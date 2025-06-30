@@ -60,7 +60,7 @@ function PortfolioSkeleton() {
 }
 
 export default function PortfolioPage() {
-  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
+  const [portfolio, setPortfolio] = useState<Partial<PortfolioData> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
@@ -82,8 +82,10 @@ export default function PortfolioPage() {
   }, [router, toast]);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({ title: "Link Copied", description: "Portfolio URL copied to clipboard!" });
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      toast({ title: "Link Copied", description: "Portfolio URL copied to clipboard!" });
+    }
   };
   
   if (isLoading) {
@@ -102,7 +104,14 @@ export default function PortfolioPage() {
     return null; // Or a message saying "No portfolio to display"
   }
   
-  const { personalInfo, summary, experience, education, skills, projects } = portfolio;
+  const { 
+    personalInfo = { name: '', title: '', email: '', phone: '', website: '', location: '' },
+    summary = '',
+    experience = [],
+    education = [],
+    skills = [],
+    projects = []
+  } = portfolio;
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -153,7 +162,7 @@ export default function PortfolioPage() {
                             <p className="text-md text-primary">{job.company} - {job.location}</p>
                             <p className="text-sm text-muted-foreground">{job.dates}</p>
                             <ul className="mt-2 list-disc list-inside space-y-1 text-muted-foreground">
-                                {job.description.map((item, i) => <li key={i}>{item}</li>)}
+                                {job.description?.map((item, i) => <li key={i}>{item}</li>)}
                             </ul>
                         </div>
                     ))}
