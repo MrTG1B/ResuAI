@@ -41,11 +41,18 @@ const prompt = ai.definePrompt({
   output: {schema: AnalyzeResumeOutputSchema},
   prompt: `You are an AI expert at creating resumes and portfolios.
 
-  You will analyze the resume and extract key information from it such as experience, education, skills, projects, and any certifications.
+  You will analyze the resume and extract key information. The extracted information must include:
+  - Personal Info: name, professional title, email address, phone number, personal website/portfolio URL, and location (city, state).
+  - Professional Summary: A brief overview of the candidate's career.
+  - Work Experience: A list of jobs including role, company, location, and dates.
+  - Education: A list of degrees, schools, and dates.
+  - Skills: A list of technical and soft skills.
+  - Projects: Any personal or professional projects mentioned.
+  - Certifications: Any professional certifications.
 
-  Return the portfolio draft as a JSON string. The JSON should conform to a structure with keys: personalInfo, summary, experience, education, skills, projects, certifications.
+  Return the extracted information as a JSON string in the 'portfolioDraft' field. This JSON string must have the following keys: personalInfo, summary, experience, education, skills, projects, certifications. The 'personalInfo' object must contain all the details extracted above (name, title, email, phone, website, location).
 
-  Also, based on the resume, generate a simple, two-word, generic prompt for creating a professional avatar image. For example: "male software engineer", "female graphic designer". Do not include any names or specific identifying details in the avatar prompt.
+  Also, generate a simple, two-word, generic prompt for creating a professional avatar image for the 'avatarPrompt' field. For example: "male software engineer", "female graphic designer". Do not include any names or specific identifying details in this prompt.
 
   Here is the resume:
   {{media url=resumeDataUri}}`,
