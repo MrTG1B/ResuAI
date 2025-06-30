@@ -28,6 +28,7 @@ export interface Project {
   description: string;
   technologies: string[];
   url: string;
+  previewImage?: string;
 }
 
 export interface Certification {

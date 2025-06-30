@@ -52,6 +52,8 @@ const prompt = ai.definePrompt({
 
   Return the extracted information as a JSON string in the 'portfolioDraft' field. This JSON string must have the following keys: personalInfo, summary, experience, education, skills, projects, certifications. The 'personalInfo' object must contain all the details extracted above (name, title, email, phone, website, location).
 
+  For each project in the 'projects' array, extract its name, description, technologies, and URL. Also, include a 'previewImage' field for each project and set its value to an empty string.
+
   Also, generate a simple, two-word, generic prompt for creating a professional avatar image for the 'avatarPrompt' field. For example: "male software engineer", "female graphic designer". Do not include any names or specific identifying details in this prompt.
 
   Here is the resume:
