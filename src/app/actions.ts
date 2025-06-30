@@ -1,12 +1,30 @@
 "use server";
 
 import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flows/resume-analysis";
+import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar";
+import { type PortfolioData } from "@/types/portfolio";
 
 export async function analyzeResumeAction(input: AnalyzeResumeInput) {
   try {
-    const result = await analyzeResumeFlow(input);
-    // The output from the AI is a string, so we need to parse it into a JSON object.
-    const portfolioDraft = JSON.parse(result.portfolioDraft);
+    // Step 1: Analyze resume for text content and get an avatar prompt
+    const analysisResult = await analyzeResumeFlow(input);
+    
+    // Step 2: Parse the portfolio draft JSON
+    const portfolioDraft: Partial<PortfolioData> = JSON.parse(analysisResult.portfolioDraft);
+
+    // Step 3: Generate the avatar image
+    const avatarResult = await generateAvatarFlow({ prompt: analysisResult.avatarPrompt });
+
+    // Step 4: Combine the results
+    if (portfolioDraft.personalInfo) {
+      portfolioDraft.personalInfo.profilePictureDataUri = avatarResult.imageDataUri;
+    } else {
+        portfolioDraft.personalInfo = {
+            name: '', title: '', email: '', phone: '', website: '', location: '',
+            profilePictureDataUri: avatarResult.imageDataUri,
+        }
+    }
+
     return { success: true, data: portfolioDraft };
   } catch (error) {
     console.error("Error analyzing resume:", error);

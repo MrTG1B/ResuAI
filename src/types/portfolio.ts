@@ -5,6 +5,7 @@ export interface PersonalInfo {
   website: string;
   location: string;
   title: string;
+  profilePictureDataUri?: string;
 }
 
 export interface Experience {
@@ -29,6 +30,13 @@ export interface Project {
   url: string;
 }
 
+export interface Certification {
+  name: string;
+  issuingOrganization: string;
+  date: string;
+  credentialUrl?: string;
+}
+
 export interface PortfolioData {
   personalInfo: PersonalInfo;
   summary: string;
@@ -36,4 +44,5 @@ export interface PortfolioData {
   education: Education[];
   skills: string[];
   projects: Project[];
+  certifications: Certification[];
 }
