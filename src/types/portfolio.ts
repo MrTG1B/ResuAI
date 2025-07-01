@@ -1,3 +1,8 @@
+export interface SocialLink {
+  platform: string;
+  url: string;
+}
+
 export interface PersonalInfo {
   name: string;
   email: string;
@@ -6,6 +11,7 @@ export interface PersonalInfo {
   location: string;
   title: string;
   profilePictureDataUri?: string;
+  socials?: SocialLink[];
 }
 
 export interface Experience {

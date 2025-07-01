@@ -20,7 +20,7 @@ export async function analyzeResumeAction(input: AnalyzeResumeInput) {
       portfolioDraft.personalInfo.profilePictureDataUri = avatarResult.imageDataUri;
     } else {
         portfolioDraft.personalInfo = {
-            name: '', title: '', email: '', phone: '', website: '', location: '',
+            name: '', title: '', email: '', phone: '', website: '', location: '', socials: [],
             profilePictureDataUri: avatarResult.imageDataUri,
         }
     }

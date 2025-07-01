@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { type PortfolioData, PersonalInfo, Project } from "@/types/portfolio";
+import { type PortfolioData, PersonalInfo, Project, SocialLink } from "@/types/portfolio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera } from "lucide-react";
+import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin } from "lucide-react";
 
 function PortfolioSkeleton() {
   return (
@@ -172,6 +172,31 @@ export default function PortfolioPage() {
         reader.readAsDataURL(file);
     }
   };
+  
+  const handleSocialChange = (index: number, field: keyof SocialLink, value: string) => {
+    setEditablePortfolio(prev => {
+      if (!prev || !prev.personalInfo || !prev.personalInfo.socials) return prev;
+      const newSocials = [...prev.personalInfo.socials];
+      newSocials[index] = { ...newSocials[index], [field]: value };
+      return { ...prev, personalInfo: { ...prev.personalInfo, socials: newSocials } };
+    });
+  };
+
+  const handleAddSocial = () => {
+    setEditablePortfolio(prev => {
+      if (!prev || !prev.personalInfo) return prev;
+      const newSocials = [...(prev.personalInfo.socials || []), { platform: '', url: '' }];
+      return { ...prev, personalInfo: { ...prev.personalInfo, socials: newSocials } };
+    });
+  };
+
+  const handleRemoveSocial = (index: number) => {
+    setEditablePortfolio(prev => {
+      if (!prev || !prev.personalInfo || !prev.personalInfo.socials) return prev;
+      const newSocials = prev.personalInfo.socials.filter((_, i) => i !== index);
+      return { ...prev, personalInfo: { ...prev.personalInfo, socials: newSocials } };
+    });
+  };
 
 
   const copyToClipboard = () => {
@@ -179,6 +204,17 @@ export default function PortfolioPage() {
       navigator.clipboard.writeText(window.location.href);
       toast({ title: "Link Copied", description: "Portfolio URL copied to clipboard!" });
     }
+  };
+
+  const SocialIcon = ({ platform, className }: { platform: string, className?: string }) => {
+    const lowerCasePlatform = platform.toLowerCase();
+    if (lowerCasePlatform.includes('github')) {
+        return <Github className={className} />;
+    }
+    if (lowerCasePlatform.includes('linkedin')) {
+        return <Linkedin className={className} />;
+    }
+    return <Globe className={className} />;
   };
   
   if (isLoading) {
@@ -257,6 +293,32 @@ export default function PortfolioPage() {
                         {isEditMode ? <Input value={personalInfo?.website} onChange={(e) => handlePersonalInfoChange('website', e.target.value)} placeholder="Website" /> : (personalInfo?.website && <a href={personalInfo.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary"><Globe className="h-4 w-4 text-primary/80"/>{personalInfo.website}</a>)}
                         {isEditMode ? <Input value={personalInfo?.location} onChange={(e) => handlePersonalInfoChange('location', e.target.value)} placeholder="Location" /> : (personalInfo?.location && <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary/80"/>{personalInfo.location}</span>)}
                     </div>
+
+                    {isEditMode ? (
+                        <div className="mt-4 space-y-2 text-left">
+                          <Label>Social Links</Label>
+                          {editablePortfolio.personalInfo?.socials?.map((social, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <Input value={social.platform} onChange={(e) => handleSocialChange(index, 'platform', e.target.value)} placeholder="Platform (e.g. GitHub)" />
+                              <Input value={social.url} onChange={(e) => handleSocialChange(index, 'url', e.target.value)} placeholder="URL" />
+                              <Button variant="ghost" size="icon" onClick={() => handleRemoveSocial(index)} className="shrink-0">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          ))}
+                          <Button type="button" variant="outline" size="sm" onClick={handleAddSocial}>Add Link</Button>
+                        </div>
+                    ) : (
+                        personalInfo?.socials && personalInfo.socials.length > 0 && (
+                          <div className="mt-4 flex flex-wrap justify-center md:justify-start items-center gap-4">
+                            {personalInfo.socials.map((social, index) => (
+                              <a key={index} href={social.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary" title={social.platform}>
+                                <SocialIcon platform={social.platform} className="h-6 w-6" />
+                              </a>
+                            ))}
+                          </div>
+                        )
+                    )}
                 </div>
             </div>
 

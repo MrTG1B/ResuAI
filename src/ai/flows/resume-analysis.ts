@@ -42,7 +42,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI expert at creating resumes and portfolios.
 
   You will analyze the resume and extract key information. The extracted information must include:
-  - Personal Info: name, professional title, email address, phone number, personal website/portfolio URL, and location (city, state).
+  - Personal Info: name, professional title, email address, phone number, personal website/portfolio URL, location (city, state), and social media links (e.g., GitHub, LinkedIn).
   - Professional Summary: A brief overview of the candidate's career.
   - Work Experience: A list of jobs including role, company, location, and dates.
   - Education: A list of degrees, schools, and dates.
@@ -50,7 +50,7 @@ const prompt = ai.definePrompt({
   - Projects: Any personal or professional projects mentioned.
   - Certifications: Any professional certifications.
 
-  Return the extracted information as a JSON string in the 'portfolioDraft' field. This JSON string must have the following keys: personalInfo, summary, experience, education, skills, projects, certifications. The 'personalInfo' object must contain all the details extracted above (name, title, email, phone, website, location).
+  Return the extracted information as a JSON string in the 'portfolioDraft' field. This JSON string must have the following keys: personalInfo, summary, experience, education, skills, projects, certifications. The 'personalInfo' object must contain all the details extracted above (name, title, email, phone, website, location). It should also include a 'socials' field, which is an array of objects. Each object should have a 'platform' and 'url' key (e.g., [{"platform": "GitHub", "url": "..."}]). If no social links are found, return an empty array for 'socials'.
 
   For each project in the 'projects' array, extract its name, description, technologies, and URL. Also, include a 'previewImage' field for each project and set its value to an empty string.
 
