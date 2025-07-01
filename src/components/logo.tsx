@@ -48,9 +48,8 @@ export const Logo = (props: React.SVGProps<SVGSVGElement>) => (
         <circle cx="175" cy="40" r="2" fill="#FF9E0D"/>
         <circle cx="160" cy="52" r="2" fill="#FF9E0D"/>
     </g>
-    <text x="5" y="55" fontFamily="Inter, sans-serif" fontSize="48" fontWeight="900" letterSpacing="-2">
-        <tspan fill="#111111">Resu</tspan>
-        <tspan fill="#FFFFFF">AI</tspan>
+    <text x="5" y="55" fontFamily="Inter, sans-serif" fontSize="48" fontWeight="900" letterSpacing="-2" className="fill-[hsl(var(--foreground))]">
+        <tspan>ResuAI</tspan>
     </text>
     <defs>
         <clipPath id="clip0_logo">
