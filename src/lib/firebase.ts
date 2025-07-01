@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,6 +13,7 @@ const firebaseConfig = {
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
+let db = null;
 
 // Initialize Firebase only if the configuration is provided
 // This prevents the app from crashing if Firebase credentials are not in .env
@@ -19,6 +21,7 @@ if (firebaseConfig.apiKey && firebaseConfig.projectId) {
   try {
     app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     auth = getAuth(app);
+    db = getFirestore(app);
   } catch (error) {
     console.error("Firebase initialization error:", error);
   }
@@ -26,4 +29,4 @@ if (firebaseConfig.apiKey && firebaseConfig.projectId) {
   console.warn("Firebase configuration is missing. Authentication features will be disabled. Please add your Firebase credentials to the .env file.");
 }
 
-export { app, auth };
+export { app, auth, db, doc, getDoc, setDoc };

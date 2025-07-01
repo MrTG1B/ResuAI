@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { type PortfolioData, PersonalInfo, Project, SocialLink } from "@/types/portfolio";
@@ -13,7 +13,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin } from "lucide-react";
+import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2 } from "lucide-react";
+import { onAuthStateChanged, type User } from "firebase/auth";
+import { auth, db, getDoc, setDoc, doc } from "@/lib/firebase";
 
 function PortfolioSkeleton() {
   return (
@@ -74,42 +76,76 @@ function PortfolioSkeleton() {
   );
 }
 
-export default function PortfolioPage() {
-  const [portfolio, setPortfolio] = useState<Partial<PortfolioData> | null>(null);
-  const [editablePortfolio, setEditablePortfolio] = useState<Partial<PortfolioData> | null>(null);
+function PortfolioPageContent() {
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
+  const [editablePortfolio, setEditablePortfolio] = useState<PortfolioData | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-  const { toast } = useToast();
+  const [isOwner, setIsOwner] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const data = localStorage.getItem("portfolioData");
-    if (data) {
-      try {
-        const parsedData = JSON.parse(data);
-        setPortfolio(parsedData);
-        setEditablePortfolio(parsedData);
-      } catch (error) {
-        toast({ title: "Error", description: "Could not parse portfolio data.", variant: "destructive" });
-        router.push("/");
-      }
-    } else {
-      toast({ title: "No Data", description: "No portfolio data found. Please upload a resume first.", variant: "destructive" });
-      router.push("/");
-    }
-    setIsLoading(false);
-  }, [router, toast]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
   
+  useEffect(() => {
+    if (!db || !auth) {
+        // Firebase not configured
+        setIsLoading(false);
+        return;
+    }
+  
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+      const paramUserId = searchParams.get('user');
+      const userIdToFetch = paramUserId || user?.uid;
+
+      if (!userIdToFetch) {
+        toast({ title: "Not Found", description: "You must be logged in to view a portfolio.", variant: "destructive" });
+        router.push('/login');
+        return;
+      }
+      
+      setIsOwner(!!user && user.uid === userIdToFetch);
+
+      try {
+        const portfolioDoc = await getDoc(doc(db, "portfolios", userIdToFetch));
+
+        if (portfolioDoc.exists()) {
+          const data = portfolioDoc.data() as PortfolioData;
+          setPortfolio(data);
+          setEditablePortfolio(data);
+        } else {
+          setNotFound(true);
+          toast({ title: "Not Found", description: "This portfolio does not exist.", variant: "destructive" });
+        }
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to fetch portfolio data.", variant: "destructive" });
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router, searchParams, toast]);
+
   const handleCancel = () => {
     setEditablePortfolio(portfolio);
     setIsEditMode(false);
   };
   
-  const handleSaveChanges = () => {
-    setPortfolio(editablePortfolio);
-    localStorage.setItem("portfolioData", JSON.stringify(editablePortfolio));
-    setIsEditMode(false);
-    toast({ title: "Portfolio Saved", description: "Your changes have been saved." });
+  const handleSaveChanges = async () => {
+    if (!currentUser || !editablePortfolio) return;
+
+    try {
+        await setDoc(doc(db, "portfolios", currentUser.uid), editablePortfolio);
+        setPortfolio(editablePortfolio);
+        setIsEditMode(false);
+        toast({ title: "Portfolio Saved", description: "Your changes have been saved." });
+    } catch (error) {
+        toast({ title: "Error", description: "Failed to save portfolio.", variant: "destructive" });
+    }
   };
   
   const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
@@ -137,11 +173,11 @@ export default function PortfolioPage() {
   };
 
   const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditablePortfolio(prev => ({ ...prev, summary: e.target.value }));
+    setEditablePortfolio(prev => prev ? ({ ...prev, summary: e.target.value }) : null);
   };
 
   const handleSkillsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditablePortfolio(prev => ({ ...prev, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }));
+    setEditablePortfolio(prev => prev ? ({ ...prev, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }) : null);
   };
   
   const handleProjectChange = (index: number, field: keyof Project, value: string) => {
@@ -198,10 +234,10 @@ export default function PortfolioPage() {
     });
   };
 
-
   const copyToClipboard = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
+    if (typeof window !== 'undefined' && currentUser) {
+      const shareUrl = `${window.location.origin}/portfolio?user=${currentUser.uid}`;
+      navigator.clipboard.writeText(shareUrl);
       toast({ title: "Link Copied", description: "Portfolio URL copied to clipboard!" });
     }
   };
@@ -229,6 +265,22 @@ export default function PortfolioPage() {
     );
   }
 
+  if (notFound) {
+    return (
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow flex items-center justify-center text-center">
+                <div>
+                    <h1 className="text-4xl font-bold">Portfolio Not Found</h1>
+                    <p className="text-muted-foreground mt-2">The portfolio you are looking for does not exist or has been moved.</p>
+                    <Button onClick={() => router.push('/')} className="mt-6">Go Home</Button>
+                </div>
+            </main>
+            <Footer />
+        </div>
+    )
+  }
+
   if (!portfolio || !editablePortfolio) {
     return null;
   }
@@ -239,19 +291,21 @@ export default function PortfolioPage() {
     <div className="flex flex-col min-h-screen bg-muted/40">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-5xl">
-        <div className="flex justify-end mb-4 gap-2">
-            {!isEditMode ? (
-              <>
-                <Button onClick={copyToClipboard} variant="outline"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
-                <Button onClick={() => setIsEditMode(true)}><Edit className="mr-2 h-4 w-4" /> Edit Portfolio</Button>
-              </>
-            ) : (
-              <>
-                <Button onClick={handleCancel} variant="outline">Cancel</Button>
-                <Button onClick={handleSaveChanges}><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
-              </>
-            )}
-        </div>
+        {isOwner && (
+            <div className="flex justify-end mb-4 gap-2">
+                {!isEditMode ? (
+                  <>
+                    <Button onClick={copyToClipboard} variant="outline"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
+                    <Button onClick={() => setIsEditMode(true)}><Edit className="mr-2 h-4 w-4" /> Edit Portfolio</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={handleCancel} variant="outline">Cancel</Button>
+                    <Button onClick={handleSaveChanges}><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
+                  </>
+                )}
+            </div>
+        )}
 
         <div className="bg-card rounded-xl shadow-2xl overflow-hidden">
             {/* Profile Header */}
@@ -336,7 +390,7 @@ export default function PortfolioPage() {
                         </section>
                     )}
                     
-                    {experience?.length > 0 && (
+                    {experience && experience.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Briefcase className="text-primary"/> Work Experience</h2>
                             <div className="space-y-8">
@@ -355,7 +409,7 @@ export default function PortfolioPage() {
                         </section>
                     )}
 
-                    {projects?.length > 0 && (
+                    {projects && projects.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Lightbulb className="text-primary"/> Projects</h2>
                             <div className="space-y-8">
@@ -397,7 +451,7 @@ export default function PortfolioPage() {
                 </div>
                 {/* Right Column */}
                 <div className="lg:col-span-1 space-y-12">
-                    {skills?.length > 0 && (
+                    {skills && skills.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Wrench className="text-primary"/> Skills</h2>
                             {isEditMode ? (
@@ -410,7 +464,7 @@ export default function PortfolioPage() {
                         </section>
                     )}
 
-                    {education?.length > 0 && (
+                    {education && education.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><GraduationCap className="text-primary"/> Education</h2>
                             <div className="space-y-4">
@@ -425,7 +479,7 @@ export default function PortfolioPage() {
                         </section>
                     )}
 
-                    {certifications?.length > 0 && (
+                    {certifications && certifications.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Award className="text-primary"/> Certifications</h2>
                             <div className="space-y-4">
@@ -447,4 +501,13 @@ export default function PortfolioPage() {
       <Footer />
     </div>
   );
+}
+
+
+export default function PortfolioPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <PortfolioPageContent />
+        </Suspense>
+    )
 }

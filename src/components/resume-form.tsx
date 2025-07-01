@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeResumeAction } from "@/app/actions";
+import { auth, db, doc, setDoc } from "@/lib/firebase";
 
 export function ResumeForm() {
   const [file, setFile] = useState<File | null>(null);
@@ -33,27 +34,40 @@ export function ResumeForm() {
       });
       return;
     }
+    
+    if (!auth?.currentUser || !db) {
+      toast({
+        title: "Authentication Error",
+        description: "Please log in to create a portfolio.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoading(true);
+    const user = auth.currentUser;
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async () => {
-      const resumeDataUri = reader.result as string;
-      const result = await analyzeResumeAction({ resumeDataUri });
+      try {
+        const resumeDataUri = reader.result as string;
+        const result = await analyzeResumeAction({ resumeDataUri });
 
-      setIsLoading(false);
-
-      if (result.success) {
-        // Store the result in localStorage to pass it to the portfolio page
-        localStorage.setItem("portfolioData", JSON.stringify(result.data));
-        router.push("/portfolio");
-      } else {
+        if (result.success && result.data) {
+          await setDoc(doc(db, "portfolios", user.uid), result.data);
+          router.push("/portfolio");
+        } else {
+          throw new Error(result.error || "Analysis failed");
+        }
+      } catch (error: any) {
         toast({
-          title: "Analysis Failed",
-          description: result.error,
+          title: "Failed to build portfolio",
+          description: error.message || "An unexpected error occurred. Please try again.",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
     reader.onerror = () => {
