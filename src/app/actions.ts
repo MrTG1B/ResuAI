@@ -6,16 +6,19 @@ import { type PortfolioData } from "@/types/portfolio";
 
 export async function analyzeResumeAction(input: AnalyzeResumeInput) {
   try {
-    // Step 1: Analyze resume for text content and get an avatar prompt
+    // Step 1: Analyze resume for text content, get an avatar prompt, and color palette
     const analysisResult = await analyzeResumeFlow(input);
     
     // Step 2: Parse the portfolio draft JSON
     const portfolioDraft: Partial<PortfolioData> = JSON.parse(analysisResult.portfolioDraft);
 
-    // Step 3: Generate the avatar image
+    // Step 3: Add the color palette
+    portfolioDraft.colorPalette = analysisResult.colorPalette;
+
+    // Step 4: Generate the avatar image
     const avatarResult = await generateAvatarFlow({ prompt: analysisResult.avatarPrompt });
 
-    // Step 4: Combine the results
+    // Step 5: Combine the results
     if (portfolioDraft.personalInfo) {
       portfolioDraft.personalInfo.profilePictureDataUri = avatarResult.imageDataUri;
     } else {

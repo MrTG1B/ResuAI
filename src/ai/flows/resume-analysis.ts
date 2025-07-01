@@ -26,7 +26,14 @@ const AnalyzeResumeOutputSchema = z.object({
     .describe('A draft of the portfolio, formatted as a JSON string. It should include personal info, summary, experience, education, skills, projects, and certifications.'),
   avatarPrompt: z
     .string()
-    .describe('A simple, two-word prompt for generating a professional avatar based on the resume, like "male engineer" or "female designer". The prompt should be generic and avoid specific names or identifying features.')
+    .describe('A simple, two-word prompt for generating a professional avatar based on the resume, like "male engineer" or "female designer". The prompt should be generic and avoid specific names or identifying features.'),
+  colorPalette: z.object({
+      primary: z.string().describe("A hex color code for the primary color. Should have good contrast with the foreground color."),
+      secondary: z.string().describe("A hex color code for the secondary color, used for secondary elements like card backgrounds."),
+      accent: z.string().describe("A hex color code for the accent color, for buttons and links."),
+      background: z.string().describe("A hex color code for the page background."),
+      foreground: z.string().describe("A hex color code for the main text color. Should have good contrast with the background color.")
+  }).describe("A unique, stylish, and professional color palette for the portfolio. All colors must be valid hex codes. Ensure high contrast between background/foreground and primary/foreground pairs for accessibility.")
 });
 export type AnalyzeResumeOutput = z.infer<typeof AnalyzeResumeOutputSchema>;
 
@@ -55,6 +62,8 @@ const prompt = ai.definePrompt({
   For each project in the 'projects' array, extract its name, description, technologies, and URL. Also, include a 'previewImage' field for each project and set its value to an empty string.
 
   Also, generate a simple, two-word, generic prompt for creating a professional avatar image for the 'avatarPrompt' field. For example: "male software engineer", "female graphic designer". Do not include any names or specific identifying details in this prompt.
+  
+  Finally, generate a unique, stylish, and professional color palette for the portfolio for the 'colorPalette' field. The palette should consist of five hex color codes: primary, secondary, accent, background, and foreground. Ensure the generated palette is aesthetically pleasing and that there is sufficient contrast between background and foreground colors, as well as primary and foreground colors, to meet accessibility standards (WCAG AA).
 
   Here is the resume:
   {{media url=resumeDataUri}}`,

@@ -44,6 +44,14 @@ export interface Certification {
   credentialUrl?: string;
 }
 
+export interface ColorPalette {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  foreground: string;
+}
+
 export interface PortfolioData {
   personalInfo: PersonalInfo;
   summary: string;
@@ -52,4 +60,5 @@ export interface PortfolioData {
   skills: string[];
   projects: Project[];
   certifications: Certification[];
+  colorPalette?: ColorPalette;
 }
