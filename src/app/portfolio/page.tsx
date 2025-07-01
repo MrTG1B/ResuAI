@@ -88,6 +88,7 @@ function PortfolioPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
   
   useEffect(() => {
     if (!db || !auth) {
@@ -160,6 +161,14 @@ function PortfolioPageContent() {
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          title: 'Image Too Large',
+          description: 'Please select an image smaller than 1MB.',
+          variant: 'destructive',
+        });
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditablePortfolio(prev => {
@@ -195,6 +204,14 @@ function PortfolioPageContent() {
   const handleProjectImageChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+        if (file.size > MAX_FILE_SIZE) {
+          toast({
+            title: 'Image Too Large',
+            description: 'Please select an image smaller than 1MB.',
+            variant: 'destructive',
+          });
+          return;
+        }
         const reader = new FileReader();
         reader.onloadend = () => {
             setEditablePortfolio(prev => {
@@ -450,7 +467,7 @@ function PortfolioPageContent() {
                                     ) : (
                                       <>
                                         {project.previewImage && (
-                                            <Image src={project.previewImage} alt={`${project.name} preview`} width={800} height={450} className="rounded-lg mb-4 border" data-ai-hint="project app" style={{ borderColor: 'var(--p-border, hsl(var(--border)))' }} />
+                                            <Image src={project.previewImage} alt={`${project.name} preview`} width={800} height={450} className="rounded-lg mb-4 border" data-ai-hint="app screenshot" style={{ borderColor: 'var(--p-border, hsl(var(--border)))' }} />
                                         )}
                                         <h3 className="font-semibold text-lg">{project.name}</h3>
                                         {project.url && <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: 'var(--p-accent, hsl(var(--primary)))' }}>{project.url}</a>}
