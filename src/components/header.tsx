@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from "next/link";
-import { FileText, LogOut, User as UserIcon, LayoutDashboard } from "lucide-react";
+import { LogOut, User as UserIcon, LayoutDashboard } from "lucide-react";
 import { Button } from "./ui/button";
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
@@ -17,6 +17,7 @@ import {
   } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Skeleton } from './ui/skeleton';
+import { Logo } from './logo';
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -54,9 +55,8 @@ export function Header() {
   return (
     <header className="py-4 px-4 sm:px-6 lg:px-8 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
-          <FileText className="h-7 w-7" />
-          <span>ResuAI</span>
+        <Link href="/" className="flex items-center">
+          <Logo className="h-9 w-auto" />
         </Link>
         <nav className="flex items-center gap-4">
             {loading ? (
