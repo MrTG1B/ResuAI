@@ -260,7 +260,7 @@ export default function PortfolioPage() {
                     <div className="relative h-32 w-32 group">
                       <Image
                           src={personalInfo?.profilePictureDataUri || 'https://placehold.co/128x128.png'}
-                          alt={`${personalInfo?.name}'s profile picture`}
+                          alt={`${personalInfo?.name || 'User'}'s profile picture`}
                           width={128}
                           height={128}
                           className="rounded-full object-cover h-32 w-32 border-4 border-primary/20 shadow-md"
@@ -278,20 +278,20 @@ export default function PortfolioPage() {
                 </div>
                 <div className="flex-1 text-center md:text-left mt-6 md:mt-0">
                     {isEditMode ? (
-                      <Input value={personalInfo?.name} onChange={(e) => handlePersonalInfoChange('name', e.target.value)} className="text-4xl font-bold tracking-tight h-auto p-0 border-0 focus-visible:ring-0" />
+                      <Input value={personalInfo?.name || ''} onChange={(e) => handlePersonalInfoChange('name', e.target.value)} className="text-4xl font-bold tracking-tight h-auto p-0 border-0 focus-visible:ring-0" />
                     ) : (
                       <h1 className="text-4xl font-bold tracking-tight text-primary">{personalInfo?.name}</h1>
                     )}
                     {isEditMode ? (
-                      <Input value={personalInfo?.title} onChange={(e) => handlePersonalInfoChange('title', e.target.value)} className="text-xl mt-1 h-auto p-0 border-0 focus-visible:ring-0" />
+                      <Input value={personalInfo?.title || ''} onChange={(e) => handlePersonalInfoChange('title', e.target.value)} className="text-xl mt-1 h-auto p-0 border-0 focus-visible:ring-0" />
                     ) : (
                       <p className="text-xl text-muted-foreground mt-1">{personalInfo?.title}</p>
                     )}
                     <div className="mt-4 flex flex-wrap justify-center md:justify-start items-center gap-x-6 gap-y-2 text-sm text-foreground">
-                        {isEditMode ? <Input value={personalInfo?.email} onChange={(e) => handlePersonalInfoChange('email', e.target.value)} placeholder="Email" /> : (personalInfo?.email && <a href={`mailto:${personalInfo.email}`} className="flex items-center gap-2 hover:text-primary"><Mail className="h-4 w-4 text-primary/80"/>{personalInfo.email}</a>)}
-                        {isEditMode ? <Input value={personalInfo?.phone} onChange={(e) => handlePersonalInfoChange('phone', e.target.value)} placeholder="Phone" /> : (personalInfo?.phone && <span className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary/80"/>{personalInfo.phone}</span>)}
-                        {isEditMode ? <Input value={personalInfo?.website} onChange={(e) => handlePersonalInfoChange('website', e.target.value)} placeholder="Website" /> : (personalInfo?.website && <a href={personalInfo.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary"><Globe className="h-4 w-4 text-primary/80"/>{personalInfo.website}</a>)}
-                        {isEditMode ? <Input value={personalInfo?.location} onChange={(e) => handlePersonalInfoChange('location', e.target.value)} placeholder="Location" /> : (personalInfo?.location && <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary/80"/>{personalInfo.location}</span>)}
+                        {isEditMode ? <Input value={personalInfo?.email || ''} onChange={(e) => handlePersonalInfoChange('email', e.target.value)} placeholder="Email" /> : (personalInfo?.email && <a href={`mailto:${personalInfo.email}`} className="flex items-center gap-2 hover:text-primary"><Mail className="h-4 w-4 text-primary/80"/>{personalInfo.email}</a>)}
+                        {isEditMode ? <Input value={personalInfo?.phone || ''} onChange={(e) => handlePersonalInfoChange('phone', e.target.value)} placeholder="Phone" /> : (personalInfo?.phone && <span className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary/80"/>{personalInfo.phone}</span>)}
+                        {isEditMode ? <Input value={personalInfo?.website || ''} onChange={(e) => handlePersonalInfoChange('website', e.target.value)} placeholder="Website" /> : (personalInfo?.website && <a href={personalInfo.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary"><Globe className="h-4 w-4 text-primary/80"/>{personalInfo.website}</a>)}
+                        {isEditMode ? <Input value={personalInfo?.location || ''} onChange={(e) => handlePersonalInfoChange('location', e.target.value)} placeholder="Location" /> : (personalInfo?.location && <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary/80"/>{personalInfo.location}</span>)}
                     </div>
 
                     {isEditMode ? (
@@ -299,8 +299,8 @@ export default function PortfolioPage() {
                           <Label>Social Links</Label>
                           {editablePortfolio.personalInfo?.socials?.map((social, index) => (
                             <div key={index} className="flex items-center gap-2">
-                              <Input value={social.platform} onChange={(e) => handleSocialChange(index, 'platform', e.target.value)} placeholder="Platform (e.g. GitHub)" />
-                              <Input value={social.url} onChange={(e) => handleSocialChange(index, 'url', e.target.value)} placeholder="URL" />
+                              <Input value={social.platform || ''} onChange={(e) => handleSocialChange(index, 'platform', e.target.value)} placeholder="Platform (e.g. GitHub)" />
+                              <Input value={social.url || ''} onChange={(e) => handleSocialChange(index, 'url', e.target.value)} placeholder="URL" />
                               <Button variant="ghost" size="icon" onClick={() => handleRemoveSocial(index)} className="shrink-0">
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
@@ -329,7 +329,7 @@ export default function PortfolioPage() {
                         <section>
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><BookUser className="text-primary"/> Professional Summary</h2>
                             {isEditMode ? (
-                              <Textarea value={summary} onChange={handleSummaryChange} rows={5} />
+                              <Textarea value={summary || ''} onChange={handleSummaryChange} rows={5} />
                             ) : (
                               <p className="text-muted-foreground whitespace-pre-line leading-relaxed">{summary}</p>
                             )}
@@ -364,10 +364,10 @@ export default function PortfolioPage() {
                                     <div className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full bg-primary border-4 border-card"></div>
                                     {isEditMode ? (
                                       <div className="space-y-4">
-                                        <Input value={project.name} onChange={e => handleProjectChange(index, 'name', e.target.value)} placeholder="Project Name" />
-                                        <Textarea value={project.description} onChange={e => handleProjectChange(index, 'description', e.target.value)} placeholder="Project Description" />
-                                        <Input value={project.url} onChange={e => handleProjectChange(index, 'url', e.target.value)} placeholder="Project URL" />
-                                        <Textarea value={project.technologies?.join(', ')} onChange={e => handleProjectChange(index, 'technologies', e.target.value)} placeholder="Technologies (comma-separated)" />
+                                        <Input value={project.name || ''} onChange={e => handleProjectChange(index, 'name', e.target.value)} placeholder="Project Name" />
+                                        <Textarea value={project.description || ''} onChange={e => handleProjectChange(index, 'description', e.target.value)} placeholder="Project Description" />
+                                        <Input value={project.url || ''} onChange={e => handleProjectChange(index, 'url', e.target.value)} placeholder="Project URL" />
+                                        <Textarea value={project.technologies?.join(', ') || ''} onChange={e => handleProjectChange(index, 'technologies', e.target.value)} placeholder="Technologies (comma-separated)" />
                                         <div>
                                             <Label htmlFor={`project-image-${index}`}>Project Preview</Label>
                                             <Input id={`project-image-${index}`} type="file" accept="image/*" onChange={e => handleProjectImageChange(index, e)} />
@@ -401,7 +401,7 @@ export default function PortfolioPage() {
                         <section>
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Wrench className="text-primary"/> Skills</h2>
                             {isEditMode ? (
-                              <Textarea value={skills.join(', ')} onChange={handleSkillsChange} placeholder="Skills (comma-separated)" rows={4}/>
+                              <Textarea value={skills?.join(', ') || ''} onChange={handleSkillsChange} placeholder="Skills (comma-separated)" rows={4}/>
                             ) : (
                               <div className="flex flex-wrap gap-2">
                                   {skills.map((skill, index) => <Badge key={index} variant="outline" className="text-base py-1 px-3 shadow-sm">{skill}</Badge>)}
