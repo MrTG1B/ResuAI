@@ -101,6 +101,15 @@ export default function ResumeEditorPage() {
         }
     }, [toast]);
     
+    useEffect(() => {
+        // If there's resume data but no preview, it means we came from a page refresh.
+        // We need to regenerate the PDF preview from the stored HTML.
+        if (resumeData && resumeData.htmlContent && !isGeneratingPdf && !previewUri?.startsWith('data:application/pdf')) {
+            generatePdfPreview(resumeData.htmlContent);
+        }
+    }, [resumeData, previewUri, isGeneratingPdf, generatePdfPreview]);
+
+
     const handleResumeUpdate = (newResumeData: ParsedResume) => {
         setResumeData(newResumeData);
         if (typeof window !== 'undefined') {
@@ -123,11 +132,15 @@ export default function ResumeEditorPage() {
         reader.onload = async () => {
             try {
                 const uploadedResumeDataUri = reader.result as string;
-
-                setPreviewUri(uploadedResumeDataUri);
-                setResumeDataUri(uploadedResumeDataUri);
+                
+                // Store the original file's data URI for preview
                 sessionStorage.setItem('resumePreviewUri', uploadedResumeDataUri);
+                setPreviewUri(uploadedResumeDataUri); // Show uploaded file immediately
+
+                // Store it for portfolio conversion
                 sessionStorage.setItem('resumeDataUri', uploadedResumeDataUri);
+                setResumeDataUri(uploadedResumeDataUri);
+
                 sessionStorage.setItem('resumeFileName', file.name);
 
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
@@ -229,11 +242,11 @@ export default function ResumeEditorPage() {
 
     const editorActions = (
         <div className="flex items-center gap-2">
-            <Button onClick={handleDownload} variant="outline" disabled={!previewUri || isGeneratingPdf || isParsing}>
+            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!previewUri || isGeneratingPdf || isParsing}>
                 <Download className="mr-2 h-4 w-4" />
                 Download PDF
             </Button>
-            <Button onClick={handleConvertToPortfolio} disabled={!resumeDataUri || isConverting || isParsing}>
+            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!resumeDataUri || isConverting || isParsing}>
                 {isConverting ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -248,7 +261,7 @@ export default function ResumeEditorPage() {
         <div className="flex flex-col h-screen bg-muted/20">
             <Header pageActions={editorActions} />
             <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
-                {isParsing ? (
+                {isParsing || (!previewUri && !resumeData) ? (
                     <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
                         <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
                         <p className="text-sm text-foreground">Analyzing your document...</p>

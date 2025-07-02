@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -54,22 +53,24 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
   }
 
   return (
-    <header className="py-4 px-4 sm:px-6 lg:px-8 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
+    <header className="py-2 px-4 sm:px-6 lg:px-8 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center">
-            <Logo className="h-9 w-auto" />
+            <Logo className="h-8 w-auto" />
           </Link>
         </div>
         <nav className="flex items-center gap-4">
-            {pageActions}
+            <div className="flex items-center gap-2 justify-end flex-grow">
+                {pageActions}
+            </div>
             {loading ? (
                 <Skeleton className="h-9 w-24" />
             ) : user ? (
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                            <Avatar className="h-10 w-10">
+                        <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+                            <Avatar className="h-8 w-8">
                                 <AvatarImage src={user.photoURL || undefined} alt={user.displayName || user.email || 'User'} />
                                 <AvatarFallback className="text-sm font-semibold">
                                     {getInitials(user.displayName) || <UserIcon />}
@@ -102,10 +103,10 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                  </DropdownMenu>
             ) : (
                 <div className="hidden md:flex items-center gap-2">
-                    <Button variant="ghost" asChild>
+                    <Button variant="ghost" asChild size="sm">
                         <Link href="/login">Login</Link>
                     </Button>
-                    <Button asChild>
+                    <Button asChild size="sm">
                         <Link href="/signup">Sign Up</Link>
                     </Button>
                 </div>
