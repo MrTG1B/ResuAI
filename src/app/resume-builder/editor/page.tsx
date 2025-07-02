@@ -90,7 +90,7 @@ export default function ResumeEditorPage() {
         hiddenPreviewRef.current.innerHTML = htmlContent;
 
         // Add a small delay to ensure the browser has time to render the new HTML
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
 
         try {
             const pdf = new jsPDF({
@@ -312,7 +312,7 @@ export default function ResumeEditorPage() {
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="py-2 px-6">
-                                    <CardTitle className="text-lg font-medium">Resume Preview</CardTitle>
+                                    <CardTitle className="text-lg font-normal">Resume Preview</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-center min-h-0 relative">
                                     {(isGeneratingPdf) && (
@@ -351,8 +351,8 @@ export default function ResumeEditorPage() {
                     </div>
                 )}
             </main>
-            {/* Hidden div for jsPDF to render into. It's positioned on-screen but transparent to be visible to html2canvas. */}
-            <div ref={hiddenPreviewRef} className="absolute left-0 top-0 opacity-0 pointer-events-none z-[-1] bg-white text-black w-[8.27in] min-h-[11.69in] font-serif"></div>
+            {/* Hidden div for jsPDF to render into. It's positioned off-screen to be visible to html2canvas. */}
+            <div ref={hiddenPreviewRef} className="absolute -left-[9999px] top-0 z-[-1] bg-white text-black w-[8.27in] min-h-[11.69in] font-serif"></div>
         </div>
     );
 }
