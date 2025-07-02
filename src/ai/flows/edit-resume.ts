@@ -11,13 +11,13 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const EditResumeInputSchema = z.object({
+const EditResumeInputSchema = z.object({
   rawText: z.string().describe('The current raw text content of the resume.'),
   prompt: z.string().describe("The user's instruction for what to change."),
 });
 export type EditResumeInput = z.infer<typeof EditResumeInputSchema>;
 
-export const EditResumeOutputSchema = z.object({
+const EditResumeOutputSchema = z.object({
   newRawText: z.string().describe('The updated, complete raw text of the resume.'),
   response: z.string().describe('A friendly, conversational response to the user explaining the changes made.'),
 });
