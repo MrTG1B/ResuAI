@@ -74,8 +74,8 @@ export default function ResumeBuilderPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
-                <Button asChild disabled>
-                  <Link href="#">Upload Resume <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                <Button asChild>
+                  <Link href="/resume-builder/editor">Upload Resume <ArrowRight className="ml-2 h-5 w-5" /></Link>
                 </Button>
               </CardContent>
             </Card>
