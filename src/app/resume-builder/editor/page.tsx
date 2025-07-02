@@ -1,9 +1,10 @@
+
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db, doc, setDoc } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { Loader2, UploadCloud, Download, LayoutTemplate } from 'lucide-react';
+import { Loader2, UploadCloud, Download, LayoutTemplate, Paperclip } from 'lucide-react';
 import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,6 @@ import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type ParsedResume } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 export default function ResumeEditorPage() {
     const router = useRouter();
@@ -50,52 +50,47 @@ export default function ResumeEditorPage() {
         hiddenPreviewRef.current.innerHTML = htmlContent;
 
         try {
-            const canvas = await html2canvas(hiddenPreviewRef.current, { 
-                scale: 2,
-                useCORS: true,
-                width: hiddenPreviewRef.current.scrollWidth,
-                height: hiddenPreviewRef.current.scrollHeight,
-                windowWidth: hiddenPreviewRef.current.scrollWidth,
-                windowHeight: hiddenPreviewRef.current.scrollHeight,
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'pt',
+                format: 'a4'
             });
             
-            const pdf = new jsPDF('p', 'pt', 'a4');
-            const imgData = canvas.toDataURL('image/png');
-            const imgProps = pdf.getImageProperties(imgData);
-            
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-            
-            let heightLeft = pdfHeight;
-            let position = 0;
+            await pdf.html(hiddenPreviewRef.current, {
+                autoPaging: 'text',
+                margin: [40, 30, 40, 30],
+                width: 595, // A4 width in points
+                windowWidth: hiddenPreviewRef.current.scrollWidth,
+            });
 
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-            heightLeft -= pdf.internal.pageSize.getHeight();
-
-            while (heightLeft > 0) {
-                position = heightLeft - pdfHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                heightLeft -= pdf.internal.pageSize.getHeight();
-            }
-            
             setPreviewUri(pdf.output('datauristring'));
         } catch(error) {
-            toast({ title: "Preview Failed", description: "Could not generate the updated PDF preview.", variant: "destructive" });
+            console.error("PDF generation failed:", error);
+            toast({ title: "Preview Failed", description: "Could not generate the text-based PDF preview.", variant: "destructive" });
         } finally {
-            hiddenPreviewRef.current.innerHTML = '';
+            if (hiddenPreviewRef.current) {
+                hiddenPreviewRef.current.innerHTML = '';
+            }
             setIsGeneratingPdf(false);
         }
     };
     
     useEffect(() => {
         if (isInitialMount.current) {
+            const storedResume = sessionStorage.getItem('resumeData');
+            if (storedResume) {
+                const data = JSON.parse(storedResume);
+                setResumeData(data);
+                setResumeDataUri(sessionStorage.getItem('resumeDataUri') || null);
+                setFileName(sessionStorage.getItem('resumeFileName') || "");
+            }
             isInitialMount.current = false;
             return;
         }
 
         if (resumeData?.htmlContent) {
             generatePdfPreview(resumeData.htmlContent);
+            sessionStorage.setItem('resumeData', JSON.stringify(resumeData));
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resumeData]);
@@ -115,6 +110,9 @@ export default function ResumeEditorPage() {
             try {
                 const uploadedResumeDataUri = reader.result as string;
                 setResumeDataUri(uploadedResumeDataUri);
+                sessionStorage.setItem('resumeDataUri', uploadedResumeDataUri);
+                sessionStorage.setItem('resumeFileName', file.name);
+
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
 
                 if (result.success && result.data) {
@@ -230,7 +228,12 @@ export default function ResumeEditorPage() {
         <div className="flex flex-col h-screen bg-muted/20">
             <Header pageActions={editorActions} />
             <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
-                {resumeData ? (
+                {isParsing ? (
+                    <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
+                        <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
+                        <p className="text-sm text-foreground">Analyzing your document...</p>
+                    </div>
+                ) : resumeData ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
@@ -238,11 +241,11 @@ export default function ResumeEditorPage() {
                                     <CardTitle>Resume Preview</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-center min-h-0 relative">
-                                    {(isGeneratingPdf || isParsing) && (
+                                    {isGeneratingPdf && (
                                         <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center text-center">
                                             <Loader2 className="h-8 w-8 animate-spin text-primary"/>
                                             <p className="mt-4 font-medium text-muted-foreground">
-                                                {isParsing ? "Analyzing your document..." : "Generating preview..."}
+                                                Generating preview...
                                             </p>
                                         </div>
                                     )}
@@ -253,7 +256,7 @@ export default function ResumeEditorPage() {
                                             </div>
                                         </object>
                                     ) : (
-                                        !isGeneratingPdf && !isParsing && (
+                                        !isGeneratingPdf && (
                                             <div className="text-center text-destructive">
                                                 <p>Could not load preview.</p>
                                                 <p className="text-xs text-muted-foreground">Please try uploading the file again.</p>
@@ -277,21 +280,12 @@ export default function ResumeEditorPage() {
                             className="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
                             >
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    {isParsing ? (
-                                        <>
-                                            <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
-                                            <p className="text-sm text-foreground">Analyzing your document...</p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <UploadCloud className="w-10 h-10 mb-3 text-primary" />
-                                            <p className="mb-2 text-sm text-foreground">
-                                            <span className="font-semibold">Click to upload</span> or drag and drop
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
-                                        </>
-                                    )}
-                                    {fileName && !isParsing && <p className="mt-4 text-sm font-medium text-primary">{fileName}</p>}
+                                    <UploadCloud className="w-10 h-10 mb-3 text-primary" />
+                                    <p className="mb-2 text-sm text-foreground">
+                                    <span className="font-semibold">Click to upload</span> or drag and drop
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
+                                    {fileName && <p className="mt-4 text-sm font-medium text-primary">{fileName}</p>}
                                 </div>
                                 <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" disabled={isParsing} />
                             </label>
@@ -299,8 +293,8 @@ export default function ResumeEditorPage() {
                     </div>
                 )}
             </main>
-            {/* Hidden div for html2canvas to render into */}
-            <div ref={hiddenPreviewRef} className="absolute -left-[9999px] top-0 bg-white text-black w-[8.27in] min-h-[11.69in] p-[0.75in] font-serif"></div>
+            {/* Hidden div for jsPDF to render into */}
+            <div ref={hiddenPreviewRef} className="absolute -left-[9999px] top-0 bg-white text-black w-[8.27in] min-h-[11.69in] font-serif"></div>
         </div>
     );
 }
