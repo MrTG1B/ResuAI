@@ -12,23 +12,22 @@ import { ResumeChatPanel } from '@/components/resume-chat-panel';
 import { parseResumeAction } from '@/app/actions';
 import { type ParsedResume } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
-import remarkGfm from 'remark-gfm';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
 
 export default function ResumeEditorPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
     const [isParsing, setIsParsing] = useState(false);
-    const [isDownloading, setIsDownloading] = useState(false);
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [resumeData, setResumeData] = useState<ParsedResume | null>(null);
+    const [previewUri, setPreviewUri] = useState<string | null>(null);
     const [fileName, setFileName] = useState("");
-    const previewRef = useRef<HTMLDivElement>(null);
+    
+    const hiddenPreviewRef = useRef<HTMLDivElement>(null);
+    const isInitialMount = useRef(true);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -42,6 +41,63 @@ export default function ResumeEditorPage() {
         return () => unsubscribe();
     }, [router]);
 
+    const generatePdfPreview = async (htmlContent: string) => {
+        if (!hiddenPreviewRef.current) return;
+        setIsGeneratingPdf(true);
+        
+        hiddenPreviewRef.current.innerHTML = htmlContent;
+
+        try {
+            const canvas = await html2canvas(hiddenPreviewRef.current, { 
+                scale: 2,
+                useCORS: true,
+                width: hiddenPreviewRef.current.scrollWidth,
+                height: hiddenPreviewRef.current.scrollHeight,
+                windowWidth: hiddenPreviewRef.current.scrollWidth,
+                windowHeight: hiddenPreviewRef.current.scrollHeight,
+            });
+            
+            const pdf = new jsPDF('p', 'pt', 'a4');
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = pdf.getImageProperties(imgData);
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            
+            let heightLeft = pdfHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pdf.internal.pageSize.getHeight();
+
+            while (heightLeft > 0) {
+                position = heightLeft - pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pdf.internal.pageSize.getHeight();
+            }
+            
+            setPreviewUri(pdf.output('datauristring'));
+        } catch(error) {
+            toast({ title: "Preview Failed", description: "Could not generate the updated PDF preview.", variant: "destructive" });
+        } finally {
+            hiddenPreviewRef.current.innerHTML = '';
+            setIsGeneratingPdf(false);
+        }
+    };
+    
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
+        if (resumeData?.htmlContent) {
+            generatePdfPreview(resumeData.htmlContent);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [resumeData]);
+
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -54,6 +110,7 @@ export default function ResumeEditorPage() {
         reader.onload = async () => {
             try {
                 const resumeDataUri = reader.result as string;
+                setPreviewUri(resumeDataUri); // Show the uploaded file immediately
                 const result = await parseResumeAction({ resumeDataUri });
 
                 if (result.success && result.data) {
@@ -76,45 +133,18 @@ export default function ResumeEditorPage() {
         }
     };
 
-    const handleDownload = async () => {
-        const element = previewRef.current;
-        if (!element) return;
-        setIsDownloading(true);
-
-        try {
-            const canvas = await html2canvas(element, { 
-                scale: 2, // Higher scale for better quality
-                useCORS: true 
-            });
-            
-            const pdf = new jsPDF('p', 'pt', 'a4');
-            const imgData = canvas.toDataURL('image/png');
-            const imgProps = pdf.getImageProperties(imgData);
-            
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-            
-            let heightLeft = pdfHeight;
-            let position = 0;
-
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-            heightLeft -= pdf.internal.pageSize.getHeight();
-
-            while (heightLeft >= 0) {
-                position = heightLeft - pdfHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                heightLeft -= pdf.internal.pageSize.getHeight();
-            }
-            
-            pdf.save('resume.pdf');
-        } catch(error) {
-            toast({ title: "Download Failed", description: "Could not generate PDF.", variant: "destructive" });
-        } finally {
-            setIsDownloading(false);
+    const handleDownload = () => {
+        if (!previewUri) {
+             toast({ title: "Nothing to download", description: "Please upload or generate a resume first.", variant: "destructive" });
+             return;
         }
+        const link = document.createElement('a');
+        link.href = previewUri;
+        link.download = 'resume.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
-
 
     if (isLoading) {
         return (
@@ -131,27 +161,29 @@ export default function ResumeEditorPage() {
         <div className="flex flex-col h-screen bg-muted/20">
             <Header />
             <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
-                {resumeData ? (
+                {resumeData && previewUri ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="flex-row items-center justify-between">
                                     <CardTitle>Resume Preview</CardTitle>
-                                    <Button onClick={handleDownload} disabled={isDownloading}>
-                                        {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                    <Button onClick={handleDownload}>
+                                        <Download className="mr-2 h-4 w-4" />
                                         Download PDF
                                     </Button>
                                 </CardHeader>
-                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center min-h-0">
-                                    <div ref={previewRef} className="bg-white text-black w-full max-w-4xl p-10 sm:p-12 shadow-lg overflow-y-auto font-serif">
-                                        <ReactMarkdown
-                                            rehypePlugins={[rehypeRaw]}
-                                            remarkPlugins={[remarkGfm]}
-                                            className="max-w-none"
-                                        >
-                                            {resumeData.htmlContent}
-                                        </ReactMarkdown>
-                                    </div>
+                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center min-h-0 relative">
+                                    {isGeneratingPdf && (
+                                        <div className="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center">
+                                            <Loader2 className="h-8 w-8 animate-spin text-primary"/>
+                                            <p className="mt-2 font-medium text-muted-foreground">Generating updated preview...</p>
+                                        </div>
+                                    )}
+                                    <object data={previewUri} type="application/pdf" width="100%" height="100%" className="z-10">
+                                        <div className="flex items-center justify-center h-full">
+                                            <p className="p-4 rounded-md bg-yellow-100 text-yellow-800">Your browser does not support embedded PDFs. You can <a href={previewUri} download="resume.pdf" className="underline font-bold">download it here</a> instead.</p>
+                                        </div>
+                                    </object>
                                 </CardContent>
                             </Card>
                         </div>
@@ -191,6 +223,8 @@ export default function ResumeEditorPage() {
                     </div>
                 )}
             </main>
+            {/* Hidden div for html2canvas to render into */}
+            <div ref={hiddenPreviewRef} className="absolute -left-[9999px] top-0 bg-white text-black w-[8.27in] min-h-[11.69in] p-[0.75in] font-serif"></div>
         </div>
     );
 }
