@@ -31,13 +31,21 @@ export default function ResumeEditorPage() {
         }
         return null;
     });
-    const [previewUri, setPreviewUri] = useState<string | null>(null);
+
+    const [previewUri, setPreviewUri] = useState<string | null>(() => {
+        if (typeof window !== "undefined") {
+            return sessionStorage.getItem('resumePreviewUri') || null;
+        }
+        return null;
+    });
+
     const [resumeDataUri, setResumeDataUri] = useState<string | null>(() => {
         if (typeof window !== "undefined") {
             return sessionStorage.getItem('resumeDataUri') || null;
         }
         return null;
     });
+    
     const [fileName, setFileName] = useState<string>(() => {
         if (typeof window !== "undefined") {
             return sessionStorage.getItem('resumeFileName') || "";
@@ -76,8 +84,12 @@ export default function ResumeEditorPage() {
                 autoPaging: 'text',
                 margin: [40, 30, 40, 30],
             });
-
-            setPreviewUri(pdf.output('datauristring'));
+            
+            const newPreviewUri = pdf.output('datauristring');
+            setPreviewUri(newPreviewUri);
+            if (typeof window !== 'undefined') {
+                sessionStorage.setItem('resumePreviewUri', newPreviewUri);
+            }
         } catch(error) {
             console.error("PDF generation failed:", error);
             toast({ title: "Preview Failed", description: "Could not generate the text-based PDF preview.", variant: "destructive" });
@@ -89,14 +101,13 @@ export default function ResumeEditorPage() {
         }
     }, [toast]);
     
-    useEffect(() => {
-        if (resumeData?.htmlContent) {
-            generatePdfPreview(resumeData.htmlContent);
-            if (typeof window !== 'undefined') {
-              sessionStorage.setItem('resumeData', JSON.stringify(resumeData));
-            }
+    const handleResumeUpdate = (newResumeData: ParsedResume) => {
+        setResumeData(newResumeData);
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('resumeData', JSON.stringify(newResumeData));
         }
-    }, [resumeData, generatePdfPreview]);
+        generatePdfPreview(newResumeData.htmlContent);
+    };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -112,7 +123,10 @@ export default function ResumeEditorPage() {
         reader.onload = async () => {
             try {
                 const uploadedResumeDataUri = reader.result as string;
+
+                setPreviewUri(uploadedResumeDataUri);
                 setResumeDataUri(uploadedResumeDataUri);
+                sessionStorage.setItem('resumePreviewUri', uploadedResumeDataUri);
                 sessionStorage.setItem('resumeDataUri', uploadedResumeDataUri);
                 sessionStorage.setItem('resumeFileName', file.name);
 
@@ -120,6 +134,7 @@ export default function ResumeEditorPage() {
 
                 if (result.success && result.data) {
                     setResumeData(result.data);
+                    sessionStorage.setItem('resumeData', JSON.stringify(result.data));
                     toast({ title: "Resume Uploaded", description: "You can now edit your resume with AI." });
                 } else {
                     throw new Error(result.error || "Failed to parse resume.");
@@ -128,6 +143,7 @@ export default function ResumeEditorPage() {
                 toast({ title: "Parsing Failed", description: error.message, variant: "destructive" });
                 setFileName("");
                 setResumeDataUri(null);
+                setPreviewUri(null);
             } finally {
                 setIsParsing(false);
             }
@@ -136,6 +152,7 @@ export default function ResumeEditorPage() {
           setIsParsing(false);
           setFileName("");
           setResumeDataUri(null);
+          setPreviewUri(null);
           toast({ title: "File Read Error", description: "There was an error reading the file.", variant: "destructive" });
         }
     };
@@ -211,7 +228,7 @@ export default function ResumeEditorPage() {
     if (!isAuthenticated) return null;
 
     const editorActions = (
-        <div className="hidden md:flex items-center gap-2">
+        <div className="flex items-center gap-2">
             <Button onClick={handleDownload} variant="outline" disabled={!previewUri || isGeneratingPdf || isParsing}>
                 <Download className="mr-2 h-4 w-4" />
                 Download PDF
@@ -236,7 +253,7 @@ export default function ResumeEditorPage() {
                         <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
                         <p className="text-sm text-foreground">Analyzing your document...</p>
                     </div>
-                ) : resumeData ? (
+                ) : (resumeData || previewUri) ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
@@ -244,7 +261,7 @@ export default function ResumeEditorPage() {
                                     <CardTitle>Resume Preview</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-center min-h-0 relative">
-                                    {isGeneratingPdf && (
+                                    {(isGeneratingPdf) && (
                                         <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center text-center">
                                             <Loader2 className="h-8 w-8 animate-spin text-primary"/>
                                             <p className="mt-4 font-medium text-muted-foreground">
@@ -259,11 +276,7 @@ export default function ResumeEditorPage() {
                                           width="100%" 
                                           height="100%" 
                                           className="z-10 border-none"
-                                        >
-                                            <div className="flex items-center justify-center h-full">
-                                                <p className="p-4 rounded-md bg-yellow-100 text-yellow-800">Your browser does not support embedded PDFs. You can <a href={previewUri} download="resume.pdf" className="underline font-bold">download it here</a> instead.</p>
-                                            </div>
-                                        </iframe>
+                                        />
                                     ) : (
                                         !isGeneratingPdf && (
                                             <div className="text-center text-destructive">
@@ -276,7 +289,16 @@ export default function ResumeEditorPage() {
                             </Card>
                         </div>
                         <div className="lg:col-span-1 h-full min-h-0">
-                            <ResumeChatPanel resume={resumeData} setResume={setResumeData} />
+                             {resumeData ? (
+                                <ResumeChatPanel resume={resumeData} setResume={handleResumeUpdate} />
+                            ) : (
+                                <Card className="h-full flex items-center justify-center">
+                                    <div className="text-center text-muted-foreground p-4">
+                                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                                        <p>Analyzing resume for AI editing...</p>
+                                    </div>
+                                </Card>
+                            )}
                         </div>
                     </div>
                 ) : (
