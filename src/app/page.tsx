@@ -49,10 +49,10 @@ export default function HomePage() {
         <section className="text-center py-20 md:py-32 bg-gradient-to-b from-background to-muted/40 animate-fade-in-down">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-primary mb-4">
-              Your Career Story, Reimagined
+              Build Your Future with an AI-Powered Resume & Portfolio
             </h1>
             <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-              ResuAI transforms your resume into a stunning, professional portfolio website in seconds. Land your dream job with a portfolio that stands out.
+              ResuAI is your ultimate career tool. Craft a job-winning resume from scratch or transform your existing one into a stunning portfolio website in seconds.
             </p>
             <div className="flex justify-center gap-4">
               <Button asChild size="lg">
@@ -66,8 +66,8 @@ export default function HomePage() {
         <section className="py-20 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold">How It Works</h2>
-              <p className="text-lg text-muted-foreground mt-2">A simple, powerful, and fast three-step process.</p>
+              <h2 className="text-3xl md:text-4xl font-bold">Simple, Powerful, and Fast</h2>
+              <p className="text-lg text-muted-foreground mt-2">Whether you're building a resume or a portfolio, our AI makes it easy.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div className="p-8 rounded-lg border bg-card shadow-sm animate-fade-in-up transition-transform duration-300 hover:-translate-y-2">
@@ -76,9 +76,9 @@ export default function HomePage() {
                     <Bot className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">1. Upload & Analyze</h3>
+                <h3 className="text-xl font-semibold mb-2">1. Provide Your Info</h3>
                 <p className="text-muted-foreground">
-                  Simply upload your resume. Our AI analyzes your skills, experience, and projects to create a structured draft.
+                  Simply upload your resume or provide your details. Our AI analyzes your info to create a structured draft.
                 </p>
               </div>
               <div className="p-8 rounded-lg border bg-card shadow-sm animate-fade-in-up transition-transform duration-300 hover:-translate-y-2" style={{ animationDelay: '200ms' }}>
@@ -89,7 +89,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">2. Customize & Refine</h3>
                 <p className="text-muted-foreground">
-                  Easily edit any section of your portfolio. Update text, upload project images, and add your personal touch.
+                  Easily edit any section. Get AI suggestions to improve your content, and customize the design to match your style.
                 </p>
               </div>
               <div className="p-8 rounded-lg border bg-card shadow-sm animate-fade-in-up transition-transform duration-300 hover:-translate-y-2" style={{ animationDelay: '400ms' }}>
@@ -100,7 +100,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">3. Publish & Share</h3>
                 <p className="text-muted-foreground">
-                  Your professional portfolio is ready! Share the link with recruiters and on your social profiles.
+                  Download a professional resume or share your portfolio with a unique link. Impress recruiters and land your dream job.
                 </p>
               </div>
             </div>

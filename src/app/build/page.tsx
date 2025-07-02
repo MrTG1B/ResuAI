@@ -61,10 +61,10 @@ export default function BuildPage() {
           <Card className="shadow-2xl">
             <CardHeader className="text-center">
               <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-                Transform Your Resume into a Portfolio
+                AI-Powered Career Tools
               </h1>
               <CardDescription className="mt-2 text-lg">
-                Upload your resume, and our AI will craft a beautiful, professional portfolio website for you in seconds.
+                Upload your resume to instantly generate a stunning portfolio. More AI resume-building tools are coming soon!
               </CardDescription>
             </CardHeader>
             <CardContent>

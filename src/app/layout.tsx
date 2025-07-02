@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'ResuAI - AI-Powered Portfolio Builder',
-  description: 'Upload your resume and let AI create a stunning portfolio website for you in seconds.',
+  title: 'ResuAI - AI Resume & Portfolio Builder',
+  description: 'Build a job-winning resume and a stunning portfolio website with the power of AI.',
 };
 
 export default function RootLayout({
