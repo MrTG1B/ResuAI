@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -59,9 +60,9 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
           <Link href="/" className="flex items-center">
             <Logo className="h-9 w-auto" />
           </Link>
-          {pageActions}
         </div>
         <nav className="flex items-center gap-4">
+            {pageActions}
             {loading ? (
                 <Skeleton className="h-9 w-24" />
             ) : user ? (

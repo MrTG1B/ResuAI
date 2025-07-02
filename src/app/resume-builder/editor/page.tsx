@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db, doc, setDoc } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -23,13 +23,29 @@ export default function ResumeEditorPage() {
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [isConverting, setIsConverting] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [resumeData, setResumeData] = useState<ParsedResume | null>(null);
+    
+    const [resumeData, setResumeData] = useState<ParsedResume | null>(() => {
+        if (typeof window !== "undefined") {
+            const storedResume = sessionStorage.getItem('resumeData');
+            if (storedResume) return JSON.parse(storedResume);
+        }
+        return null;
+    });
     const [previewUri, setPreviewUri] = useState<string | null>(null);
-    const [resumeDataUri, setResumeDataUri] = useState<string | null>(null);
-    const [fileName, setFileName] = useState("");
+    const [resumeDataUri, setResumeDataUri] = useState<string | null>(() => {
+        if (typeof window !== "undefined") {
+            return sessionStorage.getItem('resumeDataUri') || null;
+        }
+        return null;
+    });
+    const [fileName, setFileName] = useState<string>(() => {
+        if (typeof window !== "undefined") {
+            return sessionStorage.getItem('resumeFileName') || "";
+        }
+        return "";
+    });
     
     const hiddenPreviewRef = useRef<HTMLDivElement>(null);
-    const isInitialMount = useRef(true);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -43,7 +59,7 @@ export default function ResumeEditorPage() {
         return () => unsubscribe();
     }, [router]);
 
-    const generatePdfPreview = async (htmlContent: string) => {
+    const generatePdfPreview = useCallback(async (htmlContent: string) => {
         if (!hiddenPreviewRef.current) return;
         setIsGeneratingPdf(true);
         
@@ -59,8 +75,6 @@ export default function ResumeEditorPage() {
             await pdf.html(hiddenPreviewRef.current, {
                 autoPaging: 'text',
                 margin: [40, 30, 40, 30],
-                width: 595, // A4 width in points
-                windowWidth: hiddenPreviewRef.current.scrollWidth,
             });
 
             setPreviewUri(pdf.output('datauristring'));
@@ -73,27 +87,16 @@ export default function ResumeEditorPage() {
             }
             setIsGeneratingPdf(false);
         }
-    };
+    }, [toast]);
     
     useEffect(() => {
-        if (isInitialMount.current) {
-            const storedResume = sessionStorage.getItem('resumeData');
-            if (storedResume) {
-                const data = JSON.parse(storedResume);
-                setResumeData(data);
-                setResumeDataUri(sessionStorage.getItem('resumeDataUri') || null);
-                setFileName(sessionStorage.getItem('resumeFileName') || "");
-            }
-            isInitialMount.current = false;
-            return;
-        }
-
         if (resumeData?.htmlContent) {
             generatePdfPreview(resumeData.htmlContent);
-            sessionStorage.setItem('resumeData', JSON.stringify(resumeData));
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('resumeData', JSON.stringify(resumeData));
+            }
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [resumeData]);
+    }, [resumeData, generatePdfPreview]);
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -250,11 +253,17 @@ export default function ResumeEditorPage() {
                                         </div>
                                     )}
                                     {previewUri ? (
-                                        <object data={previewUri} type="application/pdf" width="100%" height="100%" className="z-10">
+                                        <iframe 
+                                          src={`${previewUri}#toolbar=0&navpanes=0`} 
+                                          title="Resume Preview"
+                                          width="100%" 
+                                          height="100%" 
+                                          className="z-10 border-none"
+                                        >
                                             <div className="flex items-center justify-center h-full">
                                                 <p className="p-4 rounded-md bg-yellow-100 text-yellow-800">Your browser does not support embedded PDFs. You can <a href={previewUri} download="resume.pdf" className="underline font-bold">download it here</a> instead.</p>
                                             </div>
-                                        </object>
+                                        </iframe>
                                     ) : (
                                         !isGeneratingPdf && (
                                             <div className="text-center text-destructive">
