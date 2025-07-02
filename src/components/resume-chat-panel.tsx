@@ -43,7 +43,6 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
                 setMessages(prev => [...prev, { role: 'assistant', content: result.data.response }]);
             } else {
                 toast({ title: "Error", description: result.error, variant: "destructive" });
-                // If it fails, remove the user's last message to let them try again.
                 setMessages(messages);
             }
         } catch (error: any) {
@@ -57,7 +56,6 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // TODO: Handle certificate/document upload
             toast({ title: 'File Uploaded', description: `${file.name} has been uploaded. I will analyze it shortly.`});
         }
     };
@@ -69,9 +67,8 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
 
     return (
         <Card className="flex flex-col h-full">
-            <CardHeader>
+            <CardHeader className="py-2 px-6">
                 <CardTitle className="text-xl font-medium">AI Assistant</CardTitle>
-                <CardDescription>Chat with the AI to edit your resume.</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
                 <ScrollArea className="flex-grow pr-4 -mr-4">
