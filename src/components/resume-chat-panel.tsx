@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Send, Loader2, UploadCloud } from "lucide-react";
+import { Send, Loader2, Paperclip } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { type ParsedResume, type ChatMessage } from '@/types/resume';
 import { editResumeAction } from '@/app/actions';
@@ -22,6 +22,7 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
+    const attachmentInputRef = useRef<HTMLInputElement>(null);
 
     const handleSendMessage = async () => {
         if (!input.trim() || !resume.htmlContent) return;
@@ -60,6 +61,11 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
         }
     };
 
+    const handleAttachmentClick = () => {
+        attachmentInputRef.current?.click();
+    };
+
+
     return (
         <Card className="flex flex-col h-full">
             <CardHeader>
@@ -85,16 +91,20 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
                         )}
                     </div>
                 </ScrollArea>
-                <div className="mt-4">
-                    <label htmlFor="cert-upload" className="w-full flex items-center justify-center border-2 border-dashed rounded-md p-3 text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
-                        <UploadCloud className="h-5 w-5 mr-2" />
-                        Upload Certificates or other files
-                    </label>
-                    <Input id="cert-upload" type="file" className="hidden" onChange={handleFileUpload} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
-                </div>
             </CardContent>
             <CardFooter>
                 <div className="flex w-full items-center gap-2">
+                    <Input
+                        id="cert-upload"
+                        type="file"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                        ref={attachmentInputRef}
+                    />
+                    <Button variant="ghost" size="icon" onClick={handleAttachmentClick} aria-label="Attach file" disabled={isLoading}>
+                        <Paperclip className="h-4 w-4" />
+                    </Button>
                     <Input
                         value={input}
                         onChange={(e) => setInput(e.target.value)}

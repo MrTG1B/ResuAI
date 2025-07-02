@@ -106,6 +106,8 @@ export default function ResumeEditorPage() {
 
         setFileName(file.name);
         setIsParsing(true);
+        setResumeData(null);
+        setPreviewUri(null);
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -113,7 +115,6 @@ export default function ResumeEditorPage() {
             try {
                 const uploadedResumeDataUri = reader.result as string;
                 setResumeDataUri(uploadedResumeDataUri);
-                setPreviewUri(uploadedResumeDataUri); // Show the uploaded file immediately
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
 
                 if (result.success && result.data) {
@@ -229,25 +230,36 @@ export default function ResumeEditorPage() {
         <div className="flex flex-col h-screen bg-muted/20">
             <Header pageActions={editorActions} />
             <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
-                {resumeData && previewUri ? (
+                {resumeData ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader>
                                     <CardTitle>Resume Preview</CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center min-h-0 relative">
-                                    {isGeneratingPdf && (
-                                        <div className="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center">
+                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-center min-h-0 relative">
+                                    {(isGeneratingPdf || isParsing) && (
+                                        <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center text-center">
                                             <Loader2 className="h-8 w-8 animate-spin text-primary"/>
-                                            <p className="mt-2 font-medium text-muted-foreground">Generating updated preview...</p>
+                                            <p className="mt-4 font-medium text-muted-foreground">
+                                                {isParsing ? "Analyzing your document..." : "Generating preview..."}
+                                            </p>
                                         </div>
                                     )}
-                                    <object data={previewUri} type="application/pdf" width="100%" height="100%" className="z-10">
-                                        <div className="flex items-center justify-center h-full">
-                                            <p className="p-4 rounded-md bg-yellow-100 text-yellow-800">Your browser does not support embedded PDFs. You can <a href={previewUri} download="resume.pdf" className="underline font-bold">download it here</a> instead.</p>
-                                        </div>
-                                    </object>
+                                    {previewUri ? (
+                                        <object data={previewUri} type="application/pdf" width="100%" height="100%" className="z-10">
+                                            <div className="flex items-center justify-center h-full">
+                                                <p className="p-4 rounded-md bg-yellow-100 text-yellow-800">Your browser does not support embedded PDFs. You can <a href={previewUri} download="resume.pdf" className="underline font-bold">download it here</a> instead.</p>
+                                            </div>
+                                        </object>
+                                    ) : (
+                                        !isGeneratingPdf && !isParsing && (
+                                            <div className="text-center text-destructive">
+                                                <p>Could not load preview.</p>
+                                                <p className="text-xs text-muted-foreground">Please try uploading the file again.</p>
+                                            </div>
+                                        )
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>
@@ -268,7 +280,7 @@ export default function ResumeEditorPage() {
                                     {isParsing ? (
                                         <>
                                             <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
-                                            <p className="text-sm text-foreground">Parsing your resume...</p>
+                                            <p className="text-sm text-foreground">Analyzing your document...</p>
                                         </>
                                     ) : (
                                         <>
