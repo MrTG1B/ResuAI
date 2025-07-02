@@ -351,8 +351,8 @@ export default function ResumeEditorPage() {
                     </div>
                 )}
             </main>
-            {/* Hidden div for jsPDF to render into */}
-            <div ref={hiddenPreviewRef} className="absolute -left-[9999px] top-0 bg-white text-black w-[8.27in] min-h-[11.69in] font-serif"></div>
+            {/* Hidden div for jsPDF to render into. It's positioned on-screen but transparent to be visible to html2canvas. */}
+            <div ref={hiddenPreviewRef} className="absolute left-0 top-0 opacity-0 pointer-events-none z-[-1] bg-white text-black w-[8.27in] min-h-[11.69in] font-serif"></div>
         </div>
     );
 }
