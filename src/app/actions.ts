@@ -3,8 +3,9 @@
 import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flows/resume-analysis";
 import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
+import { editResume as editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
 import { type PortfolioData } from "@/types/portfolio";
-import { type ParsedResume } from "@/types/resume";
+import { type ParsedResume, type EditedResume } from "@/types/resume";
 
 export async function analyzeResumeAction(input: AnalyzeResumeInput) {
   try {
@@ -48,5 +49,19 @@ export async function parseResumeAction(input: ParseResumeInput) {
   } catch (error) {
     console.error("Error parsing resume:", error);
     return { success: false, error: "Failed to parse resume. Please check the file format and try again." };
+  }
+}
+
+export async function editResumeAction(input: EditResumeInput) {
+  try {
+    const result = await editResumeFlow(input);
+    const editedData: EditedResume = {
+      newRawText: result.newRawText,
+      response: result.response,
+    };
+    return { success: true, data: editedData };
+  } catch (error) {
+    console.error("Error editing resume:", error);
+    return { success: false, error: "Failed to edit resume. The AI model might be busy, please try again." };
   }
 }

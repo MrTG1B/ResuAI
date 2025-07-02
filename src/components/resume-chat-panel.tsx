@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from "./ui/scroll-area";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Paperclip, Send, Loader2, UploadCloud } from "lucide-react";
+import { Send, Loader2, UploadCloud } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { type ParsedResume, type ChatMessage } from '@/types/resume';
+import { editResumeAction } from '@/app/actions';
 
 interface ResumeChatPanelProps {
     resume: ParsedResume;
@@ -23,28 +24,32 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     const { toast } = useToast();
 
     const handleSendMessage = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() || !resume.rawText) return;
 
-        const newMessages: ChatMessage[] = [...messages, { role: 'user', content: input }];
+        const userMessage: ChatMessage = { role: 'user', content: input };
+        const newMessages: ChatMessage[] = [...messages, userMessage];
         setMessages(newMessages);
+        const currentInput = input;
         setInput('');
         setIsLoading(true);
         
-        // Placeholder for AI interaction
-        setTimeout(() => {
-            setMessages(prev => [...prev, { role: 'assistant', content: "This is a placeholder response. AI chat functionality is coming soon!" }]);
+        try {
+            const result = await editResumeAction({ rawText: resume.rawText, prompt: currentInput });
+            
+            if (result.success && result.data) {
+                setResume({ rawText: result.data.newRawText });
+                setMessages(prev => [...prev, { role: 'assistant', content: result.data.response }]);
+            } else {
+                toast({ title: "Error", description: result.error, variant: "destructive" });
+                // If it fails, remove the user's last message to let them try again.
+                setMessages(messages);
+            }
+        } catch (error: any) {
+            toast({ title: "Request Failed", description: "Could not communicate with the AI. Please try again.", variant: "destructive" });
+            setMessages(messages);
+        } finally {
             setIsLoading(false);
-        }, 1000);
-
-        // TODO: Call server action with resume data and user input
-        // const result = await editResumeAction({ resume, prompt: input });
-        // if (result.success && result.data) {
-        //     setResume(result.data.newResume);
-        //     setMessages(prev => [...prev, { role: 'assistant', content: result.data.response }]);
-        // } else {
-        //     toast({ title: "Error", description: result.error, variant: "destructive" });
-        // }
-        // setIsLoading(false);
+        }
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +102,7 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
                         placeholder="e.g., 'Make my summary more professional'"
                         disabled={isLoading}
                     />
-                    <Button onClick={handleSendMessage} disabled={isLoading}>
+                    <Button onClick={handleSendMessage} disabled={isLoading || !input.trim()}>
                         <Send className="h-4 w-4" />
                     </Button>
                 </div>
