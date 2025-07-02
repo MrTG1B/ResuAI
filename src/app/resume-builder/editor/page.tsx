@@ -258,7 +258,7 @@ export default function ResumeEditorPage() {
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader>
-                                    <CardTitle>Resume Preview</CardTitle>
+                                    <CardTitle className="text-xl font-medium">Resume Preview</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-center min-h-0 relative">
                                     {(isGeneratingPdf) && (

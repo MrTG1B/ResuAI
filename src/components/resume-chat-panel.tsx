@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useRef } from 'react';
@@ -69,7 +70,7 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     return (
         <Card className="flex flex-col h-full">
             <CardHeader>
-                <CardTitle>AI Assistant</CardTitle>
+                <CardTitle className="text-xl font-medium">AI Assistant</CardTitle>
                 <CardDescription>Chat with the AI to edit your resume.</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
