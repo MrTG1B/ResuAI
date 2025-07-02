@@ -1,25 +1,34 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud, Download } from 'lucide-react';
 import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ResumePreview } from '@/components/resume-preview';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
 import { parseResumeAction } from '@/app/actions';
 import { type ParsedResume } from '@/types/resume';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 
 export default function ResumeEditorPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
     const [isParsing, setIsParsing] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [resumeData, setResumeData] = useState<ParsedResume | null>(null);
     const [fileName, setFileName] = useState("");
+    const previewRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -67,6 +76,46 @@ export default function ResumeEditorPage() {
         }
     };
 
+    const handleDownload = async () => {
+        const element = previewRef.current;
+        if (!element) return;
+        setIsDownloading(true);
+
+        try {
+            const canvas = await html2canvas(element, { 
+                scale: 2, // Higher scale for better quality
+                useCORS: true 
+            });
+            
+            const pdf = new jsPDF('p', 'pt', 'a4');
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = pdf.getImageProperties(imgData);
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            
+            let heightLeft = pdfHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pdf.internal.pageSize.getHeight();
+
+            while (heightLeft >= 0) {
+                position = heightLeft - pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pdf.internal.pageSize.getHeight();
+            }
+            
+            pdf.save('resume.pdf');
+        } catch(error) {
+            toast({ title: "Download Failed", description: "Could not generate PDF.", variant: "destructive" });
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+
     if (isLoading) {
         return (
             <div className="flex flex-col min-h-screen items-center justify-center bg-background">
@@ -85,7 +134,26 @@ export default function ResumeEditorPage() {
                 {resumeData ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                         <div className="lg:col-span-2 h-full min-h-0">
-                            <ResumePreview resume={resumeData} />
+                           <Card className="h-full flex flex-col overflow-hidden">
+                                <CardHeader className="flex-row items-center justify-between">
+                                    <CardTitle>Resume Preview</CardTitle>
+                                    <Button onClick={handleDownload} disabled={isDownloading}>
+                                        {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                        Download PDF
+                                    </Button>
+                                </CardHeader>
+                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center min-h-0">
+                                    <div ref={previewRef} className="bg-white text-black w-full max-w-4xl p-10 sm:p-12 shadow-lg overflow-y-auto font-serif">
+                                        <ReactMarkdown
+                                            rehypePlugins={[rehypeRaw]}
+                                            remarkPlugins={[remarkGfm]}
+                                            className="max-w-none"
+                                        >
+                                            {resumeData.htmlContent}
+                                        </ReactMarkdown>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
                         <div className="lg:col-span-1 h-full min-h-0">
                             <ResumeChatPanel resume={resumeData} setResume={setResumeData} />
