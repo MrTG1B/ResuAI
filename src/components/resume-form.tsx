@@ -1,13 +1,24 @@
+
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UploadCloud, Loader2 } from "lucide-react";
+import { UploadCloud, PenSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeResumeAction } from "@/app/actions";
 import { auth, db, doc, setDoc } from "@/lib/firebase";
+import { useDynamicText } from "@/hooks/use-dynamic-text";
+
+const analysisTexts = [
+  "Analyzing...",
+  "Extracting skills...",
+  "Identifying keywords...",
+  "Building your profile...",
+  "Finalizing...",
+];
+
 
 export function ResumeForm() {
   const [file, setFile] = useState<File | null>(null);
@@ -15,6 +26,7 @@ export function ResumeForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const dynamicAnalysisText = useDynamicText(analysisTexts);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -101,8 +113,8 @@ export function ResumeForm() {
       <Button type="submit" className="w-full text-lg" size="lg" disabled={isLoading}>
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Analyzing...
+            <PenSquare className="mr-2 h-5 w-5 animate-spin" />
+            {dynamicAnalysisText}
           </>
         ) : (
           "Build My Portfolio"

@@ -14,6 +14,22 @@ import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type ParsedResume } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import jsPDF from 'jspdf';
+import { CreativeLoader } from '@/components/creative-loader';
+
+const parsingTexts = [
+    "Reading your document...",
+    "Parsing structure and style...",
+    "Preparing the editor...",
+    "Just a moment...",
+];
+
+const generatingPdfTexts = [
+    "Rebuilding your resume as a PDF...",
+    "Applying formatting...",
+    "Generating high-fidelity preview...",
+    "Finalizing document...",
+];
+
 
 export default function ResumeEditorPage() {
     const router = useRouter();
@@ -267,10 +283,7 @@ export default function ResumeEditorPage() {
                 { !showEditor ? (
                      <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
                         {isParsing ? (
-                             <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
-                                <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
-                                <p className="text-sm text-foreground">Analyzing your document...</p>
-                            </div>
+                            <CreativeLoader texts={parsingTexts} className="flex flex-col items-center justify-center"/>
                         ) : (
                              <>
                                 <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">AI Resume Editor</h1>
@@ -299,15 +312,12 @@ export default function ResumeEditorPage() {
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="py-2 px-6">
-                                    <CardTitle className="text-xl font-medium">Resume Preview</CardTitle>
+                                    <CardTitle className="text-lg font-medium">Resume Preview</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-center min-h-0 relative">
                                     {(isGeneratingPdf) && (
                                         <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center text-center">
-                                            <Loader2 className="h-8 w-8 animate-spin text-primary"/>
-                                            <p className="mt-4 font-medium text-muted-foreground">
-                                                Generating preview...
-                                            </p>
+                                            <CreativeLoader texts={generatingPdfTexts} />
                                         </div>
                                     )}
                                     {previewUri ? (
@@ -334,10 +344,7 @@ export default function ResumeEditorPage() {
                                 <ResumeChatPanel resume={resumeData} setResume={handleResumeUpdate} />
                             ) : (
                                 <Card className="h-full flex items-center justify-center">
-                                    <div className="text-center text-muted-foreground p-4">
-                                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                                        <p>Analyzing resume for AI editing...</p>
-                                    </div>
+                                    <CreativeLoader texts={parsingTexts} className="flex flex-col items-center justify-center"/>
                                 </Card>
                             )}
                         </div>

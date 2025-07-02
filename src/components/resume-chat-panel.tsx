@@ -2,14 +2,15 @@
 'use client'
 
 import { useState, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Send, Loader2, Paperclip } from "lucide-react";
+import { Send, Paperclip } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { type ParsedResume, type ChatMessage } from '@/types/resume';
 import { editResumeAction } from '@/app/actions';
+import { PulsingDotsLoader } from './pulsing-dots-loader';
 
 interface ResumeChatPanelProps {
     resume: ParsedResume;
@@ -68,7 +69,7 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     return (
         <Card className="flex flex-col h-full">
             <CardHeader className="py-2 px-6">
-                <CardTitle className="text-xl font-medium">AI Assistant</CardTitle>
+                <CardTitle className="text-lg font-medium">AI Assistant</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
                 <ScrollArea className="flex-grow pr-4 -mr-4">
@@ -83,7 +84,7 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
                          {isLoading && (
                             <div className="flex items-end gap-2 justify-start">
                                 <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center">
-                                    <Loader2 className="h-5 w-5 animate-spin"/>
+                                    <PulsingDotsLoader />
                                 </div>
                             </div>
                         )}
