@@ -73,6 +73,9 @@ export default function ResumeEditorPage() {
         
         hiddenPreviewRef.current.innerHTML = htmlContent;
 
+        // Add a small delay to ensure the browser has time to render the new HTML
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         try {
             const pdf = new jsPDF({
                 orientation: 'p',
@@ -102,10 +105,10 @@ export default function ResumeEditorPage() {
     }, [toast]);
     
     useEffect(() => {
-        if (resumeData && !isGeneratingPdf && !previewUri) {
-            generatePdfPreview(resumeData.htmlContent);
-        }
-    }, [resumeData, previewUri, isGeneratingPdf, generatePdfPreview]);
+        // This effect was causing re-renders and potentially issues.
+        // The logic is now more streamlined: initial preview is the uploaded file,
+        // and subsequent previews are generated only on edit.
+    }, []);
 
 
     const handleResumeUpdate = (newResumeData: ParsedResume) => {
@@ -131,7 +134,8 @@ export default function ResumeEditorPage() {
             try {
                 const uploadedResumeDataUri = reader.result as string;
                 
-                setPreviewUri(uploadedResumeDataUri);
+                // Instantly show the uploaded file
+                setPreviewUri(uploadedResumeDataUri); 
                 setResumeDataUri(uploadedResumeDataUri);
                 if (typeof window !== 'undefined') {
                     sessionStorage.setItem('resumePreviewUri', uploadedResumeDataUri);
@@ -139,6 +143,7 @@ export default function ResumeEditorPage() {
                     sessionStorage.setItem('resumeFileName', file.name);
                 }
 
+                // Parse in the background
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
 
                 if (result.success && result.data) {
@@ -146,7 +151,7 @@ export default function ResumeEditorPage() {
                     if (typeof window !== 'undefined') {
                         sessionStorage.setItem('resumeData', JSON.stringify(result.data));
                     }
-                    toast({ title: "Resume Uploaded", description: "You can now edit your resume with AI." });
+                    toast({ title: "Resume Ready", description: "You can now edit your resume with AI." });
                 } else {
                     throw new Error(result.error || "Failed to parse resume.");
                 }
@@ -253,35 +258,41 @@ export default function ResumeEditorPage() {
         </div>
     );
 
+    const showEditor = (previewUri || resumeData) && !isParsing;
+
     return (
         <div className="flex flex-col h-screen bg-muted/20">
-            <Header pageActions={editorActions} />
+            <Header pageActions={showEditor ? editorActions: undefined} />
             <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
-                {(isParsing || (!previewUri && !resumeData)) && !fileName ? (
-                    <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
-                        <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">AI Resume Editor</h1>
-                        <p className="mt-2 text-lg text-muted-foreground">Upload your resume to start making improvements with AI.</p>
-                         <div className="mt-8 w-full">
-                            <label
-                            htmlFor="resume-upload"
-                            className="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
-                            >
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <UploadCloud className="w-10 h-10 mb-3 text-primary" />
-                                    <p className="mb-2 text-sm text-foreground">
-                                    <span className="font-semibold">Click to upload</span> or drag and drop
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
-                                    {fileName && <p className="mt-4 text-sm font-medium text-primary">{fileName}</p>}
+                { !showEditor ? (
+                     <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
+                        {isParsing ? (
+                             <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
+                                <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
+                                <p className="text-sm text-foreground">Analyzing your document...</p>
+                            </div>
+                        ) : (
+                             <>
+                                <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">AI Resume Editor</h1>
+                                <p className="mt-2 text-lg text-muted-foreground">Upload your resume to start making improvements with AI.</p>
+                                <div className="mt-8 w-full">
+                                    <label
+                                    htmlFor="resume-upload"
+                                    className="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
+                                    >
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-10 h-10 mb-3 text-primary" />
+                                            <p className="mb-2 text-sm text-foreground">
+                                            <span className="font-semibold">Click to upload</span> or drag and drop
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
+                                            {fileName && <p className="mt-4 text-sm font-medium text-primary">{fileName}</p>}
+                                        </div>
+                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" disabled={isParsing} />
+                                    </label>
                                 </div>
-                                <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" disabled={isParsing} />
-                            </label>
-                        </div>
-                    </div>
-                ) : (isParsing || (fileName && !resumeData)) ? (
-                    <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
-                        <Loader2 className="w-10 h-10 mb-3 text-primary animate-spin" />
-                        <p className="text-sm text-foreground">Analyzing your document...</p>
+                            </>
+                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
