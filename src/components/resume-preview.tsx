@@ -7,13 +7,13 @@ interface ResumePreviewProps {
 
 export function ResumePreview({ resume }: ResumePreviewProps) {
     return (
-        <Card className="h-full">
+        <Card className="h-full flex flex-col overflow-hidden">
             <CardHeader>
                 <CardTitle>Resume Preview</CardTitle>
             </CardHeader>
-            <CardContent>
-                <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-md bg-background h-[calc(100vh-250px)] overflow-y-auto">
-                    <pre className="whitespace-pre-wrap text-xs font-sans">{resume.rawText}</pre>
+            <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center overflow-y-auto">
+                <div className="bg-white text-black w-full max-w-4xl p-10 sm:p-12 shadow-lg min-h-full">
+                    <pre className="whitespace-pre-wrap font-serif text-sm leading-relaxed">{resume.rawText}</pre>
                 </div>
             </CardContent>
         </Card>
