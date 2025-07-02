@@ -38,7 +38,7 @@ const prompt = ai.definePrompt({
   output: {schema: ParseResumeOutputSchema},
   prompt: `You are an AI expert at parsing documents.
   
-  Extract the content from the following document and convert it into clean, semantic HTML. Preserve the structure, layout, and text formatting (like bold, italics, lists, and headings) as accurately as possible.
+  Extract the content from the following document and convert it into clean, semantic HTML. Preserve the structure, layout, and all text formatting as accurately as possible. This includes font sizes, font colors, bold, italics, lists, headings, and text alignment. Use inline CSS styles within the HTML tags to ensure the visual representation is a near-perfect match to the original document.
   
   Do not include <html>, <head>, or <body> tags. The output should only be the HTML content for the document's body.
 

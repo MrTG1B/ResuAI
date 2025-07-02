@@ -19,7 +19,7 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
                     <ReactMarkdown
                         rehypePlugins={[rehypeRaw]}
                         remarkPlugins={[remarkGfm]}
-                        className="prose prose-sm max-w-none"
+                        className="max-w-none"
                     >
                         {resume.htmlContent}
                     </ReactMarkdown>
