@@ -6,28 +6,19 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { ResumeForm } from "@/components/resume-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Loader2, Construction } from 'lucide-react';
 
-export default function BuildPage() {
+export default function ResumeBuilderPage() {
   const router = useRouter();
-  const { toast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     if (!auth) {
-      toast({
-        title: "Configuration Error",
-        description: "Firebase is not configured. Please provide API keys in your .env file.",
-        variant: "destructive",
-      });
-      router.push('/login');
-      return;
+        router.push('/login');
+        return;
     }
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuthenticated(true);
@@ -38,7 +29,7 @@ export default function BuildPage() {
     });
 
     return () => unsubscribe();
-  }, [router, toast]);
+  }, [router]);
 
   if (isLoading) {
     return (
@@ -57,21 +48,24 @@ export default function BuildPage() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
-        <div className="w-full max-w-2xl">
-          <Card className="shadow-2xl">
-            <CardHeader className="text-center">
-              <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-                Create Your AI-Powered Portfolio
-              </h1>
-              <CardDescription className="mt-2 text-lg">
-                Upload your resume, and our AI will instantly generate a stunning, professional portfolio website for you.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResumeForm />
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="w-full max-w-2xl text-center shadow-2xl">
+          <CardHeader>
+            <div className="flex justify-center items-center mb-4">
+              <Construction className="h-16 w-16 text-primary" />
+            </div>
+            <CardTitle className="text-3xl font-bold tracking-tight text-primary">
+              AI Resume Builder Coming Soon!
+            </CardTitle>
+            <CardDescription className="mt-2 text-lg">
+              We're hard at work creating a powerful AI-driven resume building experience for you. Stay tuned!
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              In the meantime, you can create a stunning portfolio from your existing resume.
+            </p>
+          </CardContent>
+        </Card>
       </main>
       <Footer />
     </div>

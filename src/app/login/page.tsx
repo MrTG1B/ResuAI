@@ -43,9 +43,9 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       toast({
         title: "Login Successful",
-        description: "Redirecting you to the portfolio builder...",
+        description: "Redirecting you to the dashboard...",
       });
-      router.push("/build");
+      router.push("/dashboard");
     } catch (error: any) {
       toast({
         title: "Login Failed",
@@ -68,9 +68,9 @@ export default function LoginPage() {
         await signInWithPopup(auth, provider);
         toast({
             title: "Signed In Successfully",
-            description: "Redirecting you to the portfolio builder...",
+            description: "Redirecting you to the dashboard...",
         });
-        router.push("/build");
+        router.push("/dashboard");
     } catch (error: any) {
         toast({
             title: "Google Sign-In Failed",

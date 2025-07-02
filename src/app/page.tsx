@@ -23,7 +23,7 @@ export default function HomePage() {
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        router.push('/build');
+        router.push('/dashboard');
       } else {
         setIsLoading(false);
       }

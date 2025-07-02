@@ -81,10 +81,15 @@ export function Header() {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push('/portfolio')} className="cursor-pointer">
+                        <DropdownMenuItem onClick={() => router.push('/dashboard')} className="cursor-pointer">
                             <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Dashboard</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/portfolio')} className="cursor-pointer">
+                            <UserIcon className="mr-2 h-4 w-4" />
                             <span>My Portfolio</span>
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>Log out</span>

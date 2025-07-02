@@ -56,9 +56,9 @@ export default function SignupPage() {
       
       toast({
         title: "Account Created",
-        description: "Redirecting you to the portfolio builder...",
+        description: "Redirecting you to the dashboard...",
       });
-      router.push("/build");
+      router.push("/dashboard");
     } catch (error: any) {
       let errorMessage = "An unknown error occurred.";
       if (error.code === 'auth/email-already-in-use') {
@@ -87,9 +87,9 @@ export default function SignupPage() {
         await signInWithPopup(auth, provider);
         toast({
             title: "Signed In Successfully",
-            description: "Redirecting you to the portfolio builder...",
+            description: "Redirecting you to the dashboard...",
         });
-        router.push("/build");
+        router.push("/dashboard");
     } catch (error: any) {
         toast({
             title: "Google Sign-In Failed",
