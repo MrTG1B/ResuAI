@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Skeleton } from './ui/skeleton';
 import { Logo } from './logo';
 
-export function Header() {
+export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -55,9 +55,12 @@ export function Header() {
   return (
     <header className="py-4 px-4 sm:px-6 lg:px-8 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <Logo className="h-9 w-auto" />
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center">
+            <Logo className="h-9 w-auto" />
+          </Link>
+          {pageActions}
+        </div>
         <nav className="flex items-center gap-4">
             {loading ? (
                 <Skeleton className="h-9 w-24" />

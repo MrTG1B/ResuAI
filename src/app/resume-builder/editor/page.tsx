@@ -1,15 +1,15 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db, doc, setDoc } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { Loader2, UploadCloud, Download } from 'lucide-react';
+import { Loader2, UploadCloud, Download, LayoutTemplate } from 'lucide-react';
 import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
-import { parseResumeAction } from '@/app/actions';
+import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type ParsedResume } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import jsPDF from 'jspdf';
@@ -21,9 +21,11 @@ export default function ResumeEditorPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isParsing, setIsParsing] = useState(false);
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+    const [isConverting, setIsConverting] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [resumeData, setResumeData] = useState<ParsedResume | null>(null);
     const [previewUri, setPreviewUri] = useState<string | null>(null);
+    const [resumeDataUri, setResumeDataUri] = useState<string | null>(null);
     const [fileName, setFileName] = useState("");
     
     const hiddenPreviewRef = useRef<HTMLDivElement>(null);
@@ -109,9 +111,10 @@ export default function ResumeEditorPage() {
         reader.readAsDataURL(file);
         reader.onload = async () => {
             try {
-                const resumeDataUri = reader.result as string;
-                setPreviewUri(resumeDataUri); // Show the uploaded file immediately
-                const result = await parseResumeAction({ resumeDataUri });
+                const uploadedResumeDataUri = reader.result as string;
+                setResumeDataUri(uploadedResumeDataUri);
+                setPreviewUri(uploadedResumeDataUri); // Show the uploaded file immediately
+                const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
 
                 if (result.success && result.data) {
                     setResumeData(result.data);
@@ -122,6 +125,7 @@ export default function ResumeEditorPage() {
             } catch (error: any) {
                 toast({ title: "Parsing Failed", description: error.message, variant: "destructive" });
                 setFileName("");
+                setResumeDataUri(null);
             } finally {
                 setIsParsing(false);
             }
@@ -129,6 +133,7 @@ export default function ResumeEditorPage() {
         reader.onerror = () => {
           setIsParsing(false);
           setFileName("");
+          setResumeDataUri(null);
           toast({ title: "File Read Error", description: "There was an error reading the file.", variant: "destructive" });
         }
     };
@@ -146,6 +151,52 @@ export default function ResumeEditorPage() {
         document.body.removeChild(link);
     };
 
+    const handleConvertToPortfolio = async () => {
+        if (!resumeDataUri) {
+            toast({
+                title: "File Not Found",
+                description: "The original resume file is needed to create a portfolio. Please re-upload.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (!auth?.currentUser || !db) {
+            toast({
+                title: "Authentication Error",
+                description: "Please log in to create a portfolio.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsConverting(true);
+        const user = auth.currentUser;
+
+        try {
+            const result = await analyzeResumeAction({ resumeDataUri });
+
+            if (result.success && result.data) {
+                await setDoc(doc(db, "portfolios", user.uid), result.data);
+                toast({
+                    title: "Portfolio Created!",
+                    description: "Redirecting you to your new portfolio page.",
+                });
+                router.push("/portfolio");
+            } else {
+                throw new Error(result.error || "Analysis failed");
+            }
+        } catch (error: any) {
+            toast({
+                title: "Failed to build portfolio",
+                description: error.message || "An unexpected error occurred. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsConverting(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex flex-col min-h-screen items-center justify-center bg-background">
@@ -157,20 +208,33 @@ export default function ResumeEditorPage() {
     
     if (!isAuthenticated) return null;
 
+    const editorActions = (
+        <div className="hidden md:flex items-center gap-2">
+            <Button onClick={handleDownload} variant="outline" disabled={!previewUri || isGeneratingPdf || isParsing}>
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+            </Button>
+            <Button onClick={handleConvertToPortfolio} disabled={!resumeDataUri || isConverting || isParsing}>
+                {isConverting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <LayoutTemplate className="mr-2 h-4 w-4" />
+                )}
+                Create Portfolio
+            </Button>
+        </div>
+    );
+
     return (
         <div className="flex flex-col h-screen bg-muted/20">
-            <Header />
+            <Header pageActions={editorActions} />
             <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
                 {resumeData && previewUri ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
-                                <CardHeader className="flex-row items-center justify-between">
+                                <CardHeader>
                                     <CardTitle>Resume Preview</CardTitle>
-                                    <Button onClick={handleDownload}>
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Download PDF
-                                    </Button>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center min-h-0 relative">
                                     {isGeneratingPdf && (
