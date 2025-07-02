@@ -43,7 +43,7 @@ export async function parseResumeAction(input: ParseResumeInput) {
   try {
     const result = await parseResumeFlow(input);
     const parsedData: ParsedResume = {
-      rawText: result.rawText,
+      htmlContent: result.htmlContent,
     };
     return { success: true, data: parsedData };
   } catch (error) {
@@ -56,7 +56,7 @@ export async function editResumeAction(input: EditResumeInput) {
   try {
     const result = await editResumeFlow(input);
     const editedData: EditedResume = {
-      newRawText: result.newRawText,
+      newHtmlContent: result.newHtmlContent,
       response: result.response,
     };
     return { success: true, data: editedData };

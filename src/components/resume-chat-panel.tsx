@@ -24,7 +24,7 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     const { toast } = useToast();
 
     const handleSendMessage = async () => {
-        if (!input.trim() || !resume.rawText) return;
+        if (!input.trim() || !resume.htmlContent) return;
 
         const userMessage: ChatMessage = { role: 'user', content: input };
         const newMessages: ChatMessage[] = [...messages, userMessage];
@@ -34,10 +34,10 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
         setIsLoading(true);
         
         try {
-            const result = await editResumeAction({ rawText: resume.rawText, prompt: currentInput });
+            const result = await editResumeAction({ htmlContent: resume.htmlContent, prompt: currentInput });
             
             if (result.success && result.data) {
-                setResume({ rawText: result.data.newRawText });
+                setResume({ htmlContent: result.data.newHtmlContent });
                 setMessages(prev => [...prev, { role: 'assistant', content: result.data.response }]);
             } else {
                 toast({ title: "Error", description: result.error, variant: "destructive" });

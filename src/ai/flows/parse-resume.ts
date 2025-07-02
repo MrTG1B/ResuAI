@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Parses a resume file and extracts its raw text content.
+ * @fileOverview Parses a resume file and extracts its content as HTML.
  *
  * - parseResume - A function that handles parsing the resume.
  * - ParseResumeInput - The input type for the parseResume function.
@@ -21,9 +21,9 @@ const ParseResumeInputSchema = z.object({
 export type ParseResumeInput = z.infer<typeof ParseResumeInputSchema>;
 
 const ParseResumeOutputSchema = z.object({
-  rawText: z
+  htmlContent: z
     .string()
-    .describe('The full raw text content extracted from the resume.'),
+    .describe('The full HTML content extracted from the resume.'),
 });
 export type ParseResumeOutput = z.infer<typeof ParseResumeOutputSchema>;
 
@@ -38,7 +38,9 @@ const prompt = ai.definePrompt({
   output: {schema: ParseResumeOutputSchema},
   prompt: `You are an AI expert at parsing documents.
   
-  Extract the full, raw text content from the following document. Preserve all formatting, including line breaks and spacing, as accurately as possible.
+  Extract the content from the following document and convert it into clean, semantic HTML. Preserve the structure, layout, and text formatting (like bold, italics, lists, and headings) as accurately as possible.
+  
+  Do not include <html>, <head>, or <body> tags. The output should only be the HTML content for the document's body.
 
   Here is the document:
   {{media url=resumeDataUri}}`,

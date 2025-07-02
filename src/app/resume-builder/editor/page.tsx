@@ -5,7 +5,6 @@ import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { Loader2, UploadCloud } from 'lucide-react';
 import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ResumePreview } from '@/components/resume-preview';
@@ -80,9 +79,9 @@ export default function ResumeEditorPage() {
     if (!isAuthenticated) return null;
 
     return (
-        <div className="flex flex-col min-h-screen bg-muted/20">
+        <div className="flex flex-col h-screen bg-muted/20">
             <Header />
-            <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
+            <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
                 {resumeData ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                         <div className="lg:col-span-2 h-full">
@@ -124,7 +123,6 @@ export default function ResumeEditorPage() {
                     </div>
                 )}
             </main>
-            <Footer />
         </div>
     );
 }

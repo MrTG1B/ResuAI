@@ -1,6 +1,5 @@
 export interface ParsedResume {
-    rawText: string;
-    // Future structured data can be added here
+    htmlContent: string;
 }
 
 export interface ChatMessage {
@@ -9,6 +8,6 @@ export interface ChatMessage {
 }
 
 export interface EditedResume {
-    newRawText: string;
+    newHtmlContent: string;
     response: string;
 }
