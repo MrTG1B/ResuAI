@@ -3,9 +3,9 @@
 /**
  * @fileOverview Edits resume content based on user prompts using an AI.
  *
- * - editResume - A function that handles the resume editing process.
- * - EditResumeInput - The input type for the editResume function.
- * - EditResumeOutput - The return type for the editResume function.
+ * - editResumeFlow - A function that handles the resume editing process.
+ * - EditResumeInput - The input type for the editResumeFlow function.
+ * - EditResumeOutput - The return type for the editResumeFlow function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -23,8 +23,8 @@ const EditResumeOutputSchema = z.object({
 });
 export type EditResumeOutput = z.infer<typeof EditResumeOutputSchema>;
 
-export async function editResume(input: EditResumeInput): Promise<EditResumeOutput> {
-  return editResumeFlow(input);
+export async function editResumeFlow(input: EditResumeInput): Promise<EditResumeOutput> {
+  return _editResumeFlow(input);
 }
 
 const prompt = ai.definePrompt({
@@ -52,7 +52,7 @@ const prompt = ai.definePrompt({
   `,
 });
 
-const editResumeFlow = ai.defineFlow(
+const _editResumeFlow = ai.defineFlow(
   {
     name: 'editResumeFlow',
     inputSchema: EditResumeInputSchema,

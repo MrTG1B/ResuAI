@@ -3,7 +3,7 @@
 import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flows/resume-analysis";
 import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
-import { editResume as editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
+import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
 import { type PortfolioData } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume } from "@/types/resume";
 
