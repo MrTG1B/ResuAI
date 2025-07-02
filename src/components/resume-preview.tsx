@@ -14,7 +14,7 @@ export function ResumePreview({ resume }: ResumePreviewProps) {
             <CardHeader>
                 <CardTitle>Resume Preview</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center">
+            <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center min-h-0">
                 <div className="bg-white text-black w-full max-w-4xl p-10 sm:p-12 shadow-lg font-serif overflow-y-auto">
                     <ReactMarkdown
                         rehypePlugins={[rehypeRaw]}
