@@ -84,10 +84,10 @@ export default function ResumeEditorPage() {
             <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
                 {resumeData ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-                        <div className="lg:col-span-2 h-full">
+                        <div className="lg:col-span-2 h-full min-h-0">
                             <ResumePreview resume={resumeData} />
                         </div>
-                        <div className="lg:col-span-1 h-full">
+                        <div className="lg:col-span-1 h-full min-h-0">
                             <ResumeChatPanel resume={resumeData} setResume={setResumeData} />
                         </div>
                     </div>
