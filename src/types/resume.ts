@@ -15,3 +15,7 @@ export interface EditedResume {
 export interface JobMatchAnalysis {
     analysis: string;
 }
+
+export interface CoachChatResponse {
+    response: string;
+}

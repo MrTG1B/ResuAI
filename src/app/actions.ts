@@ -5,8 +5,9 @@ import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
 import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput } from "@/ai/flows/job-match-analyzer";
+import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { type PortfolioData } from "@/types/portfolio";
-import { type ParsedResume, type EditedResume, type JobMatchAnalysis } from "@/types/resume";
+import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
 
 export async function analyzeResumeAction(input: AnalyzeResumeInput) {
   try {
@@ -77,5 +78,18 @@ export async function jobMatchAnalyzeAction(input: JobMatchAnalyzerInput) {
   } catch (error) {
     console.error("Error analyzing resume for job match:", error);
     return { success: false, error: "Failed to analyze resume. The AI model might be busy, please try again." };
+  }
+}
+
+export async function coachChatAction(input: CoachChatInput) {
+  try {
+    const result = await coachChatFlow(input);
+    const responseData: CoachChatResponse = {
+      response: result.response,
+    };
+    return { success: true, data: responseData };
+  } catch (error: any) {
+    console.error("Error in coach chat:", error);
+    return { success: false, error: "The AI coach is unavailable. Please try again later." };
   }
 }
