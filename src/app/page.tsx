@@ -53,7 +53,7 @@ export default function HomePage() {
               Build Your Future with an AI-Powered Resume & Portfolio
             </h1>
             <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-              ResuAI is your ultimate career tool. Craft a job-winning resume or transform your existing one into a stunning portfolio website in seconds.
+              ResuAI is your ultimate career tool. Analyze your resume against any job description, edit it to perfection with AI assistance, and instantly generate a stunning portfolio website.
             </p>
             <div className="flex justify-center gap-4">
               <Button asChild size="lg">
