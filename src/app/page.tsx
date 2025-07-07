@@ -50,7 +50,7 @@ export default function HomePage() {
         <section className="text-center py-20 md:py-32 bg-gradient-to-b from-background to-card/20 animate-fade-in-down">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-primary mb-4 font-heading">
-              Build Your Future with an AI-Powered Resume & Portfolio
+              Your AI-Powered Career Toolkit
             </h1>
             <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
               ResuAI is your ultimate career tool. Analyze your resume against any job description, edit it to perfection with AI assistance, and instantly generate a stunning portfolio website.
