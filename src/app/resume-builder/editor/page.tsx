@@ -40,7 +40,6 @@ export default function ResumeEditorPage() {
     const [isConverting, setIsConverting] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     
-    // This holds the original uploaded file for the initial preview
     const [initialPreviewUri, setInitialPreviewUri] = useState<string | null>(() => {
         if (typeof window !== "undefined") {
             return sessionStorage.getItem('resumePreviewUri') || null;
@@ -70,10 +69,8 @@ export default function ResumeEditorPage() {
         return "";
     });
 
-    // This flag tracks if we should show the live HTML preview
     const [isLivePreview, setIsLivePreview] = useState(false);
     
-    // This ref points to the live HTML preview container for PDF generation
     const livePreviewRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -88,7 +85,6 @@ export default function ResumeEditorPage() {
         return () => unsubscribe();
     }, [router]);
     
-    // On load, check if we were already in live preview mode
     useEffect(() => {
         if (typeof window !== "undefined") {
             if (sessionStorage.getItem('isLivePreview') === 'true') {
@@ -103,7 +99,6 @@ export default function ResumeEditorPage() {
         if (typeof window !== 'undefined') {
             sessionStorage.setItem('resumeData', JSON.stringify(newResumeData));
         }
-        // Switch to live preview mode on the first edit
         if (!isLivePreview) {
             setIsLivePreview(true);
             if (typeof window !== 'undefined') {
@@ -116,7 +111,6 @@ export default function ResumeEditorPage() {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        // Reset state for the new file upload
         setFileName(file.name);
         setIsParsing(true);
         setResumeData(null);
@@ -132,7 +126,6 @@ export default function ResumeEditorPage() {
             try {
                 const uploadedResumeDataUri = reader.result as string;
                 
-                // Instantly show the uploaded file and store its data
                 setInitialPreviewUri(uploadedResumeDataUri); 
                 setResumeDataUri(uploadedResumeDataUri);
                 if (typeof window !== 'undefined') {
@@ -141,7 +134,6 @@ export default function ResumeEditorPage() {
                     sessionStorage.setItem('resumeFileName', file.name);
                 }
 
-                // Parse in the background
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
 
                 if (result.success && result.data) {
