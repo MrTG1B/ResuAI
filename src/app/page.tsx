@@ -4,13 +4,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { ArrowRight, Bot, PenSquare, Eye, Loader2, Star, Quote } from 'lucide-react';
+import { ArrowRight, Bot, PenSquare, Eye, Loader2, Star, Quote, FileText, LayoutTemplate, SearchCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 export default function HomePage() {
@@ -109,27 +108,51 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Showcase Section */}
+        {/* Toolkit Section */}
         <section className="py-20 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Stunning Designs, Instantly</h2>
-              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our AI applies professional, industry-standard templates to make your portfolio or resume stand out.</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Your AI-Powered Career Toolkit</h2>
+              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Everything you need to analyze, edit, and showcase your professional story.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="animate-fade-in-up" style={{ animationDelay: '0ms' }}>
-                <Card className="overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300">
-                  <Image src="https://placehold.co/600x800.png" alt="Modern Resume Template" width={600} height={800} className="w-full object-cover group-hover:scale-105 transition-transform duration-300" data-ai-hint="resume design" />
+                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 flex flex-col h-full">
+                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                      <FileText className="h-10 w-10 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-semibold mb-2 text-center">AI Resume Editor</h3>
+                  <p className="text-muted-foreground text-center flex-grow mb-6">
+                    Upload your existing resume and let our AI assistant help you refine content, fix typos, and even redesign the entire layout with professional templates.
+                  </p>
                 </Card>
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                <Card className="overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300">
-                  <Image src="https://placehold.co/600x800.png" alt="Creative Portfolio Template" width={600} height={800} className="w-full object-cover group-hover:scale-105 transition-transform duration-300" data-ai-hint="portfolio website" />
+                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 flex flex-col h-full">
+                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                      <SearchCheck className="h-10 w-10 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-semibold mb-2 text-center">AI Resume Analyzer</h3>
+                  <p className="text-muted-foreground text-center flex-grow mb-6">
+                    Get instant, detailed feedback. Our AI coach analyzes your resume against a job description to identify strengths, weaknesses, and actionable steps.
+                  </p>
                 </Card>
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-                <Card className="overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300">
-                  <Image src="https://placehold.co/600x800.png" alt="Professional Resume Design" width={600} height={800} className="w-full object-cover group-hover:scale-105 transition-transform duration-300" data-ai-hint="minimalist resume" />
+                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 flex flex-col h-full">
+                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                      <LayoutTemplate className="h-10 w-10 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-semibold mb-2 text-center">AI Portfolio Generator</h3>
+                  <p className="text-muted-foreground text-center flex-grow mb-6">
+                    Transform your resume into a stunning, professional portfolio website in seconds. Choose from beautiful themes and share your unique link.
+                  </p>
                 </Card>
               </div>
             </div>
@@ -144,7 +167,7 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Don't just take our word for it. Here's what our users are saying.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up" style={{ animationDelay: '0ms' }}>
+              <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105" style={{ animationDelay: '0ms' }}>
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"I created a portfolio in under 5 minutes that looked better than what I spent weeks trying to build myself. Truly magical!"</p>
                 <div className="flex items-center gap-2 mb-2">
@@ -153,7 +176,7 @@ export default function HomePage() {
                 <p className="font-semibold">Sarah L.</p>
                 <p className="text-sm text-muted-foreground">UX Designer</p>
               </Card>
-               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105" style={{ animationDelay: '200ms' }}>
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"The AI Resume Analyzer gave me the exact feedback I needed to land three interviews. It's like having a personal career coach."</p>
                 <div className="flex items-center gap-2 mb-2">
@@ -162,7 +185,7 @@ export default function HomePage() {
                 <p className="font-semibold">Michael B.</p>
                 <p className="text-sm text-muted-foreground">Software Engineer</p>
               </Card>
-               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105" style={{ animationDelay: '400ms' }}>
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"As a recent graduate, this tool was a lifesaver. It helped me create a resume that got noticed and felt professional."</p>
                  <div className="flex items-center gap-2 mb-2">
