@@ -14,6 +14,12 @@ import {z} from 'genkit';
 const EditResumeInputSchema = z.object({
   htmlContent: z.string().describe('The current HTML content of the resume.'),
   prompt: z.string().describe("The user's instruction for what to change."),
+  attachmentDataUri: z
+    .string()
+    .optional()
+    .describe(
+      "An optional attached file (e.g., a certificate or project details) as a data URI. The AI can use this as context for edits. Format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 export type EditResumeInput = z.infer<typeof EditResumeInputSchema>;
 
@@ -39,7 +45,7 @@ const prompt = ai.definePrompt({
   1. Read the user's prompt carefully to understand their request.
   2. Modify the resume's HTML content according to the prompt. Your output must be the *entire*, updated resume as a single block of clean, semantic HTML.
   3. **Crucially, you must preserve all existing inline CSS styles** for elements that are not being changed. When you modify an element, try to maintain a consistent style with the rest of the document.
-  4. Generate a brief, friendly, and conversational response to the user. Confirm that you've made the change and briefly explain what you did. For example: "I've updated your summary to be more action-oriented and impactful. Take a look!" or "I've corrected the typos you pointed out. Let me know what you'd like to do next!".
+  4. Generate a brief, friendly, and conversational response to the user. Confirm that you've made the change and briefly explain what you did. Use Markdown for formatting (e.g., **bolding**, lists) to make your response clear and easy to read. For example: "I've updated your summary to be more **action-oriented** and **impactful**. Take a look!" or "I've corrected the typos you pointed out. Let me know what you'd like to do next!".
 
   CURRENT RESUME HTML:
   ---
@@ -50,6 +56,14 @@ const prompt = ai.definePrompt({
   ---
   {{{prompt}}}
   ---
+  
+  {{#if attachmentDataUri}}
+  ADDITIONAL CONTEXT FROM ATTACHED FILE:
+  ---
+  You also have the following file attached for context. Use the information within it to inform your edits.
+  {{media url=attachmentDataUri}}
+  ---
+  {{/if}}
   `,
 });
 
