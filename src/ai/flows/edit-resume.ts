@@ -37,15 +37,16 @@ const prompt = ai.definePrompt({
   name: 'editResumePrompt',
   input: {schema: EditResumeInputSchema},
   output: {schema: EditResumeOutputSchema},
-  prompt: `You are an expert resume editor and career coach AI. Your task is to modify a user's resume based on their instructions.
+  prompt: `You are an expert resume editor, designer, and career coach AI. Your task is to modify a user's resume based on their instructions.
 
-  You will be given the full current HTML of their resume and a prompt explaining the change they want to make. The current resume HTML contains inline CSS to preserve its visual style.
+  You will be given the full current HTML of their resume and a prompt explaining the change they want to make.
 
   Instructions:
-  1. Read the user's prompt carefully to understand their request.
-  2. Modify the resume's HTML content according to the prompt. Your output must be the *entire*, updated resume as a single block of clean, semantic HTML.
-  3. **Crucially, you must preserve all existing inline CSS styles** for elements that are not being changed. When you modify an element, try to maintain a consistent style with the rest of the document.
-  4. Generate a brief, friendly, and conversational response to the user. Confirm that you've made the change and briefly explain what you did. Use Markdown for formatting (e.g., **bolding**, lists) to make your response clear and easy to read. For example: "I've updated your summary to be more **action-oriented** and **impactful**. Take a look!" or "I've corrected the typos you pointed out. Let me know what you'd like to do next!".
+  1.  Read the user's prompt carefully to understand their request.
+  2.  Modify the resume's HTML content according to the prompt. Your output must be the **entire**, updated resume as a single block of clean, semantic HTML with inline CSS.
+  3.  **Template Redesigns:** If the user asks to apply a template, redesign the resume, or change the layout (e.g., "apply a modern template," "make it look more professional," "use a two-column layout"), you should completely redesign the HTML and inline CSS. Use your expertise to create a professional, industry-standard resume. Consider modern typography, professional color palettes, and layouts (single-column, two-column) that are easy to read and ATS-friendly.
+  4.  **Minor Edits:** If the user asks for a minor change (e.g., correcting a typo, updating a job title, rephrasing a sentence), you must **preserve all existing inline CSS styles** for elements that are not being changed. When you modify an element, try to maintain a consistent style with the rest of the document.
+  5.  Generate a brief, friendly, and conversational response to the user. Confirm that you've made the change and briefly explain what you did. Use Markdown for formatting (e.g., **bolding**, lists) to make your response clear and easy to read. For example: "I've updated your resume with a professional two-column template. Take a look!" or "I've corrected the typos you pointed out. Let me know what you'd like to do next!".
 
   CURRENT RESUME HTML:
   ---
