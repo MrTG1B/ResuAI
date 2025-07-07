@@ -112,8 +112,8 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
 
     return (
         <Card className="flex flex-col h-full">
-            <CardHeader className="py-2 px-6">
-                <CardTitle className="text-lg font-normal">AI Assistant</CardTitle>
+            <CardHeader className="py-2 px-6 border-b">
+                <CardTitle className="text-base font-medium">AI Assistant</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-4">
                 <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
@@ -123,7 +123,7 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
                                 <div className={`max-w-xs rounded-lg px-3 py-2 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                                     {message.role === 'assistant' ? (
                                         <ReactMarkdown 
-                                            className="prose prose-sm dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0"
+                                            className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0"
                                             rehypePlugins={[rehypeRaw]}
                                             remarkPlugins={[remarkGfm]}
                                         >
