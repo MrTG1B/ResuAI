@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db, doc, setDoc } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -40,17 +40,18 @@ export default function ResumeEditorPage() {
     const [isConverting, setIsConverting] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     
-    const [resumeData, setResumeData] = useState<ParsedResume | null>(() => {
+    // This holds the original uploaded file for the initial preview
+    const [initialPreviewUri, setInitialPreviewUri] = useState<string | null>(() => {
         if (typeof window !== "undefined") {
-            const storedResume = sessionStorage.getItem('resumeData');
-            if (storedResume) return JSON.parse(storedResume);
+            return sessionStorage.getItem('resumePreviewUri') || null;
         }
         return null;
     });
 
-    const [previewUri, setPreviewUri] = useState<string | null>(() => {
+    const [resumeData, setResumeData] = useState<ParsedResume | null>(() => {
         if (typeof window !== "undefined") {
-            return sessionStorage.getItem('resumePreviewUri') || null;
+            const storedResume = sessionStorage.getItem('resumeData');
+            if (storedResume) return JSON.parse(storedResume);
         }
         return null;
     });
@@ -68,8 +69,12 @@ export default function ResumeEditorPage() {
         }
         return "";
     });
+
+    // This flag tracks if we should show the live HTML preview
+    const [isLivePreview, setIsLivePreview] = useState(false);
     
-    const hiddenPreviewRef = useRef<HTMLDivElement>(null);
+    // This ref points to the live HTML preview container for PDF generation
+    const livePreviewRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -82,48 +87,14 @@ export default function ResumeEditorPage() {
         });
         return () => unsubscribe();
     }, [router]);
-
-    const generatePdfPreview = useCallback(async (htmlContent: string) => {
-        if (!hiddenPreviewRef.current) return;
-        setIsGeneratingPdf(true);
-        
-        hiddenPreviewRef.current.innerHTML = htmlContent;
-
-        // Add a small delay to ensure the browser has time to render the new HTML
-        await new Promise(resolve => setTimeout(resolve, 200));
-
-        try {
-            const pdf = new jsPDF({
-                orientation: 'p',
-                unit: 'pt',
-                format: 'a4'
-            });
-            
-            await pdf.html(hiddenPreviewRef.current, {
-                autoPaging: 'text',
-                margin: [40, 30, 40, 30],
-            });
-            
-            const newPreviewUri = pdf.output('datauristring');
-            setPreviewUri(newPreviewUri);
-            if (typeof window !== 'undefined') {
-                sessionStorage.setItem('resumePreviewUri', newPreviewUri);
-            }
-        } catch(error) {
-            console.error("PDF generation failed:", error);
-            toast({ title: "Preview Failed", description: "Could not generate the text-based PDF preview.", variant: "destructive" });
-        } finally {
-            if (hiddenPreviewRef.current) {
-                hiddenPreviewRef.current.innerHTML = '';
-            }
-            setIsGeneratingPdf(false);
-        }
-    }, [toast]);
     
+    // On load, check if we were already in live preview mode
     useEffect(() => {
-        // This effect was causing re-renders and potentially issues.
-        // The logic is now more streamlined: initial preview is the uploaded file,
-        // and subsequent previews are generated only on edit.
+        if (typeof window !== "undefined") {
+            if (sessionStorage.getItem('isLivePreview') === 'true') {
+                setIsLivePreview(true);
+            }
+        }
     }, []);
 
 
@@ -132,17 +103,28 @@ export default function ResumeEditorPage() {
         if (typeof window !== 'undefined') {
             sessionStorage.setItem('resumeData', JSON.stringify(newResumeData));
         }
-        generatePdfPreview(newResumeData.htmlContent);
+        // Switch to live preview mode on the first edit
+        if (!isLivePreview) {
+            setIsLivePreview(true);
+            if (typeof window !== 'undefined') {
+                sessionStorage.setItem('isLivePreview', 'true');
+            }
+        }
     };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
+        // Reset state for the new file upload
         setFileName(file.name);
         setIsParsing(true);
         setResumeData(null);
-        setPreviewUri(null);
+        setInitialPreviewUri(null);
+        setIsLivePreview(false);
+        if (typeof window !== 'undefined') {
+            sessionStorage.clear();
+        }
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -150,8 +132,8 @@ export default function ResumeEditorPage() {
             try {
                 const uploadedResumeDataUri = reader.result as string;
                 
-                // Instantly show the uploaded file
-                setPreviewUri(uploadedResumeDataUri); 
+                // Instantly show the uploaded file and store its data
+                setInitialPreviewUri(uploadedResumeDataUri); 
                 setResumeDataUri(uploadedResumeDataUri);
                 if (typeof window !== 'undefined') {
                     sessionStorage.setItem('resumePreviewUri', uploadedResumeDataUri);
@@ -175,7 +157,7 @@ export default function ResumeEditorPage() {
                 toast({ title: "Parsing Failed", description: error.message, variant: "destructive" });
                 setFileName("");
                 setResumeDataUri(null);
-                setPreviewUri(null);
+                setInitialPreviewUri(null);
             } finally {
                 setIsParsing(false);
             }
@@ -184,22 +166,38 @@ export default function ResumeEditorPage() {
           setIsParsing(false);
           setFileName("");
           setResumeDataUri(null);
-          setPreviewUri(null);
+          setInitialPreviewUri(null);
           toast({ title: "File Read Error", description: "There was an error reading the file.", variant: "destructive" });
         }
     };
 
-    const handleDownload = () => {
-        if (!previewUri) {
-             toast({ title: "Nothing to download", description: "Please upload or generate a resume first.", variant: "destructive" });
+    const handleDownload = async () => {
+        const sourceElement = livePreviewRef.current;
+        if (!sourceElement) {
+             toast({ title: "Nothing to download", description: "The resume preview is not available.", variant: "destructive" });
              return;
         }
-        const link = document.createElement('a');
-        link.href = previewUri;
-        link.download = 'resume.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+
+        setIsGeneratingPdf(true);
+        try {
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'pt',
+                format: 'a4',
+            });
+            await pdf.html(sourceElement, {
+                autoPaging: 'text',
+                margin: [40, 0, 40, 0],
+                width: 595, // A4 width in points
+                windowWidth: sourceElement.scrollWidth,
+            });
+            pdf.save('resume.pdf');
+        } catch (error) {
+            console.error('PDF Download error:', error);
+            toast({ title: "Download failed", description: "Could not generate PDF.", variant: "destructive" });
+        } finally {
+            setIsGeneratingPdf(false);
+        }
     };
 
     const handleConvertToPortfolio = async () => {
@@ -260,9 +258,9 @@ export default function ResumeEditorPage() {
     if (!isAuthenticated) return null;
 
     const editorActions = (
-        <div className="flex items-center gap-2">
-            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!previewUri || isGeneratingPdf || isParsing}>
-                Download PDF
+        <div className="flex items-center justify-end gap-2 flex-grow">
+            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!resumeData || isGeneratingPdf || isParsing || !isLivePreview}>
+                {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
             </Button>
             <Button onClick={handleConvertToPortfolio} size="sm" disabled={!resumeDataUri || isConverting || isParsing}>
                 {isConverting ? (
@@ -274,7 +272,7 @@ export default function ResumeEditorPage() {
         </div>
     );
 
-    const showEditor = (previewUri || resumeData) && !isParsing;
+    const showEditor = (initialPreviewUri || resumeData) && !isParsing;
 
     return (
         <div className="flex flex-col h-screen bg-muted/20">
@@ -312,27 +310,27 @@ export default function ResumeEditorPage() {
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="py-2 px-6">
-                                    <CardTitle className="text-lg font-normal">Resume Preview</CardTitle>
+                                    <CardTitle className="text-lg font-normal">{isLivePreview ? 'Live Resume Preview' : 'Resume Preview'}</CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-center min-h-0 relative">
-                                    {(isGeneratingPdf) && (
-                                        <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center text-center">
-                                            <CreativeLoader texts={generatingPdfTexts} />
-                                        </div>
-                                    )}
-                                    {previewUri ? (
-                                        <iframe 
-                                          src={`${previewUri}#toolbar=0&navpanes=0`} 
-                                          title="Resume Preview"
-                                          width="100%" 
-                                          height="100%" 
-                                          className="z-10 border-none"
+                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start overflow-auto">
+                                    {isLivePreview && resumeData ? (
+                                        <div
+                                            ref={livePreviewRef}
+                                            className="bg-white text-black w-[8.27in] min-h-[11.69in] p-12 shadow-lg"
+                                            dangerouslySetInnerHTML={{ __html: resumeData.htmlContent || '' }}
                                         />
                                     ) : (
-                                        !isGeneratingPdf && (
-                                            <div className="text-center text-destructive">
-                                                <p>Could not load preview.</p>
-                                                <p className="text-xs text-muted-foreground">Please try uploading the file again.</p>
+                                        initialPreviewUri ? (
+                                            <iframe 
+                                              src={`${initialPreviewUri}#toolbar=0&navpanes=0`} 
+                                              title="Resume Preview"
+                                              width="100%" 
+                                              height="100%" 
+                                              className="border-none"
+                                            />
+                                        ) : (
+                                            <div className="text-center text-muted-foreground">
+                                                <p>Loading preview...</p>
                                             </div>
                                         )
                                     )}
@@ -351,8 +349,6 @@ export default function ResumeEditorPage() {
                     </div>
                 )}
             </main>
-            {/* Hidden div for jsPDF to render into. It's positioned off-screen to be visible to html2canvas. */}
-            <div ref={hiddenPreviewRef} className="absolute -left-[9999px] top-0 z-[-1] bg-white text-black w-[8.27in] min-h-[11.69in] font-serif"></div>
         </div>
     );
 }
