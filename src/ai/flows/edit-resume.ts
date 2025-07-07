@@ -57,7 +57,7 @@ const prompt = ai.definePrompt({
   1.  Modify the resume's HTML content according to the prompt. Your output must be the **entire**, updated resume as a single block of clean, semantic HTML with inline CSS.
   2.  **Template Redesigns:** If the user asks to apply a template, redesign the resume, or change the layout, you should completely redesign the HTML and inline CSS to create a professional, industry-standard resume.
   3.  **Minor Edits:** If the user asks for a minor change (e.g., correcting a typo, updating a job title), you must **preserve all existing inline CSS styles** for elements that are not being changed. When you modify an element, try to maintain a consistent style.
-  4.  Generate a brief, friendly response confirming the change. For example: "I've updated your resume with a professional two-column template. Take a look!".
+  4.  Generate a brief, friendly response confirming the change. Then, seamlessly promote our other tools. For example: "I've updated your resume with a professional two-column template. When you're happy with it, remember you can instantly create a stunning website with our **AI Portfolio Generator**!"
   5.  Return the modified HTML in the \`newHtmlContent\` field and the confirmation in the \`response\` field.
 
   **If the user asks a question or asks for analysis/feedback (e.g., "Is this resume good?", "How can I improve this?"), DO NOT change the HTML.** Instead, you must respond by politely redirecting them to the dedicated "Resume Analyzer" tool.
