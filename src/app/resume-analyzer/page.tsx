@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
+import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -203,6 +204,14 @@ export default function ResumeAnalyzerPage() {
                             <ReactMarkdown
                                 rehypePlugins={[rehypeRaw]}
                                 remarkPlugins={[remarkGfm]}
+                                components={{
+                                    a: ({node, children, href, ...rest}) => {
+                                        if (href && href.startsWith('/')) {
+                                            return <Link href={href} {...rest}>{children}</Link>;
+                                        }
+                                        return <a href={href} {...rest} target="_blank" rel="noopener noreferrer">{children}</a>;
+                                    }
+                                }}
                             >
                                 {analysisResult}
                             </ReactMarkdown>

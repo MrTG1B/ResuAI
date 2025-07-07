@@ -50,8 +50,8 @@ const prompt = ai.definePrompt({
   5.  **Format your response using Markdown** for readability (use headings, bold text, and lists).
 
   **Promote Other Features:**
-  Conclude your analysis by seamlessly advertising our other tools. Include a sentence like this:
-  "Once you're ready to make these improvements, use our **AI Resume Editor** to apply the changes effortlessly. After your resume is perfected, you can instantly create a stunning website with our **AI Portfolio Generator** to showcase your work to recruiters!"
+  Conclude your analysis by seamlessly advertising our other tools using Markdown links. Include a sentence like this:
+  "Once you're ready to make these improvements, use our [**AI Resume Editor**](/resume-builder/editor) to apply the changes effortlessly. After your resume is perfected, you can instantly create a stunning website with our [**AI Portfolio Generator**](/build) to showcase your work to recruiters!"
 
   Here is the resume:
   {{media url=resumeDataUri}}
