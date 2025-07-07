@@ -14,11 +14,11 @@ import {z} from 'genkit';
 const EditResumeInputSchema = z.object({
   htmlContent: z.string().describe('The current HTML content of the resume.'),
   prompt: z.string().describe("The user's instruction for what to change."),
-  attachmentDataUri: z
-    .string()
+  attachmentDataUris: z
+    .array(z.string())
     .optional()
     .describe(
-      "An optional attached file (e.g., a certificate or project details) as a data URI. The AI can use this as context for edits. Format: 'data:<mimetype>;base64,<encoded_data>'."
+      "An optional list of attached files (e.g., certificates or project details) as data URIs. The AI can use these as context for edits. Each string should be a data URI: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
 export type EditResumeInput = z.infer<typeof EditResumeInputSchema>;
@@ -57,11 +57,14 @@ const prompt = ai.definePrompt({
   {{{prompt}}}
   ---
   
-  {{#if attachmentDataUri}}
-  ADDITIONAL CONTEXT FROM ATTACHED FILE:
+  {{#if attachmentDataUris}}
+  ADDITIONAL CONTEXT FROM ATTACHED FILES:
   ---
-  You also have the following file attached for context. Use the information within it to inform your edits.
-  {{media url=attachmentDataUri}}
+  You also have the following files attached for context. Use the information within them to inform your edits.
+  {{#each attachmentDataUris}}
+  Attachment {{@index}}:
+  {{media url=this}}
+  {{/each}}
   ---
   {{/if}}
   `,

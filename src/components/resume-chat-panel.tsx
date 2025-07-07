@@ -26,8 +26,7 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [attachmentDataUri, setAttachmentDataUri] = useState<string | null>(null);
-    const [attachmentName, setAttachmentName] = useState<string | null>(null);
+    const [attachments, setAttachments] = useState<{ name: string; dataUri: string }[]>([]);
     const { toast } = useToast();
     const attachmentInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -46,25 +45,24 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     }, [messages, isLoading]);
 
     const handleSendMessage = async () => {
-        if ((!input.trim() && !attachmentDataUri) || !resume.htmlContent) return;
+        if ((!input.trim() && attachments.length === 0) || !resume.htmlContent) return;
 
         const userMessage: ChatMessage = { role: 'user', content: input };
         const newMessages: ChatMessage[] = [...messages, userMessage];
         setMessages(newMessages);
 
         const currentInput = input;
-        const currentAttachment = attachmentDataUri;
+        const currentAttachments = attachments;
 
         setInput('');
-        setAttachmentDataUri(null);
-        setAttachmentName(null);
+        setAttachments([]);
         setIsLoading(true);
         
         try {
             const result = await editResumeAction({
                 htmlContent: resume.htmlContent,
                 prompt: currentInput,
-                attachmentDataUri: currentAttachment || undefined
+                attachmentDataUris: currentAttachments.map(a => a.dataUri)
             });
             
             if (result.success && result.data) {
@@ -83,31 +81,45 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                setAttachmentDataUri(reader.result as string);
-                setAttachmentName(file.name);
-                toast({ title: 'File Attached', description: `${file.name} is ready to be sent with your next message.`});
-            };
-            reader.onerror = () => {
-                toast({ title: 'File Read Error', description: 'Could not read the attached file.', variant: 'destructive' });
-            }
-            reader.readAsDataURL(file);
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            const filePromises = Array.from(files).map(file => {
+                return new Promise<{ name: string; dataUri: string }>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        resolve({ name: file.name, dataUri: reader.result as string });
+                    };
+                    reader.onerror = () => {
+                        reject(new Error(`Could not read file: ${file.name}`));
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            Promise.all(filePromises)
+                .then(newlyReadAttachments => {
+                    setAttachments(prev => [...prev, ...newlyReadAttachments]);
+                    toast({
+                        title: 'Files Attached',
+                        description: `${files.length} file(s) are ready to be sent with your next message.`,
+                    });
+                })
+                .catch(error => {
+                    toast({ title: 'File Read Error', description: error.message, variant: 'destructive' });
+                });
         }
         if (e.target) {
             e.target.value = '';
         }
     };
 
+
     const handleAttachmentClick = () => {
         attachmentInputRef.current?.click();
     };
 
-    const handleRemoveAttachment = () => {
-        setAttachmentDataUri(null);
-        setAttachmentName(null);
+    const handleRemoveAttachment = (indexToRemove: number) => {
+        setAttachments(prev => prev.filter((_, index) => index !== indexToRemove));
     }
 
     return (
@@ -145,7 +157,19 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
                     </div>
                 </ScrollArea>
             </CardContent>
-            <CardFooter className="p-2 border-t">
+            <CardFooter className="p-2 border-t flex flex-col items-start gap-2">
+                {attachments.length > 0 && (
+                    <div className="w-full flex flex-wrap gap-1 p-1">
+                        {attachments.map((attachment, index) => (
+                            <Badge key={index} variant="secondary" className="flex items-center gap-1.5">
+                                <span>{attachment.name}</span>
+                                <button onClick={() => handleRemoveAttachment(index)} className="rounded-full hover:bg-muted-foreground/20">
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </Badge>
+                        ))}
+                    </div>
+                )}
                 <div className="flex w-full items-start gap-2">
                     <input
                         id="cert-upload"
@@ -154,37 +178,26 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
                         onChange={handleFileUpload}
                         ref={attachmentInputRef}
                         disabled={isLoading}
+                        multiple
                     />
                     <Button variant="ghost" size="icon" className="shrink-0" onClick={handleAttachmentClick} aria-label="Attach file" disabled={isLoading}>
                         <Paperclip className="h-4 w-4" />
                     </Button>
-                    <div className="w-full relative">
-                        {attachmentName && (
-                            <div className="absolute -top-7 left-0 w-full">
-                                <Badge variant="secondary" className="flex items-center gap-1.5 w-fit">
-                                    <span>{attachmentName}</span>
-                                    <button onClick={handleRemoveAttachment} className="rounded-full hover:bg-muted-foreground/20">
-                                        <X className="h-3 w-3" />
-                                    </button>
-                                </Badge>
-                            </div>
-                        )}
-                        <Textarea
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault();
-                                    if (!isLoading) handleSendMessage();
-                                }
-                            }}
-                            placeholder="e.g., 'Make my summary more professional'"
-                            disabled={isLoading}
-                            rows={1}
-                            className="resize-none pr-10"
-                        />
-                    </div>
-                    <Button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && !attachmentDataUri)} className="shrink-0">
+                    <Textarea
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                if (!isLoading) handleSendMessage();
+                            }
+                        }}
+                        placeholder="e.g., 'Make my summary more professional'"
+                        disabled={isLoading}
+                        rows={1}
+                        className="resize-none w-full pr-10"
+                    />
+                    <Button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && attachments.length === 0)} className="shrink-0">
                         <Send className="h-4 w-4" />
                     </Button>
                 </div>
