@@ -4,8 +4,9 @@ import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flo
 import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
+import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput } from "@/ai/flows/job-match-analyzer";
 import { type PortfolioData } from "@/types/portfolio";
-import { type ParsedResume, type EditedResume } from "@/types/resume";
+import { type ParsedResume, type EditedResume, type JobMatchAnalysis } from "@/types/resume";
 
 export async function analyzeResumeAction(input: AnalyzeResumeInput) {
   try {
@@ -63,5 +64,18 @@ export async function editResumeAction(input: EditResumeInput) {
   } catch (error) {
     console.error("Error editing resume:", error);
     return { success: false, error: "Failed to edit resume. The AI model might be busy, please try again." };
+  }
+}
+
+export async function jobMatchAnalyzeAction(input: JobMatchAnalyzerInput) {
+  try {
+    const result = await jobMatchAnalyzerFlow(input);
+    const analysisData: JobMatchAnalysis = {
+      analysis: result.analysis,
+    };
+    return { success: true, data: analysisData };
+  } catch (error) {
+    console.error("Error analyzing resume for job match:", error);
+    return { success: false, error: "Failed to analyze resume. The AI model might be busy, please try again." };
   }
 }

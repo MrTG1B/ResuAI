@@ -11,3 +11,7 @@ export interface EditedResume {
     newHtmlContent: string;
     response: string;
 }
+
+export interface JobMatchAnalysis {
+    analysis: string;
+}

@@ -9,7 +9,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -51,7 +51,7 @@ export default function DashboardPage() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
-        <div className="w-full max-w-4xl space-y-8">
+        <div className="w-full max-w-6xl space-y-8">
             <div className="text-center">
                 <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
                     Welcome, {user.displayName || 'User'}!
@@ -60,7 +60,7 @@ export default function DashboardPage() {
                     What would you like to create today?
                 </p>
             </div>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="shadow-lg hover:shadow-2xl transition-shadow duration-300">
                 <CardHeader>
                   <div className="flex justify-center items-center mb-4">
@@ -68,15 +68,33 @@ export default function DashboardPage() {
                       <FileText className="h-10 w-10 text-primary" />
                     </div>
                   </div>
-                  <CardTitle className="text-center text-2xl">AI Resume Builder</CardTitle>
+                  <CardTitle className="text-center text-2xl">AI Resume Editor</CardTitle>
                   <CardDescription className="text-center">
-                    Craft a professional, job-winning resume from scratch with the help of our AI assistant.
+                    Upload and edit your resume with the help of our AI assistant.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-center">
                   <Button asChild>
-                    <Link href="/resume-builder">Build a Resume <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                    <Link href="/resume-builder/editor">Edit a Resume <ArrowRight className="ml-2 h-5 w-5" /></Link>
                   </Button>
+                </CardContent>
+              </Card>
+              <Card className="shadow-lg hover:shadow-2xl transition-shadow duration-300">
+                <CardHeader>
+                    <div className="flex justify-center items-center mb-4">
+                        <div className="bg-primary/10 p-4 rounded-full">
+                            <SearchCheck className="h-10 w-10 text-primary" />
+                        </div>
+                    </div>
+                    <CardTitle className="text-center text-2xl">AI Resume Analyzer</CardTitle>
+                    <CardDescription className="text-center">
+                        Get AI feedback on how well your resume matches a job description.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                    <Button asChild>
+                        <Link href="/resume-analyzer">Analyze a Resume <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                    </Button>
                 </CardContent>
               </Card>
               <Card className="shadow-lg hover:shadow-2xl transition-shadow duration-300">
@@ -88,7 +106,7 @@ export default function DashboardPage() {
                     </div>
                     <CardTitle className="text-center text-2xl">AI Portfolio Generator</CardTitle>
                     <CardDescription className="text-center">
-                        Upload your resume to instantly generate a beautiful, personalized portfolio website.
+                        Upload your resume to instantly generate a beautiful portfolio website.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-center">

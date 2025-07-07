@@ -6,3 +6,4 @@ import '@/ai/flows/resume-analysis.ts';
 import '@/ai/flows/generate-avatar.ts';
 import '@/ai/flows/parse-resume.ts';
 import '@/ai/flows/edit-resume.ts';
+import '@/ai/flows/job-match-analyzer.ts';
