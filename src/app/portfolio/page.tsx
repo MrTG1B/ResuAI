@@ -299,7 +299,7 @@ function PortfolioPageContent() {
             <Header />
             <main className="flex-grow flex items-center justify-center text-center">
                 <div>
-                    <h1 className="text-4xl font-bold">Portfolio Not Found</h1>
+                    <h1 className="text-4xl font-bold font-heading">Portfolio Not Found</h1>
                     <p className="text-muted-foreground mt-2">The portfolio you are looking for does not exist or has been moved.</p>
                     <Button onClick={() => router.push('/')} className="mt-6">Go Home</Button>
                 </div>
@@ -369,9 +369,9 @@ function PortfolioPageContent() {
                 </div>
                 <div className="flex-1 text-center md:text-left mt-6 md:mt-0">
                     {isEditMode ? (
-                      <Input value={personalInfo?.name || ''} onChange={(e) => handlePersonalInfoChange('name', e.target.value)} className="text-4xl font-bold tracking-tight h-auto p-0 border-0 focus-visible:ring-0 bg-transparent" />
+                      <Input value={personalInfo?.name || ''} onChange={(e) => handlePersonalInfoChange('name', e.target.value)} className="text-4xl font-bold tracking-tight h-auto p-0 border-0 focus-visible:ring-0 bg-transparent font-heading" />
                     ) : (
-                      <h1 className="text-4xl font-bold tracking-tight" style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}>{personalInfo?.name}</h1>
+                      <h1 className="text-4xl font-bold tracking-tight font-heading" style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}>{personalInfo?.name}</h1>
                     )}
                     {isEditMode ? (
                       <Input value={personalInfo?.title || ''} onChange={(e) => handlePersonalInfoChange('title', e.target.value)} className="text-xl mt-1 h-auto p-0 border-0 focus-visible:ring-0 bg-transparent" />
@@ -418,7 +418,7 @@ function PortfolioPageContent() {
                 <div className="lg:col-span-2 space-y-12">
                     {summary && (
                         <section>
-                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><BookUser style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Professional Summary</h2>
+                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4 font-heading"><BookUser style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Professional Summary</h2>
                             {isEditMode ? (
                               <Textarea value={summary || ''} onChange={handleSummaryChange} rows={5} className="bg-transparent" />
                             ) : (
@@ -429,12 +429,12 @@ function PortfolioPageContent() {
                     
                     {experience && experience.length > 0 && (
                         <section>
-                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Briefcase style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Work Experience</h2>
+                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4 font-heading"><Briefcase style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Work Experience</h2>
                             <div className="space-y-8">
                             {experience.map((job, index) => (
                                 <div key={index} className="pl-6 border-l-2 relative" style={{ borderColor: 'var(--p-primary, hsl(var(--primary)))' }}>
                                     <div className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-4" style={{ backgroundColor: 'var(--p-primary, hsl(var(--primary)))', borderColor: 'var(--p-secondary, hsl(var(--card)))' }}></div>
-                                    <h3 className="font-semibold text-lg">{job.role}</h3>
+                                    <h3 className="font-semibold text-lg font-heading">{job.role}</h3>
                                     <p className="text-md font-medium" style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}>{job.company} - {job.location}</p>
                                     <p className="text-sm" style={{ color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.8 }}>{job.dates}</p>
                                     <ul className="mt-2 list-disc list-inside space-y-1.5" style={{ color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.9 }}>
@@ -448,14 +448,14 @@ function PortfolioPageContent() {
 
                     {projects && projects.length > 0 && (
                         <section>
-                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Lightbulb style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Projects</h2>
+                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4 font-heading"><Lightbulb style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Projects</h2>
                             <div className="space-y-8">
                             {projects.map((project, index) => (
                                 <div key={index} className="pl-6 border-l-2 relative" style={{ borderColor: 'var(--p-primary, hsl(var(--primary)))' }}>
                                     <div className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-4" style={{ backgroundColor: 'var(--p-primary, hsl(var(--primary)))', borderColor: 'var(--p-secondary, hsl(var(--card)))' }}></div>
                                     {isEditMode ? (
                                       <div className="space-y-4">
-                                        <Input value={project.name || ''} onChange={e => handleProjectChange(index, 'name', e.target.value)} placeholder="Project Name" className="bg-transparent"/>
+                                        <Input value={project.name || ''} onChange={e => handleProjectChange(index, 'name', e.target.value)} placeholder="Project Name" className="bg-transparent font-heading"/>
                                         <Textarea value={project.description || ''} onChange={e => handleProjectChange(index, 'description', e.target.value)} placeholder="Project Description" className="bg-transparent"/>
                                         <Input value={project.url || ''} onChange={e => handleProjectChange(index, 'url', e.target.value)} placeholder="Project URL" className="bg-transparent"/>
                                         <Textarea value={project.technologies?.join(', ') || ''} onChange={e => handleProjectChange(index, 'technologies', e.target.value)} placeholder="Technologies (comma-separated)" className="bg-transparent"/>
@@ -470,7 +470,7 @@ function PortfolioPageContent() {
                                         {project.previewImage && (
                                             <Image src={project.previewImage} alt={`${project.name} preview`} width={800} height={450} className="rounded-lg mb-4 border" data-ai-hint="app screenshot" style={{ borderColor: 'var(--p-border, hsl(var(--border)))' }} />
                                         )}
-                                        <h3 className="font-semibold text-lg">{project.name}</h3>
+                                        <h3 className="font-semibold text-lg font-heading">{project.name}</h3>
                                         {project.url && <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: 'var(--p-accent, hsl(var(--primary)))' }}>{project.url}</a>}
                                         <p className="mt-2" style={{ color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.9 }}>{project.description}</p>
                                         {project.technologies?.length > 0 && (
@@ -490,7 +490,7 @@ function PortfolioPageContent() {
                 <div className="lg:col-span-1 space-y-12">
                     {skills && skills.length > 0 && (
                         <section>
-                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Wrench style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Skills</h2>
+                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4 font-heading"><Wrench style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Skills</h2>
                             {isEditMode ? (
                               <Textarea value={skills?.join(', ') || ''} onChange={handleSkillsChange} placeholder="Skills (comma-separated)" rows={4} className="bg-transparent"/>
                             ) : (
@@ -503,11 +503,11 @@ function PortfolioPageContent() {
 
                     {education && education.length > 0 && (
                         <section>
-                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><GraduationCap style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Education</h2>
+                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4 font-heading"><GraduationCap style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Education</h2>
                             <div className="space-y-4">
                             {education.map((edu, index) => (
                                 <div key={index}>
-                                    <h3 className="font-semibold text-lg">{edu.degree}</h3>
+                                    <h3 className="font-semibold text-lg font-heading">{edu.degree}</h3>
                                     <p className="text-sm font-medium" style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}>{edu.school}</p>
                                     <p className="text-xs" style={{ color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.8 }}>{edu.dates}</p>
                                 </div>
@@ -518,11 +518,11 @@ function PortfolioPageContent() {
 
                     {certifications && certifications.length > 0 && (
                         <section>
-                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Award style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Certifications</h2>
+                            <h2 className="text-2xl font-bold flex items-center gap-3 mb-4 font-heading"><Award style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Certifications</h2>
                             <div className="space-y-4">
                             {certifications.map((cert, index) => (
                                 <div key={index}>
-                                    <h3 className="font-semibold text-lg">{cert.name}</h3>
+                                    <h3 className="font-semibold text-lg font-heading">{cert.name}</h3>
                                     <p className="text-sm font-medium" style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}>{cert.issuingOrganization}</p>
                                     <p className="text-xs" style={{ color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.8 }}>{cert.date}</p>
                                 </div>
@@ -532,7 +532,7 @@ function PortfolioPageContent() {
                     )}
 
                     <section>
-                        <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><Palette style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Theme</h2>
+                        <h2 className="text-2xl font-bold flex items-center gap-3 mb-4 font-heading"><Palette style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Theme</h2>
                         {isEditMode ? (
                         <div className="space-y-4 p-4 border rounded-lg bg-background">
                             {(Object.keys(editablePortfolio.colorPalette || {}) as Array<keyof ColorPalette>).map((key) => (

@@ -11,10 +11,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        sans: ['"Open Sans"', 'sans-serif'],
+        heading: ['Poppins', 'sans-serif'],
         code: ['monospace'],
-        serif: ['Lora', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

@@ -61,7 +61,7 @@ export default function BuildPage() {
         <div className="w-full max-w-2xl">
           <Card className="shadow-2xl">
             <CardHeader className="text-center">
-              <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+              <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
                 Create Your AI-Powered Portfolio
               </h1>
               <CardDescription className="mt-2 text-lg">

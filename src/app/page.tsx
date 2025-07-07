@@ -49,7 +49,7 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="text-center py-20 md:py-32 bg-gradient-to-b from-background to-card/20 animate-fade-in-down">
           <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-primary mb-4">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-primary mb-4 font-heading">
               Build Your Future with an AI-Powered Resume & Portfolio
             </h1>
             <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
@@ -67,7 +67,7 @@ export default function HomePage() {
         <section className="py-20 bg-card/40">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Simple, Powerful, and Fast</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">Simple, Powerful, and Fast</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our AI streamlines the entire process, from analyzing your experience to designing a beautiful final product.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
@@ -77,7 +77,7 @@ export default function HomePage() {
                     <Bot className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">1. Provide Your Info</h3>
+                <h3 className="text-xl font-semibold mb-2 font-heading">1. Provide Your Info</h3>
                 <p className="text-muted-foreground">
                   Simply upload your resume. Our AI analyzes your info to create a structured draft for a resume or portfolio.
                 </p>
@@ -88,7 +88,7 @@ export default function HomePage() {
                     <PenSquare className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">2. Customize & Refine</h3>
+                <h3 className="text-xl font-semibold mb-2 font-heading">2. Customize & Refine</h3>
                 <p className="text-muted-foreground">
                   Easily edit any section. Get AI suggestions, apply professional templates, and customize the design to match your style.
                 </p>
@@ -99,7 +99,7 @@ export default function HomePage() {
                     <Eye className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">3. Publish & Share</h3>
+                <h3 className="text-xl font-semibold mb-2 font-heading">3. Publish & Share</h3>
                 <p className="text-muted-foreground">
                   Download a professional resume or share your portfolio with a unique link. Impress recruiters and land your dream job.
                 </p>
@@ -112,7 +112,7 @@ export default function HomePage() {
         <section className="py-20 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Your AI-Powered Career Toolkit</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">Your AI-Powered Career Toolkit</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Everything you need to analyze, edit, and showcase your professional story.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -123,7 +123,7 @@ export default function HomePage() {
                       <FileText className="h-10 w-10 text-primary" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-2 text-center">AI Resume Editor</h3>
+                  <h3 className="text-2xl font-semibold mb-2 text-center font-heading">AI Resume Editor</h3>
                   <p className="text-muted-foreground text-center flex-grow mb-6">
                     Upload your existing resume and let our AI assistant help you refine content, fix typos, and even redesign the entire layout with professional templates.
                   </p>
@@ -136,7 +136,7 @@ export default function HomePage() {
                       <SearchCheck className="h-10 w-10 text-primary" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-2 text-center">AI Resume Analyzer</h3>
+                  <h3 className="text-2xl font-semibold mb-2 text-center font-heading">AI Resume Analyzer</h3>
                   <p className="text-muted-foreground text-center flex-grow mb-6">
                     Get instant, detailed feedback. Our AI coach analyzes your resume against a job description to identify strengths, weaknesses, and actionable steps.
                   </p>
@@ -149,7 +149,7 @@ export default function HomePage() {
                       <LayoutTemplate className="h-10 w-10 text-primary" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-2 text-center">AI Portfolio Generator</h3>
+                  <h3 className="text-2xl font-semibold mb-2 text-center font-heading">AI Portfolio Generator</h3>
                   <p className="text-muted-foreground text-center flex-grow mb-6">
                     Transform your resume into a stunning, professional portfolio website in seconds. Choose from beautiful themes and share your unique link.
                   </p>
@@ -163,7 +163,7 @@ export default function HomePage() {
         <section className="py-20 bg-card/40">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Professionals Love ResuAI</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">Why Professionals Love ResuAI</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Don't just take our word for it. Here's what our users are saying.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -201,7 +201,7 @@ export default function HomePage() {
         {/* Final CTA Section */}
         <section className="py-20 md:py-32 bg-background">
            <div className="container mx-auto px-4 text-center">
-             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-primary mb-4">Ready to Build Your Future?</h2>
+             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-primary mb-4 font-heading">Ready to Build Your Future?</h2>
              <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
                Join thousands of professionals who are taking their careers to the next level. Get started today and see the difference AI can make.
              </p>

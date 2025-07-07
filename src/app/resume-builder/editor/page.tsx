@@ -276,7 +276,7 @@ export default function ResumeEditorPage() {
                             <CreativeLoader texts={parsingTexts} className="flex flex-col items-center justify-center"/>
                         ) : (
                              <>
-                                <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">AI Resume Editor</h1>
+                                <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">AI Resume Editor</h1>
                                 <p className="mt-2 text-lg text-muted-foreground">Upload your resume to start making improvements with AI.</p>
                                 <div className="mt-8 w-full">
                                     <label

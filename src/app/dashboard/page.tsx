@@ -54,7 +54,7 @@ export default function DashboardPage() {
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-6xl space-y-8">
             <div className="text-center">
-                <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+                <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
                     Welcome, {user.displayName || 'User'}!
                 </h1>
                 <p className="mt-2 text-lg text-muted-foreground">
