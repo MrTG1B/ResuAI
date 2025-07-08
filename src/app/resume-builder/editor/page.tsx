@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
-import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
-import { type ParsedResume } from '@/types/resume';
+import { parseResumeAction, analyzeResumeAction, editResumeAction } from '@/app/actions';
+import { type ParsedResume, type ChatMessage } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import jsPDF from 'jspdf';
 import { CreativeLoader } from '@/components/creative-loader';
@@ -30,6 +30,13 @@ const generatingPdfTexts = [
     "Finalizing document...",
 ];
 
+const applyingSuggestionsTexts = [
+    "Applying AI suggestions...",
+    "Reworking your resume content...",
+    "Implementing improvements...",
+    "This may take a moment...",
+];
+
 
 export default function ResumeEditorPage() {
     const router = useRouter();
@@ -40,6 +47,7 @@ export default function ResumeEditorPage() {
     const [isConverting, setIsConverting] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
     
     const [initialPreviewUri, setInitialPreviewUri] = useState<string | null>(() => {
         if (typeof window !== "undefined") {
@@ -71,6 +79,7 @@ export default function ResumeEditorPage() {
     });
 
     const [isLivePreview, setIsLivePreview] = useState(false);
+    const [initialMessages, setInitialMessages] = useState<ChatMessage[]>([]);
     
     const livePreviewRef = useRef<HTMLDivElement>(null);
 
@@ -83,16 +92,76 @@ export default function ResumeEditorPage() {
             }
             setIsLoading(false);
         });
-        return () => unsubscribe();
-    }, [router]);
-    
-    useEffect(() => {
+
         if (typeof window !== "undefined") {
             if (sessionStorage.getItem('isLivePreview') === 'true') {
                 setIsLivePreview(true);
             }
         }
-    }, []);
+
+        const applySuggestions = async () => {
+            const resumeUri = sessionStorage.getItem('resumeForEditingDataUri');
+            const suggestions = sessionStorage.getItem('resumeForEditingSuggestions');
+            const name = sessionStorage.getItem('resumeForEditingFileName');
+    
+            if (resumeUri && suggestions && name) {
+                sessionStorage.removeItem('resumeForEditingDataUri');
+                sessionStorage.removeItem('resumeForEditingSuggestions');
+                sessionStorage.removeItem('resumeForEditingFileName');
+    
+                setIsApplyingSuggestions(true);
+                setFileName(name);
+                setResumeDataUri(resumeUri);
+                setInitialPreviewUri(resumeUri);
+    
+                try {
+                    const parseResult = await parseResumeAction({ resumeDataUri: resumeUri });
+                    if (!parseResult.success || !parseResult.data) {
+                        throw new Error(parseResult.error || "Failed to parse resume.");
+                    }
+                    const originalHtml = parseResult.data.htmlContent;
+                    
+                    const userPromptMessage: ChatMessage = { role: 'user', content: `Based on the previous analysis, please apply the suggestions to my resume.` };
+                    setInitialMessages([userPromptMessage]);
+    
+                    const editResult = await editResumeAction({
+                        htmlContent: originalHtml,
+                        prompt: `Based on the following analysis and suggestions, please edit my resume to incorporate all the feedback. Suggestions:\n\n${suggestions}`,
+                    });
+    
+                    if (!editResult.success || !editResult.data) {
+                        throw new Error(editResult.error || "Failed to apply suggestions.");
+                    }
+    
+                    setResumeData(editResult.data);
+                    setIsLivePreview(true);
+                    setInitialMessages(prev => [...prev, { role: 'assistant', content: editResult.data.response }]);
+    
+                    sessionStorage.setItem('resumeData', JSON.stringify(editResult.data));
+                    sessionStorage.setItem('resumePreviewUri', resumeUri);
+                    sessionStorage.setItem('resumeDataUri', resumeUri);
+                    sessionStorage.setItem('resumeFileName', name);
+                    sessionStorage.setItem('isLivePreview', 'true');
+    
+                    toast({ title: "Suggestions Applied", description: "The AI has updated your resume with the suggested improvements." });
+    
+                } catch (error: any) {
+                    toast({ title: "Failed to Apply Suggestions", description: error.message, variant: "destructive" });
+                    setFileName("");
+                    setResumeDataUri(null);
+                    setInitialPreviewUri(null);
+                } finally {
+                    setIsApplyingSuggestions(false);
+                }
+            }
+        };
+        
+        if (typeof window !== "undefined") {
+            applySuggestions();
+        }
+
+        return () => unsubscribe();
+    }, [router, toast]);
 
 
     const handleResumeUpdate = (newResumeData: ParsedResume) => {
@@ -280,6 +349,17 @@ export default function ResumeEditorPage() {
         );
     }
     
+    if (isApplyingSuggestions) {
+        return (
+            <div className="flex flex-col h-screen bg-muted/20">
+                <Header />
+                <main className="flex-grow flex flex-col items-center justify-center h-full text-center">
+                    <CreativeLoader texts={applyingSuggestionsTexts} />
+                </main>
+            </div>
+        );
+    }
+
     if (!isAuthenticated) return null;
 
     const editorActions = (
@@ -367,7 +447,7 @@ export default function ResumeEditorPage() {
                         </div>
                         <div className="lg:col-span-1 h-full min-h-0">
                              {resumeData ? (
-                                <ResumeChatPanel resume={resumeData} setResume={handleResumeUpdate} disabledRoutes={['/resume-analyzer', '/build']} />
+                                <ResumeChatPanel resume={resumeData} setResume={handleResumeUpdate} disabledRoutes={['/resume-analyzer', '/build']} initialMessages={initialMessages}/>
                             ) : (
                                 <Card className="h-full flex items-center justify-center">
                                     <CreativeLoader texts={parsingTexts} className="flex flex-col items-center justify-center"/>

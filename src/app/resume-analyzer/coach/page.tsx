@@ -25,6 +25,7 @@ export default function CoachPage() {
   const [initialAnalysis, setInitialAnalysis] = useState<string | null>(null);
   const [resumeDataUri, setResumeDataUri] = useState<string | null>(null);
   const [jobDescription, setJobDescription] = useState<string | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,14 +39,16 @@ export default function CoachPage() {
             const analysis = sessionStorage.getItem('analysisResult');
             const resumeUri = sessionStorage.getItem('analysisResumeDataUri');
             const jobDesc = sessionStorage.getItem('analysisJobDescription');
+            const fileName = sessionStorage.getItem('analysisResumeFileName');
 
-            if (!analysis || !resumeUri || !jobDesc) {
+            if (!analysis || !resumeUri || !jobDesc || !fileName) {
                 toast({ title: "Session Expired", description: "Analysis data not found. Please start again.", variant: "destructive" });
                 router.push('/resume-analyzer');
             } else {
                 setInitialAnalysis(analysis);
                 setResumeDataUri(resumeUri);
                 setJobDescription(jobDesc);
+                setResumeFileName(fileName);
             }
         }
       } catch (error) {
@@ -58,6 +61,18 @@ export default function CoachPage() {
 
     return () => unsubscribe();
   }, [router, toast]);
+
+  const handleApplySuggestionsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (!resumeDataUri || !initialAnalysis || !resumeFileName) {
+        toast({ title: "Error", description: "Missing data to apply suggestions.", variant: "destructive" });
+        return;
+    }
+    sessionStorage.setItem('resumeForEditingDataUri', resumeDataUri);
+    sessionStorage.setItem('resumeForEditingSuggestions', initialAnalysis);
+    sessionStorage.setItem('resumeForEditingFileName', resumeFileName);
+    router.push('/resume-builder/editor');
+  };
 
 
   if (isLoading || !initialAnalysis || !resumeDataUri || !jobDescription) {
@@ -89,6 +104,9 @@ export default function CoachPage() {
                                 remarkPlugins={[remarkGfm]}
                                 components={{
                                     a: ({node, children, href, ...rest}) => {
+                                        if (href === '/resume-builder/editor') {
+                                            return <a href={href} onClick={handleApplySuggestionsClick} {...rest}>{children}</a>;
+                                        }
                                         if (href && href.startsWith('/')) {
                                             return <Link href={href} {...rest}>{children}</Link>;
                                         }

@@ -21,9 +21,10 @@ interface ResumeChatPanelProps {
     resume: ParsedResume;
     setResume: (resume: ParsedResume) => void;
     disabledRoutes?: string[];
+    initialMessages?: ChatMessage[];
 }
 
-export function ResumeChatPanel({ resume, setResume, disabledRoutes = [] }: ResumeChatPanelProps) {
+export function ResumeChatPanel({ resume, setResume, disabledRoutes = [], initialMessages }: ResumeChatPanelProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([
         { role: 'assistant', content: "Hello! I'm here to help you improve your resume. What changes would you like to make? You can also attach documents like certificates for context." }
     ]);
@@ -33,6 +34,12 @@ export function ResumeChatPanel({ resume, setResume, disabledRoutes = [] }: Resu
     const { toast } = useToast();
     const attachmentInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (initialMessages && initialMessages.length > 0) {
+            setMessages(initialMessages);
+        }
+    }, [initialMessages]);
 
     // Auto-scroll to bottom
     useEffect(() => {

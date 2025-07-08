@@ -113,6 +113,7 @@ export default function ResumeAnalyzerPage() {
                     sessionStorage.setItem('analysisResult', result.data.analysis);
                     sessionStorage.setItem('analysisResumeDataUri', dataUri);
                     sessionStorage.setItem('analysisJobDescription', jobDescription);
+                    sessionStorage.setItem('analysisResumeFileName', resumeFromEditorFileName || resumeFileName);
                 }
                 router.push('/resume-analyzer/coach');
             } else {
