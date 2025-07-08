@@ -38,6 +38,7 @@ export default function ResumeEditorPage() {
     const [isParsing, setIsParsing] = useState(false);
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [isConverting, setIsConverting] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     
     const [initialPreviewUri, setInitialPreviewUri] = useState<string | null>(() => {
@@ -237,6 +238,38 @@ export default function ResumeEditorPage() {
             setIsConverting(false);
         }
     };
+    
+    const handleAnalyzeResume = () => {
+        if (!resumeData?.htmlContent) {
+            toast({
+                title: "No Resume Content",
+                description: "There is no resume content to analyze. Please upload or create a resume first.",
+                variant: "destructive",
+            });
+            return;
+        }
+        setIsAnalyzing(true);
+        try {
+            // Handle potential unicode characters by encoding them before Base64 conversion.
+            const encodedHtml = btoa(unescape(encodeURIComponent(resumeData.htmlContent)));
+            const dataUri = `data:text/html;base64,${encodedHtml}`;
+            
+            sessionStorage.setItem('resumeForAnalysisDataUri', dataUri);
+            sessionStorage.setItem('resumeForAnalysisFileName', fileName || 'Edited Resume');
+            
+            router.push('/resume-analyzer');
+
+        } catch (error) {
+            console.error("Error preparing resume for analysis:", error);
+            toast({
+                title: "Error",
+                description: "Could not prepare the resume for analysis.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -251,10 +284,13 @@ export default function ResumeEditorPage() {
 
     const editorActions = (
         <div className="flex items-center justify-end gap-2 flex-grow">
-            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!resumeData || isGeneratingPdf || isParsing || !isLivePreview}>
+            <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!resumeData || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
+                {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Analyze Resume"}
+            </Button>
+            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!resumeData || isGeneratingPdf || isParsing || !isLivePreview || isAnalyzing || isConverting}>
                 {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
             </Button>
-            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!resumeDataUri || isConverting || isParsing}>
+            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!resumeDataUri || isConverting || isParsing || isAnalyzing}>
                 {isConverting ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (

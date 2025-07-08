@@ -36,6 +36,9 @@ export default function ResumeAnalyzerPage() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeFileName, setResumeFileName] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  
+  const [resumeFromEditorDataUri, setResumeFromEditorDataUri] = useState<string | null>(null);
+  const [resumeFromEditorFileName, setResumeFromEditorFileName] = useState("");
 
   useEffect(() => {
     if (!auth) {
@@ -57,6 +60,19 @@ export default function ResumeAnalyzerPage() {
       setIsLoading(false);
     });
 
+    const dataUri = sessionStorage.getItem('resumeForAnalysisDataUri');
+    const name = sessionStorage.getItem('resumeForAnalysisFileName');
+
+    if (dataUri) {
+        setResumeFromEditorDataUri(dataUri);
+        if (name) {
+            setResumeFromEditorFileName(name);
+        }
+        // Clean up sessionStorage
+        sessionStorage.removeItem('resumeForAnalysisDataUri');
+        sessionStorage.removeItem('resumeForAnalysisFileName');
+    }
+
     return () => unsubscribe();
   }, [router, toast]);
   
@@ -68,9 +84,16 @@ export default function ResumeAnalyzerPage() {
     }
   };
 
+  const handleUseDifferentResume = () => {
+    setResumeFromEditorDataUri(null);
+    setResumeFromEditorFileName("");
+    setResumeFile(null);
+    setResumeFileName("");
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!resumeFile) {
+    if (!resumeFile && !resumeFromEditorDataUri) {
       toast({ title: "No resume selected", description: "Please upload your resume.", variant: "destructive" });
       return;
     }
@@ -80,18 +103,15 @@ export default function ResumeAnalyzerPage() {
     }
 
     setIsAnalyzing(true);
-
-    const reader = new FileReader();
-    reader.readAsDataURL(resumeFile);
-    reader.onload = async () => {
+    
+    const performAnalysis = async (dataUri: string) => {
         try {
-            const resumeDataUri = reader.result as string;
-            const result = await jobMatchAnalyzeAction({ resumeDataUri, jobDescription });
+            const result = await jobMatchAnalyzeAction({ resumeDataUri: dataUri, jobDescription });
 
             if (result.success && result.data) {
                 if (typeof window !== "undefined") {
                     sessionStorage.setItem('analysisResult', result.data.analysis);
-                    sessionStorage.setItem('analysisResumeDataUri', resumeDataUri);
+                    sessionStorage.setItem('analysisResumeDataUri', dataUri);
                     sessionStorage.setItem('analysisJobDescription', jobDescription);
                 }
                 router.push('/resume-analyzer/coach');
@@ -103,9 +123,17 @@ export default function ResumeAnalyzerPage() {
             setIsAnalyzing(false);
         }
     };
-    reader.onerror = () => {
-      setIsAnalyzing(false);
-      toast({ title: "File Read Error", description: "There was an error reading your resume file.", variant: "destructive" });
+    
+    if (resumeFromEditorDataUri) {
+        await performAnalysis(resumeFromEditorDataUri);
+    } else if (resumeFile) {
+        const reader = new FileReader();
+        reader.readAsDataURL(resumeFile);
+        reader.onload = async () => performAnalysis(reader.result as string);
+        reader.onerror = () => {
+          setIsAnalyzing(false);
+          toast({ title: "File Read Error", description: "There was an error reading your resume file.", variant: "destructive" });
+        }
     }
   };
 
@@ -144,23 +172,36 @@ export default function ResumeAnalyzerPage() {
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="resume-upload" className="text-lg font-semibold">Your Resume</Label>
-                                    <label
-                                        htmlFor="resume-upload"
-                                        className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
-                                    >
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                                            <UploadCloud className="w-8 h-8 mb-2 text-primary" />
-                                            <p className="text-sm text-foreground">
-                                            <span className="font-semibold">Click to upload</span>
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
-                                            {resumeFileName && <p className="mt-2 text-xs font-medium text-primary truncate max-w-full px-2">{resumeFileName}</p>}
+                                {resumeFromEditorDataUri ? (
+                                    <div className="space-y-2">
+                                        <Label className="text-lg font-semibold">Your Resume</Label>
+                                        <div className="relative flex flex-col items-start justify-center w-full h-40 border-2 border-dashed rounded-lg bg-muted/50 p-4">
+                                            <p className="font-semibold text-foreground">Using resume from editor</p>
+                                            <p className="mt-1 text-sm text-muted-foreground truncate max-w-full">{resumeFromEditorFileName}</p>
+                                            <Button variant="link" className="p-0 h-auto mt-auto" onClick={handleUseDifferentResume}>
+                                                Use a different resume
+                                            </Button>
                                         </div>
-                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" disabled={isAnalyzing}/>
-                                    </label>
-                                </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="resume-upload" className="text-lg font-semibold">Your Resume</Label>
+                                        <label
+                                            htmlFor="resume-upload"
+                                            className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
+                                        >
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                                                <UploadCloud className="w-8 h-8 mb-2 text-primary" />
+                                                <p className="text-sm text-foreground">
+                                                <span className="font-semibold">Click to upload</span>
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
+                                                {resumeFileName && <p className="mt-2 text-xs font-medium text-primary truncate max-w-full px-2">{resumeFileName}</p>}
+                                            </div>
+                                            <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" disabled={isAnalyzing}/>
+                                        </label>
+                                    </div>
+                                )}
                                 <div className="space-y-2">
                                     <Label htmlFor="job-description" className="text-lg font-semibold">Job Description</Label>
                                     <Textarea
@@ -170,6 +211,7 @@ export default function ResumeAnalyzerPage() {
                                         value={jobDescription}
                                         onChange={(e) => setJobDescription(e.target.value)}
                                         disabled={isAnalyzing}
+                                        required
                                     />
                                 </div>
                             </div>
