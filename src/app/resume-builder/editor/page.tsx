@@ -263,15 +263,30 @@ export default function ResumeEditorPage() {
     };
 
     const handleConvertToPortfolio = async () => {
-        if (!resumeDataUri) {
+        let dataUriForAnalysis: string | null = null;
+    
+        if (resumeData?.htmlContent) {
+            try {
+                const encodedHtml = btoa(unescape(encodeURIComponent(resumeData.htmlContent)));
+                dataUriForAnalysis = `data:text/html;base64,${encodedHtml}`;
+            } catch (e) {
+                console.error("Error encoding HTML to Base64", e);
+                toast({ title: "Error", description: "Could not prepare the resume for portfolio creation.", variant: "destructive" });
+                return;
+            }
+        } else if (resumeDataUri) {
+            dataUriForAnalysis = resumeDataUri;
+        }
+    
+        if (!dataUriForAnalysis) {
             toast({
-                title: "File Not Found",
-                description: "The original resume file is needed to create a portfolio. Please re-upload.",
+                title: "No Resume Found",
+                description: "Please upload or create a resume before generating a portfolio.",
                 variant: "destructive",
             });
             return;
         }
-
+    
         if (!auth?.currentUser || !db) {
             toast({
                 title: "Authentication Error",
@@ -280,13 +295,13 @@ export default function ResumeEditorPage() {
             });
             return;
         }
-
+    
         setIsConverting(true);
         const user = auth.currentUser;
-
+    
         try {
-            const result = await analyzeResumeAction({ resumeDataUri });
-
+            const result = await analyzeResumeAction({ resumeDataUri: dataUriForAnalysis });
+    
             if (result.success && result.data) {
                 await setDoc(doc(db, "portfolios", user.uid), result.data);
                 toast({
@@ -370,7 +385,7 @@ export default function ResumeEditorPage() {
             <Button onClick={handleDownload} variant="outline" size="sm" disabled={!resumeData || isGeneratingPdf || isParsing || !isLivePreview || isAnalyzing || isConverting}>
                 {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
             </Button>
-            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!resumeDataUri || isConverting || isParsing || isAnalyzing}>
+            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!resumeData?.htmlContent && !resumeDataUri || isConverting || isParsing || isAnalyzing}>
                 {isConverting ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
