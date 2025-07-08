@@ -56,7 +56,7 @@ export default function HomePage() {
               ResuAI is your ultimate career tool. Analyze your resume against any job description, edit it to perfection with AI assistance, and instantly generate a stunning portfolio website.
             </p>
             <div className="flex justify-center gap-4">
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="font-bold">
                 <Link href="/signup">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
             </div>
@@ -206,7 +206,7 @@ export default function HomePage() {
                Join thousands of professionals who are taking their careers to the next level. Get started today and see the difference AI can make.
              </p>
              <div className="flex justify-center gap-4">
-               <Button asChild size="lg">
+               <Button asChild size="lg" className="font-bold">
                  <Link href="/signup">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
                </Button>
              </div>
