@@ -49,7 +49,7 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="text-center py-20 md:py-32 bg-gradient-to-b from-background to-card/20 animate-fade-in-down">
           <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-primary mb-4 font-heading">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Your AI-Powered Career Toolkit
             </h1>
             <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
