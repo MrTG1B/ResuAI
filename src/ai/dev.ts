@@ -8,3 +8,4 @@ import '@/ai/flows/parse-resume.ts';
 import '@/ai/flows/edit-resume.ts';
 import '@/ai/flows/job-match-analyzer.ts';
 import '@/ai/flows/coach-chat.ts';
+import '@/ai/flows/generate-project-image.ts';

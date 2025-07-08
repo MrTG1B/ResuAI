@@ -6,7 +6,8 @@ import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flow
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
 import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
-import { type PortfolioData } from "@/types/portfolio";
+import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
+import { type PortfolioData, type Project } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
 
 export async function analyzeResumeAction(input: AnalyzeResumeInput) {
@@ -20,10 +21,30 @@ export async function analyzeResumeAction(input: AnalyzeResumeInput) {
     // Step 3: Add the color palette
     portfolioDraft.colorPalette = analysisResult.colorPalette;
 
-    // Step 4: Generate the avatar image
-    const avatarResult = await generateAvatarFlow({ prompt: analysisResult.avatarPrompt });
+    // Step 4: Generate avatar and project images in parallel
+    const avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt });
 
-    // Step 5: Combine the results
+    const projectImagePromises = (portfolioDraft.projects || []).map(async (project: Project) => {
+        try {
+            const imageResult = await generateProjectImageFlow({ description: project.description });
+            project.previewImage = imageResult.imageDataUri;
+        } catch (e) {
+            console.warn(`Failed to generate image for project: ${project.name}`, e);
+            // Use a placeholder if generation fails
+            project.previewImage = 'https://placehold.co/800x450.png';
+        }
+        return project;
+    });
+
+    // Wait for all image generation to complete
+    const [avatarResult, updatedProjects] = await Promise.all([
+        avatarPromise,
+        Promise.all(projectImagePromises),
+    ]);
+
+    // Step 5: Combine all the results
+    portfolioDraft.projects = updatedProjects;
+    
     if (portfolioDraft.personalInfo) {
       portfolioDraft.personalInfo.profilePictureDataUri = avatarResult.imageDataUri;
     } else {
