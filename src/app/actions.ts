@@ -1,3 +1,4 @@
+
 "use server";
 
 import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flows/resume-analysis";
@@ -15,8 +16,8 @@ export async function analyzeResumeAction(input: AnalyzeResumeInput) {
     // Step 1: Analyze resume for text content, get an avatar prompt, and color palette
     const analysisResult = await analyzeResumeFlow(input);
     
-    // Step 2: Parse the portfolio draft JSON
-    const portfolioDraft: Partial<PortfolioData> = JSON.parse(analysisResult.portfolioDraft);
+    // Step 2: The portfolio draft is now a structured object, no parsing needed.
+    const portfolioDraft: Partial<PortfolioData> = analysisResult.portfolioDraft;
 
     // Step 3: Add the color palette
     portfolioDraft.colorPalette = analysisResult.colorPalette;
