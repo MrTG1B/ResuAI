@@ -167,8 +167,8 @@ export default function ResumeAnalyzerPage() {
                 </CardHeader>
                 <CardContent>
                     {isAnalyzing ? (
-                        <div className="h-64">
-                            <CreativeLoader texts={analysisTexts} className="flex flex-col items-center justify-center h-full text-center"/>
+                        <div className="h-64 flex items-center justify-center">
+                            <CreativeLoader texts={analysisTexts} />
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6">

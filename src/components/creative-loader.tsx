@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { PenSquare, FileText, ScanText, Bot, Sparkles, ClipboardCheck } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const defaultTexts = [
   "Analyzing your document...",
@@ -52,7 +53,7 @@ export function CreativeLoader({ texts = defaultTexts, className, children }: Cr
   }, [texts]);
 
   return (
-    <div className={className}>
+    <div className={cn("flex flex-col items-center justify-center", className)}>
       <div className="relative w-10 h-10 mb-3 flex items-center justify-center">
         {icons.map((Icon, index) => (
           <Icon

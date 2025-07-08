@@ -133,11 +133,11 @@ export default function ResumeEditorPage() {
                         throw new Error(editResult.error || "Failed to apply suggestions.");
                     }
     
-                    setResumeData(editResult.data);
+                    setResumeData({ htmlContent: editResult.data.newHtmlContent });
                     setIsLivePreview(true);
                     setInitialMessages(prev => [...prev, { role: 'assistant', content: editResult.data.response }]);
     
-                    sessionStorage.setItem('resumeData', JSON.stringify(editResult.data));
+                    sessionStorage.setItem('resumeData', JSON.stringify({ htmlContent: editResult.data.newHtmlContent }));
                     sessionStorage.setItem('resumePreviewUri', resumeUri);
                     sessionStorage.setItem('resumeDataUri', resumeUri);
                     sessionStorage.setItem('resumeFileName', name);
@@ -389,7 +389,7 @@ export default function ResumeEditorPage() {
                 { !showEditor ? (
                      <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
                         {isParsing ? (
-                            <CreativeLoader texts={parsingTexts} className="flex flex-col items-center justify-center"/>
+                            <CreativeLoader texts={parsingTexts} />
                         ) : (
                              <>
                                 <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">AI Resume Editor</h1>
@@ -450,7 +450,7 @@ export default function ResumeEditorPage() {
                                 <ResumeChatPanel resume={resumeData} setResume={handleResumeUpdate} disabledRoutes={['/resume-analyzer', '/build']} initialMessages={initialMessages}/>
                             ) : (
                                 <Card className="h-full flex items-center justify-center">
-                                    <CreativeLoader texts={parsingTexts} className="flex flex-col items-center justify-center"/>
+                                    <CreativeLoader texts={parsingTexts} />
                                 </Card>
                             )}
                         </div>
