@@ -263,22 +263,7 @@ export default function ResumeEditorPage() {
     };
 
     const handleConvertToPortfolio = async () => {
-        let dataUriForAnalysis: string | null = null;
-    
-        if (resumeData?.htmlContent) {
-            try {
-                const encodedHtml = btoa(unescape(encodeURIComponent(resumeData.htmlContent)));
-                dataUriForAnalysis = `data:text/html;base64,${encodedHtml}`;
-            } catch (e) {
-                console.error("Error encoding HTML to Base64", e);
-                toast({ title: "Error", description: "Could not prepare the resume for portfolio creation.", variant: "destructive" });
-                return;
-            }
-        } else if (resumeDataUri) {
-            dataUriForAnalysis = resumeDataUri;
-        }
-    
-        if (!dataUriForAnalysis) {
+        if (!resumeData?.htmlContent && !resumeDataUri) {
             toast({
                 title: "No Resume Found",
                 description: "Please upload or create a resume before generating a portfolio.",
@@ -300,7 +285,11 @@ export default function ResumeEditorPage() {
         const user = auth.currentUser;
     
         try {
-            const result = await analyzeResumeAction({ resumeDataUri: dataUriForAnalysis });
+            const analysisInput = resumeData?.htmlContent 
+                ? { htmlContent: resumeData.htmlContent } 
+                : { resumeDataUri: resumeDataUri! };
+
+            const result = await analyzeResumeAction(analysisInput);
     
             if (result.success && result.data) {
                 await setDoc(doc(db, "portfolios", user.uid), result.data);
