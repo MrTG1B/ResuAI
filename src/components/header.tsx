@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from "next/link";
-import { LogOut, User as UserIcon, LayoutDashboard } from "lucide-react";
+import { LogOut, User as UserIcon, LayoutDashboard, Info, FileText } from "lucide-react";
 import { Button } from "./ui/button";
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
@@ -90,9 +90,13 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                             <LayoutDashboard className="mr-2 h-4 w-4" />
                             <span>Dashboard</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push('/portfolio')} className="cursor-pointer">
-                            <UserIcon className="mr-2 h-4 w-4" />
-                            <span>My Portfolio</span>
+                        <DropdownMenuItem onClick={() => router.push('/about')} className="cursor-pointer">
+                            <Info className="mr-2 h-4 w-4" />
+                            <span>About Us</span>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => router.push('/terms')} className="cursor-pointer">
+                            <FileText className="mr-2 h-4 w-4" />
+                            <span>Terms & Conditions</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
