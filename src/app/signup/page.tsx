@@ -28,7 +28,8 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -53,7 +54,8 @@ export default function SignupPage() {
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
+      const displayName = `${firstName} ${lastName}`.trim();
+      await updateProfile(userCredential.user, { displayName });
       
       toast({
         title: "Account Created",
@@ -115,9 +117,15 @@ export default function SignupPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleEmailSignup} className="grid gap-4">
-               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="Max Robinson" required value={name} onChange={(e) => setName(e.target.value)} />
+              <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                      <Label htmlFor="first-name">First Name</Label>
+                      <Input id="first-name" placeholder="Max" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                  </div>
+                  <div className="grid gap-2">
+                      <Label htmlFor="last-name">Last Name</Label>
+                      <Input id="last-name" placeholder="Robinson" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                  </div>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
