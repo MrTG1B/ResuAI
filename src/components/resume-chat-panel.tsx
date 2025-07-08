@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -19,9 +20,10 @@ import { Badge } from './ui/badge';
 interface ResumeChatPanelProps {
     resume: ParsedResume;
     setResume: (resume: ParsedResume) => void;
+    disabledRoutes?: string[];
 }
 
-export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
+export function ResumeChatPanel({ resume, setResume, disabledRoutes = [] }: ResumeChatPanelProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([
         { role: 'assistant', content: "Hello! I'm here to help you improve your resume. What changes would you like to make? You can also attach documents like certificates for context." }
     ]);
@@ -136,14 +138,23 @@ export function ResumeChatPanel({ resume, setResume }: ResumeChatPanelProps) {
                                 <div className={`max-w-xs rounded-lg px-3 py-2 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                                     {message.role === 'assistant' ? (
                                         <ReactMarkdown 
-                                            className="prose prose-sm prose-p:my-2 prose-ul:my-2 prose-li:my-0"
+                                            className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0"
                                             rehypePlugins={[rehypeRaw]}
                                             remarkPlugins={[remarkGfm]}
                                             components={{
                                                 a: ({node, children, href, ...rest}) => {
-                                                    if (href && href.startsWith('/')) {
+                                                    const isInternal = href && href.startsWith('/');
+                                                    const isDisabled = isInternal && disabledRoutes.includes(href);
+
+                                                    if (isDisabled) {
+                                                        // Render as non-clickable bold text
+                                                        return <strong {...rest}>{children}</strong>;
+                                                    }
+
+                                                    if (isInternal) {
                                                         return <Link href={href} {...rest} className="text-primary hover:underline font-semibold">{children}</Link>;
                                                     }
+                                                    
                                                     return <a href={href} {...rest} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">{children}</a>;
                                                 }
                                             }}

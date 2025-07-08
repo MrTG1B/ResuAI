@@ -367,7 +367,7 @@ export default function ResumeEditorPage() {
                         </div>
                         <div className="lg:col-span-1 h-full min-h-0">
                              {resumeData ? (
-                                <ResumeChatPanel resume={resumeData} setResume={handleResumeUpdate} />
+                                <ResumeChatPanel resume={resumeData} setResume={handleResumeUpdate} disabledRoutes={['/resume-analyzer', '/build']} />
                             ) : (
                                 <Card className="h-full flex items-center justify-center">
                                     <CreativeLoader texts={parsingTexts} className="flex flex-col items-center justify-center"/>
