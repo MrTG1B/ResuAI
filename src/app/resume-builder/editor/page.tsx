@@ -263,15 +263,6 @@ export default function ResumeEditorPage() {
     };
 
     const handleConvertToPortfolio = async () => {
-        if (!resumeData?.htmlContent && !resumeDataUri) {
-            toast({
-                title: "No Resume Found",
-                description: "Please upload or create a resume before generating a portfolio.",
-                variant: "destructive",
-            });
-            return;
-        }
-    
         if (!auth?.currentUser || !db) {
             toast({
                 title: "Authentication Error",
@@ -285,11 +276,21 @@ export default function ResumeEditorPage() {
         const user = auth.currentUser;
     
         try {
-            const analysisInput = resumeData?.htmlContent 
-                ? { htmlContent: resumeData.htmlContent } 
-                : { resumeDataUri: resumeDataUri! };
-
-            const result = await analyzeResumeAction(analysisInput);
+            let resumeToAnalyzeDataUri: string;
+    
+            if (resumeData?.htmlContent) {
+                // If we have edited HTML content, convert it to a data URI
+                const encodedHtml = btoa(unescape(encodeURIComponent(resumeData.htmlContent)));
+                resumeToAnalyzeDataUri = `data:text/html;base64,${encodedHtml}`;
+            } else if (resumeDataUri) {
+                // Otherwise, use the original data URI from the uploaded file
+                resumeToAnalyzeDataUri = resumeDataUri;
+            } else {
+                // If there's no resume content at all, throw an error.
+                throw new Error("No resume content available to create a portfolio.");
+            }
+    
+            const result = await analyzeResumeAction({ resumeDataUri: resumeToAnalyzeDataUri });
     
             if (result.success && result.data) {
                 await setDoc(doc(db, "portfolios", user.uid), result.data);
@@ -299,12 +300,13 @@ export default function ResumeEditorPage() {
                 });
                 router.push("/portfolio");
             } else {
-                throw new Error(result.error || "Analysis failed");
+                // The error from the action is now more specific if it's from the AI
+                throw new Error(result.error || "Failed to analyze resume. Please check the file format and try again.");
             }
         } catch (error: any) {
             toast({
                 title: "Failed to build portfolio",
-                description: error.message || "An unexpected error occurred. Please try again.",
+                description: error.message,
                 variant: "destructive",
             });
         } finally {

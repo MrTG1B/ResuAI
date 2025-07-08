@@ -15,14 +15,9 @@ import {z} from 'genkit';
 const AnalyzeResumeInputSchema = z.object({
   resumeDataUri: z
     .string()
-    .optional()
     .describe(
-      "The resume file as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "The resume file (which can be an HTML document) as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
-  htmlContent: z
-    .string()
-    .optional()
-    .describe('The HTML content of the resume, to be used if resumeDataUri is not provided.'),
 });
 export type AnalyzeResumeInput = z.infer<typeof AnalyzeResumeInputSchema>;
 
@@ -116,11 +111,7 @@ const prompt = ai.definePrompt({
   - Finally, generate a unique, stylish, and professional color palette for the portfolio for the 'colorPalette' field. Ensure the generated palette is aesthetically pleasing and that there is sufficient contrast to meet accessibility standards (WCAG AA).
 
   Here is the resume:
-  {{#if resumeDataUri}}
-    {{media url=resumeDataUri}}
-  {{else}}
-    {{{htmlContent}}}
-  {{/if}}`,
+  {{media url=resumeDataUri}}`,
 });
 
 const analyzeResumeFlow = ai.defineFlow(
