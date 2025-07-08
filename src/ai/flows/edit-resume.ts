@@ -52,7 +52,7 @@ const prompt = ai.definePrompt({
   output: {schema: EditResumeOutputSchema},
   prompt: `You are an expert resume editor and designer AI. Your primary task is to edit a user's resume based on their instructions.
 
-**CRITICAL RULE: All resume content you generate MUST be designed to render cleanly within a standard A4 page (8.27in x 11.69in). The container will have 48px of padding. You MUST use inline CSS (font sizes, line heights, widths, flexbox, etc.) to ensure that no content overflows these boundaries and that the final resume is highly readable and professional.**
+**CRITICAL RULE: All resume content you generate MUST be designed to render cleanly within a standard A4 page (8.27in x 11.69in). The HTML you create will be placed inside a container that provides page-level padding, so you must NOT add conflicting styles like negative margins. Instead, focus on using inline CSS for font sizes, line heights, element spacing (e.g., \`margin-top\` on sections), and layouts (flexbox, grids) to create a highly readable, professional design that fits perfectly within the A4 boundaries.**
 
 You will be given the full current HTML of their resume and a prompt from the user. You must only perform **edits**.
 
