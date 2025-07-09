@@ -249,12 +249,10 @@ export default function ResumeEditorPage() {
         try {
             const pdf = new jsPDF({
                 orientation: 'p',
-                unit: 'pt',
+                unit: 'px',
                 format: 'a4',
             });
 
-            // The source element is already styled to look like an A4 page with padding.
-            // We just need to render it directly to the PDF without adding extra margins.
             await pdf.html(sourceElement, {
                 autoPaging: 'text',
                 x: 0,
