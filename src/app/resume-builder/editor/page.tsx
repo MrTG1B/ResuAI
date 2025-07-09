@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
 import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
+import { type AnalyzeResumeInput } from '@/ai/flows/resume-analysis';
 import { type ParsedResume, type ChatMessage } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import jsPDF from 'jspdf';
@@ -280,17 +281,22 @@ export default function ResumeEditorPage() {
         const user = auth.currentUser;
     
         try {
-            let result;
+            let analysisInput: AnalyzeResumeInput;
+
             if (resumeData?.htmlContent) {
-                // If there's edited HTML content, use it directly.
-                result = await analyzeResumeAction({ htmlContent: resumeData.htmlContent });
+                // If there's edited HTML content, convert it to a data URI.
+                // This standardizes the input for the AI and avoids format confusion.
+                const htmlDataUri = `data:text/html;base64,${btoa(unescape(encodeURIComponent(resumeData.htmlContent)))}`;
+                analysisInput = { resumeDataUri: htmlDataUri };
             } else if (resumeDataUri) {
                 // Otherwise, use the original data URI from the uploaded file.
-                result = await analyzeResumeAction({ resumeDataUri: resumeDataUri });
+                analysisInput = { resumeDataUri: resumeDataUri };
             } else {
                 // If there's no resume content at all, throw an error.
                 throw new Error("No resume content available to create a portfolio.");
             }
+
+            const result = await analyzeResumeAction(analysisInput);
     
             if (result.success && result.data) {
                 await setDoc(doc(db, "portfolios", user.uid), result.data);
@@ -300,7 +306,6 @@ export default function ResumeEditorPage() {
                 });
                 router.push("/portfolio");
             } else {
-                // The error from the action is now more specific if it's from the AI
                 throw new Error(result.error || "Failed to analyze resume. Please check the file format and try again.");
             }
         } catch (error: any) {

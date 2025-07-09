@@ -12,24 +12,13 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const AnalyzeResumeInputSchema = z
-  .object({
-    resumeDataUri: z
-      .string()
-      .optional()
-      .describe(
-        "A resume file (PDF, DOCX) as a data URI. Use this when the source is a file upload. Format: 'data:<mimetype>;base64,<encoded_data>'."
-      ),
-    htmlContent: z
-      .string()
-      .optional()
-      .describe(
-        'The raw HTML content of a resume. Use this when the source is from an editor.'
-      ),
-  })
-  .refine((data) => data.resumeDataUri || data.htmlContent, {
-    message: 'Either resumeDataUri or htmlContent must be provided.',
-  });
+const AnalyzeResumeInputSchema = z.object({
+  resumeDataUri: z
+    .string()
+    .describe(
+      "A resume file (PDF, DOCX, or HTML) as a data URI. This is the primary source of information. Format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+});
 export type AnalyzeResumeInput = z.infer<typeof AnalyzeResumeInputSchema>;
 
 // Define detailed schemas for structured extraction
@@ -121,17 +110,8 @@ const prompt = ai.definePrompt({
   - Also generate a simple, two-word, generic prompt for creating a professional avatar image for the 'avatarPrompt' field. For example: "male software engineer", "female graphic designer". Do not include any names or specific identifying details in this prompt.
   - Finally, generate a unique, stylish, and professional color palette for the portfolio for the 'colorPalette' field. Ensure the generated palette is aesthetically pleasing and that there is sufficient contrast to meet accessibility standards (WCAG AA).
 
-  Here is the resume content. Use the source that is provided.
-
-  {{#if resumeDataUri}}
-  **Resume from uploaded file:**
+  Here is the resume content:
   {{media url=resumeDataUri}}
-  {{/if}}
-
-  {{#if htmlContent}}
-  **Resume from HTML content:**
-  {{{htmlContent}}}
-  {{/if}}
   `,
 });
 
