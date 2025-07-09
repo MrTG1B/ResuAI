@@ -254,8 +254,7 @@ export default function ResumeEditorPage() {
             });
             await pdf.html(sourceElement, {
                 autoPaging: 'text',
-                margin: [40, 0, 40, 0],
-                width: 595, // A4 width in points
+                width: pdf.internal.pageSize.getWidth(),
                 windowWidth: sourceElement.scrollWidth,
             });
             pdf.save('resume.pdf');
@@ -435,7 +434,13 @@ export default function ResumeEditorPage() {
                                     {isLivePreview && resumeData ? (
                                         <div
                                             ref={livePreviewRef}
-                                            className="bg-white text-black w-[8.27in] min-h-[11.69in] p-12 shadow-lg"
+                                            className="bg-white text-black shadow-lg"
+                                            style={{
+                                                width: '8.27in',
+                                                minHeight: '11.69in',
+                                                padding: '0.75in',
+                                                boxSizing: 'border-box',
+                                            }}
                                             dangerouslySetInnerHTML={{ __html: resumeData.htmlContent || '' }}
                                         />
                                     ) : (
