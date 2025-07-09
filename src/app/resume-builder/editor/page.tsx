@@ -252,15 +252,14 @@ export default function ResumeEditorPage() {
                 unit: 'pt',
                 format: 'a4',
             });
-            // A standard margin is ~0.75in, which is 54 points (pt).
-            const margin = 54;
+
+            // The source element is already styled to look like an A4 page with padding.
+            // We just need to render it directly to the PDF without adding extra margins.
             await pdf.html(sourceElement, {
                 autoPaging: 'text',
-                // Set margins for top, left, bottom, right
-                margin: [margin, margin, margin, margin],
-                // The width for the content should be the page width minus the horizontal margins.
-                width: pdf.internal.pageSize.getWidth() - (margin * 2),
-                // The windowWidth should be the width of the source element to correctly scale the content.
+                x: 0,
+                y: 0,
+                width: pdf.internal.pageSize.getWidth(),
                 windowWidth: sourceElement.scrollWidth,
             });
             pdf.save('resume.pdf');
