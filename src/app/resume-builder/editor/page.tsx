@@ -125,22 +125,6 @@ export default function ResumeEditorPage() {
                     const userPromptMessage: ChatMessage = { role: 'user', content: `Based on the previous analysis, please apply the suggestions to my resume.` };
                     setInitialMessages([userPromptMessage]);
     
-                    // The editResumeAction is not defined in the current context, assuming it exists
-                    // and works as intended from previous user interactions.
-                    // const editResult = await editResumeAction({
-                    //     htmlContent: originalHtml,
-                    //     prompt: `Based on the following analysis and suggestions, please edit my resume to incorporate all the feedback. Suggestions:\n\n${suggestions}`,
-                    // });
-    
-                    // if (!editResult.success || !editResult.data) {
-                    //     throw new Error(editResult.error || "Failed to apply suggestions.");
-                    // }
-    
-                    // setResumeData({ htmlContent: editResult.data.newHtmlContent });
-                    // setIsLivePreview(true);
-                    // setInitialMessages(prev => [...prev, { role: 'assistant', content: editResult.data.response }]);
-    
-                    // sessionStorage.setItem('resumeData', JSON.stringify({ htmlContent: editResult.data.newHtmlContent }));
                     sessionStorage.setItem('resumePreviewUri', resumeUri);
                     sessionStorage.setItem('resumeDataUri', resumeUri);
                     sessionStorage.setItem('resumeFileName', name);
@@ -160,8 +144,6 @@ export default function ResumeEditorPage() {
         };
         
         if (typeof window !== "undefined") {
-            // This function relies on editResumeAction which doesn't exist.
-            // I'll comment it out to prevent errors, as the user is focused on the portfolio creation flow.
             // applySuggestions();
         }
 
@@ -241,8 +223,8 @@ export default function ResumeEditorPage() {
     const handleDownload = async () => {
         const sourceElement = livePreviewRef.current;
         if (!sourceElement) {
-             toast({ title: "Nothing to download", description: "The resume preview is not available.", variant: "destructive" });
-             return;
+            toast({ title: "Nothing to download", description: "The resume preview is not available.", variant: "destructive" });
+            return;
         }
 
         setIsGeneratingPdf(true);
@@ -251,23 +233,31 @@ export default function ResumeEditorPage() {
                 orientation: 'p',
                 unit: 'px',
                 format: 'a4',
+                hotfixes: ['px_scaling'],
             });
 
             await pdf.html(sourceElement, {
+                html2canvas: {
+                    scale: 0.75, // Adjust scale to fit content if needed
+                    useCORS: true,
+                    ignoreElements: (element) => element.id === 'unrenderable' // Example
+                },
                 autoPaging: 'text',
                 x: 0,
                 y: 0,
                 width: pdf.internal.pageSize.getWidth(),
                 windowWidth: sourceElement.scrollWidth,
+                margin: 0,
             });
             pdf.save('resume.pdf');
         } catch (error) {
             console.error('PDF Download error:', error);
-            toast({ title: "Download failed", description: "Could not generate PDF.", variant: "destructive" });
+            toast({ title: "Download failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
         } finally {
             setIsGeneratingPdf(false);
         }
     };
+
 
     const handleConvertToPortfolio = async () => {
         if (!auth?.currentUser || !db) {
@@ -286,15 +276,11 @@ export default function ResumeEditorPage() {
             let analysisInput: AnalyzeResumeInput;
 
             if (resumeData?.htmlContent) {
-                // If there's edited HTML content, convert it to a data URI.
-                // This standardizes the input for the AI and avoids format confusion.
                 const htmlDataUri = `data:text/html;base64,${btoa(unescape(encodeURIComponent(resumeData.htmlContent)))}`;
                 analysisInput = { resumeDataUri: htmlDataUri };
             } else if (resumeDataUri) {
-                // Otherwise, use the original data URI from the uploaded file.
                 analysisInput = { resumeDataUri: resumeDataUri };
             } else {
-                // If there's no resume content at all, throw an error.
                 throw new Error("No resume content available to create a portfolio.");
             }
 
@@ -332,7 +318,6 @@ export default function ResumeEditorPage() {
         }
         setIsAnalyzing(true);
         try {
-            // Handle potential unicode characters by encoding them before Base64 conversion.
             const encodedHtml = btoa(unescape(encodeURIComponent(resumeData.htmlContent)));
             const dataUri = `data:text/html;base64,${encodedHtml}`;
             
@@ -479,3 +464,5 @@ export default function ResumeEditorPage() {
         </div>
     );
 }
+
+    
