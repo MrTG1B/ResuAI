@@ -10,11 +10,22 @@ import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coac
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { type PortfolioData, type Project } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
   try {
+    if (!db) {
+      throw new Error("Firestore is not initialized.");
+    }
+    const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
+
+    // Check portfolio limit
+    const portfolioSnapshot = await getDocs(portfolioCollectionRef);
+    if (portfolioSnapshot.size >= 5) {
+        return { success: false, error: "You have reached the limit of 5 free portfolios." };
+    }
+
     // Step 1: Analyze resume for text content, get an avatar prompt, and color palette
     const analysisResult = await analyzeResumeFlow(input);
     
@@ -62,10 +73,6 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     }
 
     // Step 6: Save as a new document in the user's portfolios subcollection
-    if (!db) {
-      throw new Error("Firestore is not initialized.");
-    }
-    const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
     const newDocRef = await addDoc(portfolioCollectionRef, portfolioDraft);
     
     return { success: true, data: { ...portfolioDraft, id: newDocRef.id } };

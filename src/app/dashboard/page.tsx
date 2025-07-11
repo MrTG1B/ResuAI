@@ -14,6 +14,8 @@ import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, 
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
     return (
@@ -47,6 +49,12 @@ export default function DashboardPage() {
   const [isResumeLoading, setIsResumeLoading] = useState(true);
   const [portfolios, setPortfolios] = useState<PortfolioData[]>([]);
   const [isPortfolioLoading, setIsPortfolioLoading] = useState(true);
+  
+  const MAX_RESUMES = 10;
+  const MAX_PORTFOLIOS = 5;
+
+  const hasReachedResumeLimit = resumes.length >= MAX_RESUMES;
+  const hasReachedPortfolioLimit = portfolios.length >= MAX_PORTFOLIOS;
 
 
   useEffect(() => {
@@ -126,6 +134,44 @@ export default function DashboardPage() {
     return null;
   }
 
+  const createNewResumeButton = (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div className="w-full">
+                    <Button onClick={handleStartNew} className="w-full" disabled={hasReachedResumeLimit}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Create New Resume
+                    </Button>
+                </div>
+            </TooltipTrigger>
+            {hasReachedResumeLimit && (
+                <TooltipContent>
+                    <p>You have reached the free limit of {MAX_RESUMES} resumes.</p>
+                </TooltipContent>
+            )}
+        </Tooltip>
+    </TooltipProvider>
+  );
+
+  const createNewPortfolioButton = (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div className="w-full">
+                    <Button asChild className="w-full" disabled={hasReachedPortfolioLimit}>
+                        <Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create New Portfolio</Link>
+                    </Button>
+                </div>
+            </TooltipTrigger>
+            {hasReachedPortfolioLimit && (
+                <TooltipContent>
+                    <p>You have reached the free limit of {MAX_PORTFOLIOS} portfolios.</p>
+                </TooltipContent>
+            )}
+        </Tooltip>
+    </TooltipProvider>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
       <Header />
@@ -168,7 +214,7 @@ export default function DashboardPage() {
                 {/* Saved Resumes Section */}
                 <Card className="shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                     <CardHeader>
-                        <CardTitle>Your Saved Resumes</CardTitle>
+                        <CardTitle>Your Saved Resumes ({resumes.length}/{MAX_RESUMES})</CardTitle>
                         <CardDescription>Continue where you left off or create a new one.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
@@ -218,17 +264,13 @@ export default function DashboardPage() {
                              <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
                                 <CardTitle>No Saved Resumes</CardTitle>
                                 <CardDescription className="mt-2 mb-4">You haven't started editing a resume yet.</CardDescription>
-                                <Button onClick={handleStartNew}>
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Create a New Resume
-                                </Button>
+                                {createNewResumeButton}
                             </div>
                         )}
                     </CardContent>
                      {resumes.length > 0 && (
                         <CardFooter>
-                            <Button onClick={handleStartNew} className="w-full">
-                                <PlusCircle className="mr-2 h-4 w-4" /> Create New Resume
-                            </Button>
+                           {createNewResumeButton}
                         </CardFooter>
                     )}
                 </Card>
@@ -236,7 +278,7 @@ export default function DashboardPage() {
                 {/* Saved Portfolios Section */}
                 <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '300ms' }}>
                     <CardHeader>
-                        <CardTitle>Your Portfolios</CardTitle>
+                        <CardTitle>Your Portfolios ({portfolios.length}/{MAX_PORTFOLIOS})</CardTitle>
                         <CardDescription>View, edit, and share your generated portfolios.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
@@ -273,17 +315,13 @@ export default function DashboardPage() {
                              <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
                                 <CardTitle>No Portfolios Yet</CardTitle>
                                 <CardDescription className="mt-2 mb-4">You haven't created a portfolio.</CardDescription>
-                                <Button asChild>
-                                    <Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create One Now</Link>
-                                </Button>
+                                {createNewPortfolioButton}
                             </div>
                         )}
                     </CardContent>
                     {portfolios.length > 0 && (
                         <CardFooter>
-                            <Button asChild className="w-full">
-                                <Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create New Portfolio</Link>
-                            </Button>
+                            {createNewPortfolioButton}
                         </CardFooter>
                     )}
                 </Card>

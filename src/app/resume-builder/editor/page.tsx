@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, doc, setDoc, getDoc, addDoc, collection, serverTimestamp } from '@/lib/firebase';
+import { auth, db, doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs } from '@/lib/firebase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, UploadCloud } from 'lucide-react';
 import { Header } from '@/components/header';
@@ -58,6 +58,7 @@ export default function ResumeEditorPage() {
     const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
     
     const livePreviewRef = useRef<HTMLDivElement>(null);
+    const MAX_RESUMES = 10;
     
     // Function to save state to Firestore
     const saveStateToFirestore = useCallback(async (stateToSave: SavedEditorState, currentResumeId: string | null) => {
@@ -69,9 +70,23 @@ export default function ResumeEditorPage() {
             if (docId) {
                 await setDoc(doc(db, "users", currentUser.uid, "resumes", docId), dataToSave, { merge: true });
             } else {
-                const newDocRef = await addDoc(collection(db, "users", currentUser.uid, "resumes"), dataToSave);
+                 const resumeCollectionRef = collection(db, "users", currentUser.uid, "resumes");
+                 const resumeSnapshot = await getDocs(resumeCollectionRef);
+                 if (resumeSnapshot.size >= MAX_RESUMES) {
+                     toast({
+                         title: "Limit Reached",
+                         description: `You have reached the limit of ${MAX_RESUMES} free resumes.`,
+                         variant: "destructive",
+                     });
+                     // prevent saving and redirect or show error state
+                     setIsParsing(false); // Make sure to stop loading state
+                     router.push('/dashboard');
+                     return;
+                 }
+                const newDocRef = await addDoc(resumeCollectionRef, dataToSave);
                 setResumeId(newDocRef.id);
-                router.replace(`/resume-builder/editor?id=${newDocRef.id}`, { scroll: false });
+                // Update URL without a full page reload
+                window.history.replaceState(null, '', `/resume-builder/editor?id=${newDocRef.id}`);
             }
         } catch (error) {
             console.error("Failed to save resume state:", error);
@@ -122,10 +137,23 @@ export default function ResumeEditorPage() {
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file) return;
+        if (!file || !currentUser) return;
     
         setIsParsing(true);
-    
+        
+        // Check limit before proceeding
+        const resumeCollectionRef = collection(db, "users", currentUser.uid, "resumes");
+        const resumeSnapshot = await getDocs(resumeCollectionRef);
+        if (resumeSnapshot.size >= MAX_RESUMES) {
+            toast({
+                title: "Limit Reached",
+                description: `You have reached the limit of ${MAX_RESUMES} free resumes. Please manage your existing resumes from the dashboard.`,
+                variant: "destructive",
+            });
+            setIsParsing(false);
+            return;
+        }
+
         const reader = new FileReader();
         reader.readAsDataURL(file);
     
