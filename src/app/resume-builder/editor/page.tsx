@@ -84,10 +84,12 @@ export default function ResumeEditorPage() {
                      return;
                  }
                 const newDocRef = await addDoc(resumeCollectionRef, dataToSave);
-                setResumeId(newDocRef.id);
+                docId = newDocRef.id;
+                setResumeId(docId);
                 // Update URL without a full page reload
-                window.history.replaceState(null, '', `/resume-builder/editor?id=${newDocRef.id}`);
+                window.history.replaceState(null, '', `/resume-builder/editor?id=${docId}`);
             }
+            return docId;
         } catch (error) {
             console.error("Failed to save resume state:", error);
             toast({
@@ -96,6 +98,7 @@ export default function ResumeEditorPage() {
                 variant: "destructive",
             });
         }
+        return null;
     }, [currentUser, toast, router]);
 
     // Handle updates to editor state
@@ -110,9 +113,9 @@ export default function ResumeEditorPage() {
             if (user) {
                 setCurrentUser(user);
                 const idFromUrl = searchParams.get('id');
-                setResumeId(idFromUrl);
-
+                
                 if (idFromUrl) {
+                    setResumeId(idFromUrl);
                     try {
                         const resumeDoc = await getDoc(doc(db, "users", user.uid, "resumes", idFromUrl));
                         if (resumeDoc.exists()) {
@@ -124,6 +127,49 @@ export default function ResumeEditorPage() {
                     } catch (error) {
                         console.error("Failed to load state from Firestore:", error);
                     }
+                } else {
+                    // This is a new session, create an initial state from profile
+                    const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+                    const docSnap = await getDoc(profileDocRef);
+                    if (docSnap.exists()) {
+                        const profile = docSnap.data();
+                        const socialLinksHtml = (profile.socials || [])
+                            .map((s: { platform: string; url: string; }) => `<span><a href="${s.url}" target="_blank" style="color: #007bff; text-decoration: none;">${s.platform}</a></span>`)
+                            .join(' | ');
+
+                        const initialHtml = `
+                          <div style="font-family: Arial, sans-serif; color: #333;">
+                            <header style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
+                              <h1 style="font-size: 2.5em; margin: 0; color: #1a1a1a;">${profile.name || 'Your Name'}</h1>
+                              <p style="font-size: 1.2em; margin: 5px 0 0;">${profile.title || 'Your Title'}</p>
+                            </header>
+                            <section style="margin-bottom: 20px;">
+                              <div style="display: flex; justify-content: center; gap: 20px; font-size: 0.9em; color: #555;">
+                                ${profile.email ? `<span><a href="mailto:${profile.email}" style="color: #007bff; text-decoration: none;">${profile.email}</a></span>` : ''}
+                                ${profile.phone ? `<span>${profile.phone}</span>` : ''}
+                                ${profile.website ? `<span><a href="${profile.website}" target="_blank" style="color: #007bff; text-decoration: none;">${profile.website}</a></span>` : ''}
+                              </div>
+                              <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.9em;">
+                                ${socialLinksHtml}
+                              </div>
+                            </section>
+                            <section>
+                              <h2 style="font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px;">Summary</h2>
+                              <p>A brief professional summary here.</p>
+                            </section>
+                          </div>
+                        `;
+                        const newId = await saveStateToFirestore({
+                            htmlContent: initialHtml,
+                            chatHistory: [],
+                            fileName: `${profile.name || 'User'}'s Resume.html`,
+                            initialPreviewUri: '',
+                        }, null);
+                         if (newId) {
+                            setResumeId(newId);
+                        }
+
+                    }
                 }
             } else {
                 router.push('/login');
@@ -132,7 +178,7 @@ export default function ResumeEditorPage() {
         });
         
         return () => unsubscribe();
-    }, [router, searchParams, toast]);
+    }, [router, searchParams, toast, saveStateToFirestore]);
 
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -345,7 +391,7 @@ export default function ResumeEditorPage() {
                         ) : (
                              <>
                                 <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">AI Resume Editor</h1>
-                                <p className="mt-2 text-lg text-muted-foreground">Upload your resume to start making improvements with AI.</p>
+                                <p className="mt-2 text-lg text-muted-foreground">Upload a resume to edit with AI, or we'll start one for you from your profile.</p>
                                 <div className="mt-8 w-full">
                                     <label
                                     htmlFor="resume-upload"

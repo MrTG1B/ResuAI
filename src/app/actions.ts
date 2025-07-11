@@ -8,9 +8,9 @@ import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
 import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
-import { type PortfolioData, type Project } from "@/types/portfolio";
+import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
-import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
@@ -25,12 +25,25 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     if (portfolioSnapshot.size >= 5) {
         return { success: false, error: "You have reached the limit of 5 free portfolios." };
     }
+    
+    // Fetch user profile data to merge
+    const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
+    const profileSnap = await getDoc(profileDocRef);
+    const userProfile = profileSnap.exists() ? profileSnap.data() as PersonalInfo : {};
+
 
     // Step 1: Analyze resume for text content, get an avatar prompt, and color palette
     const analysisResult = await analyzeResumeFlow(input);
     
     // Step 2: The portfolio draft is now a structured object, no parsing needed.
     const portfolioDraft: Partial<PortfolioData> = analysisResult.portfolioDraft;
+
+    // Merge profile data with analysis result
+    if (portfolioDraft.personalInfo) {
+      portfolioDraft.personalInfo = { ...userProfile, ...portfolioDraft.personalInfo };
+    } else {
+      portfolioDraft.personalInfo = userProfile;
+    }
 
     // Add a title and creation date
     portfolioDraft.title = `Portfolio from ${new Date().toLocaleDateString()}`;

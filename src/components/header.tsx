@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -89,6 +90,10 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                         <DropdownMenuItem onClick={() => router.push('/dashboard')} className="cursor-pointer">
                             <LayoutDashboard className="mr-2 h-4 w-4" />
                             <span>Dashboard</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/profile')} className="cursor-pointer">
+                            <UserIcon className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => router.push('/about')} className="cursor-pointer">
                             <Info className="mr-2 h-4 w-4" />

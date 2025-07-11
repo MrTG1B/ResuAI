@@ -58,6 +58,7 @@ const prompt = ai.definePrompt({
 **- DO NOT use \`<html>\`, \`<body>\`, or \`<head>\` tags.**
 **- DO NOT add \`width\`, \`margin\`, or \`padding\` to your outermost generated element. Let it fill the available space naturally.**
 **- DO use inline CSS for all styling (font sizes, colors, line heights, etc.).**
+**- When creating links (e.g., for email, websites, or social profiles), you MUST use \`<a>\` tags with a valid \`href\` attribute (e.g., \`<a href="mailto:email@example.com">email@example.com</a>\`).**
 **- For two-column layouts, DO use flexbox (e.g., \`<div style="display: flex; justify-content: space-between; gap: 30px;">\`). Make sure columns are flexible and their combined widths do not cause overflow (e.g., \`<div style="width: 65%;">...\` and \`<div style="width: 30%;">...\`).**
 **- ALWAYS ensure your HTML is well-formed, professional, and easy to read.**
 
