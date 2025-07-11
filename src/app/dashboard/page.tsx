@@ -5,19 +5,19 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, doc, collection, getDocs, query, orderBy } from '@/lib/firebase';
+import { auth, db, doc, getDoc, collection, getDocs, query, orderBy } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2 } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
-import { type PortfolioData } from '@/types/portfolio';
+import { type PortfolioData, type PersonalInfo } from '@/types/portfolio';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { deletePortfolioAction, deleteResumeAction } from '../actions';
 import { useToast } from '@/hooks/use-toast';
-
+import { Progress } from '@/components/ui/progress';
 
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
     return (
@@ -42,6 +42,27 @@ function ToolCard({ href, icon: Icon, title, description, actionText }: { href: 
     )
 }
 
+const calculateProfileCompletion = (profile: any): number => {
+    if (!profile) return 0;
+    
+    const fields = [
+        profile.name,
+        profile.title,
+        profile.email,
+        profile.phone,
+        profile.website,
+        profile.location,
+        profile.socials && profile.socials.length > 0,
+        profile.experience && profile.experience.length > 0,
+        profile.education && profile.education.length > 0,
+        profile.projects && profile.projects.length > 0,
+        profile.certifications && profile.certifications.length > 0,
+    ];
+
+    const completedFields = fields.filter(Boolean).length;
+    return Math.round((completedFields / fields.length) * 100);
+};
+
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -52,6 +73,7 @@ export default function DashboardPage() {
   const [isResumeLoading, setIsResumeLoading] = useState(true);
   const [portfolios, setPortfolios] = useState<(PortfolioData & {id: string})[]>([]);
   const [isPortfolioLoading, setIsPortfolioLoading] = useState(true);
+  const [profileCompletion, setProfileCompletion] = useState(0);
   
   const MAX_RESUMES = 10;
   const MAX_PORTFOLIOS = 5;
@@ -70,6 +92,18 @@ export default function DashboardPage() {
       if (user) {
         setUser(user);
         
+        // Fetch profile data for completion status
+        try {
+            const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+            const profileSnap = await getDoc(profileDocRef);
+            if (profileSnap.exists()) {
+                const completion = calculateProfileCompletion(profileSnap.data());
+                setProfileCompletion(completion);
+            }
+        } catch (error) {
+            console.error("Failed to fetch profile data:", error);
+        }
+
         // Fetch resumes
         try {
             const resumeQuery = query(collection(db, `users/${user.uid}/resumes`), orderBy('lastModified', 'desc'));
@@ -210,6 +244,25 @@ export default function DashboardPage() {
                     Your career toolkit is ready. Let's build something amazing today.
                 </p>
             </div>
+
+            {profileCompletion < 100 && (
+                <Card className="bg-primary/10 border-primary/20 animate-fade-in-up">
+                    <CardHeader>
+                        <CardTitle>Complete Your Profile!</CardTitle>
+                        <CardDescription>
+                            Your profile is {profileCompletion}% complete. A full profile helps our AI create better resumes and portfolios for you.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Progress value={profileCompletion} className="h-2" />
+                    </CardContent>
+                    <CardFooter>
+                        <Button asChild>
+                            <Link href="/profile">Update Profile <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
                 <ToolCard 
