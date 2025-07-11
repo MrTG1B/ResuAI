@@ -226,7 +226,7 @@ export default function ResumeEditorPage() {
             toast({ title: "Nothing to download", description: "The resume preview is not available.", variant: "destructive" });
             return;
         }
-
+    
         setIsGeneratingPdf(true);
         try {
             const pdf = new jsPDF({
@@ -235,19 +235,20 @@ export default function ResumeEditorPage() {
                 format: 'a4',
                 hotfixes: ['px_scaling'],
             });
-
+    
+            // Use the exact width of the preview element for rendering
+            const contentWidth = sourceElement.offsetWidth;
+    
             await pdf.html(sourceElement, {
                 html2canvas: {
-                    scale: 0.75, // Adjust scale to fit content if needed
+                    scale: pdf.internal.pageSize.getWidth() / contentWidth, // Scale based on width
                     useCORS: true,
-                    ignoreElements: (element) => element.id === 'unrenderable' // Example
                 },
                 autoPaging: 'text',
                 x: 0,
                 y: 0,
-                width: pdf.internal.pageSize.getWidth(),
-                windowWidth: sourceElement.scrollWidth,
-                margin: 0,
+                width: contentWidth, // Set the width for the PDF renderer
+                windowWidth: contentWidth, // Ensure rendering window matches content width
             });
             pdf.save('resume.pdf');
         } catch (error) {
@@ -464,5 +465,7 @@ export default function ResumeEditorPage() {
         </div>
     );
 }
+
+    
 
     
