@@ -236,14 +236,11 @@ export default function ResumeEditorPage() {
             });
     
             await pdf.html(sourceElement, {
-                callback: function (pdf) {
-                    pdf.save('resume.pdf');
+                callback: function (doc) {
+                    doc.save('resume.pdf');
                 },
                 autoPaging: 'text',
-                html2canvas: {
-                    scale: 1 / 1.5,
-                    height: sourceElement.clientHeight / 2,
-                }
+                width: pdf.internal.pageSize.getWidth(),
             });
         } catch (error) {
             console.error('PDF Download error:', error);
