@@ -2,8 +2,8 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, doc, setDoc, getDoc } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
+import { auth, db, doc, setDoc, getDoc, addDoc, collection, serverTimestamp } from '@/lib/firebase';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, UploadCloud } from 'lucide-react';
 import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,7 @@ const applyingSuggestionsTexts = [
 
 export default function ResumeEditorPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
     const [isParsing, setIsParsing] = useState(false);
@@ -50,6 +51,7 @@ export default function ResumeEditorPage() {
     const [isConverting, setIsConverting] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     
+    const [resumeId, setResumeId] = useState<string | null>(null);
     const [editorState, setEditorState] = useState<SavedEditorState | null>(null);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     
@@ -58,10 +60,19 @@ export default function ResumeEditorPage() {
     const livePreviewRef = useRef<HTMLDivElement>(null);
     
     // Function to save state to Firestore
-    const saveStateToFirestore = useCallback(async (stateToSave: SavedEditorState) => {
+    const saveStateToFirestore = useCallback(async (stateToSave: SavedEditorState, currentResumeId: string | null) => {
         if (!currentUser || !db) return;
         try {
-            await setDoc(doc(db, "resumeEditorState", currentUser.uid), stateToSave);
+            let docId = currentResumeId;
+            const dataToSave = { ...stateToSave, lastModified: serverTimestamp() };
+
+            if (docId) {
+                await setDoc(doc(db, "users", currentUser.uid, "resumes", docId), dataToSave, { merge: true });
+            } else {
+                const newDocRef = await addDoc(collection(db, "users", currentUser.uid, "resumes"), dataToSave);
+                setResumeId(newDocRef.id);
+                router.replace(`/resume-builder/editor?id=${newDocRef.id}`, { scroll: false });
+            }
         } catch (error) {
             console.error("Failed to save resume state:", error);
             toast({
@@ -70,39 +81,35 @@ export default function ResumeEditorPage() {
                 variant: "destructive",
             });
         }
-    }, [currentUser, toast]);
+    }, [currentUser, toast, router]);
 
     // Handle updates to editor state
     const handleEditorStateUpdate = useCallback((newState: SavedEditorState) => {
         setEditorState(newState);
-        sessionStorage.setItem('resumeEditorState', JSON.stringify(newState));
-        saveStateToFirestore(newState);
-    }, [saveStateToFirestore]);
+        saveStateToFirestore(newState, resumeId);
+    }, [saveStateToFirestore, resumeId]);
 
     // Initial load effect
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setCurrentUser(user);
-                
-                // Check session storage first
-                const sessionState = sessionStorage.getItem('resumeEditorState');
-                if (sessionState) {
-                    setEditorState(JSON.parse(sessionState));
-                } else {
-                    // Otherwise, fetch from Firestore
+                const idFromUrl = searchParams.get('id');
+                setResumeId(idFromUrl);
+
+                if (idFromUrl) {
                     try {
-                        const resumeDoc = await getDoc(doc(db, "resumeEditorState", user.uid));
+                        const resumeDoc = await getDoc(doc(db, "users", user.uid, "resumes", idFromUrl));
                         if (resumeDoc.exists()) {
-                            const dbState = resumeDoc.data() as SavedEditorState;
-                            setEditorState(dbState);
-                            sessionStorage.setItem('resumeEditorState', JSON.stringify(dbState));
+                            setEditorState(resumeDoc.data() as SavedEditorState);
+                        } else {
+                            toast({ title: "Not Found", description: "This resume session does not exist.", variant: "destructive" });
+                            router.push('/dashboard');
                         }
                     } catch (error) {
                         console.error("Failed to load state from Firestore:", error);
                     }
                 }
-
             } else {
                 router.push('/login');
             }
@@ -110,7 +117,7 @@ export default function ResumeEditorPage() {
         });
         
         return () => unsubscribe();
-    }, [router]);
+    }, [router, searchParams, toast]);
 
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,17 +133,6 @@ export default function ResumeEditorPage() {
             try {
                 const uploadedResumeDataUri = reader.result as string;
     
-                // Immediately set state to show PDF preview
-                const previewState: SavedEditorState = {
-                    htmlContent: null, // Set htmlContent to null to ensure iframe is shown
-                    chatHistory: [],
-                    fileName: file.name,
-                    initialPreviewUri: uploadedResumeDataUri,
-                };
-                handleEditorStateUpdate(previewState);
-                setIsParsing(false); // Stop the main parsing loader
-    
-                // Now, parse in the background and update the state when done
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
     
                 if (result.success && result.data) {
@@ -146,13 +142,14 @@ export default function ResumeEditorPage() {
                         fileName: file.name,
                         initialPreviewUri: uploadedResumeDataUri,
                     };
-                    handleEditorStateUpdate(finalState);
-                    toast({ title: "Resume Ready", description: "Your resume has been parsed. You can now use the AI assistant to edit it." });
+                    // Instead of updating, this will now create a new document
+                    await saveStateToFirestore(finalState, null);
                 } else {
                     throw new Error(result.error || "Failed to parse resume.");
                 }
             } catch (error: any) {
                 toast({ title: "Parsing Failed", description: error.message, variant: "destructive" });
+            } finally {
                 setIsParsing(false);
             }
         };
@@ -184,7 +181,7 @@ export default function ResumeEditorPage() {
                 pageSize: 'A4',
                 pageMargins: [ 40, 60, 40, 60 ],
             };
-            pdfMake.createPdf(docDefinition).download('resume.pdf');
+            pdfMake.createPdf(docDefinition).download(editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume' + '.pdf');
 
         } catch (error) {
             console.error('PDF Download error:', error);
@@ -346,7 +343,7 @@ export default function ResumeEditorPage() {
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="py-2 px-6">
                                     <CardTitle className="text-lg font-normal">
-                                        {editorState.htmlContent ? "Live Resume Preview" : "Original Resume Preview"}
+                                        {editorState.htmlContent ? `Editing: ${editorState.fileName || 'Untitled'}` : "Original Resume Preview"}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start overflow-auto">
@@ -399,5 +396,3 @@ export default function ResumeEditorPage() {
         </div>
     );
 }
-
-    

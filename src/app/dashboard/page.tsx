@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, getDoc, doc, collection, getDocs, query, orderBy } from '@/lib/firebase';
+import { auth, db, getDoc, doc, collection, getDocs, query, orderBy, deleteDoc } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2 } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
@@ -43,7 +43,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  const [savedResume, setSavedResume] = useState<SavedEditorState | null>(null);
+  const [resumes, setResumes] = useState<(SavedEditorState & {id: string})[]>([]);
   const [isResumeLoading, setIsResumeLoading] = useState(true);
   const [portfolios, setPortfolios] = useState<PortfolioData[]>([]);
   const [isPortfolioLoading, setIsPortfolioLoading] = useState(true);
@@ -59,29 +59,30 @@ export default function DashboardPage() {
       if (user) {
         setUser(user);
         
-        // Fetch resume
+        // Fetch resumes
         try {
-            const resumeDoc = await getDoc(doc(db, "resumeEditorState", user.uid));
-            if (resumeDoc.exists()) {
-                setSavedResume(resumeDoc.data() as SavedEditorState);
-            }
+            const resumeQuery = query(collection(db, `users/${user.uid}/resumes`), orderBy('lastModified', 'desc'));
+            const resumeSnapshot = await getDocs(resumeQuery);
+            const userResumes = resumeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SavedEditorState & {id: string}));
+            setResumes(userResumes);
         } catch (error) {
-            console.error("Failed to fetch saved resume:", error);
+            console.error("Failed to fetch saved resumes:", error);
         } finally {
             setIsResumeLoading(false);
         }
         
         // Fetch portfolios
         try {
-            const q = query(collection(db, `users/${user.uid}/portfolios`), orderBy('createdAt', 'desc'));
-            const querySnapshot = await getDocs(q);
-            const userPortfolios = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PortfolioData));
+            const portfolioQuery = query(collection(db, `users/${user.uid}/portfolios`), orderBy('createdAt', 'desc'));
+            const portfolioSnapshot = await getDocs(portfolioQuery);
+            const userPortfolios = portfolioSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PortfolioData));
             setPortfolios(userPortfolios);
         } catch (error) {
             console.error("Failed to fetch portfolios:", error);
         } finally {
             setIsPortfolioLoading(false);
         }
+
       } else {
         router.push('/login');
       }
@@ -91,16 +92,25 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, [router]);
 
-  const handleContinueEditing = () => {
-    if (savedResume) {
-        sessionStorage.setItem('resumeEditorState', JSON.stringify(savedResume));
-        router.push('/resume-builder/editor');
-    }
+  const handleContinueEditing = (resumeId: string) => {
+    router.push(`/resume-builder/editor?id=${resumeId}`);
   };
 
   const handleStartNew = () => {
     sessionStorage.removeItem('resumeEditorState');
     router.push('/resume-builder/editor');
+  }
+
+  const handleDeleteResume = async (resumeId: string) => {
+    if (!user) return;
+    if (!confirm("Are you sure you want to delete this resume? This action cannot be undone.")) return;
+
+    try {
+        await deleteDoc(doc(db, `users/${user.uid}/resumes`, resumeId));
+        setResumes(prev => prev.filter(r => r.id !== resumeId));
+    } catch (error) {
+        console.error("Error deleting resume:", error);
+    }
   }
 
   if (isLoading) {
@@ -155,48 +165,71 @@ export default function DashboardPage() {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                {/* Saved Resume Section */}
+                {/* Saved Resumes Section */}
                 <Card className="shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                     <CardHeader>
-                        <CardTitle>Your Saved Resume</CardTitle>
+                        <CardTitle>Your Saved Resumes</CardTitle>
                         <CardDescription>Continue where you left off or create a new one.</CardDescription>
                     </CardHeader>
-                    {isResumeLoading ? (
-                        <CardContent>
-                             <div className="flex items-center justify-center min-h-[200px]">
+                    <CardContent className="flex-grow space-y-4">
+                        {isResumeLoading ? (
+                            <div className="flex items-center justify-center min-h-[200px]">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                             </div>
-                        </CardContent>
-                    ) : savedResume ? (
-                        <>
-                            <CardContent className="flex-grow m-6 mt-0">
-                               <div className="w-full h-full max-h-[400px] overflow-hidden rounded-md border bg-white flex justify-center items-start">
-                                    <div
-                                        className="text-black shadow-lg scale-[0.35] origin-top"
-                                        style={{
-                                            width: '8.27in',
-                                            height: '11.69in',
-                                            aspectRatio: '1 / 1.414',
-                                        }}
-                                        dangerouslySetInnerHTML={{ __html: savedResume.htmlContent || '' }}
-                                    />
-                               </div>
-                            </CardContent>
-                            <CardFooter className="flex justify-end gap-2">
-                                <Button variant="outline" onClick={handleStartNew}>Start New</Button>
-                                <Button onClick={handleContinueEditing}><Edit className="mr-2 h-4 w-4" /> Continue Editing</Button>
-                            </CardFooter>
-                        </>
-                    ) : (
-                         <CardContent>
-                            <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
-                                <CardTitle>No Saved Resume</CardTitle>
+                        ) : resumes.length > 0 ? (
+                           <ul className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
+                                {resumes.map(r => (
+                                    <li key={r.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
+                                        <div 
+                                            className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow"
+                                            onClick={() => handleContinueEditing(r.id)}
+                                        >
+                                            <div className="w-12 h-16 rounded border bg-white flex justify-center items-start overflow-hidden flex-shrink-0">
+                                                <div
+                                                    className="text-black shadow-sm scale-[0.1] origin-top"
+                                                    style={{
+                                                        width: '8.27in',
+                                                        height: '11.69in',
+                                                        aspectRatio: '1 / 1.414',
+                                                    }}
+                                                    dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }}
+                                                />
+                                            </div>
+                                            <div className="overflow-hidden">
+                                                <p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p>
+                                                <p className="text-xs text-muted-foreground truncate">
+                                                    Last modified: {r.lastModified ? new Date(r.lastModified.seconds * 1000).toLocaleDateString() : 'N/A'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center flex-shrink-0 ml-2">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteResume(r.id)}>
+                                                <Trash2 className="h-4 w-4"/>
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
+                                                <Edit className="mr-2 h-4 w-4"/>
+                                                Edit
+                                            </Button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                             <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
+                                <CardTitle>No Saved Resumes</CardTitle>
                                 <CardDescription className="mt-2 mb-4">You haven't started editing a resume yet.</CardDescription>
                                 <Button onClick={handleStartNew}>
                                     <PlusCircle className="mr-2 h-4 w-4" /> Create a New Resume
                                 </Button>
                             </div>
-                        </CardContent>
+                        )}
+                    </CardContent>
+                     {resumes.length > 0 && (
+                        <CardFooter>
+                            <Button onClick={handleStartNew} className="w-full">
+                                <PlusCircle className="mr-2 h-4 w-4" /> Create New Resume
+                            </Button>
+                        </CardFooter>
                     )}
                 </Card>
 

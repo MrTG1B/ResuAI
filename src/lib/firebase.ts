@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, serverTimestamp, addDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, serverTimestamp, addDoc, deleteDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -30,4 +30,4 @@ if (firebaseConfig.apiKey && firebaseConfig.projectId) {
   console.warn("Firebase configuration is missing. Authentication features will be disabled. Please add your Firebase credentials to the .env file.");
 }
 
-export { app, auth, db, doc, getDoc, setDoc, collection, getDocs, query, orderBy, serverTimestamp, addDoc };
+export { app, auth, db, doc, getDoc, setDoc, collection, getDocs, query, orderBy, serverTimestamp, addDoc, deleteDoc };

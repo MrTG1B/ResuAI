@@ -1,4 +1,6 @@
 
+import { type Timestamp } from "firebase/firestore";
+
 export interface ParsedResume {
     htmlContent: string;
 }
@@ -26,6 +28,5 @@ export interface SavedEditorState {
     chatHistory: ChatMessage[];
     fileName?: string;
     initialPreviewUri?: string;
+    lastModified?: Timestamp;
 }
-
-    
