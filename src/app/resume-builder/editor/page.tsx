@@ -14,8 +14,13 @@ import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type AnalyzeResumeInput } from '@/ai/flows/resume-analysis';
 import { type ParsedResume, type ChatMessage } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import html2pdf from 'html2pdf.js';
 import { CreativeLoader } from '@/components/creative-loader';
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+import htmlToPdfmake from "html-to-pdfmake";
+
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
 
 const parsingTexts = [
     "Reading your document...",
@@ -229,15 +234,14 @@ export default function ResumeEditorPage() {
     
         setIsGeneratingPdf(true);
         try {
-            const opt = {
-                margin: 0,
-                filename: 'resume.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            const html = sourceElement.innerHTML;
+            const content = htmlToPdfmake(html);
+            const docDefinition = {
+                content: content,
+                pageSize: 'A4',
+                pageMargins: [ 40, 60, 40, 60 ],
             };
-
-            await html2pdf().from(sourceElement).set(opt).save();
+            pdfMake.createPdf(docDefinition).download('resume.pdf');
 
         } catch (error) {
             console.error('PDF Download error:', error);
