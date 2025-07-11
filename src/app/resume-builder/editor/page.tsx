@@ -242,6 +242,7 @@ export default function ResumeEditorPage() {
                 autoPaging: 'text',
                 html2canvas: {
                     scale: 1 / 1.5,
+                    height: sourceElement.clientHeight / 2,
                 }
             });
         } catch (error) {
