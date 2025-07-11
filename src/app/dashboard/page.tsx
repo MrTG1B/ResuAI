@@ -240,7 +240,7 @@ export default function DashboardPage() {
                              <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
                                 <CardTitle>No Portfolios Yet</CardTitle>
                                 <CardDescription className="mt-2 mb-4">You haven't created a portfolio.</CardDescription>
-                                <Button asChild variant="secondary">
+                                <Button asChild>
                                     <Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create One Now</Link>
                                 </Button>
                             </div>
