@@ -155,7 +155,12 @@ export default function ProfilePage() {
               </div>
               
               <div className="space-y-4">
-                <Label className="text-lg font-semibold">Social Links</Label>
+                <div className="flex items-center gap-4">
+                    <Label className="text-lg font-semibold">Social Links</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ platform: "", url: "" })}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Social Link
+                    </Button>
+                </div>
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex items-end gap-2">
                     <div className="grid gap-1.5 flex-grow">
@@ -183,9 +188,6 @@ export default function ProfilePage() {
                     </Button>
                   </div>
                 ))}
-                <Button type="button" variant="outline" onClick={() => append({ platform: "", url: "" })}>
-                  <PlusCircle className="mr-2 h-4 w-4" /> Add Social Link
-                </Button>
               </div>
               
               <div className="flex justify-end">
