@@ -10,9 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
-import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
-import { type AnalyzeResumeInput } from '@/ai/flows/resume-analysis';
-import { type SavedEditorState, type ChatMessage } from '@/types/resume';
+import { parseResumeAction } from '@/app/actions';
+import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
 import pdfMake from "pdfmake/build/pdfmake";
@@ -117,41 +116,51 @@ export default function ResumeEditorPage() {
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
-
+    
         setIsParsing(true);
-        setEditorState(null);
-        sessionStorage.removeItem('resumeEditorState');
-
+    
         const reader = new FileReader();
         reader.readAsDataURL(file);
+    
         reader.onload = async () => {
             try {
                 const uploadedResumeDataUri = reader.result as string;
-                
+    
+                // Immediately set state to show PDF preview
+                const previewState: SavedEditorState = {
+                    htmlContent: null, // Set htmlContent to null to ensure iframe is shown
+                    chatHistory: [],
+                    fileName: file.name,
+                    initialPreviewUri: uploadedResumeDataUri,
+                };
+                handleEditorStateUpdate(previewState);
+                setIsParsing(false); // Stop the main parsing loader
+    
+                // Now, parse in the background and update the state when done
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
-
+    
                 if (result.success && result.data) {
-                    const newState: SavedEditorState = {
+                    const finalState: SavedEditorState = {
                         htmlContent: result.data.htmlContent,
                         chatHistory: [],
                         fileName: file.name,
                         initialPreviewUri: uploadedResumeDataUri,
                     };
-                    handleEditorStateUpdate(newState);
-                    toast({ title: "Resume Ready", description: "You can now edit your resume with AI." });
+                    handleEditorStateUpdate(finalState);
+                    toast({ title: "Resume Ready", description: "Your resume has been parsed. You can now use the AI assistant to edit it." });
                 } else {
                     throw new Error(result.error || "Failed to parse resume.");
                 }
             } catch (error: any) {
                 toast({ title: "Parsing Failed", description: error.message, variant: "destructive" });
-            } finally {
                 setIsParsing(false);
             }
         };
+    
         reader.onerror = () => {
-          setIsParsing(false);
-          toast({ title: "File Read Error", description: "There was an error reading the file.", variant: "destructive" });
-        }
+            setIsParsing(false);
+            toast({ title: "File Read Error", description: "There was an error reading the file.", variant: "destructive" });
+        };
     };
 
     const handleDownload = async () => {
@@ -187,50 +196,44 @@ export default function ResumeEditorPage() {
 
 
     const handleConvertToPortfolio = async () => {
-        if (!currentUser || !db) {
-            toast({
-                title: "Authentication Error",
-                description: "Please log in to create a portfolio.",
-                variant: "destructive",
-            });
-            return;
+      if (!currentUser || !editorState) {
+        toast({
+          title: "Error",
+          description: "Cannot create portfolio. Missing user or resume data.",
+          variant: "destructive",
+        });
+        return;
+      }
+    
+      setIsConverting(true);
+    
+      try {
+        // Use the initial uploaded URI for the highest fidelity analysis
+        const analysisInput = { resumeDataUri: editorState.initialPreviewUri || '' };
+        if (!analysisInput.resumeDataUri) {
+          throw new Error("No resume file has been uploaded to create a portfolio from.");
         }
     
-        setIsConverting(true);
+        const result = await analyzeResumeAction(currentUser.uid, analysisInput);
     
-        try {
-            let analysisInput: AnalyzeResumeInput;
-
-            if (editorState?.htmlContent) {
-                const htmlDataUri = `data:text/html;base64,${btoa(unescape(encodeURIComponent(editorState.htmlContent)))}`;
-                analysisInput = { resumeDataUri: htmlDataUri };
-            } else if (editorState?.initialPreviewUri) {
-                analysisInput = { resumeDataUri: editorState.initialPreviewUri };
-            } else {
-                throw new Error("No resume content available to create a portfolio.");
-            }
-
-            const result = await analyzeResumeAction(analysisInput);
-    
-            if (result.success && result.data) {
-                await setDoc(doc(db, "portfolios", currentUser.uid), result.data);
-                toast({
-                    title: "Portfolio Created!",
-                    description: "Redirecting you to your new portfolio page.",
-                });
-                router.push("/portfolio");
-            } else {
-                throw new Error(result.error || "Failed to analyze resume. Please check the file format and try again.");
-            }
-        } catch (error: any) {
-            toast({
-                title: "Failed to build portfolio",
-                description: error.message,
-                variant: "destructive",
-            });
-        } finally {
-            setIsConverting(false);
+        if (result.success && result.data?.id) {
+          toast({
+            title: "Portfolio Created!",
+            description: "Redirecting you to your new portfolio page.",
+          });
+          router.push(`/portfolio?id=${result.data.id}`);
+        } else {
+          throw new Error(result.error || "Failed to create portfolio.");
         }
+      } catch (error: any) {
+        toast({
+          title: "Failed to build portfolio",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsConverting(false);
+      }
     };
     
     const handleAnalyzeResume = () => {
@@ -288,10 +291,10 @@ export default function ResumeEditorPage() {
 
     const editorActions = (
         <div className="flex items-center justify-end gap-2 flex-grow">
-            <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!editorState || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
+            <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
                 {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Analyze Resume"}
             </Button>
-            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!editorState || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
+            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
                 {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
             </Button>
             <Button onClick={handleConvertToPortfolio} size="sm" disabled={!editorState || isConverting || isParsing || isAnalyzing}>
@@ -342,7 +345,9 @@ export default function ResumeEditorPage() {
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="py-2 px-6">
-                                    <CardTitle className="text-lg font-normal">Live Resume Preview</CardTitle>
+                                    <CardTitle className="text-lg font-normal">
+                                        {editorState.htmlContent ? "Live Resume Preview" : "Original Resume Preview"}
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start overflow-auto">
                                     {editorState.htmlContent ? (
@@ -394,3 +399,5 @@ export default function ResumeEditorPage() {
         </div>
     );
 }
+
+    

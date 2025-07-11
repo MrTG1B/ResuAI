@@ -22,8 +22,10 @@ export interface CoachChatResponse {
 }
 
 export interface SavedEditorState {
-    htmlContent: string;
+    htmlContent: string | null;
     chatHistory: ChatMessage[];
     fileName?: string;
     initialPreviewUri?: string;
 }
+
+    
