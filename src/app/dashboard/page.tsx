@@ -5,28 +5,26 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, getDoc, doc } from '@/lib/firebase';
+import { auth, db, getDoc, doc, collection, getDocs, query, orderBy } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
+import { type PortfolioData } from '@/types/portfolio';
+import Image from 'next/image';
 
-function SavedResumeSkeleton() {
+function SavedItemSkeleton({ title, description }: { title: string, description: string }) {
     return (
         <Card className="shadow-lg">
             <CardHeader>
-                <CardTitle>Your Saved Resume</CardTitle>
-                <CardDescription>Loading your last editing session...</CardDescription>
+                <CardTitle>{title}</CardTitle>
+                <CardDescription>{description}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex items-center justify-center bg-muted/50 rounded-md m-6 mt-0 min-h-[200px]">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </CardContent>
-            <CardFooter className="flex justify-end gap-2">
-                <Button disabled><Edit className="mr-2 h-4 w-4" /> Continue Editing</Button>
-                <Button variant="outline" disabled>Start New</Button>
-            </CardFooter>
         </Card>
     );
 }
@@ -61,6 +59,9 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [savedResume, setSavedResume] = useState<SavedEditorState | null>(null);
   const [isResumeLoading, setIsResumeLoading] = useState(true);
+  const [portfolios, setPortfolios] = useState<PortfolioData[]>([]);
+  const [isPortfolioLoading, setIsPortfolioLoading] = useState(true);
+
 
   useEffect(() => {
     if (!auth) {
@@ -71,6 +72,8 @@ export default function DashboardPage() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
+        
+        // Fetch resume
         try {
             const resumeDoc = await getDoc(doc(db, "resumeEditorState", user.uid));
             if (resumeDoc.exists()) {
@@ -80,6 +83,18 @@ export default function DashboardPage() {
             console.error("Failed to fetch saved resume:", error);
         } finally {
             setIsResumeLoading(false);
+        }
+        
+        // Fetch portfolios
+        try {
+            const q = query(collection(db, `users/${user.uid}/portfolios`), orderBy('createdAt', 'desc'));
+            const querySnapshot = await getDocs(q);
+            const userPortfolios = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PortfolioData));
+            setPortfolios(userPortfolios);
+        } catch (error) {
+            console.error("Failed to fetch portfolios:", error);
+        } finally {
+            setIsPortfolioLoading(false);
         }
       } else {
         router.push('/login');
@@ -157,7 +172,7 @@ export default function DashboardPage() {
                     </div>
                     
                     {isResumeLoading ? (
-                        <SavedResumeSkeleton />
+                        <SavedItemSkeleton title="Your Saved Resume" description="Loading your last editing session..."/>
                     ) : savedResume ? (
                         <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                             <CardHeader>
@@ -197,15 +212,46 @@ export default function DashboardPage() {
                 <div className="space-y-8">
                      <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '300ms' }}>
                         <CardHeader>
-                            <CardTitle>Your Portfolio</CardTitle>
-                            <CardDescription>View, edit, and share your generated portfolio.</CardDescription>
+                            <CardTitle>Your Portfolios</CardTitle>
+                            <CardDescription>View, edit, and share your generated portfolios.</CardDescription>
                         </CardHeader>
-                        <CardContent className="flex-grow">
-                            <p className="text-sm text-muted-foreground">Once you've generated a portfolio, you can access it here at any time to make edits or get a shareable link.</p>
+                        <CardContent className="flex-grow space-y-4">
+                            {isPortfolioLoading ? (
+                                <div className="flex items-center justify-center min-h-[100px]">
+                                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                </div>
+                            ) : portfolios.length > 0 ? (
+                                <ul className="space-y-3">
+                                    {portfolios.map(p => (
+                                        <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                            <div className='flex items-center gap-3'>
+                                                <Image 
+                                                    src={p.personalInfo?.profilePictureDataUri || 'https://placehold.co/40x40.png'} 
+                                                    alt="avatar" 
+                                                    width={40} height={40} 
+                                                    className="rounded-full object-cover"
+                                                />
+                                                <div>
+                                                    <p className="font-semibold text-sm">{p.title || "Untitled Portfolio"}</p>
+                                                    <p className="text-xs text-muted-foreground">{p.personalInfo?.title || 'No title'}</p>
+                                                </div>
+                                            </div>
+                                            <Button variant="ghost" size="sm" asChild>
+                                                <Link href={`/portfolio?id=${p.id}`}>
+                                                    <Eye className="mr-2 h-4 w-4"/>
+                                                    View
+                                                </Link>
+                                            </Button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-sm text-muted-foreground text-center py-4">You haven't created any portfolios yet.</p>
+                            )}
                         </CardContent>
                         <CardFooter>
-                            <Button asChild>
-                                <Link href="/portfolio">Go to My Portfolio <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                            <Button asChild className="w-full">
+                                <Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create New Portfolio</Link>
                             </Button>
                         </CardFooter>
                     </Card>

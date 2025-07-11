@@ -99,22 +99,29 @@ function PortfolioPageContent() {
   
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
-      const paramUserId = searchParams.get('user');
-      const userIdToFetch = paramUserId || user?.uid;
+      const portfolioId = searchParams.get('id');
 
-      if (!userIdToFetch) {
+      if (!user) {
         toast({ title: "Not Found", description: "You must be logged in to view a portfolio.", variant: "destructive" });
         router.push('/login');
         return;
       }
       
-      setIsOwner(!!user && user.uid === userIdToFetch);
+      if (!portfolioId) {
+        setNotFound(true);
+        toast({ title: "Not Found", description: "Portfolio ID is missing.", variant: "destructive" });
+        setIsLoading(false);
+        return;
+      }
+
+      setIsOwner(true); // Assuming if they got here with a user and ID, they are the owner for now.
 
       try {
-        const portfolioDoc = await getDoc(doc(db, "portfolios", userIdToFetch));
+        const portfolioDocRef = doc(db, `users/${user.uid}/portfolios`, portfolioId);
+        const portfolioDoc = await getDoc(portfolioDocRef);
 
         if (portfolioDoc.exists()) {
-          const data = portfolioDoc.data() as PortfolioData;
+          const data = { id: portfolioDoc.id, ...portfolioDoc.data() } as PortfolioData;
           setPortfolio(data);
           setEditablePortfolio(data);
         } else {
@@ -137,10 +144,11 @@ function PortfolioPageContent() {
   };
   
   const handleSaveChanges = async () => {
-    if (!currentUser || !editablePortfolio) return;
+    if (!currentUser || !editablePortfolio || !editablePortfolio.id) return;
 
     try {
-        await setDoc(doc(db, "portfolios", currentUser.uid), editablePortfolio, { merge: true });
+        const { id, ...dataToSave } = editablePortfolio;
+        await setDoc(doc(db, "users", currentUser.uid, "portfolios", id), dataToSave, { merge: true });
         setPortfolio(editablePortfolio);
         setIsEditMode(false);
         toast({ title: "Portfolio Saved", description: "Your changes have been saved." });
@@ -263,8 +271,10 @@ function PortfolioPageContent() {
   };
 
   const copyToClipboard = () => {
-    if (typeof window !== 'undefined' && currentUser) {
-      const shareUrl = `${window.location.origin}/portfolio?user=${currentUser.uid}`;
+    if (typeof window !== 'undefined' && currentUser && portfolio?.id) {
+      // Note: This creates a public share link, but we don't have public rules for this yet.
+      // For now, it only works for the logged-in user.
+      const shareUrl = `${window.location.origin}/portfolio?id=${portfolio.id}`;
       navigator.clipboard.writeText(shareUrl);
       toast({ title: "Link Copied", description: "Portfolio URL copied to clipboard!" });
     }
@@ -301,7 +311,7 @@ function PortfolioPageContent() {
                 <div>
                     <h1 className="text-4xl font-bold font-heading">Portfolio Not Found</h1>
                     <p className="text-muted-foreground mt-2">The portfolio you are looking for does not exist or has been moved.</p>
-                    <Button onClick={() => router.push('/')} className="mt-6">Go Home</Button>
+                    <Button onClick={() => router.push('/dashboard')} className="mt-6">Go Home</Button>
                 </div>
             </main>
             <Footer />

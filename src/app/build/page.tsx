@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function BuildPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function BuildPage() {
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setIsAuthenticated(true);
+        setCurrentUser(user);
       } else {
         router.push('/login');
       }
@@ -50,7 +50,7 @@ export default function BuildPage() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!currentUser) {
     return null;
   }
 
@@ -69,7 +69,7 @@ export default function BuildPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResumeForm />
+              <ResumeForm user={currentUser} />
             </CardContent>
           </Card>
         </div>

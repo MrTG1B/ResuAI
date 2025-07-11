@@ -1,3 +1,6 @@
+
+import { type Timestamp } from "firebase/firestore";
+
 export interface SocialLink {
   platform: string;
   url: string;
@@ -53,6 +56,9 @@ export interface ColorPalette {
 }
 
 export interface PortfolioData {
+  id?: string;
+  title?: string;
+  createdAt?: Timestamp | any;
   personalInfo: PersonalInfo;
   summary: string;
   experience: Experience[];

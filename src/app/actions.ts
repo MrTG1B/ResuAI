@@ -10,14 +10,20 @@ import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coac
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { type PortfolioData, type Project } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-export async function analyzeResumeAction(input: AnalyzeResumeInput) {
+export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
   try {
     // Step 1: Analyze resume for text content, get an avatar prompt, and color palette
     const analysisResult = await analyzeResumeFlow(input);
     
     // Step 2: The portfolio draft is now a structured object, no parsing needed.
     const portfolioDraft: Partial<PortfolioData> = analysisResult.portfolioDraft;
+
+    // Add a title and creation date
+    portfolioDraft.title = `Portfolio from ${new Date().toLocaleDateString()}`;
+    portfolioDraft.createdAt = serverTimestamp();
 
     // Step 3: Add the color palette
     portfolioDraft.colorPalette = analysisResult.colorPalette;
@@ -55,7 +61,14 @@ export async function analyzeResumeAction(input: AnalyzeResumeInput) {
         }
     }
 
-    return { success: true, data: portfolioDraft };
+    // Step 6: Save as a new document in the user's portfolios subcollection
+    if (!db) {
+      throw new Error("Firestore is not initialized.");
+    }
+    const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
+    const newDocRef = await addDoc(portfolioCollectionRef, portfolioDraft);
+    
+    return { success: true, data: { ...portfolioDraft, id: newDocRef.id } };
   } catch (error) {
     console.error("Error analyzing resume:", error);
     // It's good practice to not expose detailed internal errors to the client.

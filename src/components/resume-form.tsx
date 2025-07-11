@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeResumeAction } from "@/app/actions";
-import { auth, db, doc, setDoc } from "@/lib/firebase";
 import { useDynamicText } from "@/hooks/use-dynamic-text";
+import { type User } from "firebase/auth";
 
 const analysisTexts = [
   "Analyzing...",
@@ -20,7 +20,7 @@ const analysisTexts = [
 ];
 
 
-export function ResumeForm() {
+export function ResumeForm({ user }: { user: User }) {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +47,7 @@ export function ResumeForm() {
       return;
     }
     
-    if (!auth?.currentUser || !db) {
+    if (!user) {
       toast({
         title: "Authentication Error",
         description: "Please log in to create a portfolio.",
@@ -57,20 +57,18 @@ export function ResumeForm() {
     }
 
     setIsLoading(true);
-    const user = auth.currentUser;
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async () => {
       try {
         const resumeDataUri = reader.result as string;
-        const result = await analyzeResumeAction({ resumeDataUri });
+        const result = await analyzeResumeAction(user.uid, { resumeDataUri });
 
-        if (result.success && result.data) {
-          await setDoc(doc(db, "portfolios", user.uid), result.data);
-          router.push("/portfolio");
+        if (result.success && result.data?.id) {
+          router.push(`/portfolio?id=${result.data.id}`);
         } else {
-          throw new Error(result.error || "Analysis failed");
+          throw new Error(result.error || "Analysis failed to return a portfolio ID.");
         }
       } catch (error: any) {
         toast({
