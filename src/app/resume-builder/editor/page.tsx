@@ -231,26 +231,16 @@ export default function ResumeEditorPage() {
         try {
             const pdf = new jsPDF({
                 orientation: 'p',
-                unit: 'px',
+                unit: 'pt',
                 format: 'a4',
-                hotfixes: ['px_scaling'],
             });
-    
-            // Use the exact width of the preview element for rendering
-            const contentWidth = sourceElement.offsetWidth;
     
             await pdf.html(sourceElement, {
-                html2canvas: {
-                    scale: pdf.internal.pageSize.getWidth() / contentWidth, // Scale based on width
-                    useCORS: true,
+                callback: function (pdf) {
+                    pdf.save('resume.pdf');
                 },
                 autoPaging: 'text',
-                x: 0,
-                y: 0,
-                width: contentWidth, // Set the width for the PDF renderer
-                windowWidth: contentWidth, // Ensure rendering window matches content width
             });
-            pdf.save('resume.pdf');
         } catch (error) {
             console.error('PDF Download error:', error);
             toast({ title: "Download failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
