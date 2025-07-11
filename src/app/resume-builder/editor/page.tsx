@@ -240,6 +240,9 @@ export default function ResumeEditorPage() {
                     pdf.save('resume.pdf');
                 },
                 autoPaging: 'text',
+                html2canvas: {
+                    scale: 1 / 1.5,
+                }
             });
         } catch (error) {
             console.error('PDF Download error:', error);
@@ -455,7 +458,3 @@ export default function ResumeEditorPage() {
         </div>
     );
 }
-
-    
-
-    
