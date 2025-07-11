@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, db, doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs } from '@/lib/firebase';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
-import { parseResumeAction } from '@/app/actions';
+import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
@@ -41,7 +41,7 @@ const applyingSuggestionsTexts = [
 ];
 
 
-export default function ResumeEditorPage() {
+function ResumeEditorPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { toast } = useToast();
@@ -217,7 +217,11 @@ export default function ResumeEditorPage() {
                         initialPreviewUri: uploadedResumeDataUri,
                     };
                     // Instead of updating, this will now create a new document
-                    await saveStateToFirestore(finalState, null);
+                    const newId = await saveStateToFirestore(finalState, null);
+                    if (newId) {
+                       setEditorState(finalState);
+                       setResumeId(newId);
+                    }
                 } else {
                     throw new Error(result.error || "Failed to parse resume.");
                 }
@@ -368,7 +372,7 @@ export default function ResumeEditorPage() {
             <Button onClick={handleDownload} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
                 {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
             </Button>
-            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!editorState || isConverting || isParsing || isAnalyzing}>
+            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!editorState || isConverting || isParsing || isAnalyzing || !editorState.initialPreviewUri}>
                 {isConverting ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -421,7 +425,15 @@ export default function ResumeEditorPage() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start overflow-auto">
-                                    {editorState.htmlContent ? (
+                                    {editorState.initialPreviewUri && !editorState.htmlContent ? (
+                                        <iframe 
+                                            src={`${editorState.initialPreviewUri}#toolbar=0&navpanes=0`} 
+                                            title="Resume Preview"
+                                            width="100%" 
+                                            height="100%" 
+                                            className="border-none"
+                                        />
+                                    ) : (
                                         <div
                                             ref={livePreviewRef}
                                             className="bg-white text-black shadow-lg"
@@ -433,20 +445,6 @@ export default function ResumeEditorPage() {
                                             }}
                                             dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                         />
-                                    ) : (
-                                        editorState.initialPreviewUri ? (
-                                            <iframe 
-                                              src={`${editorState.initialPreviewUri}#toolbar=0&navpanes=0`} 
-                                              title="Resume Preview"
-                                              width="100%" 
-                                              height="100%" 
-                                              className="border-none"
-                                            />
-                                        ) : (
-                                            <div className="text-center text-muted-foreground">
-                                                <p>Loading preview...</p>
-                                            </div>
-                                        )
                                     )}
                                 </CardContent>
                             </Card>
@@ -469,4 +467,17 @@ export default function ResumeEditorPage() {
             </main>
         </div>
     );
+}
+
+export default function ResumeEditorPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex flex-col min-h-screen items-center justify-center bg-background">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <p className="mt-4 text-muted-foreground">Loading Editor...</p>
+            </div>
+        }>
+            <ResumeEditorPageContent />
+        </Suspense>
+    )
 }
