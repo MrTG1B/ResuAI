@@ -114,6 +114,12 @@ export default function ProfilePage() {
         const docSnap = await getDoc(profileDocRef);
         if (docSnap.exists()) {
           reset(docSnap.data() as ProfileFormData);
+        } else {
+          // Pre-fill from auth if profile is new
+          reset({
+            name: user.displayName || '',
+            email: user.email || '',
+          });
         }
       } else {
         router.push('/login');
@@ -245,7 +251,7 @@ export default function ProfilePage() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="website">Website/Portfolio</Label>
-                          <Input id="website" {...register("website")} placeholder="e.g., https://your-portfolio.com" />
+                          <Input id="website" {...register("website")} placeholder="https://your-portfolio.com" />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="location">Location</Label>
