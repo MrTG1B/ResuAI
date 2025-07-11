@@ -241,6 +241,7 @@ export default function ResumeEditorPage() {
                 },
                 autoPaging: 'text',
                 width: pdf.internal.pageSize.getWidth(),
+                windowWidth: pdf.internal.pageSize.getWidth() * 2,
             });
         } catch (error) {
             console.error('PDF Download error:', error);
