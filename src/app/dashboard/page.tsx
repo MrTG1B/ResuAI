@@ -17,7 +17,7 @@ import Image from 'next/image';
 
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
     return (
-        <Card className="shadow-lg hover:shadow-primary/10 transition-shadow duration-300 flex flex-col h-full">
+        <Card className="shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 flex flex-col h-full">
             <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                     <Icon className="h-6 w-6 text-primary" />
