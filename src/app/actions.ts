@@ -10,7 +10,7 @@ import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coac
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { type PortfolioData, type Project } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
-import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
@@ -134,4 +134,32 @@ export async function coachChatAction(input: CoachChatInput) {
     console.error("Error in coach chat:", error);
     return { success: false, error: "The AI coach is unavailable. Please try again later." };
   }
+}
+
+export async function deleteResumeAction(userId: string, resumeId: string) {
+    if (!userId || !resumeId) {
+        return { success: false, error: "User ID and Resume ID are required." };
+    }
+    try {
+        if (!db) throw new Error("Firestore is not initialized.");
+        await deleteDoc(doc(db, `users/${userId}/resumes`, resumeId));
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting resume:", error);
+        return { success: false, error: "Failed to delete resume." };
+    }
+}
+
+export async function deletePortfolioAction(userId: string, portfolioId: string) {
+    if (!userId || !portfolioId) {
+        return { success: false, error: "User ID and Portfolio ID are required." };
+    }
+    try {
+        if (!db) throw new Error("Firestore is not initialized.");
+        await deleteDoc(doc(db, `users/${userId}/portfolios`, portfolioId));
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting portfolio:", error);
+        return { success: false, error: "Failed to delete portfolio." };
+    }
 }

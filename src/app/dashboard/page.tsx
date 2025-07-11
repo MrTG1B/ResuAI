@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, getDoc, doc, collection, getDocs, query, orderBy, deleteDoc } from '@/lib/firebase';
+import { auth, db, doc, collection, getDocs, query, orderBy } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -15,6 +15,8 @@ import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { deletePortfolioAction, deleteResumeAction } from '../actions';
+import { useToast } from '@/hooks/use-toast';
 
 
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
@@ -43,11 +45,12 @@ function ToolCard({ href, icon: Icon, title, description, actionText }: { href: 
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [resumes, setResumes] = useState<(SavedEditorState & {id: string})[]>([]);
   const [isResumeLoading, setIsResumeLoading] = useState(true);
-  const [portfolios, setPortfolios] = useState<PortfolioData[]>([]);
+  const [portfolios, setPortfolios] = useState<(PortfolioData & {id: string})[]>([]);
   const [isPortfolioLoading, setIsPortfolioLoading] = useState(true);
   
   const MAX_RESUMES = 10;
@@ -83,7 +86,7 @@ export default function DashboardPage() {
         try {
             const portfolioQuery = query(collection(db, `users/${user.uid}/portfolios`), orderBy('createdAt', 'desc'));
             const portfolioSnapshot = await getDocs(portfolioQuery);
-            const userPortfolios = portfolioSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PortfolioData));
+            const userPortfolios = portfolioSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PortfolioData & {id: string}));
             setPortfolios(userPortfolios);
         } catch (error) {
             console.error("Failed to fetch portfolios:", error);
@@ -114,10 +117,32 @@ export default function DashboardPage() {
     if (!confirm("Are you sure you want to delete this resume? This action cannot be undone.")) return;
 
     try {
-        await deleteDoc(doc(db, `users/${user.uid}/resumes`, resumeId));
-        setResumes(prev => prev.filter(r => r.id !== resumeId));
-    } catch (error) {
-        console.error("Error deleting resume:", error);
+        const result = await deleteResumeAction(user.uid, resumeId);
+        if (result.success) {
+            setResumes(prev => prev.filter(r => r.id !== resumeId));
+            toast({ title: "Resume Deleted", description: "The resume has been successfully deleted." });
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error: any) {
+        toast({ title: "Error", description: error.message || "Failed to delete resume.", variant: "destructive" });
+    }
+  }
+
+  const handleDeletePortfolio = async (portfolioId: string) => {
+    if (!user) return;
+    if (!confirm("Are you sure you want to delete this portfolio? This action cannot be undone.")) return;
+
+    try {
+        const result = await deletePortfolioAction(user.uid, portfolioId);
+        if (result.success) {
+            setPortfolios(prev => prev.filter(p => p.id !== portfolioId));
+            toast({ title: "Portfolio Deleted", description: "The portfolio has been successfully deleted." });
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error: any) {
+        toast({ title: "Error", description: error.message || "Failed to delete portfolio.", variant: "destructive" });
     }
   }
 
@@ -249,7 +274,7 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteResume(r.id)}>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDeleteResume(r.id)}>
                                                 <Trash2 className="h-4 w-4"/>
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
@@ -289,8 +314,8 @@ export default function DashboardPage() {
                         ) : portfolios.length > 0 ? (
                             <ul className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
                                 {portfolios.map(p => (
-                                    <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                                        <div className='flex items-center gap-3 overflow-hidden'>
+                                    <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
+                                        <div className='flex items-center gap-3 overflow-hidden flex-grow cursor-pointer' onClick={() => router.push(`/portfolio?id=${p.id}`)}>
                                             <Image 
                                                 src={p.personalInfo?.profilePictureDataUri || 'https://placehold.co/40x40.png'} 
                                                 alt="avatar" 
@@ -298,16 +323,21 @@ export default function DashboardPage() {
                                                 className="rounded-full object-cover flex-shrink-0"
                                             />
                                             <div className="overflow-hidden">
-                                                <p className="font-semibold text-sm truncate">{p.title || "Untitled Portfolio"}</p>
+                                                <p className="font-semibold text-sm truncate group-hover:underline">{p.title || "Untitled Portfolio"}</p>
                                                 <p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p>
                                             </div>
                                         </div>
-                                        <Button variant="ghost" size="sm" asChild className="flex-shrink-0 ml-2">
-                                            <Link href={`/portfolio?id=${p.id}`}>
-                                                <Eye className="mr-2 h-4 w-4"/>
-                                                View
-                                            </Link>
-                                        </Button>
+                                        <div className="flex items-center flex-shrink-0 ml-2">
+                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePortfolio(p.id)}>
+                                                <Trash2 className="h-4 w-4"/>
+                                            </Button>
+                                            <Button variant="ghost" size="sm" asChild>
+                                                <Link href={`/portfolio?id=${p.id}`}>
+                                                    <Eye className="mr-2 h-4 w-4"/>
+                                                    View
+                                                </Link>
+                                            </Button>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
