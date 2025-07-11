@@ -8,6 +8,7 @@ import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
 import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
+import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
@@ -175,4 +176,14 @@ export async function deletePortfolioAction(userId: string, portfolioId: string)
         console.error("Error deleting portfolio:", error);
         return { success: false, error: "Failed to delete portfolio." };
     }
+}
+
+export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
+  try {
+    const result = await analyzeCertificateFlow(input);
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error("Error analyzing certificate:", error);
+    return { success: false, error: "The AI failed to analyze the certificate. Please check the file and try again." };
+  }
 }

@@ -3,11 +3,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth, db, doc, getDoc, setDoc } from "@/lib/firebase";
+import { analyzeCertificateAction } from "@/app/actions";
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -51,9 +52,7 @@ const certificationSchema = z.object({
   name: z.string().min(1, "Certification name is required"),
   issuingOrganization: z.string().optional(),
   date: z.string().optional(),
-  credentialUrl: z.string().url("Please enter a valid URL").optional(),
-  // We'll store the file as a data URI string in Firestore
-  certificateDataUri: z.string().optional(), 
+  credentialUrl: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
 });
 
 const profileSchema = z.object({
@@ -88,8 +87,9 @@ export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAnalyzingCert, setIsAnalyzingCert] = useState<number | null>(null);
 
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<ProfileFormData>({
+  const { register, handleSubmit, control, reset, setValue, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       socials: [],
@@ -144,31 +144,43 @@ export default function ProfilePage() {
     }
   };
 
-  const handleCertificateUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCertificateUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit
-        toast({ title: "File too large", description: "Please select a file smaller than 2MB.", variant: "destructive" });
-        return;
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      toast({ title: "File too large", description: "Please select a file smaller than 2MB.", variant: "destructive" });
+      return;
+    }
+
+    setIsAnalyzingCert(index);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = async () => {
+      try {
+        const certificateDataUri = reader.result as string;
+        const result = await analyzeCertificateAction({ certificateDataUri });
+
+        if (result.success && result.data) {
+            setValue(`certifications.${index}.name`, result.data.name);
+            setValue(`certifications.${index}.issuingOrganization`, result.data.issuingOrganization);
+            setValue(`certifications.${index}.date`, result.data.date);
+            setValue(`certifications.${index}.credentialUrl`, result.data.credentialUrl);
+            toast({ title: "Certificate Analyzed", description: "Details have been auto-filled." });
+        } else {
+            throw new Error(result.error || "Failed to analyze certificate.");
+        }
+      } catch (error: any) {
+         toast({ title: "Analysis Failed", description: error.message, variant: "destructive" });
+      } finally {
+        setIsAnalyzingCert(null);
+        // Clear file input value
+        if (e.target) e.target.value = '';
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUri = reader.result as string;
-        const updatedCerts = [...certFields];
-        updatedCerts[index] = { ...updatedCerts[index], certificateDataUri: dataUri };
-        
-        // This is a bit of a hack to update the field in react-hook-form
-        // A better approach might involve setValue from useForm, but this works for now.
-        const currentData = control._getWatch("certifications") || [];
-        currentData[index].certificateDataUri = dataUri;
-        control._formValues.certifications = currentData;
-        
-        // Re-render the component to show the change
-        appendCert({ name: "" }, { shouldFocus: false });
-        removeCert(certFields.length);
-        toast({title: "Certificate Uploaded", description: `${file.name} is ready to be saved.`});
-      };
-      reader.readAsDataURL(file);
+    };
+    reader.onerror = () => {
+        toast({ title: "File Read Error", description: "There was an error reading the file.", variant: "destructive" });
+        setIsAnalyzingCert(null);
     }
   };
 
@@ -343,22 +355,26 @@ export default function ProfilePage() {
                     </div>
                     {certFields.map((field, index) => (
                         <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
-                            <Input {...register(`certifications.${index}.name`)} placeholder="Certification Name" />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Input {...register(`certifications.${index}.name`)} placeholder="Certification Name" />
                                 <Input {...register(`certifications.${index}.issuingOrganization`)} placeholder="Issuing Organization" />
                                 <Input {...register(`certifications.${index}.date`)} placeholder="Issue Date" />
+                                <Input {...register(`certifications.${index}.credentialUrl`)} placeholder="Credential URL" />
                             </div>
-                            <Input {...register(`certifications.${index}.credentialUrl`)} placeholder="Credential URL" />
                             <div>
-                               <Label htmlFor={`cert-upload-${index}`} className="text-xs">Upload Certificate (PDF, JPG, PNG)</Label>
-                               <Input 
+                               <Label htmlFor={`cert-upload-${index}`} className="text-sm font-medium">Auto-fill from Certificate</Label>
+                               <div className="flex items-center gap-2">
+                                <Input 
                                  id={`cert-upload-${index}`} 
                                  type="file" 
                                  accept=".pdf,.jpg,.jpeg,.png"
                                  onChange={(e) => handleCertificateUpload(index, e)}
-                                 className="text-xs"
-                               />
-                               {field.certificateDataUri && <p className="text-xs text-green-500 mt-1">Certificate file attached.</p>}
+                                 className="text-xs flex-grow"
+                                 disabled={isAnalyzingCert === index}
+                                />
+                                {isAnalyzingCert === index && <Loader2 className="h-4 w-4 animate-spin" />}
+                               </div>
+                               <p className="text-xs text-muted-foreground mt-1">Upload a PDF or image to have the AI fill in the details automatically.</p>
                             </div>
                             <Button type="button" variant="ghost" size="icon" onClick={() => removeCert(index)} className="absolute top-2 right-2">
                                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -369,7 +385,7 @@ export default function ProfilePage() {
               </Tabs>
               
               <div className="flex justify-end pt-4 border-t">
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" disabled={isSaving || isAnalyzingCert !== null}>
                   {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Profile
                 </Button>
