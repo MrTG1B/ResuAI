@@ -16,10 +16,8 @@ import { type ParsedResume, type ChatMessage } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
 import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
+import vfsFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
-
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 
 const parsingTexts = [
@@ -234,6 +232,11 @@ export default function ResumeEditorPage() {
     
         setIsGeneratingPdf(true);
         try {
+            // Correctly assign the virtual file system for fonts
+            if (pdfMake.vfs === undefined || Object.keys(pdfMake.vfs).length === 0) {
+              pdfMake.vfs = vfsFonts.pdfMake.vfs;
+            }
+
             const html = sourceElement.innerHTML;
             const content = htmlToPdfmake(html);
             const docDefinition = {
