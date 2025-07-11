@@ -15,20 +15,43 @@ import { type SavedEditorState } from '@/types/resume';
 
 function SavedResumeSkeleton() {
     return (
-        <Card className="flex flex-col shadow-lg">
+        <Card className="shadow-lg">
             <CardHeader>
                 <CardTitle>Your Saved Resume</CardTitle>
                 <CardDescription>Loading your last editing session...</CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow flex items-center justify-center bg-muted/50 rounded-md m-6 mt-0">
+            <CardContent className="flex-grow flex items-center justify-center bg-muted/50 rounded-md m-6 mt-0 min-h-[200px]">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </CardContent>
-            <CardFooter className="flex justify-between">
+            <CardFooter className="flex justify-end gap-2">
                 <Button disabled><Edit className="mr-2 h-4 w-4" /> Continue Editing</Button>
                 <Button variant="outline" disabled>Start New</Button>
             </CardFooter>
         </Card>
     );
+}
+
+function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
+    return (
+        <Card className="shadow-lg hover:shadow-primary/10 transition-shadow duration-300 flex flex-col">
+            <CardHeader className="flex-row items-center gap-4 space-y-0">
+                <div className="bg-primary/10 p-3 rounded-lg">
+                    <Icon className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                    <CardTitle className="text-xl font-heading">{title}</CardTitle>
+                </div>
+            </CardHeader>
+            <CardContent className="flex-grow">
+                <p className="text-muted-foreground">{description}</p>
+            </CardContent>
+            <CardFooter>
+                 <Button asChild className="w-full">
+                    <Link href={href}>{actionText} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+            </CardFooter>
+        </Card>
+    )
 }
 
 
@@ -106,89 +129,73 @@ export default function DashboardPage() {
                 </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up">
-                <Card className="shadow-xl border-none col-span-1 md:col-span-2 lg:col-span-3">
-                    <CardContent className="p-0">
-                        <div className="grid grid-cols-1 md:grid-cols-3">
-                            <Link href="/resume-builder/editor" className="group block p-8 hover:bg-primary/5 transition-colors duration-300 rounded-t-lg md:rounded-l-lg md:rounded-tr-none">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-primary/10 p-3 rounded-lg">
-                                        <FileText className="h-6 w-6 text-primary" />
-                                    </div>
-                                    <h2 className="text-xl font-semibold font-heading">AI Resume Editor</h2>
-                                </div>
-                                <p className="mt-3 text-muted-foreground">
-                                    Upload and enhance your resume with AI-powered suggestions, formatting, and content improvements.
-                                </p>
-                                <div className="mt-4 font-semibold text-primary flex items-center gap-2">
-                                    Start Editing
-                                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                </div>
-                            </Link>
-                            
-                            <Link href="/resume-analyzer" className="group block p-8 hover:bg-primary/5 transition-colors duration-300 border-y md:border-y-0 md:border-x">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-primary/10 p-3 rounded-lg">
-                                        <SearchCheck className="h-6 w-6 text-primary" />
-                                    </div>
-                                    <h2 className="text-xl font-semibold font-heading">AI Resume Analyzer</h2>
-                                </div>
-                                <p className="mt-3 text-muted-foreground">
-                                    Get instant feedback on how well your resume matches a specific job description to boost your chances.
-                                </p>
-                                <div className="mt-4 font-semibold text-primary flex items-center gap-2">
-                                    Analyze Resume
-                                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                </div>
-                            </Link>
-                            
-                            <Link href="/build" className="group block p-8 hover:bg-primary/5 transition-colors duration-300 rounded-b-lg md:rounded-r-lg md:rounded-bl-none">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-primary/10 p-3 rounded-lg">
-                                        <LayoutTemplate className="h-6 w-6 text-primary" />
-                                    </div>
-                                    <h2 className="text-xl font-semibold font-heading">AI Portfolio Generator</h2>
-                                </div>
-                                <p className="mt-3 text-muted-foreground">
-                                    Instantly transform your resume into a stunning, professional portfolio website to showcase your work.
-                                </p>
-                                <div className="mt-4 font-semibold text-primary flex items-center gap-2">
-                                    Create Portfolio
-                                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                </div>
-                            </Link>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6" style={{animationDelay: '200ms'}}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                {/* Main Content Column */}
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
+                        <ToolCard 
+                            href="/resume-builder/editor"
+                            icon={FileText}
+                            title="AI Resume Editor"
+                            description="Upload and enhance your resume with AI-powered suggestions and formatting."
+                            actionText="Start Editing"
+                        />
+                        <ToolCard 
+                            href="/resume-analyzer"
+                            icon={SearchCheck}
+                            title="AI Resume Analyzer"
+                            description="Get instant feedback on how well your resume matches a specific job description."
+                            actionText="Analyze Resume"
+                        />
+                         <ToolCard 
+                            href="/build"
+                            icon={LayoutTemplate}
+                            title="AI Portfolio Generator"
+                            description="Instantly transform your resume into a stunning, professional portfolio website."
+                            actionText="Create Portfolio"
+                        />
+                    </div>
+                    
                     {isResumeLoading ? (
                         <SavedResumeSkeleton />
                     ) : savedResume ? (
-                        <Card className="flex flex-col shadow-lg">
+                        <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                             <CardHeader>
                                 <CardTitle>Your Saved Resume</CardTitle>
-                                <CardDescription>Continue where you left off.</CardDescription>
+                                <CardDescription>Continue where you left off or start a new resume.</CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow m-6 mt-0">
-                               <div
-                                    className="bg-white text-black shadow-lg overflow-hidden w-full h-full scale-[0.3] origin-top-left"
-                                    style={{
-                                        width: '8.27in',
-                                        height: '11.69in',
-                                        aspectRatio: '1 / 1.414',
-                                    }}
-                                    dangerouslySetInnerHTML={{ __html: savedResume.htmlContent || '' }}
-                                />
+                               <div className="w-full h-[350px] overflow-hidden rounded-md border bg-white flex justify-center items-start">
+                                    <div
+                                        className="text-black shadow-lg scale-[0.3] origin-top"
+                                        style={{
+                                            width: '8.27in',
+                                            height: '11.69in',
+                                            aspectRatio: '1 / 1.414',
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: savedResume.htmlContent || '' }}
+                                    />
+                               </div>
                             </CardContent>
-                            <CardFooter className="flex justify-between">
-                                <Button onClick={handleContinueEditing}><Edit className="mr-2 h-4 w-4" /> Continue Editing</Button>
+                            <CardFooter className="flex justify-end gap-2">
                                 <Button variant="outline" onClick={handleStartNew}>Start New</Button>
+                                <Button onClick={handleContinueEditing}><Edit className="mr-2 h-4 w-4" /> Continue Editing</Button>
                             </CardFooter>
                         </Card>
-                    ) : null }
+                    ) : (
+                         <Card className="flex flex-col items-center justify-center text-center shadow-lg animate-fade-in-up p-8 min-h-[200px]" style={{ animationDelay: '200ms' }}>
+                            <CardTitle>No Saved Resume</CardTitle>
+                            <CardDescription className="mt-2 mb-4">You haven't saved a resume editing session yet.</CardDescription>
+                            <Button onClick={handleStartNew}>
+                                <Edit className="mr-2 h-4 w-4" /> Create a New Resume
+                            </Button>
+                        </Card>
+                    )}
+                </div>
 
-                    <Card className="flex flex-col shadow-lg">
+                {/* Right Sidebar Column */}
+                <div className="space-y-8">
+                     <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '300ms' }}>
                         <CardHeader>
                             <CardTitle>Your Portfolio</CardTitle>
                             <CardDescription>View, edit, and share your generated portfolio.</CardDescription>
@@ -202,22 +209,22 @@ export default function DashboardPage() {
                             </Button>
                         </CardFooter>
                     </Card>
-                </div>
 
-                <Card className="flex flex-col shadow-lg" style={{animationDelay: '200ms'}}>
-                    <CardHeader>
-                        <CardTitle>Career Hub</CardTitle>
-                        <CardDescription>Learn more about us and our mission.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                        <p className="text-sm text-muted-foreground">Discover how our AI tools can help you accelerate your career journey and stand out to recruiters.</p>
-                    </CardContent>
-                    <CardFooter>
-                        <Button variant="outline" asChild>
-                            <Link href="/about">About ResuAI</Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
+                    <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+                        <CardHeader>
+                            <CardTitle>Career Hub</CardTitle>
+                            <CardDescription>Learn more about us and our mission.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <p className="text-sm text-muted-foreground">Discover how our AI tools can help you accelerate your career journey and stand out to recruiters.</p>
+                        </CardContent>
+                        <CardFooter>
+                            <Button variant="outline" asChild>
+                                <Link href="/about">About ResuAI</Link>
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </div>
             </div>
         </div>
       </main>
