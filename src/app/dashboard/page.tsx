@@ -15,25 +15,11 @@ import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
 
-function SavedItemSkeleton({ title, description }: { title: string, description: string }) {
-    return (
-        <Card className="shadow-lg">
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow flex items-center justify-center bg-muted/50 rounded-md m-6 mt-0 min-h-[200px]">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </CardContent>
-        </Card>
-    );
-}
-
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
     return (
-        <Card className="shadow-lg hover:shadow-primary/10 transition-shadow duration-300 flex flex-col">
-            <CardHeader className="flex-row items-center gap-4 space-y-0">
-                <div className="bg-primary/10 p-3 rounded-lg">
+        <Card className="shadow-lg hover:shadow-primary/10 transition-shadow duration-300 flex flex-col h-full">
+            <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
                     <Icon className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -140,49 +126,53 @@ export default function DashboardPage() {
                     Welcome back, {user.displayName || 'Creator'}!
                 </h1>
                 <p className="mt-2 text-lg text-muted-foreground">
-                    Let's build something amazing today.
+                    Your career toolkit is ready. Let's build something amazing today.
                 </p>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
+                <ToolCard 
+                    href="/resume-builder/editor"
+                    icon={FileText}
+                    title="AI Resume Editor"
+                    description="Upload and enhance your resume with AI-powered suggestions and formatting."
+                    actionText="Open Editor"
+                />
+                <ToolCard 
+                    href="/resume-analyzer"
+                    icon={SearchCheck}
+                    title="AI Resume Analyzer"
+                    description="Get instant feedback on how well your resume matches a specific job description."
+                    actionText="Analyze Resume"
+                />
+                 <ToolCard 
+                    href="/build"
+                    icon={LayoutTemplate}
+                    title="AI Portfolio Generator"
+                    description="Instantly transform your resume into a stunning, professional portfolio website."
+                    actionText="Create Portfolio"
+                />
+            </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                {/* Main Content Column */}
-                <div className="lg:col-span-2 space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
-                        <ToolCard 
-                            href="/resume-builder/editor"
-                            icon={FileText}
-                            title="AI Resume Editor"
-                            description="Upload and enhance your resume with AI-powered suggestions and formatting."
-                            actionText="Start Editing"
-                        />
-                        <ToolCard 
-                            href="/resume-analyzer"
-                            icon={SearchCheck}
-                            title="AI Resume Analyzer"
-                            description="Get instant feedback on how well your resume matches a specific job description."
-                            actionText="Analyze Resume"
-                        />
-                         <ToolCard 
-                            href="/build"
-                            icon={LayoutTemplate}
-                            title="AI Portfolio Generator"
-                            description="Instantly transform your resume into a stunning, professional portfolio website."
-                            actionText="Create Portfolio"
-                        />
-                    </div>
-                    
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                {/* Saved Resume Section */}
+                <Card className="shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                    <CardHeader>
+                        <CardTitle>Your Saved Resume</CardTitle>
+                        <CardDescription>Continue where you left off or create a new one.</CardDescription>
+                    </CardHeader>
                     {isResumeLoading ? (
-                        <SavedItemSkeleton title="Your Saved Resume" description="Loading your last editing session..."/>
+                        <CardContent>
+                             <div className="flex items-center justify-center min-h-[200px]">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        </CardContent>
                     ) : savedResume ? (
-                        <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                            <CardHeader>
-                                <CardTitle>Your Saved Resume</CardTitle>
-                                <CardDescription>Continue where you left off or start a new resume.</CardDescription>
-                            </CardHeader>
+                        <>
                             <CardContent className="flex-grow m-6 mt-0">
-                               <div className="w-full h-[350px] overflow-hidden rounded-md border bg-white flex justify-center items-start">
+                               <div className="w-full h-full max-h-[400px] overflow-hidden rounded-md border bg-white flex justify-center items-start">
                                     <div
-                                        className="text-black shadow-lg scale-[0.3] origin-top"
+                                        className="text-black shadow-lg scale-[0.35] origin-top"
                                         style={{
                                             width: '8.27in',
                                             height: '11.69in',
@@ -196,81 +186,74 @@ export default function DashboardPage() {
                                 <Button variant="outline" onClick={handleStartNew}>Start New</Button>
                                 <Button onClick={handleContinueEditing}><Edit className="mr-2 h-4 w-4" /> Continue Editing</Button>
                             </CardFooter>
-                        </Card>
+                        </>
                     ) : (
-                         <Card className="flex flex-col items-center justify-center text-center shadow-lg animate-fade-in-up p-8 min-h-[200px]" style={{ animationDelay: '200ms' }}>
-                            <CardTitle>No Saved Resume</CardTitle>
-                            <CardDescription className="mt-2 mb-4">You haven't saved a resume editing session yet.</CardDescription>
-                            <Button onClick={handleStartNew}>
-                                <Edit className="mr-2 h-4 w-4" /> Create a New Resume
-                            </Button>
-                        </Card>
-                    )}
-                </div>
-
-                {/* Right Sidebar Column */}
-                <div className="space-y-8">
-                     <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-                        <CardHeader>
-                            <CardTitle>Your Portfolios</CardTitle>
-                            <CardDescription>View, edit, and share your generated portfolios.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-grow space-y-4">
-                            {isPortfolioLoading ? (
-                                <div className="flex items-center justify-center min-h-[100px]">
-                                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                                </div>
-                            ) : portfolios.length > 0 ? (
-                                <ul className="space-y-3">
-                                    {portfolios.map(p => (
-                                        <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                                            <div className='flex items-center gap-3'>
-                                                <Image 
-                                                    src={p.personalInfo?.profilePictureDataUri || 'https://placehold.co/40x40.png'} 
-                                                    alt="avatar" 
-                                                    width={40} height={40} 
-                                                    className="rounded-full object-cover"
-                                                />
-                                                <div>
-                                                    <p className="font-semibold text-sm">{p.title || "Untitled Portfolio"}</p>
-                                                    <p className="text-xs text-muted-foreground">{p.personalInfo?.title || 'No title'}</p>
-                                                </div>
-                                            </div>
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={`/portfolio?id=${p.id}`}>
-                                                    <Eye className="mr-2 h-4 w-4"/>
-                                                    View
-                                                </Link>
-                                            </Button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-sm text-muted-foreground text-center py-4">You haven't created any portfolios yet.</p>
-                            )}
+                         <CardContent>
+                            <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
+                                <CardTitle>No Saved Resume</CardTitle>
+                                <CardDescription className="mt-2 mb-4">You haven't started editing a resume yet.</CardDescription>
+                                <Button onClick={handleStartNew}>
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Create a New Resume
+                                </Button>
+                            </div>
                         </CardContent>
+                    )}
+                </Card>
+
+                {/* Saved Portfolios Section */}
+                <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                    <CardHeader>
+                        <CardTitle>Your Portfolios</CardTitle>
+                        <CardDescription>View, edit, and share your generated portfolios.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow space-y-4">
+                        {isPortfolioLoading ? (
+                            <div className="flex items-center justify-center min-h-[200px]">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : portfolios.length > 0 ? (
+                            <ul className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
+                                {portfolios.map(p => (
+                                    <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
+                                        <div className='flex items-center gap-3 overflow-hidden'>
+                                            <Image 
+                                                src={p.personalInfo?.profilePictureDataUri || 'https://placehold.co/40x40.png'} 
+                                                alt="avatar" 
+                                                width={40} height={40} 
+                                                className="rounded-full object-cover flex-shrink-0"
+                                            />
+                                            <div className="overflow-hidden">
+                                                <p className="font-semibold text-sm truncate">{p.title || "Untitled Portfolio"}</p>
+                                                <p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p>
+                                            </div>
+                                        </div>
+                                        <Button variant="ghost" size="sm" asChild className="flex-shrink-0 ml-2">
+                                            <Link href={`/portfolio?id=${p.id}`}>
+                                                <Eye className="mr-2 h-4 w-4"/>
+                                                View
+                                            </Link>
+                                        </Button>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                             <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
+                                <CardTitle>No Portfolios Yet</CardTitle>
+                                <CardDescription className="mt-2 mb-4">You haven't created a portfolio.</CardDescription>
+                                <Button asChild variant="secondary">
+                                    <Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create One Now</Link>
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                    {portfolios.length > 0 && (
                         <CardFooter>
                             <Button asChild className="w-full">
                                 <Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create New Portfolio</Link>
                             </Button>
                         </CardFooter>
-                    </Card>
-
-                    <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-                        <CardHeader>
-                            <CardTitle>Career Hub</CardTitle>
-                            <CardDescription>Learn more about us and our mission.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-grow">
-                            <p className="text-sm text-muted-foreground">Discover how our AI tools can help you accelerate your career journey and stand out to recruiters.</p>
-                        </CardContent>
-                        <CardFooter>
-                            <Button variant="outline" asChild>
-                                <Link href="/about">About ResuAI</Link>
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                </div>
+                    )}
+                </Card>
             </div>
         </div>
       </main>
