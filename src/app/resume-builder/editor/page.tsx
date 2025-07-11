@@ -14,7 +14,7 @@ import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type AnalyzeResumeInput } from '@/ai/flows/resume-analysis';
 import { type ParsedResume, type ChatMessage } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import jsPDF from 'jspdf';
+import html2pdf from 'html2pdf.js';
 import { CreativeLoader } from '@/components/creative-loader';
 
 const parsingTexts = [
@@ -229,20 +229,16 @@ export default function ResumeEditorPage() {
     
         setIsGeneratingPdf(true);
         try {
-            const pdf = new jsPDF({
-                orientation: 'p',
-                unit: 'pt',
-                format: 'a4',
-            });
-    
-            await pdf.html(sourceElement, {
-                callback: function (doc) {
-                    doc.save('resume.pdf');
-                },
-                autoPaging: 'text',
-                width: pdf.internal.pageSize.getWidth(),
-                windowWidth: pdf.internal.pageSize.getWidth() * 2,
-            });
+            const opt = {
+                margin: 0,
+                filename: 'resume.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            await html2pdf().from(sourceElement).set(opt).save();
+
         } catch (error) {
             console.error('PDF Download error:', error);
             toast({ title: "Download failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
