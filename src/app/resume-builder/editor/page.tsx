@@ -1,8 +1,8 @@
 
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db, doc, setDoc } from '@/lib/firebase';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { auth, db, doc, setDoc, getDoc } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { Loader2, UploadCloud } from 'lucide-react';
 import { Header } from '@/components/header';
@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
 import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type AnalyzeResumeInput } from '@/ai/flows/resume-analysis';
-import { type ParsedResume, type ChatMessage } from '@/types/resume';
+import { type SavedEditorState, type ChatMessage } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
 import pdfMake from "pdfmake/build/pdfmake";
@@ -50,135 +50,77 @@ export default function ResumeEditorPage() {
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [isConverting, setIsConverting] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    
+    const [editorState, setEditorState] = useState<SavedEditorState | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    
     const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
     
-    const [initialPreviewUri, setInitialPreviewUri] = useState<string | null>(() => {
-        if (typeof window !== "undefined") {
-            return sessionStorage.getItem('resumePreviewUri') || null;
-        }
-        return null;
-    });
-
-    const [resumeData, setResumeData] = useState<ParsedResume | null>(() => {
-        if (typeof window !== "undefined") {
-            const storedResume = sessionStorage.getItem('resumeData');
-            if (storedResume) return JSON.parse(storedResume);
-        }
-        return null;
-    });
-
-    const [resumeDataUri, setResumeDataUri] = useState<string | null>(() => {
-        if (typeof window !== "undefined") {
-            return sessionStorage.getItem('resumeDataUri') || null;
-        }
-        return null;
-    });
-    
-    const [fileName, setFileName] = useState<string>(() => {
-        if (typeof window !== "undefined") {
-            return sessionStorage.getItem('resumeFileName') || "";
-        }
-        return "";
-    });
-
-    const [isLivePreview, setIsLivePreview] = useState(false);
-    const [initialMessages, setInitialMessages] = useState<ChatMessage[]>([]);
-    
     const livePreviewRef = useRef<HTMLDivElement>(null);
+    
+    // Function to save state to Firestore
+    const saveStateToFirestore = useCallback(async (stateToSave: SavedEditorState) => {
+        if (!currentUser || !db) return;
+        try {
+            await setDoc(doc(db, "resumeEditorState", currentUser.uid), stateToSave);
+        } catch (error) {
+            console.error("Failed to save resume state:", error);
+            toast({
+                title: "Sync Error",
+                description: "Could not save changes to the cloud.",
+                variant: "destructive",
+            });
+        }
+    }, [currentUser, toast]);
 
+    // Handle updates to editor state
+    const handleEditorStateUpdate = useCallback((newState: SavedEditorState) => {
+        setEditorState(newState);
+        sessionStorage.setItem('resumeEditorState', JSON.stringify(newState));
+        saveStateToFirestore(newState);
+    }, [saveStateToFirestore]);
+
+    // Initial load effect
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                setIsAuthenticated(true);
+                setCurrentUser(user);
+                
+                // Check session storage first
+                const sessionState = sessionStorage.getItem('resumeEditorState');
+                if (sessionState) {
+                    setEditorState(JSON.parse(sessionState));
+                } else {
+                    // Otherwise, fetch from Firestore
+                    try {
+                        const resumeDoc = await getDoc(doc(db, "resumeEditorState", user.uid));
+                        if (resumeDoc.exists()) {
+                            const dbState = resumeDoc.data() as SavedEditorState;
+                            setEditorState(dbState);
+                            sessionStorage.setItem('resumeEditorState', JSON.stringify(dbState));
+                        }
+                    } catch (error) {
+                        console.error("Failed to load state from Firestore:", error);
+                    }
+                }
+
             } else {
                 router.push('/login');
             }
             setIsLoading(false);
         });
-
-        if (typeof window !== "undefined") {
-            if (sessionStorage.getItem('isLivePreview') === 'true') {
-                setIsLivePreview(true);
-            }
-        }
-
-        const applySuggestions = async () => {
-            const resumeUri = sessionStorage.getItem('resumeForEditingDataUri');
-            const suggestions = sessionStorage.getItem('resumeForEditingSuggestions');
-            const name = sessionStorage.getItem('resumeForEditingFileName');
-    
-            if (resumeUri && suggestions && name) {
-                sessionStorage.removeItem('resumeForEditingDataUri');
-                sessionStorage.removeItem('resumeForEditingSuggestions');
-                sessionStorage.removeItem('resumeForEditingFileName');
-    
-                setIsApplyingSuggestions(true);
-                setFileName(name);
-                setResumeDataUri(resumeUri);
-                setInitialPreviewUri(resumeUri);
-    
-                try {
-                    const parseResult = await parseResumeAction({ resumeDataUri: resumeUri });
-                    if (!parseResult.success || !parseResult.data) {
-                        throw new Error(parseResult.error || "Failed to parse resume.");
-                    }
-                    const originalHtml = parseResult.data.htmlContent;
-                    
-                    const userPromptMessage: ChatMessage = { role: 'user', content: `Based on the previous analysis, please apply the suggestions to my resume.` };
-                    setInitialMessages([userPromptMessage]);
-    
-                    sessionStorage.setItem('resumePreviewUri', resumeUri);
-                    sessionStorage.setItem('resumeDataUri', resumeUri);
-                    sessionStorage.setItem('resumeFileName', name);
-                    sessionStorage.setItem('isLivePreview', 'true');
-    
-                    toast({ title: "Suggestions Applied", description: "The AI has updated your resume with the suggested improvements." });
-    
-                } catch (error: any) {
-                    toast({ title: "Failed to Apply Suggestions", description: error.message, variant: "destructive" });
-                    setFileName("");
-                    setResumeDataUri(null);
-                    setInitialPreviewUri(null);
-                } finally {
-                    setIsApplyingSuggestions(false);
-                }
-            }
-        };
         
-        if (typeof window !== "undefined") {
-            // applySuggestions();
-        }
-
         return () => unsubscribe();
-    }, [router, toast]);
+    }, [router]);
 
-
-    const handleResumeUpdate = (newResumeData: ParsedResume) => {
-        setResumeData(newResumeData);
-        if (typeof window !== 'undefined') {
-            sessionStorage.setItem('resumeData', JSON.stringify(newResumeData));
-        }
-        if (!isLivePreview) {
-            setIsLivePreview(true);
-            if (typeof window !== 'undefined') {
-                sessionStorage.setItem('isLivePreview', 'true');
-            }
-        }
-    };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        setFileName(file.name);
         setIsParsing(true);
-        setResumeData(null);
-        setInitialPreviewUri(null);
-        setIsLivePreview(false);
-        if (typeof window !== 'undefined') {
-            sessionStorage.clear();
-        }
+        setEditorState(null);
+        sessionStorage.removeItem('resumeEditorState');
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -186,39 +128,28 @@ export default function ResumeEditorPage() {
             try {
                 const uploadedResumeDataUri = reader.result as string;
                 
-                setInitialPreviewUri(uploadedResumeDataUri); 
-                setResumeDataUri(uploadedResumeDataUri);
-                if (typeof window !== 'undefined') {
-                    sessionStorage.setItem('resumePreviewUri', uploadedResumeDataUri);
-                    sessionStorage.setItem('resumeDataUri', uploadedResumeDataUri);
-                    sessionStorage.setItem('resumeFileName', file.name);
-                }
-
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
 
                 if (result.success && result.data) {
-                    setResumeData(result.data);
-                    if (typeof window !== 'undefined') {
-                        sessionStorage.setItem('resumeData', JSON.stringify(result.data));
-                    }
+                    const newState: SavedEditorState = {
+                        htmlContent: result.data.htmlContent,
+                        chatHistory: [],
+                        fileName: file.name,
+                        initialPreviewUri: uploadedResumeDataUri,
+                    };
+                    handleEditorStateUpdate(newState);
                     toast({ title: "Resume Ready", description: "You can now edit your resume with AI." });
                 } else {
                     throw new Error(result.error || "Failed to parse resume.");
                 }
             } catch (error: any) {
                 toast({ title: "Parsing Failed", description: error.message, variant: "destructive" });
-                setFileName("");
-                setResumeDataUri(null);
-                setInitialPreviewUri(null);
             } finally {
                 setIsParsing(false);
             }
         };
         reader.onerror = () => {
           setIsParsing(false);
-          setFileName("");
-          setResumeDataUri(null);
-          setInitialPreviewUri(null);
           toast({ title: "File Read Error", description: "There was an error reading the file.", variant: "destructive" });
         }
     };
@@ -256,7 +187,7 @@ export default function ResumeEditorPage() {
 
 
     const handleConvertToPortfolio = async () => {
-        if (!auth?.currentUser || !db) {
+        if (!currentUser || !db) {
             toast({
                 title: "Authentication Error",
                 description: "Please log in to create a portfolio.",
@@ -266,16 +197,15 @@ export default function ResumeEditorPage() {
         }
     
         setIsConverting(true);
-        const user = auth.currentUser;
     
         try {
             let analysisInput: AnalyzeResumeInput;
 
-            if (resumeData?.htmlContent) {
-                const htmlDataUri = `data:text/html;base64,${btoa(unescape(encodeURIComponent(resumeData.htmlContent)))}`;
+            if (editorState?.htmlContent) {
+                const htmlDataUri = `data:text/html;base64,${btoa(unescape(encodeURIComponent(editorState.htmlContent)))}`;
                 analysisInput = { resumeDataUri: htmlDataUri };
-            } else if (resumeDataUri) {
-                analysisInput = { resumeDataUri: resumeDataUri };
+            } else if (editorState?.initialPreviewUri) {
+                analysisInput = { resumeDataUri: editorState.initialPreviewUri };
             } else {
                 throw new Error("No resume content available to create a portfolio.");
             }
@@ -283,7 +213,7 @@ export default function ResumeEditorPage() {
             const result = await analyzeResumeAction(analysisInput);
     
             if (result.success && result.data) {
-                await setDoc(doc(db, "portfolios", user.uid), result.data);
+                await setDoc(doc(db, "portfolios", currentUser.uid), result.data);
                 toast({
                     title: "Portfolio Created!",
                     description: "Redirecting you to your new portfolio page.",
@@ -304,7 +234,7 @@ export default function ResumeEditorPage() {
     };
     
     const handleAnalyzeResume = () => {
-        if (!resumeData?.htmlContent) {
+        if (!editorState?.htmlContent) {
             toast({
                 title: "No Resume Content",
                 description: "There is no resume content to analyze. Please upload or create a resume first.",
@@ -314,11 +244,11 @@ export default function ResumeEditorPage() {
         }
         setIsAnalyzing(true);
         try {
-            const encodedHtml = btoa(unescape(encodeURIComponent(resumeData.htmlContent)));
+            const encodedHtml = btoa(unescape(encodeURIComponent(editorState.htmlContent)));
             const dataUri = `data:text/html;base64,${encodedHtml}`;
             
             sessionStorage.setItem('resumeForAnalysisDataUri', dataUri);
-            sessionStorage.setItem('resumeForAnalysisFileName', fileName || 'Edited Resume');
+            sessionStorage.setItem('resumeForAnalysisFileName', editorState.fileName || 'Edited Resume');
             
             router.push('/resume-analyzer');
 
@@ -354,17 +284,17 @@ export default function ResumeEditorPage() {
         );
     }
 
-    if (!isAuthenticated) return null;
+    if (!currentUser) return null;
 
     const editorActions = (
         <div className="flex items-center justify-end gap-2 flex-grow">
-            <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!resumeData || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
+            <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!editorState || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
                 {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Analyze Resume"}
             </Button>
-            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!resumeData || isGeneratingPdf || isParsing || !isLivePreview || isAnalyzing || isConverting}>
+            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!editorState || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
                 {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
             </Button>
-            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!resumeData?.htmlContent && !resumeDataUri || isConverting || isParsing || isAnalyzing}>
+            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!editorState || isConverting || isParsing || isAnalyzing}>
                 {isConverting ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -374,7 +304,7 @@ export default function ResumeEditorPage() {
         </div>
     );
 
-    const showEditor = (initialPreviewUri || resumeData) && !isParsing;
+    const showEditor = (editorState) && !isParsing;
 
     return (
         <div className="flex flex-col h-screen bg-muted/20">
@@ -399,7 +329,7 @@ export default function ResumeEditorPage() {
                                             <span className="font-semibold">Click to upload</span> or drag and drop
                                             </p>
                                             <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
-                                            {fileName && <p className="mt-4 text-sm font-medium text-primary">{fileName}</p>}
+                                            {editorState?.fileName && <p className="mt-4 text-sm font-medium text-primary">{editorState.fileName}</p>}
                                         </div>
                                         <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" disabled={isParsing} />
                                     </label>
@@ -412,10 +342,10 @@ export default function ResumeEditorPage() {
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="py-2 px-6">
-                                    <CardTitle className="text-lg font-normal">{isLivePreview ? 'Live Resume Preview' : 'Resume Preview'}</CardTitle>
+                                    <CardTitle className="text-lg font-normal">Live Resume Preview</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start overflow-auto">
-                                    {isLivePreview && resumeData ? (
+                                    {editorState.htmlContent ? (
                                         <div
                                             ref={livePreviewRef}
                                             className="bg-white text-black shadow-lg"
@@ -425,12 +355,12 @@ export default function ResumeEditorPage() {
                                                 padding: '0.75in',
                                                 boxSizing: 'border-box',
                                             }}
-                                            dangerouslySetInnerHTML={{ __html: resumeData.htmlContent || '' }}
+                                            dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                         />
                                     ) : (
-                                        initialPreviewUri ? (
+                                        editorState.initialPreviewUri ? (
                                             <iframe 
-                                              src={`${initialPreviewUri}#toolbar=0&navpanes=0`} 
+                                              src={`${editorState.initialPreviewUri}#toolbar=0&navpanes=0`} 
                                               title="Resume Preview"
                                               width="100%" 
                                               height="100%" 
@@ -446,8 +376,12 @@ export default function ResumeEditorPage() {
                             </Card>
                         </div>
                         <div className="lg:col-span-1 h-full min-h-0">
-                             {resumeData ? (
-                                <ResumeChatPanel resume={resumeData} setResume={handleResumeUpdate} disabledRoutes={['/resume-analyzer', '/build']} initialMessages={initialMessages}/>
+                             {editorState ? (
+                                <ResumeChatPanel 
+                                    editorState={editorState}
+                                    setEditorState={handleEditorStateUpdate} 
+                                    disabledRoutes={['/resume-analyzer', '/build']} 
+                                />
                              ) : (
                                  <Card className="h-full flex items-center justify-center">
                                      <CreativeLoader texts={parsingTexts} />

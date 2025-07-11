@@ -12,22 +12,18 @@ import { Textarea } from './ui/textarea';
 import { Button } from "./ui/button";
 import { Send, Paperclip, X } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
-import { type ParsedResume, type ChatMessage } from '@/types/resume';
+import { type SavedEditorState } from '@/types/resume';
 import { editResumeAction } from '@/app/actions';
 import { PulsingDotsLoader } from './pulsing-dots-loader';
 import { Badge } from './ui/badge';
 
 interface ResumeChatPanelProps {
-    resume: ParsedResume;
-    setResume: (resume: ParsedResume) => void;
+    editorState: SavedEditorState;
+    setEditorState: (state: SavedEditorState) => void;
     disabledRoutes?: string[];
-    initialMessages?: ChatMessage[];
 }
 
-export function ResumeChatPanel({ resume, setResume, disabledRoutes = [], initialMessages }: ResumeChatPanelProps) {
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        { role: 'assistant', content: "Hello! I'm here to help you improve your resume. What changes would you like to make? You can also attach documents like certificates for context." }
-    ]);
+export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = [] }: ResumeChatPanelProps) {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [attachments, setAttachments] = useState<{ name: string; dataUri: string }[]>([]);
@@ -35,11 +31,7 @@ export function ResumeChatPanel({ resume, setResume, disabledRoutes = [], initia
     const attachmentInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (initialMessages && initialMessages.length > 0) {
-            setMessages(initialMessages);
-        }
-    }, [initialMessages]);
+    const messages = editorState.chatHistory || [];
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -55,11 +47,11 @@ export function ResumeChatPanel({ resume, setResume, disabledRoutes = [], initia
     }, [messages, isLoading]);
 
     const handleSendMessage = async () => {
-        if ((!input.trim() && attachments.length === 0) || !resume.htmlContent) return;
+        if ((!input.trim() && attachments.length === 0) || !editorState.htmlContent) return;
 
-        const userMessage: ChatMessage = { role: 'user', content: input };
-        const newMessages: ChatMessage[] = [...messages, userMessage];
-        setMessages(newMessages);
+        const userMessage = { role: 'user', content: input };
+        const newMessages = [...messages, userMessage];
+        setEditorState({ ...editorState, chatHistory: newMessages });
 
         const currentInput = input;
         const currentAttachments = attachments;
@@ -70,21 +62,25 @@ export function ResumeChatPanel({ resume, setResume, disabledRoutes = [], initia
         
         try {
             const result = await editResumeAction({
-                htmlContent: resume.htmlContent,
+                htmlContent: editorState.htmlContent,
                 prompt: currentInput,
                 attachmentDataUris: currentAttachments.map(a => a.dataUri)
             });
             
             if (result.success && result.data) {
-                setResume({ htmlContent: result.data.newHtmlContent });
-                setMessages(prev => [...prev, { role: 'assistant', content: result.data.response }]);
+                const finalMessages = [...newMessages, { role: 'assistant', content: result.data.response }];
+                setEditorState({ 
+                    ...editorState, 
+                    htmlContent: result.data.newHtmlContent,
+                    chatHistory: finalMessages,
+                });
             } else {
                 toast({ title: "Error", description: result.error, variant: "destructive" });
-                setMessages(messages); // revert on error
+                setEditorState({ ...editorState, chatHistory: messages }); // revert on error
             }
         } catch (error: any) {
             toast({ title: "Request Failed", description: "Could not communicate with the AI. Please try again.", variant: "destructive" });
-            setMessages(messages); // revert on error
+            setEditorState({ ...editorState, chatHistory: messages }); // revert on error
         } finally {
             setIsLoading(false);
         }
@@ -140,6 +136,13 @@ export function ResumeChatPanel({ resume, setResume, disabledRoutes = [], initia
             <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-4">
                 <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
                     <div className="space-y-4">
+                        {messages.length === 0 && (
+                            <div className="flex items-end gap-2 justify-start">
+                                <div className="max-w-xs rounded-lg px-3 py-2 break-words bg-muted">
+                                    <p className="text-sm">Hello! I'm here to help you improve your resume. What changes would you like to make? You can also attach documents like certificates for context.</p>
+                                </div>
+                            </div>
+                        )}
                         {messages.map((message, index) => (
                             <div key={index} className={`flex items-end gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-xs rounded-lg px-3 py-2 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>

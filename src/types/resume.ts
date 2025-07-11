@@ -1,3 +1,4 @@
+
 export interface ParsedResume {
     htmlContent: string;
 }
@@ -18,4 +19,11 @@ export interface JobMatchAnalysis {
 
 export interface CoachChatResponse {
     response: string;
+}
+
+export interface SavedEditorState {
+    htmlContent: string;
+    chatHistory: ChatMessage[];
+    fileName?: string;
+    initialPreviewUri?: string;
 }
