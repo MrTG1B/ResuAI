@@ -247,7 +247,7 @@ function ResumeEditorPageContent() {
     
         setIsGeneratingPdf(true);
         try {
-            pdfMake.vfs = pdfFonts.pdfMake.vfs;
+            pdfMake.vfs = pdfFonts.vfs;
             
             const html = sourceElement.innerHTML;
             const content = htmlToPdfmake(html);
