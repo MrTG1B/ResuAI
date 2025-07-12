@@ -244,10 +244,8 @@ function ResumeEditorPageContent() {
             return;
         }
     
-        // 1. Clone the node to avoid capturing the loader state
         const elementToPrint = sourceElement.cloneNode(true) as HTMLElement;
         
-        // 2. Set the loading state AFTER cloning
         setIsGeneratingPdf(true);
     
         try {
@@ -258,7 +256,6 @@ function ResumeEditorPageContent() {
               // Forcing text-based rendering by removing canvas options
             };
         
-            // Use the cloned element for PDF generation
             await html2pdf().set(opt).from(elementToPrint).save();
 
         } catch (error) {
@@ -266,7 +263,6 @@ function ResumeEditorPageContent() {
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
             toast({ title: "Download failed", description: `Could not generate PDF. Error: ${errorMessage}`, variant: "destructive" });
         } finally {
-            // 3. Unset the loading state
             setIsGeneratingPdf(false);
         }
     };
@@ -386,6 +382,10 @@ function ResumeEditorPageContent() {
 
     const showEditor = (editorState) && !isParsing;
 
+    // Use original PDF for preview if it exists and no edits have happened yet
+    const hasBeenEdited = (editorState?.chatHistory?.length || 0) > 0;
+    const showOriginalPdf = editorState?.initialPreviewUri && !hasBeenEdited;
+    
     return (
         <div className="flex flex-col h-screen bg-muted/20">
             <Header pageActions={showEditor ? editorActions: undefined} />
@@ -432,6 +432,8 @@ function ResumeEditorPageContent() {
                                             <div className="w-full h-full flex items-center justify-center">
                                                 <CreativeLoader texts={generatingPdfTexts} />
                                             </div>
+                                        ) : showOriginalPdf ? (
+                                            <iframe src={editorState.initialPreviewUri} className="w-full h-full border-none" title="Original Resume Preview" />
                                         ) : (
                                             <div
                                                 ref={livePreviewRef}

@@ -46,10 +46,6 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
         }
     }, [messages, isLoading]);
     
-    const handleSuggestionClick = (suggestion: string) => {
-        setInput(suggestion);
-    }
-
     const handleSendMessage = async () => {
         if ((!input.trim() && attachments.length === 0) || !editorState.htmlContent) return;
 
@@ -190,10 +186,6 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
                         )}
                     </div>
                 </ScrollArea>
-                <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleSuggestionClick("Use a professional template")}>Use a professional template</Button>
-                    <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleSuggestionClick("Make my summary more professional")}>Make my summary more professional</Button>
-                </div>
             </CardContent>
             <CardFooter className="p-2 border-t flex flex-col items-start gap-2">
                 {attachments.length > 0 && (
@@ -208,8 +200,20 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
                         ))}
                     </div>
                 )}
-                <div className="relative flex w-full items-center">
-                     <Textarea
+                <div className="flex w-full items-start gap-2">
+                    <input
+                        id="cert-upload"
+                        type="file"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                        ref={attachmentInputRef}
+                        disabled={isLoading}
+                        multiple
+                    />
+                    <Button variant="ghost" size="icon" className="shrink-0" onClick={handleAttachmentClick} aria-label="Attach file" disabled={isLoading}>
+                        <Paperclip className="h-4 w-4" />
+                    </Button>
+                    <Textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => {
@@ -221,27 +225,11 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
                         placeholder="e.g., 'Add a skills section'"
                         disabled={isLoading}
                         rows={1}
-                        className="resize-none w-full pr-24 pl-10 border-none focus-visible:ring-0 shadow-none bg-muted rounded-full"
+                        className="resize-none w-full"
                     />
-                    <div className="absolute left-2 top-1/2 -translate-y-1/2">
-                        <input
-                            id="cert-upload"
-                            type="file"
-                            className="hidden"
-                            onChange={handleFileUpload}
-                            ref={attachmentInputRef}
-                            disabled={isLoading}
-                            multiple
-                        />
-                        <Button variant="ghost" size="icon" className="shrink-0 rounded-full h-8 w-8" onClick={handleAttachmentClick} aria-label="Attach file" disabled={isLoading}>
-                            <Paperclip className="h-4 w-4" />
-                        </Button>
-                    </div>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                        <Button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && attachments.length === 0)} className="shrink-0 rounded-full h-8 w-8" size="icon">
-                            <Send className="h-4 w-4" />
-                        </Button>
-                    </div>
+                    <Button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && attachments.length === 0)} className="shrink-0">
+                        <Send className="h-4 w-4" />
+                    </Button>
                 </div>
             </CardFooter>
         </Card>
