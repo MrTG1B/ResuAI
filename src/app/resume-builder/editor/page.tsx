@@ -248,8 +248,13 @@ function ResumeEditorPageContent() {
         setIsGeneratingPdf(true);
         try {
             // Correctly assign the virtual file system for fonts
-            if (pdfMake.vfs === undefined || Object.keys(pdfMake.vfs).length === 0) {
-              pdfMake.vfs = vfsFonts.pdfMake.vfs;
+            if (vfsFonts.pdfMake) {
+                pdfMake.vfs = vfsFonts.pdfMake.vfs;
+            } else {
+                console.error("vfsFonts.pdfMake is undefined. Check the import.");
+                toast({ title: "Font Error", description: "Could not load fonts for PDF generation.", variant: "destructive" });
+                setIsGeneratingPdf(false);
+                return;
             }
 
             const html = sourceElement.innerHTML;
