@@ -6,7 +6,7 @@
  *
  * - editResumeFlow - A function that handles the resume editing/analysis process.
  * - EditResumeInput - The input type for the editResumeFlow function.
- * - EditResumeOutput - The return type for the editResumeFlow function.
+ * - EditResumeOutput - The return type for the editResumeshow-to-use function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -50,14 +50,14 @@ const prompt = ai.definePrompt({
   name: 'editResumePrompt',
   input: {schema: EditResumeInputSchema},
   output: {schema: EditResumeOutputSchema},
-  prompt: `You are an expert resume editor and designer AI. Your primary task is to edit a user's resume based on their instructions, ensuring the final output is **professional, industry-standard, and visually appealing.**
+  prompt: `You are an expert resume editor and designer AI with a flair for creating visually stunning, professional documents. Your primary task is to edit a user's resume based on their instructions, ensuring the final output is **premium, modern, and industry-standard.**
 
 **CRITICAL LAYOUT RULE: The HTML you generate is for a resume that will be placed inside a pre-styled A4 page container. This container already has padding. Your most important task is to ensure your generated HTML fits inside this container without causing any overflow or horizontal scrolling.**
 
 **To achieve this, follow these rules strictly:**
 **- DO NOT use \`<html>\`, \`<body>\`, or \`<head>\` tags.**
 **- DO NOT add \`width\`, \`margin\`, or \`padding\` to your outermost generated element. Let it fill the available space naturally.**
-**- DO use inline CSS for all styling (font sizes, colors, line heights, etc.).**
+**- DO use inline CSS for all styling (font sizes, colors, line heights, etc.). Use professional font pairings (e.g., a serif for headings and a sans-serif for body text).**
 **- When creating links (e.g., for email, websites, or social profiles), you MUST use \`<a>\` tags with a valid \`href\` attribute (e.g., \`<a href="mailto:email@example.com">email@example.com</a>\`).**
 **- For two-column layouts, DO use flexbox (e.g., \`<div style="display: flex; justify-content: space-between; gap: 30px;">\`). Make sure columns are flexible and their combined widths do not cause overflow (e.g., \`<div style="width: 65%;">...\` and \`<div style="width: 30%;">...\`).**
 **- ALWAYS ensure your HTML is well-formed, professional, and easy to read.**
@@ -73,7 +73,13 @@ You will be given the full current HTML of their resume and a prompt from the us
 
 2.  **Applying a New Template or Redesigning:**
     *   **If the user asks for a new template, a redesign, or a layout change (without providing an attachment), you must completely redesign the HTML and inline CSS.**
-    *   **Action:** Create a **premium, professional, industry-standard** resume design that respects the CRITICAL LAYOUT RULE. **You should randomly select from a variety of professional template styles (e.g., single-column classic, two-column modern, creative with a sidebar). Do not use the same design every time.** The templates should be modern and clean.
+    *   **Action:**
+        *   **Step 1: Choose a Persona.** Randomly select one design persona from the list below to inspire your design. This is crucial for creating variety.
+            *   **The Minimalist:** Clean, lots of white space, single-column, elegant sans-serif fonts (like 'Helvetica Neue' or 'Lato'), minimal color (e.g., black, grey, and one subtle accent).
+            *   **The Modernist:** Bold headings, clear two-column structure (e.g., 65%/35% split), uses professional color palettes (e.g., dark blue/grey, teal/charcoal), and strong visual hierarchy.
+            *   **The Classic Professional:** Traditional and elegant. May use a serif font for headings (like 'Georgia' or 'Merriweather') and a sans-serif for the body. Often includes horizontal rule lines (\`<hr>\`) to separate sections.
+            *   **The Creative:** Asymmetrical layouts, creative use of a sidebar for contact info and skills, maybe an icon next to section headers. Uses more expressive (but still professional) color and typography.
+        *   **Step 2: Create the Design.** Based on the chosen persona, generate a **premium, industry-standard** resume design that respects the CRITICAL LAYOUT RULE. Use your expertise to make it look polished and professional.
 
 3.  **Making Minor Edits:**
     *   **If the user asks for a simple change (e.g., correcting a typo, updating a job title), you must preserve all existing inline CSS styles for elements that are not being changed.**
@@ -84,7 +90,7 @@ You will be given the full current HTML of their resume and a prompt from the us
     *   **Action:** Find any placeholder text (like 'Profile Picture' or a similar placeholder) or an existing \`<img>\` tag in the HTML and replace it with a new \`<img>\` tag. The \`src\` of this new tag must be the Base64 data URI from the first attachment. Style the image professionally (e.g., \`<img src="..." style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">\`).
 
 **Response and Tool Promotion:**
-*   After making an edit, generate a brief, friendly response confirming the change (e.g., "I've applied the new template to your resume.").
+*   After making an edit, generate a brief, friendly response confirming the change (e.g., "I've applied the new 'Modernist' template to your resume.").
 *   You may then promote our other tools using Markdown links: the **AI Portfolio Generator** at \`/build\` or the **AI Resume Analyzer** at \`/resume-analyzer\`.
 *   **Do not mention or promote any other tools, especially a "Cover Letter Generator".**
 *   Return the modified HTML in the \`newHtmlContent\` field and the confirmation in the \`response\` field.
