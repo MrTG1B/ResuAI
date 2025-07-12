@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2 } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
-import { type PortfolioData, type PersonalInfo } from '@/types/portfolio';
+import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -24,7 +24,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { deletePortfolioAction, deleteResumeAction } from '../actions';
 import { useToast } from '@/hooks/use-toast';
@@ -69,11 +68,11 @@ const calculateProfileCompletion = (profile: any, user: User | null): number => 
         combinedData.email,
         combinedData.phone,
         combinedData.location,
-        combinedData.socials?.length > 0,
-        combinedData.experience?.length > 0,
-        combinedData.education?.length > 0,
-        combinedData.projects?.length > 0,
-        combinedData.certifications?.length > 0,
+        (combinedData.socials?.length || 0) > 0,
+        (combinedData.experience?.length || 0) > 0,
+        (combinedData.education?.length || 0) > 0,
+        (combinedData.projects?.length || 0) > 0,
+        (combinedData.certifications?.length || 0) > 0,
     ];
 
     const completedFields = fields.filter(Boolean).length;
@@ -91,7 +90,9 @@ export default function DashboardPage() {
   const [portfolios, setPortfolios] = useState<(PortfolioData & {id: string})[]>([]);
   const [isPortfolioLoading, setIsPortfolioLoading] = useState(true);
   const [profileCompletion, setProfileCompletion] = useState(0);
-  
+
+  const [deleteTarget, setDeleteTarget] = useState<{type: 'resume' | 'portfolio', id: string} | null>(null);
+
   const MAX_RESUMES = 10;
   const MAX_PORTFOLIOS = 5;
 
@@ -162,37 +163,36 @@ export default function DashboardPage() {
     router.push('/resume-builder/editor');
   }
 
-  const handleDeleteResume = async (resumeId: string) => {
-    if (!user) return;
+  const confirmDelete = async () => {
+    if (!user || !deleteTarget) return;
 
+    const { type, id } = deleteTarget;
+    let result;
     try {
-        const result = await deleteResumeAction(user.uid, resumeId);
-        if (result.success) {
-            setResumes(prev => prev.filter(r => r.id !== resumeId));
-            toast({ title: "Resume Deleted", description: "The resume has been successfully deleted." });
-        } else {
-            throw new Error(result.error);
+        if (type === 'resume') {
+            result = await deleteResumeAction(user.uid, id);
+            if (result.success) {
+                setResumes(prev => prev.filter(r => r.id !== id));
+                toast({ title: "Resume Deleted", description: "The resume has been successfully deleted." });
+            } else {
+                throw new Error(result.error);
+            }
+        } else if (type === 'portfolio') {
+            result = await deletePortfolioAction(user.uid, id);
+            if (result.success) {
+                setPortfolios(prev => prev.filter(p => p.id !== id));
+                toast({ title: "Portfolio Deleted", description: "The portfolio has been successfully deleted." });
+            } else {
+                throw new Error(result.error);
+            }
         }
     } catch (error: any) {
-        toast({ title: "Error", description: error.message || "Failed to delete resume.", variant: "destructive" });
+        toast({ title: "Error", description: error.message || `Failed to delete ${type}.`, variant: "destructive" });
+    } finally {
+        setDeleteTarget(null);
     }
   }
 
-  const handleDeletePortfolio = async (portfolioId: string) => {
-    if (!user) return;
-
-    try {
-        const result = await deletePortfolioAction(user.uid, portfolioId);
-        if (result.success) {
-            setPortfolios(prev => prev.filter(p => p.id !== portfolioId));
-            toast({ title: "Portfolio Deleted", description: "The portfolio has been successfully deleted." });
-        } else {
-            throw new Error(result.error);
-        }
-    } catch (error: any) {
-        toast({ title: "Error", description: error.message || "Failed to delete portfolio.", variant: "destructive" });
-    }
-  }
 
   if (isLoading) {
     return (
@@ -341,25 +341,9 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10">
-                                                        <Trash2 className="h-4 w-4"/>
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This action cannot be undone. This will permanently delete your resume.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteResume(r.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
+                                                <Trash2 className="h-4 w-4"/>
+                                            </Button>
                                             <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
                                                 <Edit className="mr-2 h-4 w-4"/>
                                                 Edit
@@ -411,25 +395,9 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10">
-                                                        <Trash2 className="h-4 w-4"/>
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This action cannot be undone. This will permanently delete your portfolio.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeletePortfolio(p.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
+                                                <Trash2 className="h-4 w-4"/>
+                                            </Button>
                                             <Button variant="ghost" size="sm" asChild>
                                                 <Link href={`/portfolio?id=${p.id}`}>
                                                     <Eye className="mr-2 h-4 w-4"/>
@@ -458,6 +426,22 @@ export default function DashboardPage() {
         </div>
       </main>
       <Footer />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your {deleteTarget?.type}.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setDeleteTarget(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }
