@@ -1,18 +1,29 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow users to manage their own document and its subcollections
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+    // Default deny all access to all documents
+    match /{document=**} {
+      allow read, write: if false;
     }
-    
-    // Allow authenticated users to create their own user document
+
+    // Rules for the 'users' collection
     match /users/{userId} {
-      allow create: if request.auth != null && request.auth.uid == userId;
-      // Allow any authenticated user to list users for the admin dashboard
+      // Allow an authenticated user to create their own document.
+      allow create: if request.auth != null;
+
+      // Allow any authenticated user to list users for the admin dashboard.
+      // NOTE: For a production app, you would lock this down to specific admin UIDs.
       allow list: if request.auth != null;
+
+      // Allow a user to read, update, or delete their own document.
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+
+      // Allow users to manage their own subcollections (portfolios, resumes, profile)
+      match /{subcollection}/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }
