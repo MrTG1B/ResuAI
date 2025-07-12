@@ -243,7 +243,12 @@ function ResumeEditorPageContent() {
             return;
         }
     
+        // 1. Clone the element to generate PDF from
+        const elementToPrint = sourceElement.cloneNode(true) as HTMLElement;
+        
+        // 2. Set the loading state for the UI
         setIsGeneratingPdf(true);
+    
         try {
             const opt = {
               margin:       [10, 10, 10, 10], // top, left, bottom, right
@@ -253,13 +258,15 @@ function ResumeEditorPageContent() {
               jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
         
-            await html2pdf().set(opt).from(sourceElement).save();
+            // 3. Generate the PDF from the cloned element, not the live one
+            await html2pdf().set(opt).from(elementToPrint).save();
 
         } catch (error) {
             console.error('PDF Download error:', error);
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
             toast({ title: "Download failed", description: `Could not generate PDF. Error: ${errorMessage}`, variant: "destructive" });
         } finally {
+            // 4. Reset the loading state
             setIsGeneratingPdf(false);
         }
     };
