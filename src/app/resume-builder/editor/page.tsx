@@ -138,7 +138,7 @@ function ResumeEditorPageContent() {
                             .join(' | ');
 
                         const initialHtml = `
-                          <div style="font-family: Roboto, sans-serif; color: #333;">
+                          <div style="font-family: 'Roboto', sans-serif; color: #333;">
                             <header style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
                               <h1 style="font-size: 2.5em; margin: 0; color: #1a1a1a;">${profile.name || 'Your Name'}</h1>
                               <p style="font-size: 1.2em; margin: 5px 0 0;">${profile.title || 'Your Title'}</p>
@@ -483,3 +483,4 @@ export default function ResumeEditorPage() {
 }
 
     
+
