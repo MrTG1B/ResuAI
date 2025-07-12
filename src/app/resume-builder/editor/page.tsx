@@ -250,17 +250,22 @@ function ResumeEditorPageContent() {
             // Assign the virtual file system for fonts.
             pdfMake.vfs = pdfFonts.vfs;
             
-            // Sanitize HTML: remove all font-family declarations
-            const sanitizedHtml = sourceElement.innerHTML.replace(/font-family:[^;"]*;/g, '');
+            // Sanitize HTML: replace unsupported fonts with Roboto
+            const sanitizedHtml = sourceElement.innerHTML.replace(/font-family:([^;>]*)(Arial|Helvetica|sans-serif)([^;>]*);?/gi, "font-family: 'Roboto', sans-serif;");
     
-            const content = htmlToPdfmake(sanitizedHtml);
+            const content = htmlToPdfmake(sanitizedHtml, {
+                defaultStyles: {
+                    // Set a default font for any elements that might not have one
+                    font: 'Roboto'
+                }
+            });
     
             const docDefinition = {
                 content: content,
                 pageSize: 'A4',
                 pageMargins: [ 40, 60, 40, 60 ],
                 defaultStyle: {
-                    font: 'Roboto' // Ensure a fallback font is always defined.
+                    font: 'Roboto' // Ensure Roboto is the fallback font for the entire document.
                 }
             };
     
@@ -487,7 +492,3 @@ export default function ResumeEditorPage() {
         </Suspense>
     )
 }
-
-    
-
-
