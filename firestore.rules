@@ -1,47 +1,32 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
   
-    // Helper function to check for admin role
+    // Helper function to check if a user is an admin
     function isAdmin() {
-      // In a real app, this would check a custom claim, but for now we use a hardcoded email.
-      return request.auth.token.email == 'admin@resuai.com';
+      return request.auth != null && request.auth.token.email == 'admin@resuai.com';
     }
 
-    // Default deny all access to the database
+    // By default, deny all reads and writes
     match /{document=**} {
       allow read, write: if false;
     }
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // Users can create and update their own user document
-      allow read, write: if request.auth.uid == userId;
-      
-      // Admins can get and delete any user document
+      // Admins can get and delete any user document, and list all users
       allow get, delete: if isAdmin();
-
-      // Rules for the 'profile' subcollection
-      match /profile/{profileId} {
-        allow read, write: if request.auth.uid == userId;
-      }
-      
-      // Rules for the 'resumes' subcollection
-      match /resumes/{resumeId} {
-        allow read, write, delete: if request.auth.uid == userId;
-      }
-      
-      // Rules for the 'portfolios' subcollection
-      match /portfolios/{portfolioId} {
-        allow read, write, delete: if request.auth.uid == userId;
-      }
-    }
-    
-    // Admins can list all users for the dashboard
-    match /users/{userId} {
       allow list: if isAdmin();
+      
+      // An authenticated user can read and write their own document
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Rules for subcollections (resumes, portfolios, profile)
+      match /{subcollection}/{docId=**} {
+        // An authenticated user has full access to their own subcollections
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }
