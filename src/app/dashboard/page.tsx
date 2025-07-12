@@ -190,7 +190,8 @@ export default function DashboardPage() {
             }
         }
     } catch (error: any) {
-        toast({ title: "Error", description: error.message || `Failed to delete ${type}.`, variant: "destructive" });
+        const errorMessage = error instanceof Error ? error.message : `Failed to delete ${type}.`;
+        toast({ title: "Error", description: errorMessage, variant: "destructive" });
     } finally {
         setDeleteTarget(null);
     }
