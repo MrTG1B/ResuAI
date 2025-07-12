@@ -247,7 +247,7 @@ function ResumeEditorPageContent() {
     
         setIsGeneratingPdf(true);
         try {
-            pdfMake.vfs = pdfFonts;
+            pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
             const html = sourceElement.innerHTML;
             const content = htmlToPdfmake(html);
@@ -255,6 +255,9 @@ function ResumeEditorPageContent() {
                 content: content,
                 pageSize: 'A4',
                 pageMargins: [ 40, 60, 40, 60 ],
+                defaultStyle: {
+                    font: 'Roboto' // Set default font
+                }
             };
             pdfMake.createPdf(docDefinition).download(editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume' + '.pdf');
 
