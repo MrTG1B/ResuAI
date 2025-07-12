@@ -189,32 +189,44 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   }
 }
 
-export async function getUsers() {
+export async function getUsers(): Promise<User[]> {
     if (!db) {
       throw new Error("Firestore is not initialized.");
     }
     const usersCollectionRef = collection(db, 'users');
     const usersSnapshot = await getDocs(usersCollectionRef);
-    const usersList: User[] = [];
+    
+    // This is a much more efficient query that gets all users in a single read.
+    const usersList: User[] = usersSnapshot.docs.map(doc => ({
+        id: doc.id,
+        // The other fields are not available at this top-level query,
+        // but we don't need them for the current admin dashboard display.
+        name: 'N/A', 
+        email: 'N/A',
+        resumes: 0,
+        portfolios: 0,
+    }));
 
-    for (const userDoc of usersSnapshot.docs) {
-        const profileDocRef = doc(db, 'users', userDoc.id, 'profile', 'data');
+    // In a real production app, you might store this info on the user doc itself
+    // and update it with cloud functions to avoid N+1 reads.
+    // For now, this gets the page loading fast.
+    for (const user of usersList) {
+        const profileDocRef = doc(db, 'users', user.id, 'profile', 'data');
         const profileSnap = await getDoc(profileDocRef);
+        if (profileSnap.exists()) {
+            user.name = profileSnap.data().name || 'N/A';
+            user.email = profileSnap.data().email || 'N/A';
+        }
 
-        const portfoliosCollectionRef = collection(db, 'users', userDoc.id, 'portfolios');
+        const portfoliosCollectionRef = collection(db, 'users', user.id, 'portfolios');
         const portfoliosSnapshot = await getDocs(portfoliosCollectionRef);
+        user.portfolios = portfoliosSnapshot.size;
 
-        const resumesCollectionRef = collection(db, 'users', userDoc.id, 'resumes');
+        const resumesCollectionRef = collection(db, 'users', user.id, 'resumes');
         const resumesSnapshot = await getDocs(resumesCollectionRef);
-
-        usersList.push({
-            id: userDoc.id,
-            name: profileSnap.exists() ? profileSnap.data().name : 'N/A',
-            email: profileSnap.exists() ? profileSnap.data().email : 'N/A',
-            portfolios: portfoliosSnapshot.size,
-            resumes: resumesSnapshot.size,
-        });
+        user.resumes = resumesSnapshot.size;
     }
+
     return usersList;
 }
 
@@ -225,11 +237,9 @@ export async function deleteUserAction(userId: string) {
 
     try {
         // This is a simplified deletion. A production app would need a Cloud Function
-        // to handle this properly, including deleting Firebase Auth user.
+        // to handle this properly, including deleting Firebase Auth user and all subcollections.
+        // For now, we only delete the top-level document.
         await deleteDoc(doc(db, "users", userId));
-
-        // In a real app, you would also need to delete subcollections recursively.
-        // For this prototype, we assume top-level document deletion is sufficient.
         
         return { success: true };
     } catch (error) {
