@@ -426,31 +426,35 @@ export default function ResumeEditorClient() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
-                                <CardHeader className="py-2 px-6">
-                                    <CardTitle className="text-lg font-normal">
+                                <CardHeader className="py-3 px-6 border-b flex-shrink-0">
+                                    <CardTitle className="text-base font-normal">
                                         {editorState.htmlContent ? `Editing: ${editorState.fileName || 'Untitled'}` : "Original Resume Preview"}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start">
-                                     <ScrollArea className="h-full w-full">
-                                        {isGeneratingPdf ? (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <CreativeLoader texts={generatingPdfTexts} />
-                                            </div>
-                                        ) : showOriginalPdf ? (
-                                            <iframe src={editorState.initialPreviewUri} className="w-full h-full border-none" title="Original Resume Preview" />
-                                        ) : (
-                                            <div
-                                                ref={livePreviewRef}
-                                                className="bg-white text-black shadow-lg mx-auto"
-                                                style={{
-                                                    width: '210mm',
-                                                    minHeight: '297mm',
-                                                    boxSizing: 'border-box',
-                                                }}
-                                                dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
-                                            />
-                                        )}
+                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 overflow-hidden">
+                                    <ScrollArea className="h-full w-full bg-muted/30 rounded-md">
+                                        <div className="flex justify-center p-4">
+                                            {isGeneratingPdf ? (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <CreativeLoader texts={generatingPdfTexts} />
+                                                </div>
+                                            ) : showOriginalPdf ? (
+                                                <iframe src={editorState.initialPreviewUri} className="w-[850px] h-[1150px] border-none shadow-lg" title="Original Resume Preview" />
+                                            ) : (
+                                                <div
+                                                    ref={livePreviewRef}
+                                                    className="bg-white text-black shadow-lg origin-top"
+                                                    style={{
+                                                        width: '210mm',
+                                                        minHeight: '297mm',
+                                                        transform: 'scale(0.8)',
+                                                        transformOrigin: 'top center',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                    dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
+                                                />
+                                            )}
+                                        </div>
                                      </ScrollArea>
                                 </CardContent>
                             </Card>
