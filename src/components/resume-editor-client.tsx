@@ -386,7 +386,6 @@ export default function ResumeEditorClient() {
     );
 
     const showEditor = flow === 'edit' && editorState && !isParsing;
-    const showUpload = flow === 'upload' && !isParsing;
 
     const hasBeenEdited = (editorState?.chatHistory?.length || 0) > 0;
     const showOriginalPdf = editorState?.initialPreviewUri && !hasBeenEdited;
@@ -431,15 +430,15 @@ export default function ResumeEditorClient() {
                                         {editorState.htmlContent ? `Editing: ${editorState.fileName || 'Untitled'}` : "Original Resume Preview"}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 overflow-hidden">
+                                <CardContent className="flex-grow p-0 bg-muted/30 overflow-hidden">
                                     <ScrollArea className="h-full w-full bg-muted/30 rounded-md">
-                                        <div className="flex justify-center p-4">
+                                        <div className="flex justify-center items-center p-4 h-full">
                                             {isGeneratingPdf ? (
                                                 <div className="w-full h-full flex items-center justify-center">
                                                     <CreativeLoader texts={generatingPdfTexts} />
                                                 </div>
                                             ) : showOriginalPdf ? (
-                                                <iframe src={editorState.initialPreviewUri} className="w-[850px] h-[1150px] border-none shadow-lg" title="Original Resume Preview" />
+                                                <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none shadow-lg" title="Original Resume Preview" />
                                             ) : (
                                                 <div
                                                     ref={livePreviewRef}
@@ -464,7 +463,6 @@ export default function ResumeEditorClient() {
                                 <ResumeChatPanel 
                                     editorState={editorState}
                                     setEditorState={handleEditorStateUpdate} 
-                                    disabledRoutes={['/resume-analyzer', '/build']} 
                                 />
                              ) : (
                                  <Card className="h-full flex items-center justify-center">
