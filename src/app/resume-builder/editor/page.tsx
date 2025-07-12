@@ -256,7 +256,7 @@ function ResumeEditorPageContent() {
                 pageSize: 'A4',
                 pageMargins: [ 40, 60, 40, 60 ],
                 defaultStyle: {
-                    font: 'Roboto' // Set default font
+                    font: 'Roboto'
                 }
             };
             pdfMake.createPdf(docDefinition).download(editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume' + '.pdf');
