@@ -2,32 +2,36 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
-    
-    function isOwner(userId) {
-      return request.auth.uid == userId;
+  
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
     }
 
+    // Rules for the 'users' collection
     match /users/{userId} {
-      // Allow users to create their own profile, but not read/write others' top-level doc.
-      allow create: if isSignedIn();
-      // Allow admin to list users, but not read their private top-level doc.
-      allow list: if isSignedIn();
-      // A user can read/update/delete their own document
-      allow read, update, delete: if isOwner(userId);
+      // Allow user creation by any authenticated user for their own ID.
+      allow create: if request.auth != null && request.auth.uid == userId;
 
-      // Allow owner to manage their own subcollections (portfolios, resumes, profile)
-      match /{subcollection}/{docId} {
-        allow read, write, delete: if isOwner(userId);
+      // Allow a user to read and write to their own document.
+      // Also allow any authenticated user to list users for the admin panel.
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow list: if request.auth != null;
+
+      // Rules for the 'profile' subcollection
+      match /profile/{profileId} {
+        // A user can read/write their own profile.
+        // Any authenticated user can read any profile for the admin dashboard.
+        allow write: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null;
       }
       
-      // Allow any signed-in user (acting as admin) to read profile data for the dashboard
-      match /profile/{docId} {
-         allow get: if isSignedIn();
+      // Rules for 'portfolios' and 'resumes' subcollections
+      match /{subcollection}/{docId} {
+        // A user can read/write their own subcollection documents.
+        // Any authenticated user can read any subcollection document for the admin dashboard.
+        allow write: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null;
       }
     }
   }
