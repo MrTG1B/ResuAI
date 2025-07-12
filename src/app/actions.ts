@@ -13,6 +13,7 @@ import { type PortfolioData, type Project, type PersonalInfo } from "@/types/por
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { User } from "@/types/user";
 
 export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
   try {
@@ -186,4 +187,53 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
     console.error("Error analyzing certificate:", error);
     return { success: false, error: "The AI failed to analyze the certificate. Please check the file and try again." };
   }
+}
+
+export async function getUsers() {
+    if (!db) {
+      throw new Error("Firestore is not initialized.");
+    }
+    const usersCollectionRef = collection(db, 'users');
+    const usersSnapshot = await getDocs(usersCollectionRef);
+    const usersList: User[] = [];
+
+    for (const userDoc of usersSnapshot.docs) {
+        const profileDocRef = doc(db, 'users', userDoc.id, 'profile', 'data');
+        const profileSnap = await getDoc(profileDocRef);
+
+        const portfoliosCollectionRef = collection(db, 'users', userDoc.id, 'portfolios');
+        const portfoliosSnapshot = await getDocs(portfoliosCollectionRef);
+
+        const resumesCollectionRef = collection(db, 'users', userDoc.id, 'resumes');
+        const resumesSnapshot = await getDocs(resumesCollectionRef);
+
+        usersList.push({
+            id: userDoc.id,
+            name: profileSnap.exists() ? profileSnap.data().name : 'N/A',
+            email: profileSnap.exists() ? profileSnap.data().email : 'N/A',
+            portfolios: portfoliosSnapshot.size,
+            resumes: resumesSnapshot.size,
+        });
+    }
+    return usersList;
+}
+
+export async function deleteUserAction(userId: string) {
+    if (!db) {
+        throw new Error("Firestore is not initialized.");
+    }
+
+    try {
+        // This is a simplified deletion. A production app would need a Cloud Function
+        // to handle this properly, including deleting Firebase Auth user.
+        await deleteDoc(doc(db, "users", userId));
+
+        // In a real app, you would also need to delete subcollections recursively.
+        // For this prototype, we assume top-level document deletion is sufficient.
+        
+        return { success: true };
+    } catch (error) {
+        console.error(`Failed to delete user ${userId}:`, error);
+        return { success: false, error: "Failed to delete user data from Firestore." };
+    }
 }
