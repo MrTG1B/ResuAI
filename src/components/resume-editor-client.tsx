@@ -55,13 +55,14 @@ export default function ResumeEditorClient() {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     
     const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
+    const [flow, setFlow] = useState<'upload' | 'scratch' | 'edit' | 'loading'>('loading');
     
     const livePreviewRef = useRef<HTMLDivElement>(null);
     const MAX_RESUMES = 10;
     
     // Function to save state to Firestore
     const saveStateToFirestore = useCallback(async (stateToSave: SavedEditorState, currentResumeId: string | null) => {
-        if (!currentUser || !db) return;
+        if (!currentUser || !db) return null;
         try {
             let docId = currentResumeId;
             const dataToSave = { ...stateToSave, lastModified: serverTimestamp() };
@@ -77,10 +78,8 @@ export default function ResumeEditorClient() {
                          description: `You have reached the limit of ${MAX_RESUMES} free resumes.`,
                          variant: "destructive",
                      });
-                     // prevent saving and redirect or show error state
-                     setIsParsing(false); // Make sure to stop loading state
                      router.push('/dashboard');
-                     return;
+                     return null;
                  }
                 const newDocRef = await addDoc(resumeCollectionRef, dataToSave);
                 docId = newDocRef.id;
@@ -112,9 +111,11 @@ export default function ResumeEditorClient() {
             if (user) {
                 setCurrentUser(user);
                 const idFromUrl = searchParams.get('id');
-                
+                const fromFlow = searchParams.get('from');
+
                 if (idFromUrl) {
                     setResumeId(idFromUrl);
+                    setFlow('edit');
                     try {
                         const resumeDoc = await getDoc(doc(db, "users", user.uid, "resumes", idFromUrl));
                         if (resumeDoc.exists()) {
@@ -125,12 +126,14 @@ export default function ResumeEditorClient() {
                         }
                     } catch (error) {
                         console.error("Failed to load state from Firestore:", error);
+                        router.push('/dashboard');
                     }
-                } else {
-                    // This is a new session, create an initial state from profile
-                    const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
-                    const docSnap = await getDoc(profileDocRef);
-                    if (docSnap.exists()) {
+                } else if (fromFlow === 'scratch') {
+                     setIsParsing(true);
+                     setFlow('scratch');
+                     const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+                     const docSnap = await getDoc(profileDocRef);
+                     if (docSnap.exists()) {
                         const profile = docSnap.data();
                         const socialLinksHtml = (profile.socials || [])
                             .map((s: { platform: string; url: string; }) => `<span><a href="${s.url}" target="_blank" style="color: #007bff; text-decoration: none;">${s.platform}</a></span>`)
@@ -158,17 +161,22 @@ export default function ResumeEditorClient() {
                             </section>
                           </div>
                         `;
-                        const newId = await saveStateToFirestore({
+                        const newState: SavedEditorState = {
                             htmlContent: initialHtml,
                             chatHistory: [],
                             fileName: `${profile.name || 'User'}'s Resume.html`,
                             initialPreviewUri: '',
-                        }, null);
+                        };
+                         const newId = await saveStateToFirestore(newState, null);
                          if (newId) {
+                            setEditorState(newState);
                             setResumeId(newId);
+                            setFlow('edit');
                         }
-
                     }
+                    setIsParsing(false);
+                } else {
+                    setFlow('upload');
                 }
             } else {
                 router.push('/login');
@@ -186,7 +194,6 @@ export default function ResumeEditorClient() {
     
         setIsParsing(true);
         
-        // Check limit before proceeding
         const resumeCollectionRef = collection(db, "users", currentUser.uid, "resumes");
         const resumeSnapshot = await getDocs(resumeCollectionRef);
         if (resumeSnapshot.size >= MAX_RESUMES) {
@@ -215,11 +222,11 @@ export default function ResumeEditorClient() {
                         fileName: file.name,
                         initialPreviewUri: uploadedResumeDataUri,
                     };
-                    // Instead of updating, this will now create a new document
                     const newId = await saveStateToFirestore(finalState, null);
-                    if (newId) {
+                     if (newId) {
                        setEditorState(finalState);
                        setResumeId(newId);
+                       setFlow('edit');
                     }
                 } else {
                     throw new Error(result.error || "Failed to parse resume.");
@@ -253,7 +260,6 @@ export default function ResumeEditorClient() {
               margin:       [20, 20, 20, 20],
               filename:     (editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume') + '.pdf',
               jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-              // Forcing text-based rendering by removing canvas options
             };
         
             await html2pdf().set(opt).from(elementToPrint).save();
@@ -281,7 +287,6 @@ export default function ResumeEditorClient() {
       setIsConverting(true);
     
       try {
-        // Use the initial uploaded URI for the highest fidelity analysis
         const analysisInput = { resumeDataUri: editorState.initialPreviewUri || '' };
         if (!analysisInput.resumeDataUri) {
           throw new Error("No resume file has been uploaded to create a portfolio from.");
@@ -340,7 +345,7 @@ export default function ResumeEditorClient() {
         }
     };
 
-    if (isLoading) {
+    if (isLoading || flow === 'loading') {
         return (
             <div className="flex flex-col min-h-screen items-center justify-center bg-background">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -380,9 +385,9 @@ export default function ResumeEditorClient() {
         </div>
     );
 
-    const showEditor = (editorState) && !isParsing;
+    const showEditor = flow === 'edit' && editorState && !isParsing;
+    const showUpload = flow === 'upload' && !isParsing;
 
-    // Use original PDF for preview if it exists and no edits have happened yet
     const hasBeenEdited = (editorState?.chatHistory?.length || 0) > 0;
     const showOriginalPdf = editorState?.initialPreviewUri && !hasBeenEdited;
     
@@ -397,7 +402,7 @@ export default function ResumeEditorClient() {
                         ) : (
                              <>
                                 <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">AI Resume Editor</h1>
-                                <p className="mt-2 text-lg text-muted-foreground">Upload a resume to edit with AI, or we'll start one for you from your profile.</p>
+                                <p className="mt-2 text-lg text-muted-foreground">Upload a resume to start editing with our AI assistant.</p>
                                 <div className="mt-8 w-full">
                                     <label
                                     htmlFor="resume-upload"

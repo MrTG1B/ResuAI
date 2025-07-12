@@ -163,7 +163,7 @@ export default function DashboardPage() {
 
   const handleStartNew = () => {
     sessionStorage.removeItem('resumeEditorState');
-    router.push('/resume-builder/editor');
+    router.push('/resume-builder/editor?from=scratch');
   }
 
   const confirmDelete = async () => {
@@ -285,10 +285,10 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
                 <ToolCard 
-                    href="/resume-builder/editor"
+                    href="/resume-builder"
                     icon={FileText}
                     title="AI Resume Editor"
-                    description="Upload and enhance your resume with AI-powered suggestions and formatting."
+                    description="Upload, create from scratch, and enhance your resume with AI-powered suggestions."
                     actionText="Open Editor"
                 />
                 <ToolCard 

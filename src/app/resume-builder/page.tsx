@@ -34,6 +34,14 @@ export default function ResumeBuilderPage() {
     return () => unsubscribe();
   }, [router]);
 
+  const handleStartFromScratch = () => {
+    router.push('/resume-builder/editor?from=scratch');
+  };
+
+  const handleUploadResume = () => {
+    router.push('/resume-builder/editor?from=upload');
+  }
+
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
@@ -65,35 +73,35 @@ export default function ResumeBuilderPage() {
               <CardHeader>
                 <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
-                    <UploadCloud className="h-10 w-10 text-primary" />
+                    <PenSquare className="h-10 w-10 text-primary" />
                   </div>
                 </div>
-                <CardTitle className="text-center text-2xl">Update Existing Resume</CardTitle>
+                <CardTitle className="text-center text-2xl">Start from Scratch</CardTitle>
                 <CardDescription className="text-center">
-                  Upload your current resume and let our AI help you refine and improve its content and formatting.
+                  We'll use your profile data to create a new resume with a professional template.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
-                <Button asChild>
-                  <Link href="/resume-builder/editor">Upload Resume <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                <Button onClick={handleStartFromScratch}>
+                    Start from Scratch <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </CardContent>
             </Card>
-            <Card className="shadow-lg hover:shadow-2xl transition-shadow duration-300">
+             <Card className="shadow-lg hover:shadow-2xl transition-shadow duration-300">
               <CardHeader>
                   <div className="flex justify-center items-center mb-4">
                       <div className="bg-primary/10 p-4 rounded-full">
-                          <PenSquare className="h-10 w-10 text-primary" />
+                           <UploadCloud className="h-10 w-10 text-primary" />
                       </div>
                   </div>
-                  <CardTitle className="text-center text-2xl">Create from Scratch</CardTitle>
+                  <CardTitle className="text-center text-2xl">Upload Existing Resume</CardTitle>
                   <CardDescription className="text-center">
-                      Start with a blank canvas and let our AI guide you through building a powerful resume step-by-step.
+                      Upload your current resume and let our AI help you refine and improve its content and formatting.
                   </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
-                  <Button asChild disabled>
-                      <Link href="#">Start from Scratch <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                  <Button onClick={handleUploadResume}>
+                      Upload Resume <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
               </CardContent>
             </Card>
