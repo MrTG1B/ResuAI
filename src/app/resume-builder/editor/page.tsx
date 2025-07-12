@@ -243,22 +243,17 @@ function ResumeEditorPageContent() {
             return;
         }
     
-        // 1. Clone the element to generate PDF from
         const elementToPrint = sourceElement.cloneNode(true) as HTMLElement;
-        
-        // 2. Set the loading state for the UI
         setIsGeneratingPdf(true);
     
         try {
             const opt = {
-              margin:       [10, 10, 10, 10], // top, left, bottom, right
+              margin:       [20, 20, 20, 20], // Standard A4 margins in mm
               filename:     (editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume') + '.pdf',
-              image:        { type: 'jpeg', quality: 0.98 },
-              html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+              // By omitting html2canvas and image options, we prioritize text-based rendering.
             };
         
-            // 3. Generate the PDF from the cloned element, not the live one
             await html2pdf().set(opt).from(elementToPrint).save();
 
         } catch (error) {
@@ -266,7 +261,6 @@ function ResumeEditorPageContent() {
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
             toast({ title: "Download failed", description: `Could not generate PDF. Error: ${errorMessage}`, variant: "destructive" });
         } finally {
-            // 4. Reset the loading state
             setIsGeneratingPdf(false);
         }
     };
@@ -438,7 +432,6 @@ function ResumeEditorPageContent() {
                                             style={{
                                                 width: '210mm',
                                                 minHeight: '297mm',
-                                                padding: '20mm',
                                                 boxSizing: 'border-box',
                                             }}
                                             dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
