@@ -15,7 +15,7 @@ import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
 import pdfMake from "pdfmake/build/pdfmake";
-import vfsFonts from "pdfmake/build/vfs_fonts";
+import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
 
 
@@ -247,15 +247,7 @@ function ResumeEditorPageContent() {
     
         setIsGeneratingPdf(true);
         try {
-            // Correctly assign the virtual file system for fonts
-            if (vfsFonts.pdfMake) {
-                pdfMake.vfs = vfsFonts.pdfMake.vfs;
-            } else {
-                console.error("vfsFonts.pdfMake is undefined. Check the import.");
-                toast({ title: "Font Error", description: "Could not load fonts for PDF generation.", variant: "destructive" });
-                setIsGeneratingPdf(false);
-                return;
-            }
+            pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
             const html = sourceElement.innerHTML;
             const content = htmlToPdfmake(html);
