@@ -247,23 +247,29 @@ function ResumeEditorPageContent() {
     
         setIsGeneratingPdf(true);
         try {
+            // Assign the virtual file system for fonts.
             pdfMake.vfs = pdfFonts.vfs;
             
-            const html = sourceElement.innerHTML;
-            const content = htmlToPdfmake(html);
+            // Sanitize HTML: remove all font-family declarations
+            const sanitizedHtml = sourceElement.innerHTML.replace(/font-family:[^;"]*;/g, '');
+    
+            const content = htmlToPdfmake(sanitizedHtml);
+    
             const docDefinition = {
                 content: content,
                 pageSize: 'A4',
                 pageMargins: [ 40, 60, 40, 60 ],
                 defaultStyle: {
-                    font: 'Roboto'
+                    font: 'Roboto' // Ensure a fallback font is always defined.
                 }
             };
+    
             pdfMake.createPdf(docDefinition).download(editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume' + '.pdf');
 
         } catch (error) {
             console.error('PDF Download error:', error);
-            toast({ title: "Download failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
+            const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+            toast({ title: "Download failed", description: `Could not generate PDF. Error: ${errorMessage}`, variant: "destructive" });
         } finally {
             setIsGeneratingPdf(false);
         }
@@ -483,4 +489,5 @@ export default function ResumeEditorPage() {
 }
 
     
+
 
