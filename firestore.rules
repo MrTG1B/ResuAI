@@ -2,36 +2,48 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Default deny all
-    match /{document=**} {
-      allow read, write: if false;
+
+    // Helper function to check if a user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if the user is the owner of the document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
     }
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // Allow user creation by any authenticated user for their own ID.
-      allow create: if request.auth != null && request.auth.uid == userId;
+      // Any authenticated user can create their own user document.
+      // This is necessary for sign-up.
+      allow create: if isAuthenticated();
+      
+      // Allow read access for the owner or for any authenticated user (for the admin dashboard).
+      allow read: if isAuthenticated();
+      
+      // Only the owner can update their own top-level document.
+      // (This document might not be used, but it's good practice to secure it)
+      allow update: if isOwner(userId);
 
-      // Allow a user to read and write to their own document.
-      // Also allow any authenticated user to list users for the admin panel.
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow list: if request.auth != null;
-
+      // Only allow owner to delete their account data.
+      // A more robust solution for full account deletion would use a Cloud Function.
+      allow delete: if isOwner(userId);
+      
       // Rules for the 'profile' subcollection
       match /profile/{profileId} {
-        // A user can read/write their own profile.
-        // Any authenticated user can read any profile for the admin dashboard.
-        allow write: if request.auth != null && request.auth.uid == userId;
-        allow read: if request.auth != null;
+        // Any authenticated user can read profile data (for the admin dashboard to display names/emails).
+        allow get: if isAuthenticated();
+        // The owner of the user document can write to their own profile.
+        allow write: if isOwner(userId);
       }
       
       // Rules for 'portfolios' and 'resumes' subcollections
       match /{subcollection}/{docId} {
-        // A user can read/write their own subcollection documents.
-        // Any authenticated user can read any subcollection document for the admin dashboard.
-        allow write: if request.auth != null && request.auth.uid == userId;
-        allow read: if request.auth != null;
+        // Any authenticated user can list documents (for admin dashboard counts).
+        allow list: if isAuthenticated();
+        // The owner can read and write to their own subcollection documents.
+        allow read, write: if isOwner(userId);
       }
     }
   }

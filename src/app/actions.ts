@@ -82,7 +82,7 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
       portfolioDraft.personalInfo.profilePictureDataUri = avatarResult.imageDataUri;
     } else {
         portfolioDraft.personalInfo = {
-            name: '', title: '', email: '', phone: '', website: '', location: '', socials: [],
+            name: '', title: '', email: '', phone: '', location: '', socials: [],
             profilePictureDataUri: avatarResult.imageDataUri,
         }
     }
@@ -196,21 +196,15 @@ export async function getUsers(): Promise<User[]> {
     const usersCollectionRef = collection(db, 'users');
     const usersSnapshot = await getDocs(usersCollectionRef);
     
-    // This is a much more efficient query that gets all users in a single read.
-    const usersList: User[] = usersSnapshot.docs.map(doc => ({
-        id: doc.id,
-        // The other fields are not available at this top-level query,
-        // but we don't need them for the current admin dashboard display.
-        name: 'N/A', 
-        email: 'N/A',
-        resumes: 0,
-        portfolios: 0,
-    }));
+    const usersList: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
+        const user: User = {
+            id: userDoc.id,
+            name: 'N/A', 
+            email: 'N/A',
+            resumes: 0,
+            portfolios: 0,
+        };
 
-    // In a real production app, you might store this info on the user doc itself
-    // and update it with cloud functions to avoid N+1 reads.
-    // For now, this gets the page loading fast.
-    for (const user of usersList) {
         const profileDocRef = doc(db, 'users', user.id, 'profile', 'data');
         const profileSnap = await getDoc(profileDocRef);
         if (profileSnap.exists()) {
@@ -225,7 +219,9 @@ export async function getUsers(): Promise<User[]> {
         const resumesCollectionRef = collection(db, 'users', user.id, 'resumes');
         const resumesSnapshot = await getDocs(resumesCollectionRef);
         user.resumes = resumesSnapshot.size;
-    }
+
+        return user;
+    }));
 
     return usersList;
 }
