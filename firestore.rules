@@ -1,24 +1,18 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Allow users to manage their own document and its subcollections
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to create their own user document
     match /users/{userId} {
-      // Allow users to read and write to their own profile data.
-      match /profile/data {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // Allow users to manage their own resumes.
-      match /resumes/{resumeId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-
-      // Portfolios can be read by anyone (for sharing)
-      // but can only be created, updated, or deleted by the authenticated owner.
-      match /portfolios/{portfolioId} {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.uid == userId;
-      }
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Allow any authenticated user to list users for the admin dashboard
+      allow list: if request.auth != null;
     }
   }
 }
