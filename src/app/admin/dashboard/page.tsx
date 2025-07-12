@@ -60,6 +60,12 @@ export default function AdminDashboardPage() {
 
     const handleUserDeleted = (userId: string) => {
         setUsers(currentUsers => currentUsers.filter(u => u.id !== userId));
+        // Also update stats
+        setStats(prev => ({
+            ...prev,
+            users: prev.users - 1
+            // A more complex implementation would re-calculate resume/portfolio counts
+        }));
     };
 
     if (isLoading) {

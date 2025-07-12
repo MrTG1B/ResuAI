@@ -7,43 +7,34 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    // Helper function to check if the user is the owner of the document
-    function isOwner(userId) {
-      return request.auth.uid == userId;
+
+    // Default deny all reads and writes
+    match /{document=**} {
+      allow read, write: if false;
     }
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // Any authenticated user can create their own user document.
-      // This is necessary for sign-up.
-      allow create: if isAuthenticated();
+      // Allow user to create their own document
+      allow create: if isAuthenticated() && request.auth.uid == userId;
       
-      // Allow read access for the owner or for any authenticated user (for the admin dashboard).
-      allow read: if isAuthenticated();
-      
-      // Only the owner can update their own top-level document.
-      // (This document might not be used, but it's good practice to secure it)
-      allow update: if isOwner(userId);
+      // Allow user to read their own document
+      allow get: if isAuthenticated() && request.auth.uid == userId;
 
-      // Only allow owner to delete their account data.
-      // A more robust solution for full account deletion would use a Cloud Function.
-      allow delete: if isOwner(userId);
+      // Allow any authenticated user to list all user documents for the admin dashboard
+      allow list: if isAuthenticated();
       
-      // Rules for the 'profile' subcollection
-      match /profile/{profileId} {
-        // Any authenticated user can read profile data (for the admin dashboard to display names/emails).
-        allow get: if isAuthenticated();
-        // The owner of the user document can write to their own profile.
-        allow write: if isOwner(userId);
-      }
-      
-      // Rules for 'portfolios' and 'resumes' subcollections
+      // Allow user to update their own document
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+
+      // Allow user to delete their own document (and admin to delete any)
+      // A more robust system would check for an 'admin' role in custom claims
+      allow delete: if isAuthenticated();
+
+      // Rules for user subcollections
       match /{subcollection}/{docId} {
-        // Any authenticated user can list documents (for admin dashboard counts).
-        allow list: if isAuthenticated();
-        // The owner can read and write to their own subcollection documents.
-        allow read, write: if isOwner(userId);
+        // A user can read, write, and delete documents in their own subcollections
+        allow read, write, delete: if isAuthenticated() && request.auth.uid == userId;
       }
     }
   }

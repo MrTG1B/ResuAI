@@ -9,6 +9,7 @@ import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput } from "@/ai/flows/job
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
+import { getUsers as getUsersFlow } from "@/ai/flows/admin-get-users";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
@@ -190,40 +191,7 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
 }
 
 export async function getUsers(): Promise<User[]> {
-    if (!db) {
-      throw new Error("Firestore is not initialized.");
-    }
-    const usersCollectionRef = collection(db, 'users');
-    const usersSnapshot = await getDocs(usersCollectionRef);
-    
-    const usersList: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
-        const user: User = {
-            id: userDoc.id,
-            name: 'N/A', 
-            email: 'N/A',
-            resumes: 0,
-            portfolios: 0,
-        };
-
-        const profileDocRef = doc(db, 'users', user.id, 'profile', 'data');
-        const profileSnap = await getDoc(profileDocRef);
-        if (profileSnap.exists()) {
-            user.name = profileSnap.data().name || 'N/A';
-            user.email = profileSnap.data().email || 'N/A';
-        }
-
-        const portfoliosCollectionRef = collection(db, 'users', user.id, 'portfolios');
-        const portfoliosSnapshot = await getDocs(portfoliosCollectionRef);
-        user.portfolios = portfoliosSnapshot.size;
-
-        const resumesCollectionRef = collection(db, 'users', user.id, 'resumes');
-        const resumesSnapshot = await getDocs(resumesCollectionRef);
-        user.resumes = resumesSnapshot.size;
-
-        return user;
-    }));
-
-    return usersList;
+    return await getUsersFlow();
 }
 
 export async function deleteUserAction(userId: string) {

@@ -10,3 +10,4 @@ import '@/ai/flows/job-match-analyzer.ts';
 import '@/ai/flows/coach-chat.ts';
 import '@/ai/flows/generate-project-image.ts';
 import '@/ai/flows/analyze-certificate.ts';
+import '@/ai/flows/admin-get-users.ts';
