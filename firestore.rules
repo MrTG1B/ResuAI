@@ -1,40 +1,49 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Default deny all reads and writes
-    match /{document=**} {
-      allow read, write: if false;
+    // Helper function to check if the user is the owner of the document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
     }
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // Allow user to create their own document
-      allow create: if isAuthenticated() && request.auth.uid == userId;
+      // Any authenticated user can create their own user document.
+      allow create: if request.auth != null;
+
+      // Only the owner of the user document can read or update it.
+      allow read, update: if isOwner(userId);
       
-      // Allow user to read their own document
-      allow get: if isAuthenticated() && request.auth.uid == userId;
+      // Deleting a user document is a sensitive operation and should
+      // ideally be handled by a backend service/cloud function.
+      // For now, we will disallow it from the client.
+      allow delete: if false;
 
-      // Allow any authenticated user to list all user documents for the admin dashboard
-      allow list: if isAuthenticated();
+      // Rules for the 'profile' subcollection
+      match /profile/{profileId} {
+        // The owner can perform all operations on their own profile.
+        allow read, write: if isOwner(userId);
+      }
       
-      // Allow user to update their own document
-      allow update: if isAuthenticated() && request.auth.uid == userId;
+      // Rules for the 'resumes' subcollection
+      match /resumes/{resumeId} {
+        // The owner can perform all operations on their own resumes.
+        allow read, write: if isOwner(userId);
+        
+        // Explicitly allow the owner to delete their own resumes.
+        allow delete: if isOwner(userId);
+      }
+      
+      // Rules for the 'portfolios' subcollection
+      match /portfolios/{portfolioId} {
+         // The owner can perform all operations on their own portfolios.
+        allow read, write: if isOwner(userId);
 
-      // Allow user to delete their own document (and admin to delete any)
-      // A more robust system would check for an 'admin' role in custom claims
-      allow delete: if isAuthenticated();
-
-      // Rules for user subcollections
-      match /{subcollection}/{docId} {
-        // A user can read, write, and delete documents in their own subcollections
-        allow read, write, delete: if isAuthenticated() && request.auth.uid == userId;
+        // Explicitly allow the owner to delete their own portfolios.
+        allow delete: if isOwner(userId);
       }
     }
   }
