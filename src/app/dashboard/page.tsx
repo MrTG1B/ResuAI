@@ -166,10 +166,13 @@ export default function DashboardPage() {
     router.push('/resume-builder/editor');
   }
 
-  const confirmDelete = async (target: {type: 'resume' | 'portfolio', id: string} | null) => {
-    if (!user || !target) return;
+  const confirmDelete = async () => {
+    if (!user || !deleteTarget) return;
 
-    const { type, id } = target;
+    const { type, id } = deleteTarget;
+    // Clear the target immediately to prevent double-clicks
+    setDeleteTarget(null);
+
     let result;
     try {
         if (type === 'resume') {
@@ -192,8 +195,6 @@ export default function DashboardPage() {
     } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : `Failed to delete ${type}.`;
         toast({ title: "Error", description: errorMessage, variant: "destructive" });
-    } finally {
-        setDeleteTarget(null);
     }
   }
 
@@ -441,7 +442,7 @@ export default function DashboardPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setDeleteTarget(null)}>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => confirmDelete(deleteTarget)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

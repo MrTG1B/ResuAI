@@ -22,12 +22,6 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
       throw new Error("Firestore is not initialized.");
     }
     const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
-
-    // Check portfolio limit
-    const portfolioSnapshot = await getDocs(portfolioCollectionRef);
-    if (portfolioSnapshot.size >= 5) {
-        return { success: false, error: "You have reached the limit of 5 free portfolios." };
-    }
     
     // Fetch user profile data to merge
     const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
@@ -172,6 +166,14 @@ export async function deletePortfolioAction(userId: string, portfolioId: string)
     }
     try {
         if (!db) throw new Error("Firestore is not initialized.");
+
+        // Safeguard: Check if this is the last portfolio
+        const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
+        const portfolioSnapshot = await getDocs(portfolioCollectionRef);
+        if (portfolioSnapshot.size <= 1) {
+            return { success: false, error: "You cannot delete your last portfolio." };
+        }
+
         await deleteDoc(doc(db, `users/${userId}/portfolios/${portfolioId}`));
         return { success: true };
     } catch (error) {
