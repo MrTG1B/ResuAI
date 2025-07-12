@@ -45,6 +45,10 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
             }
         }
     }, [messages, isLoading]);
+    
+    const handleSuggestionClick = (suggestion: string) => {
+        setInput(suggestion);
+    }
 
     const handleSendMessage = async () => {
         if ((!input.trim() && attachments.length === 0) || !editorState.htmlContent) return;
@@ -130,8 +134,8 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
 
     return (
         <Card className="flex flex-col h-full">
-            <CardHeader className="py-2 px-6 border-b">
-                <CardTitle className="text-base font-medium">AI Assistant</CardTitle>
+            <CardHeader className="py-3 px-6 border-b">
+                <CardTitle className="text-lg font-medium">AI Assistant</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-4">
                 <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
@@ -186,6 +190,10 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
                         )}
                     </div>
                 </ScrollArea>
+                <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleSuggestionClick("Use a professional template")}>Use a professional template</Button>
+                    <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleSuggestionClick("Make my summary more professional")}>Make my summary more professional</Button>
+                </div>
             </CardContent>
             <CardFooter className="p-2 border-t flex flex-col items-start gap-2">
                 {attachments.length > 0 && (
@@ -200,20 +208,8 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
                         ))}
                     </div>
                 )}
-                <div className="flex w-full items-start gap-2">
-                    <input
-                        id="cert-upload"
-                        type="file"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                        ref={attachmentInputRef}
-                        disabled={isLoading}
-                        multiple
-                    />
-                    <Button variant="ghost" size="icon" className="shrink-0" onClick={handleAttachmentClick} aria-label="Attach file" disabled={isLoading}>
-                        <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Textarea
+                <div className="relative flex w-full items-center">
+                     <Textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => {
@@ -222,14 +218,30 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
                                 if (!isLoading) handleSendMessage();
                             }
                         }}
-                        placeholder="e.g., 'Make my summary more professional'"
+                        placeholder="e.g., 'Add a skills section'"
                         disabled={isLoading}
                         rows={1}
-                        className="resize-none w-full pr-10"
+                        className="resize-none w-full pr-24 pl-10 border-none focus-visible:ring-0 shadow-none bg-muted rounded-full"
                     />
-                    <Button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && attachments.length === 0)} className="shrink-0">
-                        <Send className="h-4 w-4" />
-                    </Button>
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2">
+                        <input
+                            id="cert-upload"
+                            type="file"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                            ref={attachmentInputRef}
+                            disabled={isLoading}
+                            multiple
+                        />
+                        <Button variant="ghost" size="icon" className="shrink-0 rounded-full h-8 w-8" onClick={handleAttachmentClick} aria-label="Attach file" disabled={isLoading}>
+                            <Paperclip className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        <Button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && attachments.length === 0)} className="shrink-0 rounded-full h-8 w-8" size="icon">
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             </CardFooter>
         </Card>

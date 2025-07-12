@@ -15,6 +15,7 @@ import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
 import html2pdf from 'html2pdf.js';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 const parsingTexts = [
@@ -243,17 +244,21 @@ function ResumeEditorPageContent() {
             return;
         }
     
+        // 1. Clone the node to avoid capturing the loader state
         const elementToPrint = sourceElement.cloneNode(true) as HTMLElement;
+        
+        // 2. Set the loading state AFTER cloning
         setIsGeneratingPdf(true);
     
         try {
             const opt = {
-              margin:       [20, 20, 20, 20], // Standard A4 margins in mm
+              margin:       [20, 20, 20, 20],
               filename:     (editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume') + '.pdf',
               jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-              // By omitting html2canvas and image options, we prioritize text-based rendering.
+              // Forcing text-based rendering by removing canvas options
             };
         
+            // Use the cloned element for PDF generation
             await html2pdf().set(opt).from(elementToPrint).save();
 
         } catch (error) {
@@ -261,6 +266,7 @@ function ResumeEditorPageContent() {
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
             toast({ title: "Download failed", description: `Could not generate PDF. Error: ${errorMessage}`, variant: "destructive" });
         } finally {
+            // 3. Unset the loading state
             setIsGeneratingPdf(false);
         }
     };
@@ -420,23 +426,25 @@ function ResumeEditorPageContent() {
                                         {editorState.htmlContent ? `Editing: ${editorState.fileName || 'Untitled'}` : "Original Resume Preview"}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start overflow-auto">
-                                    {isGeneratingPdf ? (
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <CreativeLoader texts={generatingPdfTexts} />
-                                        </div>
-                                     ) : (
-                                        <div
-                                            ref={livePreviewRef}
-                                            className="bg-white text-black shadow-lg"
-                                            style={{
-                                                width: '210mm',
-                                                minHeight: '297mm',
-                                                boxSizing: 'border-box',
-                                            }}
-                                            dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
-                                        />
-                                    )}
+                                <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start">
+                                     <ScrollArea className="h-full w-full">
+                                        {isGeneratingPdf ? (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <CreativeLoader texts={generatingPdfTexts} />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                ref={livePreviewRef}
+                                                className="bg-white text-black shadow-lg mx-auto"
+                                                style={{
+                                                    width: '210mm',
+                                                    minHeight: '297mm',
+                                                    boxSizing: 'border-box',
+                                                }}
+                                                dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
+                                            />
+                                        )}
+                                     </ScrollArea>
                                 </CardContent>
                             </Card>
                         </div>
