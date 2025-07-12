@@ -248,7 +248,7 @@ function ResumeEditorPageContent() {
         setIsGeneratingPdf(true);
         try {
             pdfMake.vfs = pdfFonts.pdfMake.vfs;
-
+            
             const html = sourceElement.innerHTML;
             const content = htmlToPdfmake(html);
             const docDefinition = {
@@ -481,3 +481,5 @@ export default function ResumeEditorPage() {
         </Suspense>
     )
 }
+
+    
