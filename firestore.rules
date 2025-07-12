@@ -2,31 +2,22 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check if a user is the owner of a document
-    function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
-    }
-
-    // Rules for the 'users' collection
+    // A user can manage their own data.
     match /users/{userId} {
-      // Allow a user to read their own user document.
-      // This is necessary for the subcollection delete rules to work.
-      allow get: if isOwner(userId);
-      
-      // Allow a user to create and update their own profile data
-      allow write: if isOwner(userId);
+      allow get: if request.auth != null && request.auth.uid == userId;
 
-      // Rules for the 'resumes' subcollection
-      match /resumes/{resumeId} {
-        // A user can perform any action on their own resumes
-        allow read, write, delete: if isOwner(userId);
+      // Allow a user to manage their own profile document.
+      match /profile/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
       }
 
-      // Rules for the 'portfolios' subcollection
+      // A user can delete their own resumes and portfolios.
+      match /resumes/{resumeId} {
+        allow delete: if request.auth != null && request.auth.uid == userId;
+      }
+      
       match /portfolios/{portfolioId} {
-         // A user can perform any action on their own portfolios
-        allow read, write, delete: if isOwner(userId);
+        allow delete: if request.auth != null && request.auth.uid == userId;
       }
     }
   }
