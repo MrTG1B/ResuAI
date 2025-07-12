@@ -112,6 +112,7 @@ export default function DashboardPage() {
         
         // Fetch profile data for completion status
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
             const profileSnap = await getDoc(profileDocRef);
             const profileData = profileSnap.exists() ? profileSnap.data() : {};
@@ -123,6 +124,7 @@ export default function DashboardPage() {
 
         // Fetch resumes
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const resumeQuery = query(collection(db, `users/${user.uid}/resumes`), orderBy('lastModified', 'desc'));
             const resumeSnapshot = await getDocs(resumeQuery);
             const userResumes = resumeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SavedEditorState & {id: string}));
@@ -135,6 +137,7 @@ export default function DashboardPage() {
         
         // Fetch portfolios
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const portfolioQuery = query(collection(db, `users/${user.uid}/portfolios`), orderBy('createdAt', 'desc'));
             const portfolioSnapshot = await getDocs(portfolioQuery);
             const userPortfolios = portfolioSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PortfolioData & {id: string}));
@@ -163,10 +166,10 @@ export default function DashboardPage() {
     router.push('/resume-builder/editor');
   }
 
-  const confirmDelete = async () => {
-    if (!user || !deleteTarget) return;
+  const confirmDelete = async (target: {type: 'resume' | 'portfolio', id: string} | null) => {
+    if (!user || !target) return;
 
-    const { type, id } = deleteTarget;
+    const { type, id } = target;
     let result;
     try {
         if (type === 'resume') {
@@ -437,7 +440,7 @@ export default function DashboardPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setDeleteTarget(null)}>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                <AlertDialogAction onClick={() => confirmDelete(deleteTarget)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
