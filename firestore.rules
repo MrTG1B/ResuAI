@@ -1,11 +1,45 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // A user can read, write, and delete documents in their own user folder.
-    match /users/{userId}/{document=**} {
-      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+    
+    // Helper function to check for admin role
+    function isAdmin() {
+      // In a real app, this would check a custom claim, but for this project, we'll check by a hardcoded email.
+      return request.auth != null && request.auth.token.email == 'admin@resuai.com';
+    }
+
+    // Rules for the 'users' collection
+    match /users/{userId} {
+      
+      // Admins can list all users for the dashboard and delete a specific user.
+      allow list, delete: if isAdmin();
+      
+      // A user can create their own user document (though this is often done server-side).
+      // They cannot read other user docs directly, only admins can.
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Rules for the 'profile' subcollection
+      match /profile/{profileId} {
+        // A user can read and write to their own profile.
+        // An admin can only read (get) a user's profile.
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow get: if isAdmin();
+      }
+
+      // Rules for the 'resumes' subcollection
+      match /resumes/{resumeId} {
+        // A user can perform all actions on their own resumes.
+        // No admin access is granted here.
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Rules for the 'portfolios' subcollection
+      match /portfolios/{portfolioId} {
+        // A user can perform all actions on their own portfolios.
+        // No admin access is granted here.
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }
