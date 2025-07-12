@@ -1,45 +1,47 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+  
     // Helper function to check for admin role
     function isAdmin() {
-      // In a real app, this would check a custom claim, but for this project, we'll check by a hardcoded email.
-      return request.auth != null && request.auth.token.email == 'admin@resuai.com';
+      // In a real app, this would check a custom claim, but for now we use a hardcoded email.
+      return request.auth.token.email == 'admin@resuai.com';
+    }
+
+    // Default deny all access to the database
+    match /{document=**} {
+      allow read, write: if false;
     }
 
     // Rules for the 'users' collection
     match /users/{userId} {
+      // Users can create and update their own user document
+      allow read, write: if request.auth.uid == userId;
       
-      // Admins can list all users for the dashboard and delete a specific user.
-      allow list, delete: if isAdmin();
-      
-      // A user can create their own user document (though this is often done server-side).
-      // They cannot read other user docs directly, only admins can.
-      allow create: if request.auth != null && request.auth.uid == userId;
+      // Admins can get and delete any user document
+      allow get, delete: if isAdmin();
 
       // Rules for the 'profile' subcollection
       match /profile/{profileId} {
-        // A user can read and write to their own profile.
-        // An admin can only read (get) a user's profile.
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-        allow get: if isAdmin();
+        allow read, write: if request.auth.uid == userId;
       }
-
+      
       // Rules for the 'resumes' subcollection
       match /resumes/{resumeId} {
-        // A user can perform all actions on their own resumes.
-        // No admin access is granted here.
-        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+        allow read, write, delete: if request.auth.uid == userId;
       }
-
+      
       // Rules for the 'portfolios' subcollection
       match /portfolios/{portfolioId} {
-        // A user can perform all actions on their own portfolios.
-        // No admin access is granted here.
-        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+        allow read, write, delete: if request.auth.uid == userId;
       }
+    }
+    
+    // Admins can list all users for the dashboard
+    match /users/{userId} {
+      allow list: if isAdmin();
     }
   }
 }
