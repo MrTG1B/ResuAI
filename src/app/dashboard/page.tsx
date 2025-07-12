@@ -42,21 +42,27 @@ function ToolCard({ href, icon: Icon, title, description, actionText }: { href: 
     )
 }
 
-const calculateProfileCompletion = (profile: any): number => {
-    if (!profile) return 0;
+const calculateProfileCompletion = (profile: any, user: User | null): number => {
+    if (!profile && !user) return 0;
+
+    // Combine profile data with user auth data for a complete picture
+    const combinedData = {
+        ...profile,
+        name: profile?.name || user?.displayName,
+        email: profile?.email || user?.email,
+    };
     
     const fields = [
-        profile.name,
-        profile.title,
-        profile.email,
-        profile.phone,
-        profile.website,
-        profile.location,
-        profile.socials && profile.socials.length > 0,
-        profile.experience && profile.experience.length > 0,
-        profile.education && profile.education.length > 0,
-        profile.projects && profile.projects.length > 0,
-        profile.certifications && profile.certifications.length > 0,
+        combinedData.name,
+        combinedData.title,
+        combinedData.email,
+        combinedData.phone,
+        combinedData.location,
+        combinedData.socials?.length > 0,
+        combinedData.experience?.length > 0,
+        combinedData.education?.length > 0,
+        combinedData.projects?.length > 0,
+        combinedData.certifications?.length > 0,
     ];
 
     const completedFields = fields.filter(Boolean).length;
@@ -96,10 +102,9 @@ export default function DashboardPage() {
         try {
             const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
             const profileSnap = await getDoc(profileDocRef);
-            if (profileSnap.exists()) {
-                const completion = calculateProfileCompletion(profileSnap.data());
-                setProfileCompletion(completion);
-            }
+            const profileData = profileSnap.exists() ? profileSnap.data() : {};
+            const completion = calculateProfileCompletion(profileData, user);
+            setProfileCompletion(completion);
         } catch (error) {
             console.error("Failed to fetch profile data:", error);
         }

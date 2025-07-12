@@ -30,29 +30,29 @@ const socialLinkSchema = z.object({
 });
 
 const experienceSchema = z.object({
-  role: z.string().min(1, "Role is required"),
-  company: z.string().min(1, "Company is required"),
+  role: z.string().optional(),
+  company: z.string().optional(),
   location: z.string().optional(),
-  dates: z.string().min(1, "Dates are required"),
+  dates: z.string().optional(),
   description: z.string().optional(),
 });
 
 const educationSchema = z.object({
-  degree: z.string().min(1, "Degree is required"),
-  school: z.string().min(1, "School is required"),
+  degree: z.string().optional(),
+  school: z.string().optional(),
   location: z.string().optional(),
-  dates: z.string().min(1, "Dates are required"),
+  dates: z.string().optional(),
 });
 
 const projectSchema = z.object({
-  name: z.string().min(1, "Project name is required"),
+  name: z.string().optional(),
   description: z.string().optional(),
   technologies: z.string().optional(),
   url: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
 });
 
 const certificationSchema = z.object({
-  name: z.string().min(1, "Certification name is required"),
+  name: z.string().optional(),
   issuingOrganization: z.string().optional(),
   date: z.string().optional(),
   credentialUrl: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
@@ -63,7 +63,6 @@ const profileSchema = z.object({
   title: z.string().optional(),
   email: z.string().email("Invalid email address").optional(),
   phone: z.string().optional(),
-  website: z.string().url("Invalid URL").optional().or(z.literal('')),
   location: z.string().optional(),
   socials: z.array(socialLinkSchema).optional(),
   experience: z.array(experienceSchema).optional(),
@@ -286,11 +285,7 @@ export default function ProfilePage() {
                                 />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="website">Website/Portfolio</Label>
-                          <Input id="website" {...register("website")} placeholder="https://your-portfolio.com" />
-                        </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 md:col-span-2">
                           <Label htmlFor="location">Location</Label>
                           <Input id="location" {...register("location")} placeholder="e.g., San Francisco, CA" />
                         </div>
