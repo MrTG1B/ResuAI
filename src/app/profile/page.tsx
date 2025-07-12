@@ -100,7 +100,7 @@ export default function ProfilePage() {
       education: [],
       projects: [],
       certifications: [],
-      phone: "+1"
+      phone: "+91"
     },
   });
 
@@ -119,7 +119,7 @@ export default function ProfilePage() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (!data.phone) {
-            data.phone = "+1"; // Default country code if none is saved
+            data.phone = "+91"; // Default country code if none is saved
           }
           reset(data as ProfileFormData);
         } else {
@@ -127,7 +127,7 @@ export default function ProfilePage() {
           reset({
             name: user.displayName || '',
             email: user.email || '',
-            phone: "+1",
+            phone: "+91",
           });
         }
       } else {
@@ -211,7 +211,7 @@ export default function ProfilePage() {
   
   const phoneValue = watch('phone') || '';
   const countryCodeMatch = countries.find(c => phoneValue.startsWith(c.dial_code));
-  const countryCode = countryCodeMatch ? countryCodeMatch.dial_code : '+1';
+  const countryCode = countryCodeMatch ? countryCodeMatch.dial_code : '+91';
   const nationalNumber = phoneValue.startsWith(countryCode) ? phoneValue.substring(countryCode.length) : phoneValue;
 
   return (
