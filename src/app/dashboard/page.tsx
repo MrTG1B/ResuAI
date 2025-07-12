@@ -170,31 +170,30 @@ export default function DashboardPage() {
     if (!user || !deleteTarget) return;
 
     const { type, id } = deleteTarget;
-    // Clear the target immediately to prevent double-clicks
     setDeleteTarget(null);
 
-    let result;
     try {
+        let result;
         if (type === 'resume') {
             result = await deleteResumeAction(user.uid, id);
-            if (result.success) {
-                setResumes(prev => prev.filter(r => r.id !== id));
-                toast({ title: "Resume Deleted", description: "The resume has been successfully deleted." });
-            } else {
-                throw new Error(result.error);
-            }
         } else if (type === 'portfolio') {
             result = await deletePortfolioAction(user.uid, id);
-            if (result.success) {
-                setPortfolios(prev => prev.filter(p => p.id !== id));
-                toast({ title: "Portfolio Deleted", description: "The portfolio has been successfully deleted." });
+        }
+
+        if (result && result.success) {
+            if (type === 'resume') {
+                setResumes(prev => prev.filter(r => r.id !== id));
             } else {
-                throw new Error(result.error);
+                setPortfolios(prev => prev.filter(p => p.id !== id));
             }
+            toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} Deleted`, description: `The ${type} has been successfully deleted.` });
+        } else {
+            // Throw the specific error message from the action
+            throw new Error(result?.error || `An unknown error occurred while deleting the ${type}.`);
         }
     } catch (error: any) {
-        const errorMessage = error instanceof Error ? error.message : `Failed to delete ${type}.`;
-        toast({ title: "Error", description: errorMessage, variant: "destructive" });
+        // Display the specific error message from the catch block
+        toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   }
 

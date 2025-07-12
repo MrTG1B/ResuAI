@@ -153,7 +153,6 @@ export async function deleteResumeAction(userId: string, resumeId: string) {
     try {
         if (!db) throw new Error("Firestore is not initialized.");
 
-        // Safeguard: Check if this is the last resume
         const resumeCollectionRef = collection(db, 'users', userId, 'resumes');
         const resumeSnapshot = await getDocs(resumeCollectionRef);
         if (resumeSnapshot.size <= 1) {
@@ -175,7 +174,6 @@ export async function deletePortfolioAction(userId: string, portfolioId: string)
     try {
         if (!db) throw new Error("Firestore is not initialized.");
 
-        // Safeguard: Check if this is the last portfolio
         const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
         const portfolioSnapshot = await getDocs(portfolioCollectionRef);
         if (portfolioSnapshot.size <= 1) {
