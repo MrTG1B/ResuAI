@@ -152,6 +152,14 @@ export async function deleteResumeAction(userId: string, resumeId: string) {
     }
     try {
         if (!db) throw new Error("Firestore is not initialized.");
+
+        // Safeguard: Check if this is the last resume
+        const resumeCollectionRef = collection(db, 'users', userId, 'resumes');
+        const resumeSnapshot = await getDocs(resumeCollectionRef);
+        if (resumeSnapshot.size <= 1) {
+            return { success: false, error: "You cannot delete your last resume." };
+        }
+
         await deleteDoc(doc(db, `users/${userId}/resumes/${resumeId}`));
         return { success: true };
     } catch (error) {
