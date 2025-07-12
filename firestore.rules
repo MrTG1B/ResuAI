@@ -1,24 +1,25 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // A user can manage their own data.
+    // Default deny all access to user data
+    match /users/{userId}/{document=**} {
+      allow read, write: if false;
+    }
+
+    // Allow users to create their own user document and profile data
     match /users/{userId} {
-      allow get: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth.uid == userId;
+      allow get: if request.auth.uid == userId;
+    }
 
-      // Allow a user to manage their own profile document.
-      match /profile/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-
-      // A user can delete their own resumes and portfolios.
-      match /resumes/{resumeId} {
-        allow delete: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      match /portfolios/{portfolioId} {
-        allow delete: if request.auth != null && request.auth.uid == userId;
-      }
+    // Allow users to manage their own profile, resumes, and portfolios.
+    // This single rule covers create, read (get, list), update, and delete
+    // for all documents within these subcollections for the logged-in user.
+    match /users/{userId}/{collection}/{docId} {
+      allow read, write: if request.auth.uid == userId &&
+                           (collection == 'profile' || collection == 'resumes' || collection == 'portfolios');
     }
   }
 }
