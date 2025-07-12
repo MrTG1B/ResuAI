@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { onAuthStateChanged, type User } from "firebase/auth";
@@ -20,6 +20,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { CountryCodeSelector } from "@/components/country-code-selector";
+import { countries } from "@/lib/countries";
+
 
 const socialLinkSchema = z.object({
   platform: z.string().min(1, "Platform name is required"),
@@ -45,7 +48,7 @@ const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   description: z.string().optional(),
   technologies: z.string().optional(),
-  url: z.string().url("Please enter a valid URL").optional(),
+  url: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
 });
 
 const certificationSchema = z.object({
@@ -60,7 +63,7 @@ const profileSchema = z.object({
   title: z.string().optional(),
   email: z.string().email("Invalid email address").optional(),
   phone: z.string().optional(),
-  website: z.string().url("Invalid URL").optional(),
+  website: z.string().url("Invalid URL").optional().or(z.literal('')),
   location: z.string().optional(),
   socials: z.array(socialLinkSchema).optional(),
   experience: z.array(experienceSchema).optional(),
@@ -89,7 +92,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isAnalyzingCert, setIsAnalyzingCert] = useState<number | null>(null);
 
-  const { register, handleSubmit, control, reset, setValue, formState: { errors } } = useForm<ProfileFormData>({
+  const { register, handleSubmit, control, reset, setValue, watch, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       socials: [],
@@ -97,6 +100,7 @@ export default function ProfilePage() {
       education: [],
       projects: [],
       certifications: [],
+      phone: "+1"
     },
   });
 
@@ -113,12 +117,17 @@ export default function ProfilePage() {
         const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
         const docSnap = await getDoc(profileDocRef);
         if (docSnap.exists()) {
-          reset(docSnap.data() as ProfileFormData);
+          const data = docSnap.data();
+          if (!data.phone) {
+            data.phone = "+1"; // Default country code if none is saved
+          }
+          reset(data as ProfileFormData);
         } else {
           // Pre-fill from auth if profile is new
           reset({
             name: user.displayName || '',
             email: user.email || '',
+            phone: "+1",
           });
         }
       } else {
@@ -199,6 +208,11 @@ export default function ProfilePage() {
       </div>
     );
   }
+  
+  const phoneValue = watch('phone') || '';
+  const countryCodeMatch = countries.find(c => phoneValue.startsWith(c.dial_code));
+  const countryCode = countryCodeMatch ? countryCodeMatch.dial_code : '+1';
+  const nationalNumber = phoneValue.startsWith(countryCode) ? phoneValue.substring(countryCode.length) : phoneValue;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -245,9 +259,32 @@ export default function ProfilePage() {
                           <Label htmlFor="email">Email Address</Label>
                           <Input id="email" type="email" {...register("email")} placeholder="e.g., jane.doe@example.com" />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Phone Number</Label>
-                          <Input id="phone" {...register("phone")} placeholder="e.g., (123) 456-7890" />
+                         <div className="space-y-2">
+                            <Label htmlFor="phone">Phone Number</Label>
+                            <div className="flex items-center">
+                                <Controller
+                                    control={control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <CountryCodeSelector
+                                            value={countryCode}
+                                            onValueChange={(newCode) => {
+                                               field.onChange(newCode + nationalNumber);
+                                            }}
+                                        />
+                                    )}
+                                />
+                                <Input 
+                                    id="phone" 
+                                    type="tel" 
+                                    value={nationalNumber}
+                                    onChange={(e) => {
+                                        setValue('phone', countryCode + e.target.value.replace(/\D/g, ''))
+                                    }}
+                                    placeholder="e.g., 1234567890" 
+                                    className="rounded-l-none"
+                                />
+                            </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="website">Website/Portfolio</Label>
