@@ -14,9 +14,7 @@ import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import htmlToPdfmake from "html-to-pdfmake";
+import html2pdf from 'html2pdf.js';
 
 
 const parsingTexts = [
@@ -27,10 +25,10 @@ const parsingTexts = [
 ];
 
 const generatingPdfTexts = [
-    "Rebuilding your resume as a PDF...",
+    "Building your PDF...",
     "Applying formatting...",
-    "Generating high-fidelity preview...",
-    "Finalizing document...",
+    "Generating high-fidelity document...",
+    "Finalizing PDF...",
 ];
 
 const applyingSuggestionsTexts = [
@@ -247,34 +245,15 @@ function ResumeEditorPageContent() {
     
         setIsGeneratingPdf(true);
         try {
-            // Assign the virtual file system for fonts.
-            pdfMake.vfs = pdfFonts.vfs;
-            
-            // Define fonts for pdfmake. Roboto is included in vfs_fonts.
-            pdfMake.fonts = {
-                Roboto: {
-                    normal: 'Roboto-Regular.ttf',
-                    bold: 'Roboto-Medium.ttf',
-                    italics: 'Roboto-Italic.ttf',
-                    bolditalics: 'Roboto-MediumItalic.ttf'
-                }
+            const opt = {
+              margin:       [10, 10, 10, 10], // top, left, bottom, right
+              filename:     (editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume') + '.pdf',
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            
-            // Sanitize HTML: replace all font-family declarations with Roboto
-            const sanitizedHtml = sourceElement.innerHTML.replace(/font-family: ([^;]*?);/g, "font-family: Roboto;");
-    
-            const content = htmlToPdfmake(sanitizedHtml);
-    
-            const docDefinition = {
-                content: content,
-                pageSize: 'A4',
-                pageMargins: [ 40, 60, 40, 60 ],
-                defaultStyle: {
-                    font: 'Roboto' // Ensure Roboto is the fallback font.
-                }
-            };
-    
-            pdfMake.createPdf(docDefinition).download(editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume' + '.pdf');
+        
+            await html2pdf().set(opt).from(sourceElement).save();
 
         } catch (error) {
             console.error('PDF Download error:', error);
@@ -441,22 +420,18 @@ function ResumeEditorPageContent() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-4 sm:p-6 bg-muted/30 flex justify-center items-start overflow-auto">
-                                    {editorState.initialPreviewUri && !editorState.htmlContent ? (
-                                        <iframe 
-                                            src={`${editorState.initialPreviewUri}#toolbar=0&navpanes=0`} 
-                                            title="Resume Preview"
-                                            width="100%" 
-                                            height="100%" 
-                                            className="border-none"
-                                        />
-                                    ) : (
+                                    {isGeneratingPdf ? (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <CreativeLoader texts={generatingPdfTexts} />
+                                        </div>
+                                     ) : (
                                         <div
                                             ref={livePreviewRef}
                                             className="bg-white text-black shadow-lg"
                                             style={{
-                                                width: '8.27in',
-                                                minHeight: '11.69in',
-                                                padding: '0.75in',
+                                                width: '210mm',
+                                                minHeight: '297mm',
+                                                padding: '20mm',
                                                 boxSizing: 'border-box',
                                             }}
                                             dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
