@@ -158,7 +158,7 @@ export async function deleteResumeAction(userId: string, resumeId: string) {
     }
     try {
         if (!db) throw new Error("Firestore is not initialized.");
-        await deleteDoc(doc(db, `users/${userId}/resumes`, resumeId));
+        await deleteDoc(doc(db, `users/${userId}/resumes/${resumeId}`));
         return { success: true };
     } catch (error) {
         console.error("Error deleting resume:", error);
@@ -172,7 +172,7 @@ export async function deletePortfolioAction(userId: string, portfolioId: string)
     }
     try {
         if (!db) throw new Error("Firestore is not initialized.");
-        await deleteDoc(doc(db, `users/${userId}/portfolios`, portfolioId));
+        await deleteDoc(doc(db, `users/${userId}/portfolios/${portfolioId}`));
         return { success: true };
     } catch (error) {
         console.error("Error deleting portfolio:", error);

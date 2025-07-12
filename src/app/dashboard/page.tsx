@@ -15,6 +15,17 @@ import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData, type PersonalInfo } from '@/types/portfolio';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { deletePortfolioAction, deleteResumeAction } from '../actions';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
@@ -153,7 +164,6 @@ export default function DashboardPage() {
 
   const handleDeleteResume = async (resumeId: string) => {
     if (!user) return;
-    if (!confirm("Are you sure you want to delete this resume? This action cannot be undone.")) return;
 
     try {
         const result = await deleteResumeAction(user.uid, resumeId);
@@ -170,7 +180,6 @@ export default function DashboardPage() {
 
   const handleDeletePortfolio = async (portfolioId: string) => {
     if (!user) return;
-    if (!confirm("Are you sure you want to delete this portfolio? This action cannot be undone.")) return;
 
     try {
         const result = await deletePortfolioAction(user.uid, portfolioId);
@@ -332,9 +341,25 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDeleteResume(r.id)}>
-                                                <Trash2 className="h-4 w-4"/>
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10">
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot be undone. This will permanently delete your resume.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteResume(r.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                             <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
                                                 <Edit className="mr-2 h-4 w-4"/>
                                                 Edit
@@ -386,9 +411,25 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePortfolio(p.id)}>
-                                                <Trash2 className="h-4 w-4"/>
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10">
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot be undone. This will permanently delete your portfolio.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeletePortfolio(p.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                             <Button variant="ghost" size="sm" asChild>
                                                 <Link href={`/portfolio?id=${p.id}`}>
                                                     <Eye className="mr-2 h-4 w-4"/>
