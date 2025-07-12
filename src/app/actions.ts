@@ -152,18 +152,11 @@ export async function deleteResumeAction(userId: string, resumeId: string) {
     }
     try {
         if (!db) throw new Error("Firestore is not initialized.");
-
-        const resumeCollectionRef = collection(db, 'users', userId, 'resumes');
-        const resumeSnapshot = await getDocs(resumeCollectionRef);
-        if (resumeSnapshot.size <= 1) {
-            return { success: false, error: "You cannot delete your last resume." };
-        }
-
         await deleteDoc(doc(db, `users/${userId}/resumes/${resumeId}`));
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting resume:", error);
-        return { success: false, error: "Failed to delete resume." };
+        return { success: false, error: error.message || "Failed to delete resume." };
     }
 }
 
@@ -173,18 +166,11 @@ export async function deletePortfolioAction(userId: string, portfolioId: string)
     }
     try {
         if (!db) throw new Error("Firestore is not initialized.");
-
-        const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
-        const portfolioSnapshot = await getDocs(portfolioCollectionRef);
-        if (portfolioSnapshot.size <= 1) {
-            return { success: false, error: "You cannot delete your last portfolio." };
-        }
-
         await deleteDoc(doc(db, `users/${userId}/portfolios/${portfolioId}`));
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting portfolio:", error);
-        return { success: false, error: "Failed to delete portfolio." };
+        return { success: false, error: error.message || "Failed to delete portfolio." };
     }
 }
 

@@ -170,17 +170,27 @@ export default function DashboardPage() {
     if (!user || !deleteTarget) return;
 
     const { type, id } = deleteTarget;
-    setDeleteTarget(null);
+    setDeleteTarget(null); // Clear target immediately
+
+    // Client-side checks
+    if (type === 'resume' && resumes.length <= 1) {
+        toast({ title: "Deletion Failed", description: "You cannot delete your last resume.", variant: "destructive" });
+        return;
+    }
+    if (type === 'portfolio' && portfolios.length <= 1) {
+        toast({ title: "Deletion Failed", description: "You cannot delete your last portfolio.", variant: "destructive" });
+        return;
+    }
 
     try {
         let result;
         if (type === 'resume') {
             result = await deleteResumeAction(user.uid, id);
-        } else if (type === 'portfolio') {
+        } else {
             result = await deletePortfolioAction(user.uid, id);
         }
 
-        if (result && result.success) {
+        if (result?.success) {
             if (type === 'resume') {
                 setResumes(prev => prev.filter(r => r.id !== id));
             } else {
@@ -188,11 +198,9 @@ export default function DashboardPage() {
             }
             toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} Deleted`, description: `The ${type} has been successfully deleted.` });
         } else {
-            // Throw the specific error message from the action
             throw new Error(result?.error || `An unknown error occurred while deleting the ${type}.`);
         }
     } catch (error: any) {
-        // Display the specific error message from the catch block
         toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   }
