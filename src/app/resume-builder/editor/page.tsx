@@ -251,7 +251,7 @@ function ResumeEditorPageContent() {
             pdfMake.vfs = pdfFonts.vfs;
             
             // Sanitize HTML: replace unsupported fonts with Roboto
-            const sanitizedHtml = sourceElement.innerHTML.replace(/font-family:([^;>]*)(Arial|Helvetica|sans-serif)([^;>]*);?/gi, "font-family: 'Roboto', sans-serif;");
+            const sanitizedHtml = sourceElement.innerHTML.replace(/font-family: ([^;]*?);/g, "font-family: Roboto;");
     
             const content = htmlToPdfmake(sanitizedHtml, {
                 defaultStyles: {
