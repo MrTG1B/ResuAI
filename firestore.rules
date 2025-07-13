@@ -5,32 +5,27 @@ service cloud.firestore {
 
     // Helper function to check if user is admin
     function isAdmin() {
+      // Check for null before accessing properties
       return request.auth != null && request.auth.token.email == 'admin@resuai.com';
     }
 
-    // Deny all reads/writes by default
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // Allow admins to list users for the dashboard
-    match /users {
-      allow list: if isAdmin();
-    }
-
-    // Rules for a specific user's document and subcollections
+    // Rules for 'users' collection
     match /users/{userId} {
-      // Admin can get and delete any user document
+      // Admins can read and delete any user document.
       allow get, delete: if isAdmin();
+      // Users can read and write their own top-level document.
+      allow read, write: if request.auth != null && request.auth.uid == userId;
 
-      // Authenticated users can create, read, update, and delete their own top-level document
-      allow create, get, update, delete: if request.auth != null && request.auth.uid == userId;
-
-      // This rule allows users to perform any action on any document in any subcollection under their own user ID.
-      // This covers /resumes, /portfolios, /profile, etc.
+      // This rule applies to all subcollections (resumes, portfolios, profile)
+      // It grants the user full control over documents within their own subcollections.
       match /{subcollection}/{docId=**} {
         allow read, write, delete: if request.auth != null && request.auth.uid == userId;
       }
+    }
+    
+    // Admins can list the users collection for the dashboard
+    match /users {
+        allow list: if isAdmin();
     }
   }
 }
