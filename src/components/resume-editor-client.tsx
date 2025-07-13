@@ -432,14 +432,14 @@ export default function ResumeEditorClient() {
                                 </CardHeader>
                                 <CardContent className="flex-grow p-0 bg-muted/30 overflow-hidden">
                                     <ScrollArea className="h-full w-full bg-muted/30 rounded-md">
-                                        <div className="w-full h-full p-4">
-                                            {isGeneratingPdf ? (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <CreativeLoader texts={generatingPdfTexts} />
-                                                </div>
-                                            ) : showOriginalPdf ? (
-                                                <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none" title="Original Resume Preview" />
-                                            ) : (
+                                        {isGeneratingPdf ? (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <CreativeLoader texts={generatingPdfTexts} />
+                                            </div>
+                                        ) : showOriginalPdf ? (
+                                            <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none" title="Original Resume Preview" />
+                                        ) : (
+                                            <div className="p-4 flex justify-center items-start">
                                                 <div
                                                     ref={livePreviewRef}
                                                     className="bg-white text-black shadow-lg"
@@ -454,8 +454,8 @@ export default function ResumeEditorClient() {
                                                     }}
                                                     dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                                 />
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                      </ScrollArea>
                                 </CardContent>
                             </Card>
