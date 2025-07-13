@@ -432,7 +432,7 @@ export default function ResumeEditorClient() {
                                 </CardHeader>
                                 <CardContent className="flex-grow p-0 bg-muted/30 overflow-hidden">
                                     <ScrollArea className="h-full w-full bg-muted/30 rounded-md">
-                                        <div className="w-full h-full flex justify-center items-start p-4">
+                                        <div className="w-full h-full p-4">
                                             {isGeneratingPdf ? (
                                                 <div className="w-full h-full flex items-center justify-center">
                                                     <CreativeLoader texts={generatingPdfTexts} />
