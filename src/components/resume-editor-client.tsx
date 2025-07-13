@@ -257,7 +257,7 @@ export default function ResumeEditorClient() {
     
         try {
             const opt = {
-              margin:       [20, 20, 20, 20],
+              margin:       [10, 10, 10, 10], // Narrow margin for PDF
               filename:     (editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume') + '.pdf',
               jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
             };
@@ -432,7 +432,7 @@ export default function ResumeEditorClient() {
                                 </CardHeader>
                                 <CardContent className="flex-grow p-0 bg-muted/30 overflow-hidden">
                                     <ScrollArea className="h-full w-full bg-muted/30 rounded-md">
-                                        <div className={showOriginalPdf ? "h-full w-full" : "flex justify-center items-start p-4 min-h-full"}>
+                                        <div className="w-full h-full flex justify-center items-start p-4">
                                             {isGeneratingPdf ? (
                                                 <div className="w-full h-full flex items-center justify-center">
                                                     <CreativeLoader texts={generatingPdfTexts} />
@@ -450,6 +450,7 @@ export default function ResumeEditorClient() {
                                                         transform: 'scale(0.8)',
                                                         transformOrigin: 'top center',
                                                         boxSizing: 'border-box',
+                                                        padding: '10mm',
                                                     }}
                                                     dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                                 />
@@ -477,5 +478,3 @@ export default function ResumeEditorClient() {
         </div>
     );
 }
-
-    
