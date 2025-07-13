@@ -1,0 +1,49 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is an admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'admin@resuai.com';
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Admins can list all users
+    match /users {
+        allow list: if isAdmin();
+    }
+
+    // Rules for individual user documents
+    match /users/{userId} {
+      // Admins can get and delete any user document
+      allow get, delete: if isAdmin();
+
+      // Users can create, get, and update their own main document
+      allow get, update, create: if request.auth.uid == userId;
+
+      // Rules for the 'resumes' subcollection
+      match /resumes/{resumeId} {
+        // Users can perform all actions on their own resumes
+        allow list, get, create, update, delete: if request.auth.uid == userId;
+      }
+
+      // Rules for the 'portfolios' subcollection
+      match /portfolios/{portfolioId} {
+        // Users can perform all actions on their own portfolios
+        allow list, get, create, update, delete: if request.auth.uid == userId;
+      }
+      
+      // Rules for the 'profile' subcollection
+      match /profile/{profileData} {
+        // Users can perform all actions on their own profile data
+        allow list, get, create, update, delete: if request.auth.uid == userId;
+      }
+    }
+  }
+}
