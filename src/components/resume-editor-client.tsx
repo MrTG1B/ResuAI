@@ -432,20 +432,21 @@ export default function ResumeEditorClient() {
                                 </CardHeader>
                                 <CardContent className="flex-grow p-0 bg-muted/30 overflow-hidden">
                                     <ScrollArea className="h-full w-full bg-muted/30 rounded-md">
-                                        <div className="flex justify-center items-center p-4 h-full">
+                                        <div className={showOriginalPdf ? "h-full w-full" : "flex justify-center items-start p-4 min-h-full"}>
                                             {isGeneratingPdf ? (
                                                 <div className="w-full h-full flex items-center justify-center">
                                                     <CreativeLoader texts={generatingPdfTexts} />
                                                 </div>
                                             ) : showOriginalPdf ? (
-                                                <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none shadow-lg" title="Original Resume Preview" />
+                                                <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none" title="Original Resume Preview" />
                                             ) : (
                                                 <div
                                                     ref={livePreviewRef}
-                                                    className="bg-white text-black shadow-lg origin-top"
+                                                    className="bg-white text-black shadow-lg"
                                                     style={{
                                                         width: '210mm',
                                                         minHeight: '297mm',
+                                                        aspectRatio: '1 / 1.414',
                                                         transform: 'scale(0.8)',
                                                         transformOrigin: 'top center',
                                                         boxSizing: 'border-box',
@@ -476,3 +477,5 @@ export default function ResumeEditorClient() {
         </div>
     );
 }
+
+    
