@@ -15,6 +15,14 @@ import { Card } from '@/components/ui/card';
 export default function HomePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [offsetY, setOffsetY] = useState(0);
+
+  const handleScroll = () => setOffsetY(window.pageYOffset);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!auth) {
@@ -47,8 +55,11 @@ export default function HomePage() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="text-center py-20 md:py-32 bg-gradient-to-b from-background to-card/20 animate-fade-in-down">
-          <div className="container mx-auto px-4">
+        <section className="text-center py-20 md:py-32 bg-gradient-to-b from-background to-card/20 animate-fade-in-down overflow-hidden">
+          <div 
+            className="container mx-auto px-4 relative"
+            style={{ transform: `translateY(${offsetY * 0.4}px)` }}
+          >
             <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Your AI-Powered Career Toolkit
             </h1>
@@ -66,12 +77,18 @@ export default function HomePage() {
         {/* Features Section */}
         <section className="py-20 bg-card/40">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
+            <div 
+              className="text-center mb-16"
+              style={{ transform: `translateY(${offsetY * 0.3}px)` }}
+            >
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">Simple, Powerful, and Fast</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our AI streamlines the entire process, from analyzing your experience to designing a beautiful final product.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
-              <div className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20">
+              <div 
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20"
+                style={{ transform: `translateY(${offsetY * 0.15}px)` }}
+              >
                 <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
                     <Bot className="h-8 w-8 text-primary" />
@@ -82,7 +99,10 @@ export default function HomePage() {
                   Simply upload your resume. Our AI analyzes your info to create a structured draft for a resume or portfolio.
                 </p>
               </div>
-              <div className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20" style={{ animationDelay: '200ms' }}>
+              <div 
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20" 
+                style={{ animationDelay: '200ms', transform: `translateY(${offsetY * 0.2}px)` }}
+              >
                  <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
                     <PenSquare className="h-8 w-8 text-primary" />
@@ -93,7 +113,10 @@ export default function HomePage() {
                   Easily edit any section. Get AI suggestions, apply professional templates, and customize the design to match your style.
                 </p>
               </div>
-              <div className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20" style={{ animationDelay: '400ms' }}>
+              <div 
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20" 
+                style={{ animationDelay: '400ms', transform: `translateY(${offsetY * 0.25}px)` }}
+              >
                  <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
                     <Eye className="h-8 w-8 text-primary" />
