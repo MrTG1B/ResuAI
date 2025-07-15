@@ -11,9 +11,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'HTML content is required' }, { status: 400 });
     }
 
+    // Resolve the executable path before launching puppeteer
+    const executablePath = await chromium.executablePath;
+
     const browser = await puppeteer.launch({
       args: chromium.args,
-      executablePath: await chromium.executablePath,
+      executablePath: executablePath,
       headless: chromium.headless,
     });
 
@@ -34,7 +37,7 @@ export async function POST(request: Request) {
                         padding: 0;
                     }
                     /* Inject Google Fonts link if any are used in the HTML */
-                    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap');
+                    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;700&family=Open+Sans:wght@400;700&display=swap');
                 </style>
             </head>
             <body>
