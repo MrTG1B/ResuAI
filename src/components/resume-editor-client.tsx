@@ -244,8 +244,7 @@ export default function ResumeEditorClient() {
     };
 
     const handleDownload = async () => {
-        const sourceElement = livePreviewRef.current;
-        if (!sourceElement || !editorState?.htmlContent) {
+        if (!editorState?.htmlContent) {
             toast({ title: "Nothing to download", description: "The resume content is not available.", variant: "destructive" });
             return;
         }
@@ -260,8 +259,14 @@ export default function ResumeEditorClient() {
             });
     
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Server responded with status ${response.status}`);
+                let errorDetails = `Server responded with status ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorDetails = errorData.details || errorData.error || errorDetails;
+                } catch (e) {
+                    // response is not json, ignore
+                }
+                throw new Error(errorDetails);
             }
     
             const blob = await response.blob();
@@ -277,7 +282,7 @@ export default function ResumeEditorClient() {
         } catch (error) {
             console.error('PDF Download error:', error);
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-            toast({ title: "Download failed", description: `Could not generate PDF. Error: ${errorMessage}`, variant: "destructive" });
+            toast({ title: "Download failed", description: `Could not generate PDF. Reason: ${errorMessage}`, variant: "destructive" });
         } finally {
             setIsGeneratingPdf(false);
         }
