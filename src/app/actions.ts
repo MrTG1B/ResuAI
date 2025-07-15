@@ -147,19 +147,12 @@ export async function coachChatAction(input: CoachChatInput) {
 }
 
 export async function deleteResumeAction(userId: string, resumeId: string) {
-  const user = auth?.currentUser;
-
-  if (!user || !resumeId || !userId) {
-    return { success: false, error: "Not authenticated or resume ID missing." };
+  if (!userId || !resumeId) {
+    return { success: false, error: "User ID or Resume ID is missing." };
   }
-
-  if (user.uid !== userId) {
-    return { success: false, error: "User ID mismatch. You cannot delete this resume." };
-  }
-
+  
   try {
     if (!db) throw new Error("Firestore is not initialized.");
-    // Use the validated userId from the client to construct the path
     await deleteDoc(doc(db, "users", userId, "resumes", resumeId));
     return { success: true };
   } catch (error: any) {
@@ -173,15 +166,10 @@ export async function deleteResumeAction(userId: string, resumeId: string) {
 
 
 export async function deletePortfolioAction(userId: string, portfolioId: string) {
-    const user = auth?.currentUser;
-    if (!user || !portfolioId || !userId) {
-        return { success: false, error: "User ID and Portfolio ID are required." };
+    if (!userId || !portfolioId) {
+        return { success: false, error: "User ID or Portfolio ID is missing." };
     }
-
-    if (user.uid !== userId) {
-      return { success: false, error: "User ID mismatch. You cannot delete this portfolio." };
-    }
-
+    
     try {
         if (!db) throw new Error("Firestore is not initialized.");
         await deleteDoc(doc(db, `users/${userId}/portfolios/${portfolioId}`));
