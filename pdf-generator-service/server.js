@@ -17,47 +17,26 @@ app.post('/generate-pdf', async (req, res) => {
 
   let browser = null;
   try {
-    const executablePath = await chromium.executablePath();
-    
     browser = await playwright.chromium.launch({
       args: chromium.args,
-      executablePath: executablePath,
-      headless: true, // Use boolean true
+      executablePath: await chromium.executablePath(),
+      headless: true,
     });
 
     const page = await browser.newPage();
     
-    const htmlWithFonts = `
-      <!DOCTYPE html>
-      <html>
-          <head>
-              <link rel="preconnect" href="https://fonts.googleapis.com" />
-              <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-              <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet" />
-              <style>
-                  body {
-                      margin: 0;
-                      padding: 0;
-                      -webkit-font-smoothing: antialiased;
-                  }
-              </style>
-          </head>
-          <body>
-              ${html}
-          </body>
-      </html>
-    `;
-
-    await page.setContent(htmlWithFonts, { waitUntil: 'networkidle' });
+    // The HTML content already has fonts from the editor's display.
+    // We just need to set the content.
+    await page.setContent(html, { waitUntil: 'networkidle' });
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
       margin: {
-        top: '0px',
-        right: '0px',
-        bottom: '0px',
-        left: '0px'
+        top: '10mm',
+        right: '10mm',
+        bottom: '10mm',
+        left: '10mm'
       }
     });
 
@@ -75,7 +54,7 @@ app.post('/generate-pdf', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001; // Using 3001 to avoid conflict with Next.js dev server
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`PDF Generator running on port ${PORT}`);
 });
