@@ -3,14 +3,6 @@ import { NextResponse } from 'next/server';
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
 
-// This function now consistently uses the bundled chromium executable,
-// which works in both production and local development environments.
-const getChromiumExecutablePath = async () => {
-    // The executablePath is a promise, so it must be awaited.
-    return await chromium.executablePath;
-};
-
-
 export async function POST(request: Request) {
   try {
     const { html } = await request.json();
@@ -21,7 +13,7 @@ export async function POST(request: Request) {
 
     const browser = await puppeteer.launch({
       args: chromium.args,
-      executablePath: await getChromiumExecutablePath(),
+      executablePath: await chromium.executablePath,
       headless: chromium.headless,
     });
 
