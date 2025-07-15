@@ -252,17 +252,20 @@ export default function ResumeEditorClient() {
         setIsGeneratingPdf(true);
     
         try {
-            const response = await fetch('/api/generate-pdf', {
+            // IMPORTANT: Replace this with your actual Render service URL
+            const PDF_SERVICE_URL = 'https://pdf-generator-service.onrender.com/generate-pdf';
+            
+            const response = await fetch(PDF_SERVICE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ html: editorState.htmlContent }),
             });
     
             if (!response.ok) {
-                let errorDetails = `Server responded with status ${response.status}`;
+                let errorDetails = `PDF service responded with status ${response.status}`;
                 try {
-                    const errorData = await response.json();
-                    errorDetails = errorData.details || errorData.error || errorDetails;
+                    const errorData = await response.text();
+                    errorDetails = errorData || errorDetails;
                 } catch (e) {
                     // response is not json, ignore
                 }

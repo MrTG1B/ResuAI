@@ -1,28 +1,24 @@
 
-import type { NextApiRequest, NextApiResponse } from 'next';
-import chromium from '@sparticuz/chromium';
-import playwright from 'playwright-core';
+const express = require('express');
+const cors = require('cors');
+const { chromium } = require('playwright');
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).send('Method Not Allowed');
+const app = express();
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+
+app.post('/generate-pdf', async (req, res) => {
+  const { html } = req.body;
+
+  if (!html) {
+    return res.status(400).send('Missing HTML content');
   }
 
   let browser = null;
   try {
-    const { html } = req.body;
-
-    if (!html) {
-      return res.status(400).json({ error: 'HTML content is required' });
-    }
-
-    browser = await playwright.chromium.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-      headless: true, // Corrected from chromium.headless to boolean true
+    browser = await chromium.launch({
+      headless: true,
     });
-
     const page = await browser.newPage();
     
     const htmlWithFonts = `
@@ -59,17 +55,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
+    await browser.close();
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename=resume.pdf');
     res.send(pdfBuffer);
-
-  } catch (error) {
-    console.error('PDF Generation Error:', error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during PDF generation.";
-    res.status(500).json({ error: 'Failed to generate PDF.', details: errorMessage });
-  } finally {
+  } catch (err) {
+    console.error('PDF Error:', err);
     if (browser) {
       await browser.close();
     }
+    res.status(500).send('PDF generation failed');
   }
-}
+});
+
+const PORT = process.env.PORT || 3001; // Using 3001 to avoid conflict with Next.js dev server
+app.listen(PORT, () => {
+  console.log(`PDF Generator running on port ${PORT}`);
+});
