@@ -467,7 +467,7 @@ export default function ResumeEditorClient() {
                                                         transform: 'scale(0.8)',
                                                         transformOrigin: 'top center',
                                                         boxSizing: 'border-box',
-                                                        padding: '10mm',
+                                                        padding: '12.7mm',
                                                     }}
                                                     dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                                 />
