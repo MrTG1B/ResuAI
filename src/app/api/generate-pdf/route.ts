@@ -2,7 +2,6 @@
 import { NextResponse } from 'next/server';
 import { Browser } from '@puppeteer/browsers';
 import puppeteer from 'puppeteer-core';
-import path from 'path';
 import fs from 'fs';
 
 // Define a writable cache path within the /tmp directory
@@ -12,8 +11,8 @@ if (!fs.existsSync(CACHE_DIR)) {
 }
 
 async function getBrowser() {
-    // Attempt to find a locally installed browser in our writable cache.
-    const browser = new Browser({ // Corrected from Browser.create
+    // Correctly instantiate the Browser class for the platform.
+    const browser = new Browser({
         path: CACHE_DIR,
         platform: 'linux',
     });
