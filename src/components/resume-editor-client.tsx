@@ -14,7 +14,6 @@ import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
-import html2pdf from 'html2pdf.js';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 
@@ -26,10 +25,10 @@ const parsingTexts = [
 ];
 
 const generatingPdfTexts = [
-    "Building your PDF...",
-    "Applying formatting...",
-    "Generating high-fidelity document...",
-    "Finalizing PDF...",
+    "Connecting to rendering service...",
+    "Building your high-fidelity PDF...",
+    "Applying professional formatting...",
+    "Finalizing document...",
 ];
 
 const applyingSuggestionsTexts = [
@@ -246,24 +245,35 @@ export default function ResumeEditorClient() {
 
     const handleDownload = async () => {
         const sourceElement = livePreviewRef.current;
-        if (!sourceElement) {
-            toast({ title: "Nothing to download", description: "The resume preview is not available.", variant: "destructive" });
+        if (!sourceElement || !editorState?.htmlContent) {
+            toast({ title: "Nothing to download", description: "The resume content is not available.", variant: "destructive" });
             return;
         }
     
-        const elementToPrint = sourceElement.cloneNode(true) as HTMLElement;
-        
         setIsGeneratingPdf(true);
     
         try {
-            const opt = {
-              margin:       [10, 10, 10, 10], // Narrow margin for PDF
-              filename:     (editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume') + '.pdf',
-              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            };
-        
-            await html2pdf().set(opt).from(elementToPrint).save();
-
+            const response = await fetch('/api/generate-pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ html: editorState.htmlContent }),
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Server responded with status ${response.status}`);
+            }
+    
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume') + '.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+    
         } catch (error) {
             console.error('PDF Download error:', error);
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
