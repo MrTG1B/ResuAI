@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, type User, sendEmailVerification } from 'firebase/auth';
+import { onAuthStateChanged, type User, sendEmailVerification, signOut } from 'firebase/auth';
 import { auth, db, doc, getDoc, collection, getDocs, query, orderBy, deleteDoc } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -384,18 +384,27 @@ export default function DashboardPage() {
                                             <div className="overflow-hidden">
                                                 <p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p>
                                                 <p className="text-xs text-muted-foreground truncate">
-                                                    Last modified: {r.lastModified ? new Date(r.lastModified.seconds * 1000).toLocaleDateString() : 'N/A'}
+                                                    Last modified: {r.lastModified ? new Date(r.lastModified.seconds * 1000).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2 space-x-2">
-                                            <Button variant="destructive" size="sm" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
-                                                <Trash2 className="mr-2 h-4 w-4"/>Delete
-                                            </Button>
                                             <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
                                                 <Edit className="mr-2 h-4 w-4"/>
                                                 Edit
                                             </Button>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
+                                                            <Trash2 className="h-4 w-4 text-destructive/70 hover:text-destructive"/>
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Delete Resume</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         </div>
                                     </li>
                                 ))}
@@ -443,15 +452,24 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2 space-x-2">
-                                            <Button variant="destructive" size="sm" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
-                                                <Trash2 className="mr-2 h-4 w-4"/>Delete
-                                            </Button>
                                             <Button variant="ghost" size="sm" asChild>
                                                 <Link href={`/portfolio?id=${p.id}`}>
                                                     <Eye className="mr-2 h-4 w-4"/>
                                                     View
                                                 </Link>
                                             </Button>
+                                             <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
+                                                            <Trash2 className="h-4 w-4 text-destructive/70 hover:text-destructive"/>
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Delete Portfolio</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         </div>
                                     </li>
                                 ))}
@@ -485,7 +503,7 @@ export default function DashboardPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setDeleteTarget(null)}>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                <AlertDialogAction onClick={confirmDelete} variant="destructive">Delete</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
