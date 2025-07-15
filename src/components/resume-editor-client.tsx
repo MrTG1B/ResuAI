@@ -252,7 +252,7 @@ export default function ResumeEditorClient() {
         setIsGeneratingPdf(true);
     
         try {
-            const PDF_SERVICE_URL = 'https://pdf-generator-service-52ry.onrender.com/generate-pdf';
+            const PDF_SERVICE_URL = 'https://my-pdf-generator-0bqt.onrender.com/generate-pdf';
             
             const response = await fetch(PDF_SERVICE_URL, {
                 method: 'POST',
@@ -467,7 +467,7 @@ export default function ResumeEditorClient() {
                                                         transform: 'scale(0.8)',
                                                         transformOrigin: 'top center',
                                                         boxSizing: 'border-box',
-                                                        padding: '10mm',
+                                                        padding: '1inch',
                                                     }}
                                                     dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                                 />
