@@ -447,8 +447,8 @@ export default function ResumeEditorClient() {
                                         {editorState.htmlContent ? `Editing: ${editorState.fileName || 'Untitled'}` : "Original Resume Preview"}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-grow p-0 bg-muted/30 overflow-hidden">
-                                    <ScrollArea className="h-full w-full bg-muted/30 rounded-md">
+                                <CardContent className="flex-grow flex flex-col p-0 bg-muted/30 overflow-hidden">
+                                    <ScrollArea className="flex-grow w-full bg-muted/30 rounded-md overflow-hidden">
                                         {isGeneratingPdf ? (
                                             <div className="w-full h-full flex items-center justify-center">
                                                 <CreativeLoader texts={generatingPdfTexts} />
