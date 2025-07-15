@@ -1,7 +1,8 @@
 
 const express = require('express');
 const cors = require('cors');
-const { chromium } = require('playwright');
+const playwright = require('playwright-core');
+const chromium = require('@sparticuz/chromium');
 
 const app = express();
 app.use(cors());
@@ -16,9 +17,14 @@ app.post('/generate-pdf', async (req, res) => {
 
   let browser = null;
   try {
-    browser = await chromium.launch({
-      headless: true,
+    const executablePath = await chromium.executablePath();
+    
+    browser = await playwright.chromium.launch({
+      args: chromium.args,
+      executablePath: executablePath,
+      headless: true, // Use boolean true
     });
+
     const page = await browser.newPage();
     
     const htmlWithFonts = `
