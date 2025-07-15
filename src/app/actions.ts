@@ -13,7 +13,7 @@ import { getUsers as getUsersFlow } from "@/ai/flows/admin-get-users";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { User } from "@/types/user";
 
 export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
@@ -147,23 +147,41 @@ export async function coachChatAction(input: CoachChatInput) {
 }
 
 export async function deleteResumeAction(userId: string, resumeId: string) {
-    if (!userId || !resumeId) {
-        return { success: false, error: "User ID and Resume ID are required." };
-    }
-    try {
-        if (!db) throw new Error("Firestore is not initialized.");
-        await deleteDoc(doc(db, "users", userId, "resumes", resumeId));
-        return { success: true };
-    } catch (error: any) {
-        console.error("Error deleting resume:", error);
-        return { success: false, error: error.message || "Failed to delete resume." };
-    }
+  const user = auth?.currentUser;
+
+  if (!user || !resumeId || !userId) {
+    return { success: false, error: "Not authenticated or resume ID missing." };
+  }
+
+  if (user.uid !== userId) {
+    return { success: false, error: "User ID mismatch. You cannot delete this resume." };
+  }
+
+  try {
+    if (!db) throw new Error("Firestore is not initialized.");
+    // Use the validated userId from the client to construct the path
+    await deleteDoc(doc(db, "users", userId, "resumes", resumeId));
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error deleting resume:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to delete resume.",
+    };
+  }
 }
 
+
 export async function deletePortfolioAction(userId: string, portfolioId: string) {
-    if (!userId || !portfolioId) {
+    const user = auth?.currentUser;
+    if (!user || !portfolioId || !userId) {
         return { success: false, error: "User ID and Portfolio ID are required." };
     }
+
+    if (user.uid !== userId) {
+      return { success: false, error: "User ID mismatch. You cannot delete this portfolio." };
+    }
+
     try {
         if (!db) throw new Error("Firestore is not initialized.");
         await deleteDoc(doc(db, `users/${userId}/portfolios/${portfolioId}`));
