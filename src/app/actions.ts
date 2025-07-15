@@ -12,15 +12,58 @@ import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateIn
 import { getUsers as getUsersFlow } from "@/ai/flows/admin-get-users";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
-import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { User } from "@/types/user";
+
+async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
+    if (!db) return;
+    try {
+        const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
+        const profileSnap = await getDoc(profileDocRef);
+        const profileData = profileSnap.exists() ? profileSnap.data() : {};
+        
+        // Check if profile is mostly empty (e.g., only has email/name from signup)
+        const isProfileEmpty = Object.keys(profileData).length <= 3;
+
+        if (isProfileEmpty) {
+            // Analyze resume to get structured data for profile
+            const analysisResult = await analyzeResumeFlow({ resumeDataUri });
+            const { portfolioDraft } = analysisResult;
+            
+            // Re-structure the data to match the profile form schema
+            const profileToSave = {
+                name: portfolioDraft.personalInfo?.name,
+                title: portfolioDraft.personalInfo?.title,
+                email: portfolioDraft.personalInfo?.email,
+                phone: portfolioDraft.personalInfo?.phone,
+                location: portfolioDraft.personalInfo?.location,
+                socials: portfolioDraft.personalInfo?.socials,
+                experience: (portfolioDraft.experience || []).map(exp => ({...exp, description: exp.description.join('\n')})),
+                education: portfolioDraft.education,
+                projects: (portfolioDraft.projects || []).map(proj => ({...proj, technologies: proj.technologies?.join(', ')})),
+                certifications: portfolioDraft.certifications,
+                profileAutoFilled: true, // Flag to prevent future overwrites
+            };
+
+            await setDoc(profileDocRef, profileToSave, { merge: true });
+        }
+    } catch (error) {
+        console.error("Error during profile auto-fill check:", error);
+        // Don't block the main action if this fails
+    }
+}
+
 
 export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
   try {
     if (!db) {
       throw new Error("Firestore is not initialized.");
     }
+    
+    // Auto-fill profile if it's the user's first time
+    await maybeAutoFillProfile(userId, input.resumeDataUri);
+    
     const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
     
     // Fetch user profile data to merge
@@ -93,8 +136,11 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
   }
 }
 
-export async function parseResumeAction(input: ParseResumeInput) {
+export async function parseResumeAction(userId: string, input: ParseResumeInput) {
   try {
+    // Auto-fill profile if it's the user's first time
+    await maybeAutoFillProfile(userId, input.resumeDataUri);
+    
     const result = await parseResumeFlow(input);
     const parsedData: ParsedResume = {
       htmlContent: result.htmlContent,
@@ -158,22 +204,4 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
 
 export async function getUsers(): Promise<User[]> {
     return await getUsersFlow();
-}
-
-export async function deleteUserAction(userId: string) {
-    if (!db) {
-        throw new Error("Firestore is not initialized.");
-    }
-
-    try {
-        // This is a simplified deletion. A production app would need a Cloud Function
-        // to handle this properly, including deleting Firebase Auth user and all subcollections.
-        // For now, we only delete the top-level document.
-        await deleteDoc(doc(db, "users", userId));
-        
-        return { success: true };
-    } catch (error) {
-        console.error(`Failed to delete user ${userId}:`, error);
-        return { success: false, error: "Failed to delete user data from Firestore." };
-    }
 }

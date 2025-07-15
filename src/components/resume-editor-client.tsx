@@ -213,7 +213,7 @@ export default function ResumeEditorClient() {
             try {
                 const uploadedResumeDataUri = reader.result as string;
     
-                const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
+                const result = await parseResumeAction(currentUser.uid, { resumeDataUri: uploadedResumeDataUri });
     
                 if (result.success && result.data) {
                     const finalState: SavedEditorState = {
