@@ -152,7 +152,7 @@ export async function deleteResumeAction(userId: string, resumeId: string) {
     }
     try {
         if (!db) throw new Error("Firestore is not initialized.");
-        await deleteDoc(doc(db, `users/${userId}/resumes/${resumeId}`));
+        await deleteDoc(doc(db, "users", userId, "resumes", resumeId));
         return { success: true };
     } catch (error: any) {
         console.error("Error deleting resume:", error);
