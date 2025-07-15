@@ -79,15 +79,15 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div 
               className="text-center mb-16"
-              style={{ transform: `translateY(${offsetY * 0.3}px)` }}
+              style={{ transform: `translateY(${Math.min(offsetY * 0.2, 50)}px)` }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">Simple, Powerful, and Fast</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-accent/90 bg-clip-text text-transparent">Simple, Powerful, and Fast</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our AI streamlines the entire process, from analyzing your experience to designing a beautiful final product.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20"
-                style={{ transform: `translateY(${offsetY * 0.15}px)` }}
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20"
+                style={{ transform: `translateY(${offsetY * 0.1}px)` }}
               >
                 <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
@@ -100,8 +100,8 @@ export default function HomePage() {
                 </p>
               </div>
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20" 
-                style={{ animationDelay: '200ms', transform: `translateY(${offsetY * 0.2}px)` }}
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20" 
+                style={{ animationDelay: '200ms', transform: `translateY(${offsetY * 0.15}px)` }}
               >
                  <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
@@ -114,8 +114,8 @@ export default function HomePage() {
                 </p>
               </div>
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-transform duration-300 hover:-translate-y-2 hover:shadow-primary/20" 
-                style={{ animationDelay: '400ms', transform: `translateY(${offsetY * 0.25}px)` }}
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20" 
+                style={{ animationDelay: '400ms', transform: `translateY(${offsetY * 0.2}px)` }}
               >
                  <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
@@ -135,12 +135,12 @@ export default function HomePage() {
         <section className="py-20 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">Your AI-Powered Career Toolkit</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Your AI-Powered Career Toolkit</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Everything you need to analyze, edit, and showcase your professional story.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="animate-fade-in-up" style={{ animationDelay: '0ms' }}>
-                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 flex flex-col h-full">
+              <div className="animate-fade-in-up group" style={{ animationDelay: '0ms' }}>
+                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <FileText className="h-10 w-10 text-primary" />
@@ -152,8 +152,8 @@ export default function HomePage() {
                   </p>
                 </Card>
               </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 flex flex-col h-full">
+              <div className="animate-fade-in-up group" style={{ animationDelay: '200ms' }}>
+                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <SearchCheck className="h-10 w-10 text-primary" />
@@ -165,8 +165,8 @@ export default function HomePage() {
                   </p>
                 </Card>
               </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 flex flex-col h-full">
+              <div className="animate-fade-in-up group" style={{ animationDelay: '400ms' }}>
+                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <LayoutTemplate className="h-10 w-10 text-primary" />
@@ -186,7 +186,7 @@ export default function HomePage() {
         <section className="py-20 bg-card/40">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">Why Professionals Love ResuAI</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-accent/90 bg-clip-text text-transparent">Why Professionals Love ResuAI</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Don't just take our word for it. Here's what our users are saying.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -224,7 +224,7 @@ export default function HomePage() {
         {/* Final CTA Section */}
         <section className="py-20 md:py-32 bg-background">
            <div className="container mx-auto px-4 text-center">
-             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-primary mb-4 font-heading">Ready to Build Your Future?</h2>
+             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Ready to Build Your Future?</h2>
              <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
                Join thousands of professionals who are taking their careers to the next level. Get started today and see the difference AI can make.
              </p>
