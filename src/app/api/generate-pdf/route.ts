@@ -6,13 +6,8 @@ import puppeteer from 'puppeteer-core';
 // This function now consistently uses the bundled chromium executable,
 // which works in both production and local development environments.
 const getChromiumExecutablePath = async () => {
-    // When in a serverless environment (like Vercel production),
-    // puppeteer-core needs a specific path to the bundled Chromium.
-    if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-        return await chromium.executablePath();
-    }
-    // For local development, we can use the path provided by the package.
-    return chromium.executablePath;
+    // The executablePath is a promise, so it must be awaited.
+    return await chromium.executablePath;
 };
 
 
