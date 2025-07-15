@@ -171,14 +171,15 @@ export default function DashboardPage() {
 
   const confirmDelete = async () => {
     if (!user || !deleteTarget || !db) {
-        toast({ title: "Error", description: "Could not delete. User or target is missing.", variant: "destructive" });
-        return;
+      toast({ title: "Error", description: "Could not delete. User or target is missing.", variant: "destructive" });
+      setDeleteTarget(null);
+      return;
     }
-
+  
     const { type, id } = deleteTarget;
     const { uid } = user;
     setDeleteTarget(null); // Clear target immediately
-
+  
     // Client-side checks
     if (type === 'resume' && resumes.length <= 1) {
         toast({ title: "Deletion Failed", description: "You cannot delete your last resume.", variant: "destructive" });
@@ -188,26 +189,27 @@ export default function DashboardPage() {
         toast({ title: "Deletion Failed", description: "You cannot delete your last portfolio.", variant: "destructive" });
         return;
     }
-
+  
     try {
-        const docRef = doc(db, "users", uid, type === 'resume' ? 'resumes' : 'portfolios', id);
-        await deleteDoc(docRef);
-
-        if (type === 'resume') {
-            setResumes(prev => prev.filter(r => r.id !== id));
-        } else {
-            setPortfolios(prev => prev.filter(p => p.id !== id));
-        }
-        toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} Deleted`, description: `The ${type} has been successfully deleted.` });
+      const collectionName = type === 'resume' ? 'resumes' : 'portfolios';
+      const docRef = doc(db, "users", uid, collectionName, id);
+      await deleteDoc(docRef);
+  
+      if (type === 'resume') {
+        setResumes(prev => prev.filter(r => r.id !== id));
+      } else {
+        setPortfolios(prev => prev.filter(p => p.id !== id));
+      }
+      toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} Deleted`, description: `The ${type} has been successfully deleted.` });
     } catch (error: any) {
-        console.error(`Error deleting ${type}:`, error);
-        let errorMessage = `Failed to delete ${type}. Please try again.`;
-        if (error.code === 'permission-denied') {
-            errorMessage = "You do not have permission to delete this item.";
-        }
-        toast({ title: "Error", description: errorMessage, variant: "destructive" });
+      console.error(`Error deleting ${type}:`, error);
+      let errorMessage = `Failed to delete ${type}. Please try again.`;
+      if (error.code === 'permission-denied') {
+        errorMessage = "You do not have permission to delete this item.";
+      }
+      toast({ title: "Error", description: errorMessage, variant: "destructive" });
     }
-  }
+  };
 
   const handleResendVerification = async () => {
     if (user) {
@@ -389,8 +391,8 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
-                                                <Trash2 className="h-4 w-4"/>
+                                            <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
+                                                <Trash2 className="mr-2 h-4 w-4"/>Delete
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
                                                 <Edit className="mr-2 h-4 w-4"/>
@@ -443,8 +445,8 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
-                                                <Trash2 className="h-4 w-4"/>
+                                            <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
+                                                <Trash2 className="mr-2 h-4 w-4"/>Delete
                                             </Button>
                                             <Button variant="ghost" size="sm" asChild>
                                                 <Link href={`/portfolio?id=${p.id}`}>
