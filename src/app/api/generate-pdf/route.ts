@@ -5,14 +5,14 @@ import puppeteer from 'puppeteer-core';
 import path from 'path';
 import fs from 'fs';
 
-// Define a cache path for the browser
-const CACHE_DIR = path.resolve(process.cwd(), '.cache', 'puppeteer');
+// Define a writable cache path within the /tmp directory
+const CACHE_DIR = '/tmp/puppeteer_cache';
 if (!fs.existsSync(CACHE_DIR)) {
   fs.mkdirSync(CACHE_DIR, { recursive: true });
 }
 
 async function getBrowser() {
-    // Attempt to find a locally installed browser.
+    // Attempt to find a locally installed browser in our writable cache.
     const browser = await Browser.create({
         path: CACHE_DIR,
         platform: 'linux',
@@ -52,8 +52,11 @@ export async function POST(request: Request) {
 
     const page = await browserInstance.newPage();
     
+    // Set a viewport that matches A4 paper aspect ratio
     await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
 
+    // Set the page content
+    // We inject a @import for Google Fonts to ensure they are loaded before PDF generation.
     await page.setContent(`
         <!DOCTYPE html>
         <html>
@@ -62,6 +65,7 @@ export async function POST(request: Request) {
                     body {
                         margin: 0;
                         padding: 0;
+                        -webkit-font-smoothing: antialiased;
                     }
                     /* Inject Google Fonts link if any are used in the HTML */
                     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;700&family=Open+Sans:wght@400;700&display=swap');
