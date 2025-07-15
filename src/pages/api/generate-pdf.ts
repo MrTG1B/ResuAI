@@ -1,6 +1,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { chromium } from 'playwright';
+import chromium from '@sparticuz/chromium';
+import playwright from 'playwright-core';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -8,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).send('Method Not Allowed');
   }
 
-  let browser;
+  let browser = null;
   try {
     const { html } = req.body;
 
@@ -16,13 +17,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'HTML content is required' });
     }
 
-    browser = await chromium.launch({
-      headless: true,
+    browser = await playwright.chromium.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();
     
-    // Inject Google Fonts link
     const htmlWithFonts = `
       <!DOCTYPE html>
       <html>
