@@ -23,31 +23,32 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
         const profileSnap = await getDoc(profileDocRef);
         const profileData = profileSnap.exists() ? profileSnap.data() : {};
         
-        // Check if profile is mostly empty (e.g., only has email/name from signup)
-        const isProfileEmpty = Object.keys(profileData).length <= 3;
-
-        if (isProfileEmpty) {
-            // Analyze resume to get structured data for profile
-            const analysisResult = await analyzeResumeFlow({ resumeDataUri });
-            const { portfolioDraft } = analysisResult;
-            
-            // Re-structure the data to match the profile form schema
-            const profileToSave = {
-                name: portfolioDraft.personalInfo?.name,
-                title: portfolioDraft.personalInfo?.title,
-                email: portfolioDraft.personalInfo?.email,
-                phone: portfolioDraft.personalInfo?.phone,
-                location: portfolioDraft.personalInfo?.location,
-                socials: portfolioDraft.personalInfo?.socials,
-                experience: (portfolioDraft.experience || []).map(exp => ({...exp, description: exp.description.join('\n')})),
-                education: portfolioDraft.education,
-                projects: (portfolioDraft.projects || []).map(proj => ({...proj, technologies: proj.technologies?.join(', ')})),
-                certifications: portfolioDraft.certifications,
-                profileAutoFilled: true, // Flag to prevent future overwrites
-            };
-
-            await setDoc(profileDocRef, profileToSave, { merge: true });
+        // Check if profile has already been auto-filled to prevent overwriting manual changes.
+        if (profileData.profileAutoFilled) {
+            return;
         }
+
+        // Analyze resume to get structured data for profile
+        const analysisResult = await analyzeResumeFlow({ resumeDataUri });
+        const { portfolioDraft } = analysisResult;
+        
+        // Re-structure the data to match the profile form schema
+        const profileToSave = {
+            name: portfolioDraft.personalInfo?.name,
+            title: portfolioDraft.personalInfo?.title,
+            email: portfolioDraft.personalInfo?.email,
+            phone: portfolioDraft.personalInfo?.phone,
+            location: portfolioDraft.personalInfo?.location,
+            socials: portfolioDraft.personalInfo?.socials,
+            experience: (portfolioDraft.experience || []).map(exp => ({...exp, description: exp.description.join('\\n')})),
+            education: portfolioDraft.education,
+            projects: (portfolioDraft.projects || []).map(proj => ({...proj, technologies: proj.technologies?.join(', ')})),
+            certifications: portfolioDraft.certifications,
+            profileAutoFilled: true, // Flag to prevent future overwrites
+        };
+
+        await setDoc(profileDocRef, profileToSave, { merge: true });
+        
     } catch (error) {
         console.error("Error during profile auto-fill check:", error);
         // Don't block the main action if this fails
