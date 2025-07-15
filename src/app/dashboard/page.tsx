@@ -180,7 +180,6 @@ export default function DashboardPage() {
     const { uid } = user;
     setDeleteTarget(null); // Clear target immediately
   
-    // Client-side checks
     if (type === 'resume' && resumes.length <= 1) {
         toast({ title: "Deletion Failed", description: "You cannot delete your last resume.", variant: "destructive" });
         return;
@@ -375,10 +374,9 @@ export default function DashboardPage() {
                                                 <div
                                                     className="text-black shadow-sm scale-[0.1] origin-top"
                                                     style={{
-                                                        width: '8.27in',
-                                                        height: '11.69in',
-                                                        aspectRatio: '1 / 1.414',
-                                                        padding: '1cm'
+                                                        width: '210mm',
+                                                        minHeight: '297mm',
+                                                        padding: '10mm'
                                                     }}
                                                     dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }}
                                                 />
@@ -390,8 +388,8 @@ export default function DashboardPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center flex-shrink-0 ml-2">
-                                            <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
+                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-2">
+                                            <Button variant="destructive" size="sm" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
                                                 <Trash2 className="mr-2 h-4 w-4"/>Delete
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
@@ -444,8 +442,8 @@ export default function DashboardPage() {
                                                 <p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center flex-shrink-0 ml-2">
-                                            <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
+                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-2">
+                                            <Button variant="destructive" size="sm" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
                                                 <Trash2 className="mr-2 h-4 w-4"/>Delete
                                             </Button>
                                             <Button variant="ghost" size="sm" asChild>
