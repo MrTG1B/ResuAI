@@ -180,15 +180,6 @@ export default function DashboardPage() {
     const { uid } = user;
     setDeleteTarget(null); // Clear target immediately
   
-    if (type === 'resume' && resumes.length <= 1) {
-        toast({ title: "Deletion Failed", description: "You cannot delete your last resume.", variant: "destructive" });
-        return;
-    }
-    if (type === 'portfolio' && portfolios.length <= 1) {
-        toast({ title: "Deletion Failed", description: "You cannot delete your last portfolio.", variant: "destructive" });
-        return;
-    }
-  
     try {
       const collectionName = type === 'resume' ? 'resumes' : 'portfolios';
       const docRef = doc(db, "users", uid, collectionName, id);
@@ -388,7 +379,7 @@ export default function DashboardPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-2">
+                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
                                             <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
                                                 <Edit className="mr-2 h-4 w-4"/>
                                                 Edit
@@ -397,7 +388,7 @@ export default function DashboardPage() {
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
-                                                            <Trash2 className="h-4 w-4 text-destructive/70 hover:text-destructive"/>
+                                                            <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/>
                                                         </Button>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
@@ -451,7 +442,7 @@ export default function DashboardPage() {
                                                 <p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-2">
+                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
                                             <Button variant="ghost" size="sm" asChild>
                                                 <Link href={`/portfolio?id=${p.id}`}>
                                                     <Eye className="mr-2 h-4 w-4"/>
@@ -462,7 +453,7 @@ export default function DashboardPage() {
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
-                                                            <Trash2 className="h-4 w-4 text-destructive/70 hover:text-destructive"/>
+                                                            <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/>
                                                         </Button>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
@@ -503,7 +494,7 @@ export default function DashboardPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setDeleteTarget(null)}>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete} variant="destructive">Delete</AlertDialogAction>
+                <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white font-bold">Delete</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
