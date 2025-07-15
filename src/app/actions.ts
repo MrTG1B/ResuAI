@@ -146,40 +146,6 @@ export async function coachChatAction(input: CoachChatInput) {
   }
 }
 
-export async function deleteResumeAction(userId: string, resumeId: string) {
-  if (!userId || !resumeId) {
-    return { success: false, error: "User ID or Resume ID is missing." };
-  }
-  
-  try {
-    if (!db) throw new Error("Firestore is not initialized.");
-    await deleteDoc(doc(db, "users", userId, "resumes", resumeId));
-    return { success: true };
-  } catch (error: any) {
-    console.error("Error deleting resume:", error);
-    return {
-      success: false,
-      error: error.message || "Failed to delete resume.",
-    };
-  }
-}
-
-
-export async function deletePortfolioAction(userId: string, portfolioId: string) {
-    if (!userId || !portfolioId) {
-        return { success: false, error: "User ID or Portfolio ID is missing." };
-    }
-    
-    try {
-        if (!db) throw new Error("Firestore is not initialized.");
-        await deleteDoc(doc(db, `users/${userId}/portfolios/${portfolioId}`));
-        return { success: true };
-    } catch (error: any) {
-        console.error("Error deleting portfolio:", error);
-        return { success: false, error: error.message || "Failed to delete portfolio." };
-    }
-}
-
 export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   try {
     const result = await analyzeCertificateFlow(input);

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, type User, sendEmailVerification } from 'firebase/auth';
-import { auth, db, doc, getDoc, collection, getDocs, query, orderBy } from '@/lib/firebase';
+import { auth, db, doc, getDoc, collection, getDocs, query, orderBy, deleteDoc } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -25,7 +25,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { deletePortfolioAction, deleteResumeAction } from '../actions';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -171,9 +170,13 @@ export default function DashboardPage() {
   }
 
   const confirmDelete = async () => {
-    if (!user || !deleteTarget) return;
+    if (!user || !deleteTarget || !db) {
+        toast({ title: "Error", description: "Could not delete. User or target is missing.", variant: "destructive" });
+        return;
+    }
 
     const { type, id } = deleteTarget;
+    const { uid } = user;
     setDeleteTarget(null); // Clear target immediately
 
     // Client-side checks
@@ -187,25 +190,22 @@ export default function DashboardPage() {
     }
 
     try {
-        let result;
-        if (type === 'resume') {
-            result = await deleteResumeAction(user.uid, id);
-        } else {
-            result = await deletePortfolioAction(user.uid, id);
-        }
+        const docRef = doc(db, "users", uid, type === 'resume' ? 'resumes' : 'portfolios', id);
+        await deleteDoc(docRef);
 
-        if (result?.success) {
-            if (type === 'resume') {
-                setResumes(prev => prev.filter(r => r.id !== id));
-            } else {
-                setPortfolios(prev => prev.filter(p => p.id !== id));
-            }
-            toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} Deleted`, description: `The ${type} has been successfully deleted.` });
+        if (type === 'resume') {
+            setResumes(prev => prev.filter(r => r.id !== id));
         } else {
-            throw new Error(result?.error || `An unknown error occurred while deleting the ${type}.`);
+            setPortfolios(prev => prev.filter(p => p.id !== id));
         }
+        toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} Deleted`, description: `The ${type} has been successfully deleted.` });
     } catch (error: any) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
+        console.error(`Error deleting ${type}:`, error);
+        let errorMessage = `Failed to delete ${type}. Please try again.`;
+        if (error.code === 'permission-denied') {
+            errorMessage = "You do not have permission to delete this item.";
+        }
+        toast({ title: "Error", description: errorMessage, variant: "destructive" });
     }
   }
 
