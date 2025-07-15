@@ -252,7 +252,7 @@ export default function ResumeEditorClient() {
         setIsGeneratingPdf(true);
     
         try {
-            const PDF_SERVICE_URL = 'https://my-pdf-generator-0bqt.onrender.com/generate-pdf';
+            const PDF_SERVICE_URL = 'https://pdf-generator-service-51u4.onrender.com/generate-pdf';
             
             const response = await fetch(PDF_SERVICE_URL, {
                 method: 'POST',
