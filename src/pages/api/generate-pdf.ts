@@ -1,5 +1,5 @@
 
-import { NextResponse } from 'next/server';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { Browser } from '@puppeteer/browsers';
 import puppeteer from 'puppeteer-core';
 import fs from 'fs';
@@ -31,13 +31,19 @@ async function getBrowser() {
     return browser;
 }
 
-export async function POST(request: Request) {
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).end('Method Not Allowed');
+  }
+
   let browserInstance;
   try {
-    const { html } = await request.json();
+    const { html } = req.body;
 
     if (!html) {
-      return NextResponse.json({ error: 'HTML content is required' }, { status: 400 });
+      return res.status(400).json({ error: 'HTML content is required' });
     }
     
     // Get browser instance (cached or newly installed)
@@ -51,11 +57,8 @@ export async function POST(request: Request) {
 
     const page = await browserInstance.newPage();
     
-    // Set a viewport that matches A4 paper aspect ratio
     await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
 
-    // Set the page content
-    // We inject a @import for Google Fonts to ensure they are loaded before PDF generation.
     await page.setContent(`
         <!DOCTYPE html>
         <html>
@@ -66,7 +69,6 @@ export async function POST(request: Request) {
                         padding: 0;
                         -webkit-font-smoothing: antialiased;
                     }
-                    /* Inject Google Fonts link if any are used in the HTML */
                     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;700&family=Open+Sans:wght@400;700&display=swap');
                 </style>
             </head>
@@ -87,18 +89,14 @@ export async function POST(request: Request) {
       }
     });
 
-    return new NextResponse(pdfBuffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="resume.pdf"',
-      },
-    });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="resume.pdf"');
+    res.send(pdfBuffer);
 
   } catch (error) {
     console.error('PDF Generation Error:', error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during PDF generation.";
-    return NextResponse.json({ error: 'Failed to generate PDF.', details: errorMessage }, { status: 500 });
+    res.status(500).json({ error: 'Failed to generate PDF.', details: errorMessage });
   } finally {
       if (browserInstance) {
           await browserInstance.close();
