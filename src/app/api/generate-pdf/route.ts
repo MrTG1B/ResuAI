@@ -3,31 +3,18 @@ import { NextResponse } from 'next/server';
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
 
-// This is required for Vercel deployments
-// It specifies the paths to the Chromium binary and its dependencies
-const chromiumExecutablePath = async () => {
-    if (process.env.VERCEL_ENV === 'production') {
+// This function now consistently uses the bundled chromium executable,
+// which works in both production and local development environments.
+const getChromiumExecutablePath = async () => {
+    // When in a serverless environment (like Vercel production),
+    // puppeteer-core needs a specific path to the bundled Chromium.
+    if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
         return await chromium.executablePath();
     }
-    // For local development, you'll need to have Chromium installed.
-    // Specify the path to your local Chromium installation.
-    // e.g. on macOS: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-    // on Windows: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-    // on Linux: '/usr/bin/google-chrome'
-    // You can find the path by typing "chrome://version" in your Chrome browser.
-    
-    // For MacOS
-    if (process.platform === 'darwin') {
-      return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-    }
-    // For Windows
-    if (process.platform === 'win32') {
-        // This is a common path, adjust if your installation is different
-        return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-    }
-    // For Linux
-    return '/usr/bin/google-chrome'; 
+    // For local development, we can use the path provided by the package.
+    return chromium.executablePath;
 };
+
 
 export async function POST(request: Request) {
   try {
@@ -38,9 +25,9 @@ export async function POST(request: Request) {
     }
 
     const browser = await puppeteer.launch({
-      args: process.env.VERCEL_ENV === 'production' ? chromium.args : [],
-      executablePath: await chromiumExecutablePath(),
-      headless: process.env.VERCEL_ENV === 'production' ? chromium.headless : true,
+      args: chromium.args,
+      executablePath: await getChromiumExecutablePath(),
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();
