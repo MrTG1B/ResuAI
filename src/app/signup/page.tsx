@@ -12,7 +12,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, sendEmailVerification } from "firebase/auth";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -58,10 +58,11 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const displayName = `${firstName} ${lastName}`.trim();
       await updateProfile(userCredential.user, { displayName });
+      await sendEmailVerification(userCredential.user);
       
       toast({
-        title: "Account Created",
-        description: "Redirecting you to the dashboard...",
+        title: "Account Created!",
+        description: "We've sent a verification link to your email address.",
       });
       router.push("/dashboard");
     } catch (error: any) {

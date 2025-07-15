@@ -64,6 +64,7 @@ const profileSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
   phone: z.string().optional(),
   location: z.string().optional(),
+  dob: z.string().optional(),
   socials: z.array(socialLinkSchema).optional(),
   experience: z.array(experienceSchema).optional(),
   education: z.array(educationSchema).optional(),
@@ -211,7 +212,11 @@ export default function ProfilePage() {
   const phoneValue = watch('phone') || '';
   const countryCodeMatch = countries.find(c => phoneValue.startsWith(c.dial_code));
   const countryCode = countryCodeMatch ? countryCodeMatch.dial_code : '+91';
-  const nationalNumber = phoneValue.startsWith(countryCode) ? phoneValue.substring(countryCode.length) : phoneValue;
+  let nationalNumber = phoneValue.startsWith(countryCode) ? phoneValue.substring(countryCode.length) : phoneValue;
+  nationalNumber = nationalNumber.replace(/\s/g, ''); // remove existing spaces for re-formatting
+  if (nationalNumber.length > 5) {
+      nationalNumber = `${nationalNumber.slice(0, 5)} ${nationalNumber.slice(5, 10)}`;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -258,6 +263,10 @@ export default function ProfilePage() {
                           <Label htmlFor="email">Email Address</Label>
                           <Input id="email" type="email" {...register("email")} placeholder="e.g., jane.doe@example.com" />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="dob">Date of Birth</Label>
+                            <Input id="dob" {...register("dob")} placeholder="DD/MM/YYYY" />
+                        </div>
                          <div className="space-y-2">
                             <Label htmlFor="phone">Phone Number</Label>
                             <div className="flex items-center">
@@ -268,7 +277,8 @@ export default function ProfilePage() {
                                         <CountryCodeSelector
                                             value={countryCode}
                                             onValueChange={(newCode) => {
-                                               field.onChange(newCode + nationalNumber);
+                                               const currentNational = (field.value || '').substring(countryCode.length);
+                                               field.onChange(newCode + currentNational.replace(/\s/g, ''));
                                             }}
                                         />
                                     )}
@@ -278,14 +288,14 @@ export default function ProfilePage() {
                                     type="tel" 
                                     value={nationalNumber}
                                     onChange={(e) => {
-                                        setValue('phone', countryCode + e.target.value.replace(/\D/g, ''))
+                                        setValue('phone', countryCode + e.target.value.replace(/\s/g, ''))
                                     }}
-                                    placeholder="e.g., 1234567890" 
+                                    placeholder="e.g., 12345 67890" 
                                     className="rounded-l-none"
                                 />
                             </div>
                         </div>
-                        <div className="space-y-2 md:col-span-2">
+                        <div className="space-y-2">
                           <Label htmlFor="location">Location</Label>
                           <Input id="location" {...register("location")} placeholder="e.g., San Francisco, CA" />
                         </div>

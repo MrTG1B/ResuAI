@@ -4,13 +4,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, type User, sendEmailVerification } from 'firebase/auth';
 import { auth, db, doc, getDoc, collection, getDocs, query, orderBy } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2 } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
@@ -28,6 +28,7 @@ import {
 import { deletePortfolioAction, deleteResumeAction } from '../actions';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
     return (
@@ -98,6 +99,9 @@ export default function DashboardPage() {
 
   const hasReachedResumeLimit = resumes.length >= MAX_RESUMES;
   const hasReachedPortfolioLimit = portfolios.length >= MAX_PORTFOLIOS;
+
+  const isEmailUser = user?.providerData.some(p => p.providerId === 'password');
+  const isEmailVerified = user?.emailVerified;
 
 
   useEffect(() => {
@@ -205,6 +209,24 @@ export default function DashboardPage() {
     }
   }
 
+  const handleResendVerification = async () => {
+    if (user) {
+        try {
+            await sendEmailVerification(user);
+            toast({
+                title: 'Verification Email Sent',
+                description: 'Please check your inbox (and spam folder) for the verification link.',
+            });
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Failed to send verification email. Please try again later.',
+                variant: 'destructive',
+            });
+        }
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -270,6 +292,19 @@ export default function DashboardPage() {
                     Your career toolkit is ready. Let's build something amazing today.
                 </p>
             </div>
+
+            {isEmailUser && !isEmailVerified && (
+                <Alert variant="destructive" className="animate-fade-in-up">
+                    <ShieldAlert className="h-4 w-4" />
+                    <AlertTitle>Verify Your Email Address</AlertTitle>
+                    <AlertDescription>
+                        Please check your inbox for a verification link to secure your account.{" "}
+                        <Button variant="link" className="p-0 h-auto font-semibold" onClick={handleResendVerification}>
+                            Resend verification email
+                        </Button>
+                    </AlertDescription>
+                </Alert>
+            )}
 
             {profileCompletion < 100 && (
                 <Card className="bg-primary/10 border-primary/20 animate-fade-in-up">
@@ -341,6 +376,7 @@ export default function DashboardPage() {
                                                         width: '8.27in',
                                                         height: '11.69in',
                                                         aspectRatio: '1 / 1.414',
+                                                        padding: '1cm'
                                                     }}
                                                     dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }}
                                                 />
