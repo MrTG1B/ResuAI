@@ -13,7 +13,7 @@ if (!fs.existsSync(CACHE_DIR)) {
 
 async function getBrowser() {
     // Attempt to find a locally installed browser in our writable cache.
-    const browser = await Browser.create({
+    const browser = new Browser({ // Corrected from Browser.create
         path: CACHE_DIR,
         platform: 'linux',
     });
