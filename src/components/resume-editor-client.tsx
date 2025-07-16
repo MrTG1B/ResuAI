@@ -463,9 +463,6 @@ export default function ResumeEditorClient() {
                                                     style={{
                                                         width: '210mm',
                                                         minHeight: '297mm',
-                                                        aspectRatio: '1 / 1.414',
-                                                        transform: 'scale(0.8)',
-                                                        transformOrigin: 'top center',
                                                         boxSizing: 'border-box',
                                                         padding: '12.7mm',
                                                     }}
