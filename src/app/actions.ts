@@ -197,8 +197,11 @@ export async function editResumeAction(input: EditResumeInput) {
       response: result.response,
     };
     return { success: true, data: editedData };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error editing resume:", error);
+    if (error.message && error.message.includes('Zod')) {
+      return { success: false, error: "The AI's response could not be processed. This can happen with complex requests. Please try rephrasing your instruction to be more specific (e.g., 'Change my name to Jane Doe')." };
+    }
     return { success: false, error: "Failed to edit resume. The AI model might be busy, please try again." };
   }
 }
