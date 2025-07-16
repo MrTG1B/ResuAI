@@ -7,8 +7,9 @@ export function Footer() {
       <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
         <p>&copy; {new Date().getFullYear()} ResuAI. All rights reserved.</p>
         <nav className="flex gap-4 mt-4 sm:mt-0">
-          <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-          <Link href="/about" className="hover:text-primary transition-colors">About Us</Link>
+          <Link href="/about" className="hover:text-primary transition-colors">About</Link>
+          <Link href="/feedback" className="hover:text-primary transition-colors">Feedback</Link>
+          <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
         </nav>
       </div>
     </footer>

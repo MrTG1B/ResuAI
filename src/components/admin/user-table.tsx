@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -24,26 +23,26 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Trash2 } from "lucide-react";
 import { User } from "@/types/user";
-import { deleteUserAction } from '@/app/actions';
+// import { deleteUserAction } from '@/app/actions'; // This function needs to be created
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
 interface UserTableProps {
   users: User[];
-  onUserDeleted: (userId: string) => void;
 }
 
-export function UserTable({ users, onUserDeleted }: UserTableProps) {
+export function UserTable({ users }: UserTableProps) {
     const { toast } = useToast();
 
     const handleDeleteUser = async (userId: string) => {
-        const result = await deleteUserAction(userId);
-        if (result.success) {
-            toast({ title: "User Deleted", description: "The user has been successfully deleted." });
-            onUserDeleted(userId);
-        } else {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
-        }
+        // const result = await deleteUserAction(userId);
+        // if (result.success) {
+        //     toast({ title: "User Deleted", description: "The user has been successfully deleted." });
+        //     onUserDeleted(userId);
+        // } else {
+        //     toast({ title: "Error", description: result.error, variant: "destructive" });
+        // }
+        toast({ title: "Note", description: "User deletion is disabled in this demo.", variant: "default" });
     };
 
   return (

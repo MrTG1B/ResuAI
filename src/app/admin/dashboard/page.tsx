@@ -5,10 +5,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users, FileText, LayoutTemplate } from 'lucide-react';
+import { Loader2, Users, FileText, LayoutTemplate, MessageSquare } from 'lucide-react';
 import { User } from '@/types/user';
-import { getUsers } from '@/app/actions';
+import { Feedback } from '@/types/feedback';
+import { getUsers, getFeedbackAction } from '@/app/actions';
 import { UserTable } from '@/components/admin/user-table';
+import { FeedbackTable } from '@/components/admin/feedback-table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const StatCard = ({ title, value, icon: Icon }: { title: string; value: string | number; icon: React.ElementType }) => (
     <Card>
@@ -26,7 +29,8 @@ export default function AdminDashboardPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
-    const [stats, setStats] = useState({ users: 0, resumes: 0, portfolios: 0 });
+    const [feedback, setFeedback] = useState<Feedback[]>([]);
+    const [stats, setStats] = useState({ users: 0, resumes: 0, portfolios: 0, feedbacks: 0 });
 
     useEffect(() => {
         const isAdmin = sessionStorage.getItem('admin-auth') === 'true';
@@ -37,8 +41,13 @@ export default function AdminDashboardPage() {
 
         async function fetchData() {
             try {
-                const fetchedUsers = await getUsers();
+                const [fetchedUsers, fetchedFeedback] = await Promise.all([
+                    getUsers(),
+                    getFeedbackAction()
+                ]);
+
                 setUsers(fetchedUsers);
+                setFeedback(fetchedFeedback);
 
                 const totalResumes = fetchedUsers.reduce((sum, user) => sum + (user.resumes || 0), 0);
                 const totalPortfolios = fetchedUsers.reduce((sum, user) => sum + (user.portfolios || 0), 0);
@@ -47,6 +56,7 @@ export default function AdminDashboardPage() {
                     users: fetchedUsers.length,
                     resumes: totalResumes,
                     portfolios: totalPortfolios,
+                    feedbacks: fetchedFeedback.length,
                 });
             } catch (error) {
                 console.error("Failed to fetch admin data:", error);
@@ -57,16 +67,6 @@ export default function AdminDashboardPage() {
 
         fetchData();
     }, [router]);
-
-    const handleUserDeleted = (userId: string) => {
-        setUsers(currentUsers => currentUsers.filter(u => u.id !== userId));
-        // Also update stats
-        setStats(prev => ({
-            ...prev,
-            users: prev.users - 1
-            // A more complex implementation would re-calculate resume/portfolio counts
-        }));
-    };
 
     if (isLoading) {
         return (
@@ -81,14 +81,24 @@ export default function AdminDashboardPage() {
             <Header />
             <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
                 <h1 className="text-3xl font-bold tracking-tight font-heading">Admin Dashboard</h1>
-                <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
                     <StatCard title="Total Users" value={stats.users} icon={Users} />
                     <StatCard title="Total Resumes" value={stats.resumes} icon={FileText} />
                     <StatCard title="Total Portfolios" value={stats.portfolios} icon={LayoutTemplate} />
+                    <StatCard title="Total Feedbacks" value={stats.feedbacks} icon={MessageSquare} />
                 </div>
-                <div>
-                    <UserTable users={users} onUserDeleted={handleUserDeleted} />
-                </div>
+                <Tabs defaultValue="users">
+                    <TabsList>
+                        <TabsTrigger value="users">Users</TabsTrigger>
+                        <TabsTrigger value="feedback">Feedbacks</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="users">
+                         <UserTable users={users} />
+                    </TabsContent>
+                    <TabsContent value="feedback">
+                        <FeedbackTable feedback={feedback} />
+                    </TabsContent>
+                </Tabs>
             </main>
         </div>
     );
