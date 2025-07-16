@@ -11,7 +11,7 @@ import { Feedback } from '@/types/feedback';
 import { UserTable } from '@/components/admin/user-table';
 import { FeedbackTable } from '@/components/admin/feedback-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
+import { auth, db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
 const StatCard = ({ title, value, icon: Icon }: { title: string; value: string | number; icon: React.ElementType }) => (
