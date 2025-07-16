@@ -448,29 +448,29 @@ export default function ResumeEditorClient() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow flex flex-col p-0 bg-muted/30 overflow-hidden">
-                                    <ScrollArea className="flex-grow w-full bg-muted/30 rounded-md overflow-hidden">
+                                    <div className="flex-grow w-full bg-muted/30 rounded-md overflow-hidden flex items-center justify-center">
                                         {isGeneratingPdf ? (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <CreativeLoader texts={generatingPdfTexts} />
-                                            </div>
+                                            <CreativeLoader texts={generatingPdfTexts} />
                                         ) : showOriginalPdf ? (
                                             <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none" title="Original Resume Preview" />
                                         ) : (
-                                            <div className="p-4 flex justify-center items-start">
-                                                <div
-                                                    ref={livePreviewRef}
-                                                    className="bg-white text-black shadow-lg"
-                                                    style={{
-                                                        width: '210mm',
-                                                        minHeight: '297mm',
-                                                        boxSizing: 'border-box',
-                                                        padding: '12.7mm',
-                                                    }}
-                                                    dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
-                                                />
-                                            </div>
+                                            <ScrollArea className="w-full h-full">
+                                                <div className="p-4 flex justify-center items-start">
+                                                    <div
+                                                        ref={livePreviewRef}
+                                                        className="bg-white text-black shadow-lg"
+                                                        style={{
+                                                            width: '210mm',
+                                                            minHeight: '297mm',
+                                                            boxSizing: 'border-box',
+                                                            padding: '12.7mm',
+                                                        }}
+                                                        dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
+                                                    />
+                                                </div>
+                                            </ScrollArea>
                                         )}
-                                     </ScrollArea>
+                                     </div>
                                 </CardContent>
                             </Card>
                         </div>
