@@ -51,8 +51,11 @@ export default function AdminDashboardPage() {
             }
             try {
                 // Fetch users and their subcollection counts
+                console.log("Attempting to fetch users...");
                 const usersCollectionRef = collection(db, 'users');
                 const usersSnapshot = await getDocs(usersCollectionRef);
+                console.log("Raw users snapshot:", usersSnapshot.docs.map(d => ({ id: d.id, data: d.data() })));
+
 
                 const fetchedUsers: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
                     const user: User = { id: userDoc.id, name: 'N/A', email: 'N/A', resumes: 0, portfolios: 0 };
@@ -76,11 +79,15 @@ export default function AdminDashboardPage() {
                     }
                     return user;
                 }));
+                console.log("Processed users data:", fetchedUsers);
                 
                 // Fetch feedback
+                console.log("Attempting to fetch feedback...");
                 const feedbackCollectionRef = collection(db, 'feedback');
                 const feedbackQuery = query(feedbackCollectionRef, orderBy('createdAt', 'desc'));
                 const feedbackSnapshot = await getDocs(feedbackQuery);
+                console.log("Raw feedback snapshot:", feedbackSnapshot.docs.map(d => ({ id: d.id, data: d.data() })));
+
                 const fetchedFeedback: Feedback[] = feedbackSnapshot.docs.map(doc => {
                     const data = doc.data();
                     return {
@@ -92,6 +99,7 @@ export default function AdminDashboardPage() {
                         createdAt: data.createdAt.toDate().toISOString(),
                     }
                 });
+                console.log("Processed feedback data:", fetchedFeedback);
 
                 setUsers(fetchedUsers);
                 setFeedback(fetchedFeedback);
@@ -99,18 +107,20 @@ export default function AdminDashboardPage() {
                 const totalResumes = fetchedUsers.reduce((sum, user) => sum + (user.resumes || 0), 0);
                 const totalPortfolios = fetchedUsers.reduce((sum, user) => sum + (user.portfolios || 0), 0);
 
-                setStats({
+                const finalStats = {
                     users: fetchedUsers.length,
                     resumes: totalResumes,
                     portfolios: totalPortfolios,
                     feedbacks: fetchedFeedback.length,
-                });
+                };
+                console.log("Final stats:", finalStats);
+                setStats(finalStats);
 
             } catch (error: any) {
                 console.error("Failed to fetch admin data:", error);
                 toast({
-                    title: "Permission Denied",
-                    description: "You do not have permission to view this data. Ensure you are logged in as the admin and your UID is set correctly in Firestore rules.",
+                    title: "Data Fetch Error",
+                    description: "You might not have permission to view this data. Ensure you are logged in as the admin and your UID is set correctly in Firestore rules.",
                     variant: "destructive"
                 });
             } finally {
