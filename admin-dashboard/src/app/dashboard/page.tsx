@@ -8,10 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Users, FileText, LayoutTemplate, MessageSquare } from 'lucide-react';
 import { User } from '@/types/user';
 import { Feedback } from '@/types/feedback';
-import { UserTable } from '@/components/admin/user-table';
-import { FeedbackTable } from '@/components/admin/feedback-table';
+import { UserTable } from '@/components/user-table';
+import { FeedbackTable } from '@/components/feedback-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { auth, db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
+import { db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
 const StatCard = ({ title, value, icon: Icon }: { title: string; value: string | number; icon: React.ElementType }) => (
@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
     useEffect(() => {
         const isAdmin = sessionStorage.getItem('admin-auth') === 'true';
         if (!isAdmin) {
-            router.push('/admin/login');
+            router.push('/login');
             return;
         }
         setIsAuthorized(true);
@@ -51,11 +51,8 @@ export default function AdminDashboardPage() {
             }
             try {
                 // Fetch users and their subcollection counts
-                console.log("Attempting to fetch users...");
                 const usersCollectionRef = collection(db, 'users');
                 const usersSnapshot = await getDocs(usersCollectionRef);
-                console.log("Raw users snapshot:", usersSnapshot.docs.map(d => ({ id: d.id, data: d.data() })));
-
 
                 const fetchedUsers: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
                     const user: User = { id: userDoc.id, name: 'N/A', email: 'N/A', resumes: 0, portfolios: 0 };
@@ -79,14 +76,11 @@ export default function AdminDashboardPage() {
                     }
                     return user;
                 }));
-                console.log("Processed users data:", fetchedUsers);
                 
                 // Fetch feedback
-                console.log("Attempting to fetch feedback...");
                 const feedbackCollectionRef = collection(db, 'feedback');
                 const feedbackQuery = query(feedbackCollectionRef, orderBy('createdAt', 'desc'));
                 const feedbackSnapshot = await getDocs(feedbackQuery);
-                console.log("Raw feedback snapshot:", feedbackSnapshot.docs.map(d => ({ id: d.id, data: d.data() })));
 
                 const fetchedFeedback: Feedback[] = feedbackSnapshot.docs.map(doc => {
                     const data = doc.data();
@@ -99,7 +93,6 @@ export default function AdminDashboardPage() {
                         createdAt: data.createdAt.toDate().toISOString(),
                     }
                 });
-                console.log("Processed feedback data:", fetchedFeedback);
 
                 setUsers(fetchedUsers);
                 setFeedback(fetchedFeedback);
@@ -107,14 +100,12 @@ export default function AdminDashboardPage() {
                 const totalResumes = fetchedUsers.reduce((sum, user) => sum + (user.resumes || 0), 0);
                 const totalPortfolios = fetchedUsers.reduce((sum, user) => sum + (user.portfolios || 0), 0);
 
-                const finalStats = {
+                setStats({
                     users: fetchedUsers.length,
                     resumes: totalResumes,
                     portfolios: totalPortfolios,
                     feedbacks: fetchedFeedback.length,
-                };
-                console.log("Final stats:", finalStats);
-                setStats(finalStats);
+                });
 
             } catch (error: any) {
                 console.error("Failed to fetch admin data:", error);

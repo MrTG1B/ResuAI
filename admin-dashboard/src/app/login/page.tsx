@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
             title: "Login Successful",
             description: "Redirecting to the admin dashboard...",
         });
-        router.push("/admin/dashboard");
+        router.push("/dashboard");
 
     } catch (error: any) {
         let errorMessage = "Invalid credentials. Please try again.";

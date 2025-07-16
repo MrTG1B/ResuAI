@@ -1,26 +1,29 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check for admin UID
     function isAdmin() {
+      // IMPORTANT: Replace with your actual Admin User UID from Firebase Authentication
       return request.auth.uid == 'cdXpZUNm9IV5ZuoD7JqDlufy9y52';
     }
 
-    // Rules for the 'users' collection
-    match /users/{userId}/{documents=**} {
-      // Users can read and write their own data.
-      // Admins can read anyone's data.
-      allow read, write: if request.auth.uid == userId || isAdmin();
+    match /users/{userId}/{document=**} {
+      // Users can only access their own data.
+      allow read, write: if request.auth.uid == userId;
     }
     
-    // Rules for the 'feedback' collection
+    match /users/{userId} {
+        // Admin can read all user documents for the dashboard.
+        allow get, list: if isAdmin();
+    }
+
     match /feedback/{feedbackId} {
       // Any authenticated user can create feedback.
       allow create: if request.auth != null;
       // Only the admin can read all feedback.
-      allow read: if isAdmin();
+      allow get, list: if isAdmin();
     }
   }
 }
