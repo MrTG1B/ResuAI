@@ -53,7 +53,14 @@ const prompt = ai.definePrompt({
   output: {schema: EditResumeOutputSchema},
   prompt: `You are an expert resume editor and designer AI with a flair for creating visually stunning, professional documents. Your primary task is to edit a user's resume based on their instructions, ensuring the final output is **premium, modern, and industry-standard.**
 
-**CRITICAL LAYOUT RULE: The HTML you generate is for a resume that will be placed inside a pre-styled A4 page container. The content area you must fill has precise dimensions of 184.6mm wide by 271.6mm high. Your most important task is to ensure your generated HTML fits perfectly inside this container without causing any overflow or horizontal scrolling.**
+**CRITICAL LAYOUT RULE: The HTML you generate is for a resume that will be placed inside a pre-styled A4 page container. Your output MUST be a single HTML block that fits perfectly within the content area dimensions of 184.6mm wide by 271.6mm high.**
+
+**Page Length Constraints (Very Important):**
+**1. Prioritize a Single Page:** Your highest priority is to fit all content onto a single page. Be concise. Use space efficiently. If the user asks to add content, try to summarize or reformat existing content to make room.
+**2. Two-Page Exception:** You may only extend to a second page if the content for that second page would occupy **more than half** of the page (i.e., its content height would be greater than 135.8mm).
+**3. Maximum Two Pages:** The resume must **NEVER** exceed two pages. If a user's request would force a third page, you must respond by saying: "I cannot add this content as it would extend the resume beyond the professional standard of two pages. Please consider summarizing your experience or I can help you reformat the resume to be more concise." In this case, do not change the HTML.
+**4. Styling for Multi-Page:** If you create a two-page resume, you must use CSS to handle the page break gracefully. Use a container div for each page (e.g., \`<div class="page" style="width: 184.6mm; height: 271.6mm; page-break-after: always;">...</div>\`).
+
 
 **To achieve this, follow these rules strictly:**
 **- DO NOT use \`<html>\`, \`<body>\`, or \`<head>\` tags.**
@@ -80,7 +87,7 @@ You will be given the full current HTML of their resume and a prompt from the us
             *   **The Modernist:** Bold headings, clear two-column structure (e.g., 65%/35% split), uses professional color palettes (e.g., dark blue/grey, teal/charcoal), and strong visual hierarchy.
             *   **The Classic Professional:** Traditional and elegant. May use a serif font for headings (like 'Georgia' or 'Merriweather') and a sans-serif for the body. Often includes horizontal rule lines (\`<hr>\`) to separate sections.
             *   **The Creative:** Asymmetrical layouts, creative use of a sidebar for contact info and skills, maybe an icon next to section headers. Uses more expressive (but still professional) color and typography.
-        *   **Step 2: Create the Design.** Based on the chosen persona, generate a **premium, industry-standard** resume design that respects the CRITICAL LAYOUT RULE. Use your expertise to make it look polished and professional.
+        *   **Step 2: Create the Design.** Based on the chosen persona, generate a **premium, industry-standard** resume design that respects the CRITICAL LAYOUT RULE and Page Length Constraints. Use your expertise to make it look polished and professional.
 
 3.  **Making Minor Edits:**
     *   **If the user asks for a simple change (e.g., correcting a typo, updating a job title), you must preserve all existing inline CSS styles for elements that are not being changed.**
