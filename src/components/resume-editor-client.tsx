@@ -443,7 +443,7 @@ export default function ResumeEditorClient() {
                                             <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
                                             {editorState?.fileName && <p className="mt-4 text-sm font-medium text-primary">{editorState.fileName}</p>}
                                         </div>
-                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept="application/pdf" disabled={isParsing} />
+                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" disabled={isParsing} />
                                     </label>
                                 </div>
                             </>
@@ -458,7 +458,7 @@ export default function ResumeEditorClient() {
                                         {editorState.htmlContent ? `Editing: ${editorState.fileName || 'Untitled'}` : "Original Resume Preview"}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-grow flex flex-col p-0 bg-muted/30 overflow-hidden">
+                                <CardContent className="flex-grow flex flex-col p-0 bg-muted/30 overflow-hidden relative">
                                     <div className="flex-grow flex items-center justify-center w-full bg-muted/30 rounded-md overflow-hidden relative">
                                         {isGeneratingPdf ? (
                                             <div className='flex h-full w-full items-center justify-center'>
