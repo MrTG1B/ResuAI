@@ -57,6 +57,8 @@ export default function AdminLoginPage() {
         let errorMessage = "Invalid credentials. Please try again.";
         if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             errorMessage = "The admin account credentials are not correct.";
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = "Please enter a valid email address.";
         }
         toast({
             title: "Login Failed",

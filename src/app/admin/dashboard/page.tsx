@@ -28,6 +28,7 @@ const StatCard = ({ title, value, icon: Icon }: { title: string; value: string |
 export default function AdminDashboardPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
+    const [isAuthorized, setIsAuthorized] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const [feedback, setFeedback] = useState<Feedback[]>([]);
     const [stats, setStats] = useState({ users: 0, resumes: 0, portfolios: 0, feedbacks: 0 });
@@ -38,6 +39,7 @@ export default function AdminDashboardPage() {
             router.push('/admin/login');
             return;
         }
+        setIsAuthorized(true);
 
         async function fetchData() {
             try {
@@ -68,7 +70,7 @@ export default function AdminDashboardPage() {
         fetchData();
     }, [router]);
 
-    if (isLoading) {
+    if (isLoading || !isAuthorized) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
