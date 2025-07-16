@@ -89,9 +89,6 @@ export function AnalyzerChatPanel({ initialAnalysis, resumeDataUri, jobDescripti
         if (files && files.length > 0) {
             const filePromises = Array.from(files).map(file => {
                 return new Promise<{ name: string; dataUri: string }>((resolve, reject) => {
-                    if (file.type !== 'application/pdf') {
-                        return reject(new Error(`Invalid file type: ${file.name}. Only PDFs are allowed.`));
-                    }
                     const reader = new FileReader();
                     reader.onload = () => {
                         resolve({ name: file.name, dataUri: reader.result as string });
@@ -193,7 +190,6 @@ export function AnalyzerChatPanel({ initialAnalysis, resumeDataUri, jobDescripti
                         onChange={handleFileUpload}
                         ref={attachmentInputRef}
                         disabled={isLoading}
-                        accept=".pdf"
                         multiple
                     />
                     <Button variant="ghost" size="icon" className="shrink-0" onClick={handleAttachmentClick} aria-label="Attach file" disabled={isLoading}>
