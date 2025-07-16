@@ -3,35 +3,38 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if the user is the designated admin
+
+    // Helper function to check for admin
     function isAdmin() {
-      // IMPORTANT: Replace 'YOUR_ADMIN_UID_HERE' with the actual UID of your admin user account.
-      // You can find the UID in the Firebase Console under Authentication > Users.
+      // IMPORTANT: Replace with the actual UID of your admin user from Firebase Authentication
       return request.auth.uid == 'YOUR_ADMIN_UID_HERE';
     }
 
-    // Rules for the 'users' collection
-    match /users/{userId}/{document=**} {
-      // Any authenticated user can create their own user document/subcollections.
-      // Only the user themselves or the admin can read/write their own data.
-      allow read, write: if request.auth.uid == userId || isAdmin();
-    }
-    
-    // Admin can read the entire 'users' collection to list them on the dashboard.
-    // Regular users cannot list all other users.
-    match /users/{userId} {
-        allow get: if request.auth.uid == userId || isAdmin();
-        allow list: if isAdmin();
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
     }
 
-    // Rules for the 'feedback' collection
+    // USERS
+    // Specific users can only manage their own data
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth.uid == userId;
+    }
+    
+    // Admin can read all user data and subcollections
+    match /users/{document=**} {
+        allow get, list: if isAdmin();
+    }
+    
+    // FEEDBACK
+    // Any authenticated user can submit feedback
     match /feedback/{feedbackId} {
-      // Any authenticated user can submit feedback.
       allow create: if request.auth.uid != null;
-      // Only the admin can read all feedback.
-      allow read: if isAdmin();
-      // No one can update or delete feedback.
-      allow update, delete: if false;
+    }
+
+    // Admin can read all feedback
+    match /feedback/{document=**} {
+      allow get, list: if isAdmin();
     }
   }
 }
