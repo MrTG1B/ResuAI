@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from "next/link";
-import { LogOut, User as UserIcon, LayoutDashboard, Info, FileText } from "lucide-react";
+import { LogOut, User as UserIcon, LayoutDashboard, Info, FileText, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
@@ -95,6 +95,11 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                             <UserIcon className="mr-2 h-4 w-4" />
                             <span>Profile</span>
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/feedback')} className="cursor-pointer">
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            <span>Feedback</span>
+                        </DropdownMenuItem>
+                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => router.push('/about')} className="cursor-pointer">
                             <Info className="mr-2 h-4 w-4" />
                             <span>About Us</span>
