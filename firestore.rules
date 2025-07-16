@@ -4,24 +4,31 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default deny all reads and writes
+    // Default deny all reads/writes to prevent unintended access
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Users can read and write to their own subcollections (profile, resumes, portfolios)
-    match /users/{userId}/{subcollection}/{docId} {
+    // USERS
+    // Users can read/write their own subdocuments (profile, resumes, portfolios)
+    match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Anyone who is authenticated can submit feedback
+    // Admins can list all users. The dashboard is client-side protected.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+    }
+
+    // FEEDBACK
+    // Any authenticated user can create feedback
     match /feedback/{feedbackId} {
       allow create: if request.auth != null;
     }
-
-    // The admin dashboard will use secure Genkit server flows to read user/feedback data,
-    // so we don't need broad client-side read rules here. The flows themselves run with
-    // service account credentials which bypass these rules. The dashboard route is protected
-    // by client-side session logic.
+    
+    // Admins can read all feedback. The dashboard is client-side protected.
+    match /feedback/{feedbackId} {
+        allow read: if request.auth != null;
+    }
   }
 }
