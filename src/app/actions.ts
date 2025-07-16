@@ -26,8 +26,8 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
         const profileSnap = await getDoc(profileDocRef);
         const profileData = profileSnap.exists() ? profileSnap.data() : {};
         
-        // Check if profile has already been auto-filled to prevent overwriting manual changes.
-        if (profileData.profileAutoFilled) {
+        // Only auto-fill if the profile has never been filled from a resume before.
+        if (profileData.profileFilledFromResume) {
             return;
         }
 
@@ -35,8 +35,8 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
         const analysisResult = await analyzeResumeFlow({ resumeDataUri });
         const { portfolioDraft } = analysisResult;
         
-        // Re-structure the data to match the profile form schema
-        const profileToSave = {
+        // Structure the extracted data
+        const extractedProfileData = {
             name: portfolioDraft.personalInfo?.name,
             title: portfolioDraft.personalInfo?.title,
             email: portfolioDraft.personalInfo?.email,
@@ -47,14 +47,20 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
             education: portfolioDraft.education,
             projects: (portfolioDraft.projects || []).map(proj => ({...proj, technologies: proj.technologies?.join(', ')})),
             certifications: portfolioDraft.certifications,
-            profileAutoFilled: true, // Flag to prevent future overwrites
         };
 
-        await setDoc(profileDocRef, profileToSave, { merge: true });
+        // Merge with existing data, giving precedence to what's already in the profile
+        const finalProfileData = {
+            ...extractedProfileData,
+            ...profileData,
+            profileFilledFromResume: true, // Set flag to prevent future auto-fills
+        };
+
+        await setDoc(profileDocRef, finalProfileData, { merge: true });
         
     } catch (error) {
-        console.error("Error during profile auto-fill check:", error);
-        // Don't block the main action if this fails
+        console.error("Error during profile auto-fill:", error);
+        // Do not block the main action if this fails, but log the error.
     }
 }
 
@@ -65,12 +71,12 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
       throw new Error("Firestore is not initialized.");
     }
     
-    // Auto-fill profile if it's the user's first time
+    // Attempt to auto-fill profile if it's the user's first time
     await maybeAutoFillProfile(userId, input.resumeDataUri);
     
     const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
     
-    // Fetch user profile data to merge
+    // Fetch user profile data to merge with the portfolio
     const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
     const profileSnap = await getDoc(profileDocRef);
     const userProfile = profileSnap.exists() ? profileSnap.data() as PersonalInfo : {};
@@ -79,12 +85,12 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     // Step 1: Analyze resume for text content, get an avatar prompt, and color palette
     const analysisResult = await analyzeResumeFlow(input);
     
-    // Step 2: The portfolio draft is now a structured object, no parsing needed.
     const portfolioDraft: Partial<PortfolioData> = analysisResult.portfolioDraft;
 
-    // Merge profile data with analysis result
+    // Merge profile data with analysis result for the portfolio
+    // The user's manually-saved profile data takes precedence
     if (portfolioDraft.personalInfo) {
-      portfolioDraft.personalInfo = { ...userProfile, ...portfolioDraft.personalInfo };
+      portfolioDraft.personalInfo = { ...portfolioDraft.personalInfo, ...userProfile };
     } else {
       portfolioDraft.personalInfo = userProfile;
     }
@@ -142,7 +148,7 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
 
 export async function parseResumeAction(userId: string, input: ParseResumeInput) {
   try {
-    // Auto-fill profile if it's the user's first time
+     // Attempt to auto-fill profile if it's the user's first time
     await maybeAutoFillProfile(userId, input.resumeDataUri);
     
     const result = await parseResumeFlow(input);
