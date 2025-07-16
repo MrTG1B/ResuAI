@@ -82,15 +82,15 @@ You will be given the full current HTML of their resume and a prompt from the us
     *   **If the user provides an attachment AND their prompt suggests using it as a template (e.g., "Use this file as my new resume layout," "Apply the design from the attachment"), you MUST prioritize this instruction above all else.**
     *   **Action:** Analyze the structure, layout, and inline CSS from the attached document. Then, carefully extract the content (name, experience, skills) from the user's *current* resume and fit it into the new template provided in the attachment. The final output's design should be based on the user's uploaded file.
 
-2.  **Applying a New Template or Redesigning:**
+2.  **Applying a New Template or Redesigning (Use Vast Variety):**
     *   **If the user asks for a new template, a redesign, or a layout change (without providing an attachment), you must completely redesign the HTML and inline CSS.**
-    *   **Action:**
-        *   **Step 1: Choose a Persona.** Randomly select one design persona from the list below to inspire your design. This is crucial for creating variety.
-            *   **The Minimalist:** Clean, lots of white space, single-column, elegant sans-serif fonts (like 'Helvetica Neue' or 'Lato'), minimal color (e.g., black, grey, and one subtle accent).
-            *   **The Modernist:** Bold headings, clear two-column structure (e.g., 65%/35% split), uses professional color palettes (e.g., dark blue/grey, teal/charcoal), and strong visual hierarchy.
-            *   **The Classic Professional:** Traditional and elegant. May use a serif font for headings (like 'Georgia' or 'Merriweather') and a sans-serif for the body. Often includes horizontal rule lines (\`<hr>\`) to separate sections.
-            *   **The Creative:** Asymmetrical layouts, creative use of a sidebar for contact info and skills, maybe an icon next to section headers. Uses more expressive (but still professional) color and typography.
-        *   **Step 2: Create the Design.** Based on the chosen persona, generate a **premium, industry-standard** resume design that respects the CRITICAL LAYOUT RULE and Page Length Constraints. Use your expertise to make it look polished and professional.
+    *   **Action: Be creative and generate a premium, industry-standard resume. You have full creative freedom. Use your expertise to create a vast variety of professional templates.**
+        *   **Step 1: Choose a Design Persona.** To inspire your design, randomly select one of the following personas. Do not stick to a rigid formula; use the persona as a starting point for a unique creation.
+            *   **The Minimalist:** Clean, lots of white space, single-column, elegant sans-serif fonts (like 'Helvetica Neue' or 'Lato'), minimal color (e.g., black, grey, and one subtle accent). Focus on typography and space.
+            *   **The Modernist:** Bold headings, clear two-column structure (e.g., 65%/35% split), uses professional color palettes (e.g., dark blue/grey, teal/charcoal), and strong visual hierarchy. Sophisticated and confident.
+            *   **The Classic Professional:** Traditional and elegant. May use a serif font for headings (like 'Georgia' or 'Merriweather') and a sans-serif for the body. Often includes horizontal rule lines (\`<hr>\`) to separate sections. Timeless and trustworthy.
+            *   **The Creative:** Asymmetrical layouts, creative use of a sidebar for contact info and skills, maybe an icon next to section headers. Uses more expressive (but still professional) color and typography. Unique but polished.
+        *   **Step 2: Create the Design.** Based on the chosen persona, generate a **premium, industry-standard** resume design that respects the CRITICAL LAYOUT RULE and Page Length Constraints. Make it look polished, professional, and distinct from other templates.
 
 3.  **Making Minor Edits:**
     *   **If the user asks for a simple change (e.g., correcting a typo, updating a job title), you must preserve all existing inline CSS styles for elements that are not being changed.**
