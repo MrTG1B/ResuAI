@@ -87,7 +87,7 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     const portfolioDraft: Partial<PortfolioData> = analysisResult.portfolioDraft;
 
     // Merge profile data with analysis result for the portfolio
-    // The user's manually-saved profile data takes precedence
+    // The user's manually-saved profile data takes precedence over resume analysis
     if (portfolioDraft.personalInfo) {
       portfolioDraft.personalInfo = { ...portfolioDraft.personalInfo, ...userProfile };
     } else {
@@ -101,13 +101,25 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     // Step 3: Add the color palette
     portfolioDraft.colorPalette = analysisResult.colorPalette;
 
-    // Step 4: Generate avatar and project images in parallel
-    const avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt })
+    // Step 4: Generate avatar (if needed) and project images in parallel
+    let avatarPromise;
+    if (userProfile.profilePictureUrl) {
+      // If URL exists in profile, use it directly
+      avatarPromise = Promise.resolve(userProfile.profilePictureUrl);
+    } else {
+      // Otherwise, generate a new one, upload it, and save it back to the profile
+      avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt })
         .then(res => uploadImage(res.imageDataUri))
+        .then(async (url) => {
+            // Save the new URL back to the user's profile for future use
+            await setDoc(profileDocRef, { profilePictureUrl: url }, { merge: true });
+            return url;
+        })
         .catch(err => {
             console.error("Avatar generation/upload failed:", err);
             return 'https://placehold.co/128x128.png'; // Fallback URL
         });
+    }
 
     const projectImagePromises = (portfolioDraft.projects || []).map(async (project: Project) => {
         try {

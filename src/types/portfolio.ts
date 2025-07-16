@@ -10,7 +10,7 @@ export interface PersonalInfo {
   name: string;
   email: string;
   phone: string;
-  website: string;
+  website?: string;
   location: string;
   title: string;
   dob?: string; // Date of Birth

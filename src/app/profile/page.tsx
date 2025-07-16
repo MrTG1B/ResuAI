@@ -8,7 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth, db, doc, getDoc, setDoc } from "@/lib/firebase";
-import { analyzeCertificateAction } from "@/app/actions";
+import { analyzeCertificateAction, uploadImageAction } from "@/app/actions";
+import Image from "next/image";
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -17,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -65,6 +66,7 @@ const profileSchema = z.object({
   phone: z.string().optional(),
   location: z.string().optional(),
   dob: z.string().optional(),
+  profilePictureUrl: z.string().url().optional(),
   socials: z.array(socialLinkSchema).optional(),
   experience: z.array(experienceSchema).optional(),
   education: z.array(educationSchema).optional(),
@@ -90,7 +92,9 @@ export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzingCert, setIsAnalyzingCert] = useState<number | null>(null);
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
   const { register, handleSubmit, control, reset, setValue, watch, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -158,6 +162,34 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
+  
+  const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+        toast({ title: 'Image Too Large', description: `Please select an image smaller than ${MAX_FILE_SIZE / 1024 / 1024}MB.`, variant: 'destructive' });
+        return;
+    }
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = async () => {
+        const dataUri = reader.result as string;
+        const result = await uploadImageAction(dataUri);
+        if (result.success && result.url) {
+            setValue('profilePictureUrl', result.url, { shouldDirty: true });
+            toast({ title: 'Image Uploaded', description: 'Your profile picture has been updated. Remember to save your profile.' });
+        } else {
+            toast({ title: 'Upload Failed', description: result.error, variant: 'destructive' });
+        }
+        setIsUploading(false);
+    };
+    reader.onerror = () => {
+        toast({ title: 'File Read Error', description: 'There was an error reading the file.', variant: 'destructive' });
+        setIsUploading(false);
+    }
+  };
 
   const handleCertificateUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -218,6 +250,8 @@ export default function ProfilePage() {
       nationalNumber = `${nationalNumber.slice(0, 5)} ${nationalNumber.slice(5, 10)}`;
   }
 
+  const profilePictureUrl = watch('profilePictureUrl');
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -250,54 +284,72 @@ export default function ProfilePage() {
                 {/* Personal Info Tab */}
                 <TabsContent value="personal" className="space-y-6 pt-4">
                    <SectionTitle icon={UserCircle} text="Personal Information" />
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Full Name</Label>
-                          <Input id="name" {...register("name")} placeholder="e.g., Jane Doe" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="title">Professional Title</Label>
-                          <Input id="title" {...register("title")} placeholder="e.g., Software Engineer" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
-                          <Input id="email" type="email" {...register("email")} placeholder="e.g., jane.doe@example.com" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="dob">Date of Birth</Label>
-                            <Input id="dob" {...register("dob")} placeholder="DD/MM/YYYY" />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="phone">Phone Number</Label>
-                            <div className="flex items-center">
-                                <Controller
-                                    control={control}
-                                    name="phone"
-                                    render={({ field }) => (
-                                        <CountryCodeSelector
-                                            value={countryCode}
-                                            onValueChange={(newCode) => {
-                                               const currentNational = (field.value || '').substring(countryCode.length);
-                                               field.onChange(newCode + currentNational.replace(/\s/g, ''));
-                                            }}
-                                        />
-                                    )}
+                   <div className="flex flex-col md:flex-row items-start gap-6">
+                        <div className="space-y-2 flex-shrink-0">
+                            <Label>Profile Picture</Label>
+                            <div className="relative w-32 h-32 group">
+                                <Image
+                                    src={profilePictureUrl || `https://placehold.co/128x128.png`}
+                                    alt="Profile Picture"
+                                    width={128}
+                                    height={128}
+                                    className="rounded-full object-cover w-32 h-32 border-2 border-primary"
                                 />
-                                <Input 
-                                    id="phone" 
-                                    type="tel" 
-                                    value={nationalNumber}
-                                    onChange={(e) => {
-                                        setValue('phone', countryCode + e.target.value.replace(/\s/g, ''))
-                                    }}
-                                    placeholder="e.g., 12345 67890" 
-                                    className="rounded-l-none"
-                                />
+                                <label htmlFor="profile-picture-upload" className="absolute inset-0 bg-black/60 flex items-center justify-center text-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Camera className="h-8 w-8"/>}
+                                </label>
+                                <Input id="profile-picture-upload" type="file" className="hidden" accept="image/*" onChange={handleProfilePictureUpload} disabled={isUploading} />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="location">Location</Label>
-                          <Input id="location" {...register("location")} placeholder="e.g., San Francisco, CA" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Full Name</Label>
+                                <Input id="name" {...register("name")} placeholder="e.g., Jane Doe" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="title">Professional Title</Label>
+                                <Input id="title" {...register("title")} placeholder="e.g., Software Engineer" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email Address</Label>
+                                <Input id="email" type="email" {...register("email")} placeholder="e.g., jane.doe@example.com" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dob">Date of Birth</Label>
+                                <Input id="dob" {...register("dob")} placeholder="DD/MM/YYYY" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Phone Number</Label>
+                                <div className="flex items-center">
+                                    <Controller
+                                        control={control}
+                                        name="phone"
+                                        render={({ field }) => (
+                                            <CountryCodeSelector
+                                                value={countryCode}
+                                                onValueChange={(newCode) => {
+                                                  const currentNational = (field.value || '').substring(countryCode.length);
+                                                  field.onChange(newCode + currentNational.replace(/\s/g, ''));
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                    <Input 
+                                        id="phone" 
+                                        type="tel" 
+                                        value={nationalNumber}
+                                        onChange={(e) => {
+                                            setValue('phone', countryCode + e.target.value.replace(/\s/g, ''))
+                                        }}
+                                        placeholder="e.g., 12345 67890" 
+                                        className="rounded-l-none"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="location">Location</Label>
+                                <Input id="location" {...register("location")} placeholder="e.g., San Francisco, CA" />
+                            </div>
                         </div>
                    </div>
                    <div className="space-y-4">
@@ -432,8 +484,8 @@ export default function ProfilePage() {
               </Tabs>
               
               <div className="flex justify-end pt-4 border-t">
-                <Button type="submit" disabled={isSaving || isAnalyzingCert !== null}>
-                  {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" disabled={isSaving || isAnalyzingCert !== null || isUploading}>
+                  {(isSaving || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Profile
                 </Button>
               </div>

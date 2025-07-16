@@ -68,6 +68,7 @@ const calculateProfileCompletion = (profile: any, user: User | null): number => 
         combinedData.email,
         combinedData.phone,
         combinedData.location,
+        combinedData.profilePictureUrl,
         (combinedData.socials?.length || 0) > 0,
         (combinedData.experience?.length || 0) > 0,
         (combinedData.education?.length || 0) > 0,
@@ -432,7 +433,7 @@ export default function DashboardPage() {
                                     <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
                                         <div className='flex items-center gap-3 overflow-hidden flex-grow cursor-pointer' onClick={() => router.push(`/portfolio?id=${p.id}`)}>
                                             <Image 
-                                                src={p.personalInfo?.profilePictureDataUri || 'https://placehold.co/40x40.png'} 
+                                                src={p.personalInfo?.profilePictureUrl || 'https://placehold.co/40x40.png'} 
                                                 alt="avatar" 
                                                 width={40} height={40} 
                                                 className="rounded-full object-cover flex-shrink-0"

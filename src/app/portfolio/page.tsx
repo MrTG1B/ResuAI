@@ -125,7 +125,7 @@ function PortfolioPageContent() {
         if (portfolioDoc.exists()) {
           const data = { id: portfolioDoc.id, ...portfolioDoc.data() } as PortfolioData;
           setPortfolio(data);
-          setEditablePortfolio(data);
+          setEditablePortfolio(JSON.parse(JSON.stringify(data))); // Deep copy for editing
         } else {
           setNotFound(true);
           toast({ title: "Not Found", description: "This portfolio does not exist.", variant: "destructive" });
@@ -223,7 +223,7 @@ function PortfolioPageContent() {
   const handleProjectChange = (index: number, field: keyof Project, value: string) => {
     setEditablePortfolio(prev => {
       if (!prev || !prev.projects) return prev;
-      const newProjects = [...prev.projects];
+      const newProjects = JSON.parse(JSON.stringify(prev.projects));
       if (field === 'technologies') {
         newProjects[index] = { ...newProjects[index], [field]: value.split(',').map(t => t.trim()).filter(Boolean) };
       } else {
@@ -239,7 +239,7 @@ function PortfolioPageContent() {
       handleImageUpload(file, `project-${index}`, (url) => {
         setEditablePortfolio(prev => {
           if (!prev || !prev.projects) return prev;
-          const newProjects = [...prev.projects];
+          const newProjects = JSON.parse(JSON.stringify(prev.projects));
           newProjects[index] = { ...newProjects[index], previewImage: url };
           return { ...prev, projects: newProjects };
         });
@@ -250,7 +250,7 @@ function PortfolioPageContent() {
   const handleSocialChange = (index: number, field: keyof SocialLink, value: string) => {
     setEditablePortfolio(prev => {
       if (!prev || !prev.personalInfo || !prev.personalInfo.socials) return prev;
-      const newSocials = [...prev.personalInfo.socials];
+      const newSocials = JSON.parse(JSON.stringify(prev.personalInfo.socials));
       newSocials[index] = { ...newSocials[index], [field]: value };
       return { ...prev, personalInfo: { ...prev.personalInfo, socials: newSocials } };
     });
