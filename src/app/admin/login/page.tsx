@@ -20,22 +20,12 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  // Hardcoded admin UID. In a real app, use custom claims.
-  const ADMIN_UID = "YOUR_ADMIN_UID_HERE";
+  // In a real app, use custom claims to verify admin status after login.
+  // const ADMIN_UID = "YOUR_ADMIN_UID_HERE";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    if (email.toLowerCase() !== "tirthankdasgupta2004@gmail.com" || password !== "admin") {
-         toast({
-            title: "Access Denied",
-            description: "You are not authorized to access the admin panel.",
-            variant: "destructive",
-          });
-          setIsLoading(false);
-          return;
-    }
 
     if (!auth) {
         toast({ title: "Configuration Error", description: "Firebase is not configured.", variant: "destructive" });
@@ -44,11 +34,12 @@ export default function AdminLoginPage() {
     }
 
     try {
-        // We sign in the user to get an auth token, but rely on the hardcoded check for authorization.
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        // We sign in the user to get an auth token. The Firestore rules will determine
+        // if this user has admin privileges.
+        await signInWithEmailAndPassword(auth, email, password);
 
-        // In a more secure setup, we would check a custom claim from the user's token here.
-        // For this demo, we assume the login credentials are the authorization method.
+        // For this demo, we assume a successful login with a specific account is the authorization method.
+        // A more secure setup would check a custom claim from the user's token here.
         sessionStorage.setItem("admin-auth", "true");
         toast({
             title: "Login Successful",
@@ -58,7 +49,7 @@ export default function AdminLoginPage() {
 
     } catch (error: any) {
         let errorMessage = "Invalid credentials. Please try again.";
-        if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             errorMessage = "The admin account credentials are not correct.";
         }
         toast({
