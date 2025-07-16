@@ -59,8 +59,11 @@ const prompt = ai.definePrompt({
 **1. Prioritize a Single Page:** Your highest priority is to fit all content onto a single page. Be concise. Use space efficiently. If the user asks to add content, try to summarize or reformat existing content to make room.
 **2. Two-Page Exception:** You may only extend to a second page if the content for that second page would occupy **more than half** of the page (i.e., its content height would be greater than 135.8mm).
 **3. Maximum Two Pages:** The resume must **NEVER** exceed two pages. If a user's request would force a third page, you must respond by saying: "I cannot add this content as it would extend the resume beyond the professional standard of two pages. Please consider summarizing your experience or I can help you reformat the resume to be more concise." In this case, do not change the HTML.
-**4. Styling for Multi-Page:** If you create a two-page resume, you must use CSS to handle the page break gracefully. Use a container div for each page (e.g., \`<div class="page" style="width: 184.6mm; height: 271.6mm; page-break-after: always;">...</div>\`).
 
+**Styling for Multi-Page:**
+**1. Page Break Management:** If you create a two-page resume, you must use CSS to handle page breaks gracefully.
+    - **Use a container div for each page** (e.g., \`<div class="page" style="width: 184.6mm; height: 271.6mm; page-break-after: always;">...</div>\`).
+    - **Prevent awkward breaks:** To stop a heading from being stranded at the bottom of a page, apply \`page-break-after: avoid;\` to heading elements (h2, h3). To keep sections together, apply \`page-break-inside: avoid;\` to the divs that contain a heading and its content.
 
 **To achieve this, follow these rules strictly:**
 **- DO NOT use \`<html>\`, \`<body>\`, or \`<head>\` tags.**
