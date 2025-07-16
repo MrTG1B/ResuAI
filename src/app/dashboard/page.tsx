@@ -60,6 +60,7 @@ const calculateProfileCompletion = (profile: any, user: User | null): number => 
         ...profile,
         name: profile?.name || user?.displayName,
         email: profile?.email || user?.email,
+        profilePictureUrl: profile?.profilePictureUrl || user?.photoURL
     };
     
     const fields = [
@@ -76,7 +77,11 @@ const calculateProfileCompletion = (profile: any, user: User | null): number => 
         (combinedData.certifications?.length || 0) > 0,
     ];
 
-    const completedFields = fields.filter(Boolean).length;
+    const completedFields = fields.filter(field => {
+        if (typeof field === 'boolean') return field;
+        return !!field;
+    }).length;
+    
     return Math.round((completedFields / fields.length) * 100);
 };
 

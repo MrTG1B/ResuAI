@@ -46,11 +46,14 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
 
   const getInitials = (name?: string | null) => {
     if (!name) return '';
-    const names = name.split(' ');
+    const names = name.split(' ').filter(Boolean);
     if (names.length > 1) {
-        return `${names[0][0]}${names[names.length - 1][0]}`;
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
     }
-    return name[0];
+    if (names.length === 1 && names[0].length > 1) {
+        return `${names[0][0]}${names[0][1]}`.toUpperCase();
+    }
+    return (name[0] || '').toUpperCase();
   }
 
   return (
@@ -74,7 +77,7 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                             <Avatar className="h-8 w-8">
                                 <AvatarImage src={user.photoURL || undefined} alt={user.displayName || user.email || 'User'} />
                                 <AvatarFallback className="text-sm font-semibold">
-                                    {getInitials(user.displayName) || <UserIcon />}
+                                    {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
                                 </AvatarFallback>
                             </Avatar>
                         </Button>

@@ -66,7 +66,7 @@ const profileSchema = z.object({
   phone: z.string().optional(),
   location: z.string().optional(),
   dob: z.string().optional(),
-  profilePictureUrl: z.string().url().optional(),
+  profilePictureUrl: z.string().url().optional().or(z.literal('')),
   socials: z.array(socialLinkSchema).optional(),
   experience: z.array(experienceSchema).optional(),
   education: z.array(educationSchema).optional(),
@@ -104,7 +104,8 @@ export default function ProfilePage() {
       education: [],
       projects: [],
       certifications: [],
-      phone: "+91"
+      phone: "+91",
+      profilePictureUrl: ""
     },
   });
 
@@ -127,11 +128,12 @@ export default function ProfilePage() {
           }
           reset(data as ProfileFormData);
         } else {
-          // Pre-fill from auth if profile is new
+          // Pre-fill from auth if profile is new, including Google photo
           reset({
             name: user.displayName || '',
             email: user.email || '',
             phone: "+91",
+            profilePictureUrl: user.photoURL || '',
           });
         }
       } else {
