@@ -18,6 +18,7 @@ import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, s
 import { auth, db } from "@/lib/firebase";
 import { User } from "@/types/user";
 import { Feedback } from "@/types/feedback";
+import { uploadImage } from "@/services/image-upload-service";
 
 async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
     if (!db) return;
@@ -103,14 +104,19 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     portfolioDraft.colorPalette = analysisResult.colorPalette;
 
     // Step 4: Generate avatar and project images in parallel
-    const avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt });
+    const avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt })
+        .then(res => uploadImage(res.imageDataUri))
+        .catch(err => {
+            console.error("Avatar generation/upload failed:", err);
+            return 'https://placehold.co/128x128.png'; // Fallback URL
+        });
 
     const projectImagePromises = (portfolioDraft.projects || []).map(async (project: Project) => {
         try {
             const imageResult = await generateProjectImageFlow({ description: project.description });
-            project.previewImage = imageResult.imageDataUri;
+            project.previewImage = await uploadImage(imageResult.imageDataUri);
         } catch (e) {
-            console.warn(`Failed to generate image for project: ${project.name}`, e);
+            console.warn(`Failed to generate/upload image for project: ${project.name}`, e);
             // Use a placeholder if generation fails
             project.previewImage = 'https://placehold.co/800x450.png';
         }
@@ -118,7 +124,7 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     });
 
     // Wait for all image generation to complete
-    const [avatarResult, updatedProjects] = await Promise.all([
+    const [avatarUrl, updatedProjects] = await Promise.all([
         avatarPromise,
         Promise.all(projectImagePromises),
     ]);
@@ -127,11 +133,11 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     portfolioDraft.projects = updatedProjects;
     
     if (portfolioDraft.personalInfo) {
-      portfolioDraft.personalInfo.profilePictureDataUri = avatarResult.imageDataUri;
+      portfolioDraft.personalInfo.profilePictureUrl = avatarUrl;
     } else {
         portfolioDraft.personalInfo = {
             name: '', title: '', email: '', phone: '', location: '', socials: [],
-            profilePictureDataUri: avatarResult.imageDataUri,
+            profilePictureUrl: avatarUrl,
         }
     }
 
@@ -144,6 +150,17 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     // It's good practice to not expose detailed internal errors to the client.
     return { success: false, error: "Failed to analyze resume. Please check the file format and try again." };
   }
+}
+
+export async function uploadImageAction(dataUri: string): Promise<{ success: boolean; url?: string; error?: string }> {
+    try {
+        const url = await uploadImage(dataUri);
+        return { success: true, url };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        console.error("Image upload action failed:", errorMessage);
+        return { success: false, error: `Failed to upload image: ${errorMessage}` };
+    }
 }
 
 export async function parseResumeAction(userId: string, input: ParseResumeInput) {

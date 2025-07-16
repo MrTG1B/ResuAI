@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2, Palette } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth, db, getDoc, setDoc, doc } from "@/lib/firebase";
+import { uploadImageAction } from "@/app/actions";
 
 function PortfolioSkeleton() {
   return (
@@ -82,6 +83,7 @@ function PortfolioPageContent() {
   const [editablePortfolio, setEditablePortfolio] = useState<PortfolioData | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -89,7 +91,7 @@ function PortfolioPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   
   useEffect(() => {
     if (!db || !auth) {
@@ -167,25 +169,46 @@ function PortfolioPageContent() {
     });
   };
 
+  const handleImageUpload = async (
+    file: File, 
+    uploadId: string, 
+    updateFunction: (url: string) => void
+  ) => {
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: 'Image Too Large',
+        description: `Please select an image smaller than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    setIsUploading(uploadId);
+    
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const dataUri = reader.result as string;
+      const result = await uploadImageAction(dataUri);
+      if (result.success && result.url) {
+        updateFunction(result.url);
+        toast({ title: 'Image Uploaded', description: 'Your image has been updated.' });
+      } else {
+        toast({ title: 'Upload Failed', description: result.error, variant: 'destructive' });
+      }
+      setIsUploading(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > MAX_FILE_SIZE) {
-        toast({
-          title: 'Image Too Large',
-          description: 'Please select an image smaller than 1MB.',
-          variant: 'destructive',
-        });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      handleImageUpload(file, 'profile', (url) => {
         setEditablePortfolio(prev => {
-            if (!prev || !prev.personalInfo) return prev;
-            return { ...prev, personalInfo: { ...prev.personalInfo, profilePictureDataUri: reader.result as string } };
+          if (!prev || !prev.personalInfo) return prev;
+          return { ...prev, personalInfo: { ...prev.personalInfo, profilePictureUrl: url } };
         });
-      };
-      reader.readAsDataURL(file);
+      });
     }
   };
 
@@ -213,24 +236,14 @@ function PortfolioPageContent() {
   const handleProjectImageChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-        if (file.size > MAX_FILE_SIZE) {
-          toast({
-            title: 'Image Too Large',
-            description: 'Please select an image smaller than 1MB.',
-            variant: 'destructive',
-          });
-          return;
-        }
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setEditablePortfolio(prev => {
-                if (!prev || !prev.projects) return prev;
-                const newProjects = [...prev.projects];
-                newProjects[index] = { ...newProjects[index], previewImage: reader.result as string };
-                return { ...prev, projects: newProjects };
-            });
-        };
-        reader.readAsDataURL(file);
+      handleImageUpload(file, `project-${index}`, (url) => {
+        setEditablePortfolio(prev => {
+          if (!prev || !prev.projects) return prev;
+          const newProjects = [...prev.projects];
+          newProjects[index] = { ...newProjects[index], previewImage: url };
+          return { ...prev, projects: newProjects };
+        });
+      });
     }
   };
   
@@ -347,7 +360,7 @@ function PortfolioPageContent() {
                 ) : (
                   <>
                     <Button onClick={handleCancel} variant="outline">Cancel</Button>
-                    <Button onClick={handleSaveChanges}><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
+                    <Button onClick={handleSaveChanges} disabled={!!isUploading}><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
                   </>
                 )}
             </div>
@@ -359,7 +372,7 @@ function PortfolioPageContent() {
                 <div className="flex-shrink-0 mx-auto md:mx-0">
                     <div className="relative h-32 w-32 group">
                       <Image
-                          src={personalInfo?.profilePictureDataUri || 'https://placehold.co/128x128.png'}
+                          src={personalInfo?.profilePictureUrl || 'https://placehold.co/128x128.png'}
                           alt={`${personalInfo?.name || 'User'}'s profile picture`}
                           width={128}
                           height={128}
@@ -370,9 +383,9 @@ function PortfolioPageContent() {
                       {isEditMode && (
                         <>
                           <label htmlFor="profile-picture-upload" className="absolute inset-0 bg-black/60 flex items-center justify-center text-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Camera className="h-8 w-8"/>
+                            {isUploading === 'profile' ? <Loader2 className="h-8 w-8 animate-spin" /> : <Camera className="h-8 w-8"/>}
                           </label>
-                          <Input id="profile-picture-upload" type="file" className="hidden" accept="image/*" onChange={handleProfilePictureChange} />
+                          <Input id="profile-picture-upload" type="file" className="hidden" accept="image/*" onChange={handleProfilePictureChange} disabled={isUploading === 'profile'} />
                         </>
                       )}
                     </div>
@@ -471,7 +484,10 @@ function PortfolioPageContent() {
                                         <Textarea value={project.technologies?.join(', ') || ''} onChange={e => handleProjectChange(index, 'technologies', e.target.value)} placeholder="Technologies (comma-separated)" className="bg-transparent"/>
                                         <div>
                                             <Label htmlFor={`project-image-${index}`}>Project Preview</Label>
-                                            <Input id={`project-image-${index}`} type="file" accept="image/*" onChange={e => handleProjectImageChange(index, e)} />
+                                            <div className="flex items-center gap-2">
+                                                <Input id={`project-image-${index}`} type="file" accept="image/*" onChange={e => handleProjectImageChange(index, e)} disabled={isUploading === `project-${index}`} />
+                                                {isUploading === `project-${index}` && <Loader2 className="h-4 w-4 animate-spin" />}
+                                            </div>
                                             {project.previewImage && <Image src={project.previewImage} alt="preview" width={200} height={100} className="mt-2 rounded-md object-cover" />}
                                         </div>
                                       </div>
