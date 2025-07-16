@@ -384,12 +384,15 @@ export default function ResumeEditorClient() {
 
     if (!currentUser) return null;
 
+    const hasBeenEdited = (editorState?.chatHistory?.length || 0) > 0;
+    const showOriginalPdf = editorState?.initialPreviewUri && !hasBeenEdited;
+
     const editorActions = (
         <div className="flex items-center justify-end gap-2 flex-grow">
             <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
                 {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Analyze Resume"}
             </Button>
-            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
+            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting || !hasBeenEdited}>
                 {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
             </Button>
             <Button onClick={handleConvertToPortfolio} size="sm" disabled={!editorState || isConverting || isParsing || isAnalyzing || !editorState.initialPreviewUri}>
@@ -403,9 +406,6 @@ export default function ResumeEditorClient() {
     );
 
     const showEditor = flow === 'edit' && editorState && !isParsing;
-
-    const hasBeenEdited = (editorState?.chatHistory?.length || 0) > 0;
-    const showOriginalPdf = editorState?.initialPreviewUri && !hasBeenEdited;
     
     return (
         <div className="flex flex-col h-screen bg-muted/20">
@@ -452,7 +452,9 @@ export default function ResumeEditorClient() {
                                         {isGeneratingPdf ? (
                                             <CreativeLoader texts={generatingPdfTexts} />
                                         ) : showOriginalPdf ? (
-                                            <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none" title="Original Resume Preview" />
+                                            <div className="flex-grow flex items-center justify-center">
+                                                <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none" title="Original Resume Preview" />
+                                            </div>
                                         ) : (
                                             <ScrollArea className="w-full h-full">
                                                 <div className="p-4 flex justify-center items-start">
@@ -460,8 +462,8 @@ export default function ResumeEditorClient() {
                                                         ref={livePreviewRef}
                                                         className="bg-white text-black shadow-lg"
                                                         style={{
-                                                            width: '210mm',
-                                                            minHeight: '297mm',
+                                                            width: '184.6mm',
+                                                            minHeight: '271.6mm',
                                                             boxSizing: 'border-box',
                                                             padding: '12.7mm',
                                                         }}
