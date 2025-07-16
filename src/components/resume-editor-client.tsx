@@ -15,6 +15,7 @@ import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 
 const parsingTexts = [
@@ -44,6 +45,7 @@ export default function ResumeEditorClient() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
+    const [isAILoading, setIsAILoading] = useState(false);
     const [isParsing, setIsParsing] = useState(false);
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [isConverting, setIsConverting] = useState(false);
@@ -457,7 +459,7 @@ export default function ResumeEditorClient() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow flex flex-col p-0 bg-muted/30 overflow-hidden">
-                                    <div className="flex-grow flex items-center justify-center w-full bg-muted/30 rounded-md overflow-hidden">
+                                    <div className="flex-grow flex items-center justify-center w-full bg-muted/30 rounded-md overflow-hidden relative">
                                         {isGeneratingPdf ? (
                                             <div className='flex h-full w-full items-center justify-center'>
                                                 <CreativeLoader texts={generatingPdfTexts} />
@@ -471,17 +473,20 @@ export default function ResumeEditorClient() {
                                                 <div className="p-4 flex justify-center items-start">
                                                     <div
                                                         ref={livePreviewRef}
-                                                        className="bg-white text-black shadow-lg"
+                                                        className={cn("bg-white text-black shadow-lg transition-all duration-300", isAILoading && "blur-sm")}
                                                         style={{
-                                                            width: '184.6mm',
-                                                            minHeight: '271.6mm',
-                                                            boxSizing: 'content-box',
+                                                            width: '210mm',
+                                                            minHeight: '297mm',
+                                                            boxSizing: 'border-box',
                                                             padding: '12.7mm',
                                                         }}
                                                         dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                                     />
                                                 </div>
                                             </ScrollArea>
+                                        )}
+                                        {isAILoading && (
+                                             <div className="absolute inset-0 wavy-background animate-wave opacity-20"></div>
                                         )}
                                      </div>
                                 </CardContent>
@@ -491,7 +496,9 @@ export default function ResumeEditorClient() {
                              {editorState ? (
                                 <ResumeChatPanel 
                                     editorState={editorState}
-                                    setEditorState={handleEditorStateUpdate} 
+                                    setEditorState={handleEditorStateUpdate}
+                                    isLoading={isAILoading}
+                                    setIsLoading={setIsAILoading}
                                 />
                              ) : (
                                  <Card className="h-full flex items-center justify-center">

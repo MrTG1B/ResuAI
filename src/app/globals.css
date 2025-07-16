@@ -88,3 +88,16 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+    .wavy-background {
+      background: linear-gradient(
+        45deg,
+        hsl(var(--primary) / 0.1),
+        hsl(var(--accent) / 0.1),
+        hsl(var(--primary) / 0.1),
+        hsl(var(--accent) / 0.1)
+      );
+      background-size: 400% 400%;
+    }
+}

@@ -20,12 +20,13 @@ import { Badge } from './ui/badge';
 interface ResumeChatPanelProps {
     editorState: SavedEditorState;
     setEditorState: (state: SavedEditorState) => void;
+    isLoading: boolean;
+    setIsLoading: (loading: boolean) => void;
     disabledRoutes?: string[];
 }
 
-export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = [] }: ResumeChatPanelProps) {
+export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsLoading, disabledRoutes = [] }: ResumeChatPanelProps) {
     const [input, setInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const [attachments, setAttachments] = useState<{ name: string; dataUri: string }[]>([]);
     const { toast } = useToast();
     const attachmentInputRef = useRef<HTMLInputElement>(null);
@@ -91,6 +92,10 @@ export function ResumeChatPanel({ editorState, setEditorState, disabledRoutes = 
         if (files && files.length > 0) {
             const filePromises = Array.from(files).map(file => {
                 return new Promise<{ name: string; dataUri: string }>((resolve, reject) => {
+                    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                        reject(new Error(`${file.name} is too large. Max size is 5MB.`));
+                        return;
+                    }
                     const reader = new FileReader();
                     reader.onload = () => {
                         resolve({ name: file.name, dataUri: reader.result as string });
