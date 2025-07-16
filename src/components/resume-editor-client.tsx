@@ -443,7 +443,7 @@ export default function ResumeEditorClient() {
                                             <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
                                             {editorState?.fileName && <p className="mt-4 text-sm font-medium text-primary">{editorState.fileName}</p>}
                                         </div>
-                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" disabled={isParsing} />
+                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept="application/pdf" disabled={isParsing} />
                                     </label>
                                 </div>
                             </>
