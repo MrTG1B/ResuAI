@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    if (email.toLowerCase() !== "tirthankardasgupta913913@gmail.com" || password !== "admin") {
+    if (email.toLowerCase() !== "tirthankdasgupta2004@gmail.com" || password !== "admin") {
          toast({
             title: "Access Denied",
             description: "You are not authorized to access the admin panel.",
