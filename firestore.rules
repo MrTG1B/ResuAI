@@ -1,34 +1,32 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default deny all reads/writes to prevent unintended access
-    match /{document=**} {
-      allow read, write: if false;
+    // Helper function to check if a user is the designated admin
+    function isAdmin(uid) {
+      // IMPORTANT: Replace with your actual Firebase Admin User ID
+      return uid == 'YOUR_ADMIN_UID_HERE'; 
     }
 
-    // USERS
-    // Users can read/write their own subdocuments (profile, resumes, portfolios)
+    // Users can only read/write their own data
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Admins can list all users. The dashboard is client-side protected.
+    // Admin can read all user data
     match /users/{userId} {
-      allow read: if request.auth != null;
-    }
-
-    // FEEDBACK
-    // Any authenticated user can create feedback
-    match /feedback/{feedbackId} {
-      allow create: if request.auth != null;
+      allow list: if request.auth != null && isAdmin(request.auth.uid);
     }
     
-    // Admins can read all feedback. The dashboard is client-side protected.
+    // Feedback collection rules
     match /feedback/{feedbackId} {
-        allow read: if request.auth != null;
+      // Any authenticated user can create feedback
+      allow create: if request.auth != null;
+      // Only the admin can read all feedback
+      allow read, list: if request.auth != null && isAdmin(request.auth.uid);
+      // No one can update or delete feedback through the client
+      allow update, delete: if false;
     }
   }
 }

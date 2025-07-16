@@ -9,9 +9,7 @@ import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput } from "@/ai/flows/job
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
-import { getUsers as getUsersFlow } from "@/ai/flows/admin-get-users";
 import { submitFeedback as submitFeedbackFlow, type SubmitFeedbackInput } from "@/ai/flows/submit-feedback";
-import { getFeedback as getFeedbackFlow } from "@/ai/flows/admin-get-feedback";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy } from "firebase/firestore";
@@ -229,10 +227,6 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   }
 }
 
-export async function getUsersAction(): Promise<User[]> {
-    return await getUsersFlow();
-}
-
 export async function submitFeedbackAction(input: SubmitFeedbackInput): Promise<{success: boolean, error?: string}> {
     try {
         const result = await submitFeedbackFlow(input);
@@ -241,8 +235,4 @@ export async function submitFeedbackAction(input: SubmitFeedbackInput): Promise<
         console.error("Error submitting feedback:", error);
         return { success: false, error: "Failed to submit feedback. Please try again." };
     }
-}
-
-export async function getFeedbackAction(): Promise<Feedback[]> {
-    return await getFeedbackFlow();
 }

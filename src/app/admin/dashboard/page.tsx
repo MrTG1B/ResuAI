@@ -8,10 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Users, FileText, LayoutTemplate, MessageSquare } from 'lucide-react';
 import { User } from '@/types/user';
 import { Feedback } from '@/types/feedback';
-import { getUsersAction, getFeedbackAction } from '@/app/actions';
 import { UserTable } from '@/components/admin/user-table';
 import { FeedbackTable } from '@/components/admin/feedback-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 const StatCard = ({ title, value, icon: Icon }: { title: string; value: string | number; icon: React.ElementType }) => (
     <Card>
@@ -27,6 +28,7 @@ const StatCard = ({ title, value, icon: Icon }: { title: string; value: string |
 
 export default function AdminDashboardPage() {
     const router = useRouter();
+    const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
@@ -42,11 +44,54 @@ export default function AdminDashboardPage() {
         setIsAuthorized(true);
 
         async function fetchData() {
+            if (!db) {
+                toast({ title: "Firestore Error", description: "Firestore is not initialized.", variant: "destructive" });
+                setIsLoading(false);
+                return;
+            }
             try {
-                const [fetchedUsers, fetchedFeedback] = await Promise.all([
-                    getUsersAction(),
-                    getFeedbackAction()
-                ]);
+                // Fetch users and their subcollection counts
+                const usersCollectionRef = collection(db, 'users');
+                const usersSnapshot = await getDocs(usersCollectionRef);
+
+                const fetchedUsers: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
+                    const user: User = { id: userDoc.id, name: 'N/A', email: 'N/A', resumes: 0, portfolios: 0 };
+                    try {
+                        const profileDocRef = doc(db, 'users', user.id, 'profile', 'data');
+                        const profileSnap = await getDoc(profileDocRef);
+                        if (profileSnap.exists()) {
+                            const profileData = profileSnap.data();
+                            user.name = profileData.name || 'N/A';
+                            user.email = profileData.email || 'N/A';
+                        }
+                        const portfoliosCollectionRef = collection(db, 'users', user.id, 'portfolios');
+                        const portfoliosSnapshot = await getDocs(portfoliosCollectionRef);
+                        user.portfolios = portfoliosSnapshot.size;
+
+                        const resumesCollectionRef = collection(db, 'users', user.id, 'resumes');
+                        const resumesSnapshot = await getDocs(resumesCollectionRef);
+                        user.resumes = resumesSnapshot.size;
+                    } catch (error) {
+                        console.error(`Failed to fetch details for user ${user.id}`, error);
+                    }
+                    return user;
+                }));
+                
+                // Fetch feedback
+                const feedbackCollectionRef = collection(db, 'feedback');
+                const feedbackQuery = query(feedbackCollectionRef, orderBy('createdAt', 'desc'));
+                const feedbackSnapshot = await getDocs(feedbackQuery);
+                const fetchedFeedback: Feedback[] = feedbackSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        feedback: data.feedback,
+                        userId: data.userId,
+                        userName: data.userName || 'N/A',
+                        userEmail: data.userEmail || 'N/A',
+                        createdAt: data.createdAt.toDate().toISOString(),
+                    }
+                });
 
                 setUsers(fetchedUsers);
                 setFeedback(fetchedFeedback);
@@ -60,15 +105,21 @@ export default function AdminDashboardPage() {
                     portfolios: totalPortfolios,
                     feedbacks: fetchedFeedback.length,
                 });
-            } catch (error) {
+
+            } catch (error: any) {
                 console.error("Failed to fetch admin data:", error);
+                toast({
+                    title: "Permission Denied",
+                    description: "You do not have permission to view this data. Ensure you are logged in as the admin and your UID is set correctly in Firestore rules.",
+                    variant: "destructive"
+                });
             } finally {
                 setIsLoading(false);
             }
         }
 
         fetchData();
-    }, [router]);
+    }, [router, toast]);
 
     if (isLoading || !isAuthorized) {
         return (
