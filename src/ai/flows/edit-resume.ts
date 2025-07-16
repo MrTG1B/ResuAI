@@ -97,8 +97,8 @@ You will be given the full current HTML of their resume and a prompt from the us
     *   **Action:** Modify only the requested parts of the HTML. Maintain a consistent style.
 
 4.  **Adding a Profile Picture:**
-    *   **If the user uploads an image and their prompt includes a phrase like "add my profile picture", "use this image", or "upload this photo", you MUST embed it in the HTML.**
-    *   **Action:** Find any placeholder text (like 'Profile Picture' or a similar placeholder) or an existing \`<img>\` tag in the HTML and replace it with a new \`<img>\` tag. The \`src\` of this new tag must be the Base64 data URI from the first attachment. Style the image professionally (e.g., \`<img src="..." style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">\`).
+    *   **If the user uploads an image AND their prompt includes a phrase like "add my profile picture", "use this image", or "upload this photo", you MUST embed it in the HTML.**
+    *   **Action:** Find any placeholder text (like 'Profile Picture' or a similar placeholder) or an existing \`<img>\` tag in the HTML and replace it with a new \`<img>\` tag. The \`src\` of this new tag must be the Base64 data URI from the first attachment. Style the image professionally (e.g., \`<img src="{{media url=attachmentDataUris.[0]}}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">\`).
 
 **Response and Tool Promotion:**
 *   After making an edit, generate a brief, friendly response confirming the change (e.g., "I've applied the new 'Modernist' template to your resume.").
