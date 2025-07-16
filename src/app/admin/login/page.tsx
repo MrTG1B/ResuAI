@@ -20,12 +20,22 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  // In a real app, use custom claims to verify admin status after login.
-  // const ADMIN_UID = "YOUR_ADMIN_UID_HERE";
+  const ADMIN_EMAIL = "tirthankardasgupta2004@gmail.com";
+  const ADMIN_PASSWORD = "admin";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+        toast({
+            title: "Access Denied",
+            description: "The credentials provided are not valid for admin access.",
+            variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+    }
 
     if (!auth) {
         toast({ title: "Configuration Error", description: "Firebase is not configured.", variant: "destructive" });
@@ -34,12 +44,8 @@ export default function AdminLoginPage() {
     }
 
     try {
-        // We sign in the user to get an auth token. The Firestore rules will determine
-        // if this user has admin privileges.
         await signInWithEmailAndPassword(auth, email, password);
 
-        // For this demo, we assume a successful login with a specific account is the authorization method.
-        // A more secure setup would check a custom claim from the user's token here.
         sessionStorage.setItem("admin-auth", "true");
         toast({
             title: "Login Successful",
