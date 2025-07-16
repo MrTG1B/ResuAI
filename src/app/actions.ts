@@ -229,7 +229,7 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   }
 }
 
-export async function getUsers(): Promise<User[]> {
+export async function getUsersAction(): Promise<User[]> {
     return await getUsersFlow();
 }
 

@@ -10,32 +10,64 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Hardcoded admin UID. In a real app, use custom claims.
+  const ADMIN_UID = "YOUR_ADMIN_UID_HERE";
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (username === "admin" && password === "admin") {
-      sessionStorage.setItem("admin-auth", "true");
-      toast({
-        title: "Login Successful",
-        description: "Redirecting to the admin dashboard...",
-      });
-      router.push("/admin/dashboard");
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
+    if (email.toLowerCase() !== "tirthankardasgupta913913@gmail.com" || password !== "admin") {
+         toast({
+            title: "Access Denied",
+            description: "You are not authorized to access the admin panel.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+    }
+
+    if (!auth) {
+        toast({ title: "Configuration Error", description: "Firebase is not configured.", variant: "destructive" });
+        setIsLoading(false);
+        return;
+    }
+
+    try {
+        // We sign in the user to get an auth token, but rely on the hardcoded check for authorization.
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+        // In a more secure setup, we would check a custom claim from the user's token here.
+        // For this demo, we assume the login credentials are the authorization method.
+        sessionStorage.setItem("admin-auth", "true");
+        toast({
+            title: "Login Successful",
+            description: "Redirecting to the admin dashboard...",
+        });
+        router.push("/admin/dashboard");
+
+    } catch (error: any) {
+        let errorMessage = "Invalid credentials. Please try again.";
+        if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            errorMessage = "The admin account credentials are not correct.";
+        }
+        toast({
+            title: "Login Failed",
+            description: errorMessage,
+            variant: "destructive",
+        });
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -54,14 +86,14 @@ export default function AdminLoginPage() {
         <CardContent>
           <form onSubmit={handleLogin} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                type="text"
-                placeholder="admin"
+                id="email"
+                type="email"
+                placeholder="admin@example.com"
                 required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
@@ -69,7 +101,7 @@ export default function AdminLoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="admin"
+                placeholder="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

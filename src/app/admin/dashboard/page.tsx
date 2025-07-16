@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Users, FileText, LayoutTemplate, MessageSquare } from 'lucide-react';
 import { User } from '@/types/user';
 import { Feedback } from '@/types/feedback';
-import { getUsers, getFeedbackAction } from '@/app/actions';
+import { getUsersAction, getFeedbackAction } from '@/app/actions';
 import { UserTable } from '@/components/admin/user-table';
 import { FeedbackTable } from '@/components/admin/feedback-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -42,7 +42,7 @@ export default function AdminDashboardPage() {
         async function fetchData() {
             try {
                 const [fetchedUsers, fetchedFeedback] = await Promise.all([
-                    getUsers(),
+                    getUsersAction(),
                     getFeedbackAction()
                 ]);
 
