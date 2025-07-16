@@ -79,8 +79,16 @@ export default function ResumeAnalyzerPage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
-      setResumeFile(selectedFile);
-      setResumeFileName(selectedFile.name);
+        if (selectedFile.type !== 'application/pdf') {
+            toast({
+              title: "Invalid File Type",
+              description: "Please upload a PDF file.",
+              variant: "destructive",
+            });
+            return;
+        }
+        setResumeFile(selectedFile);
+        setResumeFileName(selectedFile.name);
     }
   };
 
@@ -196,10 +204,10 @@ export default function ResumeAnalyzerPage() {
                                                 <p className="text-sm text-foreground">
                                                 <span className="font-semibold">Click to upload</span>
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
+                                                <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
                                                 {resumeFileName && <p className="mt-2 text-xs font-medium text-primary truncate max-w-full px-2">{resumeFileName}</p>}
                                             </div>
-                                            <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" disabled={isAnalyzing}/>
+                                            <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" disabled={isAnalyzing}/>
                                         </label>
                                     </div>
                                 )}

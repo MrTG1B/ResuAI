@@ -31,6 +31,14 @@ export function ResumeForm({ user }: { user: User }) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
+      if (selectedFile.type !== 'application/pdf') {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a PDF file.",
+          variant: "destructive",
+        });
+        return;
+      }
       setFile(selectedFile);
       setFileName(selectedFile.name);
     }
@@ -102,10 +110,10 @@ export function ResumeForm({ user }: { user: User }) {
             <p className="mb-2 text-sm text-foreground">
               <span className="font-semibold">Click to upload</span> or drag and drop
             </p>
-            <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
+            <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
             {fileName && <p className="mt-4 text-sm font-medium text-primary">{fileName}</p>}
           </div>
-          <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" />
+          <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" />
         </label>
       </div>
       <Button type="submit" className="w-full text-lg" size="lg" disabled={isLoading}>

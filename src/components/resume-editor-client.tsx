@@ -190,6 +190,15 @@ export default function ResumeEditorClient() {
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file || !currentUser) return;
+        
+        if (file.type !== 'application/pdf') {
+            toast({
+              title: "Invalid File Type",
+              description: "Please upload a PDF file.",
+              variant: "destructive",
+            });
+            return;
+        }
     
         setIsParsing(true);
         
@@ -429,10 +438,10 @@ export default function ResumeEditorClient() {
                                             <p className="mb-2 text-sm text-foreground">
                                             <span className="font-semibold">Click to upload</span> or drag and drop
                                             </p>
-                                            <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
+                                            <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
                                             {editorState?.fileName && <p className="mt-4 text-sm font-medium text-primary">{editorState.fileName}</p>}
                                         </div>
-                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf,.doc,.docx" disabled={isParsing} />
+                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" disabled={isParsing} />
                                     </label>
                                 </div>
                             </>
@@ -448,11 +457,13 @@ export default function ResumeEditorClient() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow flex flex-col p-0 bg-muted/30 overflow-hidden">
-                                    <div className="flex-grow w-full bg-muted/30 rounded-md overflow-hidden flex items-center justify-center">
+                                    <div className="flex-grow flex items-center justify-center w-full bg-muted/30 rounded-md overflow-hidden">
                                         {isGeneratingPdf ? (
-                                            <CreativeLoader texts={generatingPdfTexts} />
+                                            <div className='flex h-full w-full items-center justify-center'>
+                                                <CreativeLoader texts={generatingPdfTexts} />
+                                            </div>
                                         ) : showOriginalPdf ? (
-                                            <div className="flex-grow flex items-center justify-center">
+                                            <div className="flex-grow flex items-center justify-center h-full">
                                                 <iframe src={`${editorState.initialPreviewUri}#toolbar=0`} className="w-full h-full border-none" title="Original Resume Preview" />
                                             </div>
                                         ) : (
@@ -464,7 +475,7 @@ export default function ResumeEditorClient() {
                                                         style={{
                                                             width: '184.6mm',
                                                             minHeight: '271.6mm',
-                                                            boxSizing: 'border-box',
+                                                            boxSizing: 'content-box',
                                                             padding: '12.7mm',
                                                         }}
                                                         dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}

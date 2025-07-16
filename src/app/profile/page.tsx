@@ -163,6 +163,15 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.type !== 'application/pdf') {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a PDF file.",
+          variant: "destructive",
+        });
+        return;
+    }
+
     if (file.size > 2 * 1024 * 1024) { // 2MB limit
       toast({ title: "File too large", description: "Please select a file smaller than 2MB.", variant: "destructive" });
       return;
@@ -415,14 +424,14 @@ export default function ProfilePage() {
                                 <Input 
                                  id={`cert-upload-${index}`} 
                                  type="file" 
-                                 accept=".pdf,.jpg,.jpeg,.png"
+                                 accept=".pdf"
                                  onChange={(e) => handleCertificateUpload(index, e)}
                                  className="text-xs flex-grow"
                                  disabled={isAnalyzingCert === index}
                                 />
                                 {isAnalyzingCert === index && <Loader2 className="h-4 w-4 animate-spin" />}
                                </div>
-                               <p className="text-xs text-muted-foreground mt-1">Upload a PDF or image to have the AI fill in the details automatically.</p>
+                               <p className="text-xs text-muted-foreground mt-1">Upload a PDF to have the AI fill in the details automatically.</p>
                             </div>
                             <Button type="button" variant="ghost" size="icon" onClick={() => removeCert(index)} className="absolute top-2 right-2">
                                 <Trash2 className="h-4 w-4 text-destructive" />
