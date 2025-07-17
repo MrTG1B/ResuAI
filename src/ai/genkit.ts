@@ -7,20 +7,34 @@ const secondaryApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY_SECONDARY;
 const plugins = [];
 
 if (primaryApiKey) {
+  // The first plugin will use the default name 'googleai'
   plugins.push(googleAI({apiKey: primaryApiKey}));
 }
 
 if (secondaryApiKey) {
-  // Define a different name for the second plugin to avoid conflicts.
-  plugins.push(googleAI({apiKey: secondaryApiKey,
-    name: 'googleai-secondary',
-  }));
+  // The second plugin MUST have a unique name to avoid registration conflicts.
+  plugins.push(
+    googleAI({
+      name: 'googleai-secondary',
+      apiKey: secondaryApiKey,
+    })
+  );
+}
+
+// Define the model candidates. Genkit will try them in order.
+const modelCandidates = [];
+if (primaryApiKey) {
+  modelCandidates.push('googleai/gemini-2.0-flash');
+}
+if (secondaryApiKey) {
+  // Reference the uniquely named secondary plugin.
+  modelCandidates.push('googleai-secondary/gemini-2.0-flash');
 }
 
 export const ai = genkit({
   plugins,
   model: {
-    // Try the default googleai plugin first, then the secondary one.
-    candidates: ['googleai/gemini-2.0-flash', 'googleai-secondary/gemini-2.0-flash'],
+    // Use the model candidates list. If it's empty, this will gracefully do nothing.
+    candidates: modelCandidates,
   },
 });
