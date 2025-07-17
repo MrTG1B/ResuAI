@@ -25,10 +25,12 @@ if (secondaryApiKey) {
 const modelCandidates = [];
 if (primaryApiKey) {
   modelCandidates.push('googleai/gemini-2.0-flash');
+  modelCandidates.push('googleai/gemini-2.0-flash-preview-image-generation');
 }
 if (secondaryApiKey) {
   // Reference the uniquely named secondary plugin.
   modelCandidates.push('googleai-secondary/gemini-2.0-flash');
+  modelCandidates.push('googleai-secondary/gemini-2.0-flash-preview-image-generation');
 }
 
 export const ai = genkit({
