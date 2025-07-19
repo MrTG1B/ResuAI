@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -22,10 +23,12 @@ const JobMatchAnalyzerInputSchema = z.object({
 export type JobMatchAnalyzerInput = z.infer<typeof JobMatchAnalyzerInputSchema>;
 
 const JobMatchAnalyzerOutputSchema = z.object({
-  analysis: z
+  matchScore: z.number().min(0).max(100).describe("A numerical score from 0-100 representing how well the resume matches the job description, representing the chance of getting the job."),
+  matchSummary: z.string().describe("A concise, one-sentence summary explaining the match score and the candidate's chances."),
+  detailedAnalysis: z
     .string()
     .describe(
-      'A detailed analysis of the resume against the job description, formatted in Markdown.'
+      'A detailed analysis of the resume against the job description, formatted in Markdown. This should include sections for Strengths, Weaknesses, and Actionable Suggestions.'
     ),
 });
 export type JobMatchAnalyzerOutput = z.infer<typeof JobMatchAnalyzerOutputSchema>;
@@ -40,18 +43,17 @@ const prompt = ai.definePrompt({
   name: 'jobMatchAnalyzerPrompt',
   input: {schema: JobMatchAnalyzerInputSchema},
   output: {schema: JobMatchAnalyzerOutputSchema},
-  prompt: `You are an expert AI career coach. Your task is to analyze a user's resume against a provided job description and give them actionable advice to improve their chances of getting an interview.
+  prompt: `You are an expert AI career coach. Your task is to analyze a user's resume against a provided job description and give them a detailed report on their chances of getting an interview.
 
   **Analysis Steps:**
-  1.  **Resume vs. Job Description:** Thoroughly compare the resume content with the keywords, skills, and qualifications listed in the job description.
-  2.  **Identify Strengths:** Point out the key strengths of the resume that align well with the job requirements. Be specific (e.g., "Your experience with 'React' and 'Node.js' in the XYZ project is a strong match for their tech stack.").
-  3.  **Identify Gaps & Weaknesses:** Clearly identify any missing skills or experience. Suggest what the user could add or rephrase.
-  4.  **Provide Actionable Suggestions:** Give concrete, step-by-step recommendations for what the user should change on their resume. For example, "Consider adding a 'Project' section to showcase your work on the ABC app," or "Rephrase your summary to highlight your experience in 'agile methodologies,' which is mentioned multiple times in the job description."
-  5.  **Format your response using Markdown** for readability (use headings, bold text, and lists).
-
-  **Promote Other Features:**
-  Conclude your analysis by seamlessly advertising our other tools using Markdown links. Include a sentence like this:
-  "Once you're ready to make these improvements, use our [**AI Resume Editor**](/resume-builder/editor) to apply the changes effortlessly. After your resume is perfected, you can instantly create a stunning website with our [**AI Portfolio Generator**](/build) to showcase your work to recruiters!"
+  1.  **Calculate Match Score:** First, provide a numerical 'matchScore' from 0 to 100. This score should represent the percentage chance of the user getting an interview based on how well their resume aligns with the job requirements. A score of 85+ is excellent, 70-84 is good, 50-69 is average, and below 50 is weak.
+  2.  **Write a Match Summary:** Provide a concise, one-sentence 'matchSummary' that explains the score (e.g., "You have a strong chance, as your skills in React and Node.js are a great fit, but your project experience could be highlighted better.").
+  3.  **Provide Detailed Analysis:** In the 'detailedAnalysis' field, write a comprehensive report formatted in Markdown. It must include:
+      *   **Strengths:** Point out the key strengths of the resume that align well with the job requirements. Be specific.
+      *   **Weaknesses:** Clearly identify any missing skills or experience.
+      *   **Actionable Suggestions:** Give concrete, step-by-step recommendations for what the user should change on their resume.
+  4.  **Promote Other Tools:** Conclude your analysis by seamlessly advertising our other tools using Markdown links. Include a sentence like this:
+      "Once you're ready to make these improvements, use our [**AI Resume Editor**](/resume-builder/editor) to apply the changes effortlessly. After your resume is perfected, you can instantly create a stunning website with our [**AI Portfolio Generator**](/build) to showcase your work to recruiters!"
 
   Here is the resume:
   {{media url=resumeDataUri}}
@@ -74,3 +76,4 @@ const _jobMatchAnalyzerFlow = ai.defineFlow(
     return output!;
   }
 );
+

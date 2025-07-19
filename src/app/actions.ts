@@ -5,13 +5,13 @@ import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flo
 import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
-import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput } from "@/ai/flows/job-match-analyzer";
+import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput, type JobMatchAnalyzerOutput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
 import { submitFeedback as submitFeedbackFlow, type SubmitFeedbackInput } from "@/ai/flows/submit-feedback";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
-import { type ParsedResume, type EditedResume, type JobMatchAnalysis, type CoachChatResponse } from "@/types/resume";
+import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { User } from "@/types/user";
@@ -209,10 +209,7 @@ export async function editResumeAction(input: EditResumeInput) {
 export async function jobMatchAnalyzeAction(input: JobMatchAnalyzerInput) {
   try {
     const result = await jobMatchAnalyzerFlow(input);
-    const analysisData: JobMatchAnalysis = {
-      analysis: result.analysis,
-    };
-    return { success: true, data: analysisData };
+    return { success: true, data: result };
   } catch (error) {
     console.error("Error analyzing resume for job match:", error);
     return { success: false, error: "Failed to analyze resume. The AI model might be busy, please try again." };

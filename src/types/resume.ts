@@ -16,7 +16,9 @@ export interface EditedResume {
 }
 
 export interface JobMatchAnalysis {
-    analysis: string;
+    matchScore: number;
+    matchSummary: string;
+    detailedAnalysis: string;
 }
 
 export interface CoachChatResponse {

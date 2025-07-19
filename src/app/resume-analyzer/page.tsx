@@ -118,7 +118,7 @@ export default function ResumeAnalyzerPage() {
 
             if (result.success && result.data) {
                 if (typeof window !== "undefined") {
-                    sessionStorage.setItem('analysisResult', result.data.analysis);
+                    sessionStorage.setItem('analysisResult', JSON.stringify(result.data));
                     sessionStorage.setItem('analysisResumeDataUri', dataUri);
                     sessionStorage.setItem('analysisJobDescription', jobDescription);
                     sessionStorage.setItem('analysisResumeFileName', resumeFromEditorFileName || resumeFileName);
@@ -166,11 +166,11 @@ export default function ResumeAnalyzerPage() {
         <div className="w-full max-w-4xl mx-auto space-y-8">
             <Card className="shadow-2xl">
                 <CardHeader className="text-center">
-                    <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+                    <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
                         AI Resume Analyzer
                     </h1>
                     <CardDescription className="mt-2 text-lg">
-                        Upload your resume and paste a job description to get personalized coaching from our AI.
+                        Upload your resume and paste a job description to get a detailed analysis from our AI.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -231,7 +231,7 @@ export default function ResumeAnalyzerPage() {
                                         Analyzing...
                                     </>
                                 ) : (
-                                    "Start AI Coaching Session"
+                                    "Generate Analysis Report"
                                 )}
                             </Button>
                         </form>
