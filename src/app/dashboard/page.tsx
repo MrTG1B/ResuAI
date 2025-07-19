@@ -10,7 +10,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, Bot } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
@@ -323,6 +323,24 @@ export default function DashboardPage() {
                 </Card>
             )}
 
+            <Card className="shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 w-full animate-fade-in-up">
+                <Link href="/career-coach" className="block hover:bg-card/20 rounded-lg">
+                    <CardHeader className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+                        <div className="bg-primary/10 p-4 rounded-full">
+                            <Bot className="h-10 w-10 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                            <CardTitle className="text-2xl font-heading">AI Career Coach</CardTitle>
+                            <p className="text-muted-foreground mt-1">Get instant advice on your career path, interview preparation, and skill development from your personal AI assistant.</p>
+                        </div>
+                        <Button variant="ghost" className="shrink-0">
+                            Start Chatting <Sparkles className="ml-2 h-4 w-4" />
+                        </Button>
+                    </CardHeader>
+                </Link>
+            </Card>
+
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
                 <ToolCard 
                     href="/resume-builder"
@@ -508,3 +526,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

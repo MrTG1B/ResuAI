@@ -10,6 +10,7 @@ import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coac
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
 import { submitFeedback as submitFeedbackFlow, type SubmitFeedbackInput } from "@/ai/flows/submit-feedback";
+import { careerCoachChat as careerCoachChatFlow, type CareerCoachChatInput } from "@/ai/flows/career-coach-chat";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy } from "firebase/firestore";
@@ -229,6 +230,16 @@ export async function coachChatAction(input: CoachChatInput) {
   }
 }
 
+export async function careerCoachChatAction(input: CareerCoachChatInput) {
+  try {
+    const result = await careerCoachChatFlow(input);
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error("Error in career coach chat:", error);
+    return { success: false, error: "The career coach is unavailable. Please try again later." };
+  }
+}
+
 export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   try {
     const result = await analyzeCertificateFlow(input);
@@ -248,3 +259,5 @@ export async function submitFeedbackAction(input: SubmitFeedbackInput): Promise<
         return { success: false, error: "Failed to submit feedback. Please try again." };
     }
 }
+
+    
