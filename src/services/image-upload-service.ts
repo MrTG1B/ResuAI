@@ -1,7 +1,8 @@
 
 'use server';
 
-import { env } from 'process';
+import axios from 'axios';
+import FormData from 'form-data';
 
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
@@ -18,26 +19,34 @@ export async function uploadImage(base64DataUri: string): Promise<string> {
         throw new Error("Invalid Base64 data URI provided.");
     }
 
-    const formData = new FormData();
-    formData.append('image', base64string);
+    const form = new FormData();
+    form.append('image', base64string);
 
     try {
-        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-            method: 'POST',
-            body: formData,
-        });
+        const response = await axios.post(
+            `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+            form,
+            {
+                headers: {
+                    ...form.getHeaders(),
+                },
+            }
+        );
 
-        const result = await response.json();
-
-        if (result.success) {
-            return result.data.url;
+        if (response.data && response.data.success) {
+            return response.data.data.url;
         } else {
             // ImgBB API might return a 200 OK status even on failure, with an error message in the body.
-            throw new Error(result.error?.message || 'Failed to upload image to ImgBB.');
+            throw new Error(response.data?.error?.message || 'Failed to upload image to ImgBB.');
         }
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during image upload.";
+    } catch (error: any) {
+        let errorMessage = "An unknown error occurred during image upload.";
+        if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response.data?.error?.message || error.message;
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         console.error("ImgBB Upload Error:", errorMessage);
-        throw new Error(errorMessage);
+        throw new Error(`ImgBB Upload Error: ${errorMessage}`);
     }
 }
