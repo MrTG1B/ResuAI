@@ -40,11 +40,12 @@ export async function careerCoachChat(input: CareerCoachChatInput): Promise<Care
 }
 
 const prompt = ai.definePrompt({
+  model:'googleai/gemini-2.5-flash',
   name: 'careerCoachChatPrompt',
   input: {schema: CareerCoachChatInputSchema},
   output: {schema: CareerCoachChatOutputSchema},
   prompt: `You are an expert AI career coach. Your goal is to provide helpful, encouraging, and actionable advice to users about their careers.
-  
+
 You can answer questions about:
 - Resume and cover letter writing
 - Interview preparation and practice
@@ -58,8 +59,7 @@ Maintain a friendly, professional, and supportive tone. Format your responses in
 Here is the conversation history:
 ---
 {{#each history}}
-{{#if (eq role "user")}}User: {{{content}}}{{/if}}
-{{#if (eq role "assistant")}}AI: {{{content}}}{{/if}}
+{{this.role}}: {{{this.content}}}
 {{/each}}
 ---
 
