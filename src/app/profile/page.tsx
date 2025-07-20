@@ -180,7 +180,8 @@ export default function ProfilePage() {
         const dataUri = reader.result as string;
         const result = await uploadImageAction(dataUri);
         if (result.success && result.url) {
-            setValue('profilePictureUrl', result.url, { shouldDirty: true });
+            const cacheBustedUrl = `${result.url}?t=${new Date().getTime()}`;
+            setValue('profilePictureUrl', cacheBustedUrl, { shouldDirty: true });
             toast({ title: 'Image Uploaded', description: 'Your profile picture has been updated. Remember to save your profile.' });
         } else {
             toast({ title: 'Upload Failed', description: result.error, variant: 'destructive' });
@@ -291,6 +292,7 @@ export default function ProfilePage() {
                             <Label>Profile Picture</Label>
                             <div className="relative w-32 h-32 group">
                                 <Image
+                                    key={profilePictureUrl}
                                     src={profilePictureUrl || `https://placehold.co/128x128.png`}
                                     alt="Profile Picture"
                                     width={128}
