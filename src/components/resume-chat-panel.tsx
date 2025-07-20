@@ -25,9 +25,19 @@ interface ResumeChatPanelProps {
     disabledRoutes?: string[];
 }
 
+interface Attachment {
+    name: string;
+    dataUri: string;
+    mimeType: string;
+}
+
+const getMimeTypeFromDataUri = (dataUri: string): string => {
+    return dataUri.substring(dataUri.indexOf(':') + 1, dataUri.indexOf(';'));
+}
+
 export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsLoading, disabledRoutes = [] }: ResumeChatPanelProps) {
     const [input, setInput] = useState('');
-    const [attachments, setAttachments] = useState<{ name: string; dataUri: string }[]>([]);
+    const [attachments, setAttachments] = useState<Attachment[]>([]);
     const { toast } = useToast();
     const attachmentInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -65,7 +75,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             const result = await editResumeAction({
                 htmlContent: editorState.htmlContent,
                 prompt: currentInput,
-                attachmentDataUris: currentAttachments.map(a => a.dataUri)
+                attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.mimeType }))
             });
             
             if (result.success && result.data) {
@@ -91,14 +101,16 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
         const files = e.target.files;
         if (files && files.length > 0) {
             const filePromises = Array.from(files).map(file => {
-                return new Promise<{ name: string; dataUri: string }>((resolve, reject) => {
+                return new Promise<Attachment>((resolve, reject) => {
                     if (file.size > 5 * 1024 * 1024) { // 5MB limit
                         reject(new Error(`${file.name} is too large. Max size is 5MB.`));
                         return;
                     }
                     const reader = new FileReader();
                     reader.onload = () => {
-                        resolve({ name: file.name, dataUri: reader.result as string });
+                        const dataUri = reader.result as string;
+                        const mimeType = getMimeTypeFromDataUri(dataUri);
+                        resolve({ name: file.name, dataUri, mimeType });
                     };
                     reader.onerror = () => {
                         reject(new Error(`Could not read file: ${file.name}`));

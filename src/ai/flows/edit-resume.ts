@@ -18,11 +18,14 @@ const EditResumeInputSchema = z.object({
   prompt: z
     .string()
     .describe("The user's instruction for what to change or question to answer."),
-  attachmentDataUris: z
-    .array(z.string())
+  attachments: z
+    .array(z.object({
+        dataUri: z.string().describe("A file as a data URI: 'data:<mimetype>;base64,<encoded_data>'."),
+        mimeType: z.string().describe("The MIME type of the file (e.g., 'image/png').")
+    }))
     .optional()
     .describe(
-      "An optional list of attached files (e.g., certificates or project details) as data URIs. The AI can use these as context for edits or analysis. Each string should be a data URI: 'data:<mimetype>;base64,<encoded_data>'."
+      "An optional list of attached files (e.g., certificates or project details). The AI can use these as context for edits or analysis."
     ),
 });
 export type EditResumeInput = z.infer<typeof EditResumeInputSchema>;
@@ -57,7 +60,7 @@ const prompt = ai.definePrompt({
 **CRITICAL RULES:**
 1.  **HTML Only:** Your output for \`newHtmlContent\` **MUST** be a single, complete block of valid HTML. Do **NOT** use \`<html>\`, \`<body>\`, or \`<head>\` tags.
 2.  **Inline CSS:** All styling **MUST** be inline CSS (e.g., \`<p style="font-size: 12pt;">\`). Preserve existing styles unless asked to change them. Be concise with your HTML.
-3.  **Handle Attachments:** If the user provides an attachment (like a profile picture) and asks to use it, embed it in the HTML. For images, use the data URI from \`attachmentDataUris\` in an \`<img>\` tag's \`src\` attribute (e.g., \`<img src="{{media url=attachmentDataUris.[0]}}">\`).
+3.  **Handle Attachments:** If the user provides an attachment (like a profile picture) and asks to use it, embed it in the HTML. For images, use the data URI from an attachment in an \`<img>\` tag's \`src\` attribute.
 4.  **Answer Questions vs. Edit:**
     *   If the user asks for an **edit** (e.g., "change my job title", "add a skills section", "apply a new template"), you **MUST** modify the HTML and return the new version in \`newHtmlContent\`. Also, provide a confirmation message in the \`response\` field.
     *   If the user asks a **question** for feedback or analysis (e.g., "is this resume good?", "what should I improve?"), you **MUST NOT** change the HTML. Return the original, unmodified HTML in \`newHtmlContent\` and answer the question in the \`response\` field by politely redirecting them to the dedicated tool: "I can only help with direct edits here. For detailed feedback and analysis, please use our dedicated [**AI Resume Analyzer**](/resume-analyzer) tool."
@@ -73,12 +76,12 @@ USER'S INSTRUCTION:
 {{{prompt}}}
 ---
 
-{{#if attachmentDataUris}}
+{{#if attachments}}
 ATTACHED FILES:
 ---
 The user has attached the following files. Use them as context or embed them if requested.
-{{#each attachmentDataUris}}
-- Attachment {{@index}}
+{{#each attachments}}
+- Attachment {{@index}}: {{media url=this.dataUri contentType=this.mimeType}}
 {{/each}}
 ---
 {{/if}}
