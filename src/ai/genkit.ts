@@ -3,6 +3,7 @@ import {googleAI} from '@genkit-ai/googleai';
 import {config} from 'dotenv';
 
 // Use the dedicated Gemini API key.
+console.log("getiign API key");
 const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 if (!apiKey) {
@@ -13,6 +14,7 @@ if (!apiKey) {
 
 // Initialize Genkit with a single, correctly configured plugin.
 // The API key must be passed inside the `clientOptions`.
+console.log("Initializing");
 export const ai = genkit({
   plugins: apiKey ? [googleAI({clientOptions: {apiKey}})] : [],
 });

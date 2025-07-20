@@ -58,11 +58,8 @@ Maintain a friendly, professional, and supportive tone. Format your responses in
 Here is the conversation history:
 ---
 {{#each history}}
-{{#if (eq role "user")}}
-User: {{{content}}}
-{{else}}
-AI: {{{content}}}
-{{/if}}
+{{#if (eq role "user")}}User: {{{content}}}{{/if}}
+{{#if (eq role "assistant")}}AI: {{{content}}}{{/if}}
 {{/each}}
 ---
 
