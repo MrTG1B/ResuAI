@@ -94,6 +94,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [localImagePreview, setLocalImagePreview] = useState<string | null>(null);
   const [isAnalyzingCert, setIsAnalyzingCert] = useState<number | null>(null);
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -176,40 +177,45 @@ export default function ProfilePage() {
     }
     
     const oldDeleteUrl = getValues('profilePictureDeleteUrl');
-
     setIsUploading(true);
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = async () => {
-        const dataUri = reader.result as string;
+      const dataUri = reader.result as string;
+      // --- Start of UI Update ---
+      setLocalImagePreview(dataUri); // Show local preview immediately
+      window.dispatchEvent(new CustomEvent('profilePictureUpdated', { detail: { newUrl: dataUri } }));
+      // --- End of UI Update ---
+
+      try {
         const result = await uploadImageAction(dataUri);
 
         if (result.success && result.data) {
-            // Wait for 2 seconds to allow image propagation on the host CDN
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            const newUrl = `${result.data.url}?t=${new Date().getTime()}`;
-            setValue('profilePictureUrl', newUrl, { shouldDirty: true });
-            setValue('profilePictureDeleteUrl', result.data.deleteUrl, { shouldDirty: true });
-            
-            // Dispatch custom event to update header
-            window.dispatchEvent(new CustomEvent('profilePictureUpdated', { detail: { newUrl } }));
+          setValue('profilePictureUrl', result.data.url, { shouldDirty: true });
+          setValue('profilePictureDeleteUrl', result.data.deleteUrl, { shouldDirty: true });
+          toast({ title: 'Image Uploaded', description: 'Your new profile picture is saved. Remember to save your profile.' });
 
-            toast({ title: 'Image Uploaded', description: 'Your profile picture has been updated. Remember to save your profile.' });
-
-            if (oldDeleteUrl) {
-                await deleteImageAction(oldDeleteUrl);
-            }
+          if (oldDeleteUrl) {
+            await deleteImageAction(oldDeleteUrl);
+          }
         } else {
-            toast({ title: 'Upload Failed', description: result.error, variant: 'destructive' });
+          throw new Error(result.error || "Image upload failed silently.");
         }
+      } catch (error: any) {
+        toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
+        setLocalImagePreview(null); // Revert preview on failure
+        window.dispatchEvent(new CustomEvent('profilePictureUpdated', { detail: { newUrl: getValues('profilePictureUrl') } })); // Revert header
+      } finally {
         setIsUploading(false);
+      }
     };
     reader.onerror = () => {
         toast({ title: 'File Read Error', description: 'There was an error reading the file.', variant: 'destructive' });
         setIsUploading(false);
     }
   };
+
 
   const handleCertificateUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -270,6 +276,7 @@ export default function ProfilePage() {
   }
 
   const profilePictureUrl = watch('profilePictureUrl');
+  const displayImageUrl = localImagePreview || profilePictureUrl;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -307,8 +314,8 @@ export default function ProfilePage() {
                             <Label>Profile Picture</Label>
                             <div className="relative w-32 h-32 group mx-auto">
                                 <Image
-                                    key={profilePictureUrl} 
-                                    src={profilePictureUrl || `https://placehold.co/128x128.png`}
+                                    key={displayImageUrl} 
+                                    src={displayImageUrl || `https://placehold.co/128x128.png`}
                                     alt="Profile Picture"
                                     width={128}
                                     height={128}
@@ -464,7 +471,7 @@ export default function ProfilePage() {
 
                 <TabsContent value="certifications" className="space-y-6 pt-4">
                     <div className="flex items-center justify-between">
-                        <SectionTitle icon={Award} text="Licenses & Certifications" />
+                        <SectionTitle icon={Award} text="Licenses &amp; Certifications" />
                         <Button type="button" variant="outline" size="sm" onClick={() => appendCert({ name: "", issuingOrganization: "", date: "", credentialUrl: "" })}>
                             <PlusCircle className="mr-2 h-4 w-4" /> Add Certification
                         </Button>
@@ -513,3 +520,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
