@@ -58,7 +58,7 @@ Maintain a friendly, professional, and supportive tone. Format your responses in
 Here is the conversation history:
 ---
 {{#each history}}
-{{#if (eq role 'user')}}
+{{#if (eq role "user")}}
 User: {{{content}}}
 {{else}}
 AI: {{{content}}}
