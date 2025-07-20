@@ -15,6 +15,7 @@ export interface PersonalInfo {
   title: string;
   dob?: string; // Date of Birth
   profilePictureUrl?: string | null;
+  profilePictureDeleteUrl?: string;
   socials?: SocialLink[];
 }
 

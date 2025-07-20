@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth, db, doc, getDoc, setDoc } from "@/lib/firebase";
-import { analyzeCertificateAction, uploadImageAction } from "@/app/actions";
+import { analyzeCertificateAction, uploadImageAction, deleteImageAction } from "@/app/actions";
 import Image from "next/image";
 
 import { Header } from "@/components/header";
@@ -67,6 +67,7 @@ const profileSchema = z.object({
   location: z.string().optional(),
   dob: z.string().optional(),
   profilePictureUrl: z.string().url().optional().or(z.literal('')),
+  profilePictureDeleteUrl: z.string().url().optional().or(z.literal('')),
   socials: z.array(socialLinkSchema).optional(),
   experience: z.array(experienceSchema).optional(),
   education: z.array(educationSchema).optional(),
@@ -96,7 +97,7 @@ export default function ProfilePage() {
   const [isAnalyzingCert, setIsAnalyzingCert] = useState<number | null>(null);
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-  const { register, handleSubmit, control, reset, setValue, watch, formState: { errors } } = useForm<ProfileFormData>({
+  const { register, handleSubmit, control, reset, setValue, watch, getValues, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       socials: [],
@@ -173,16 +174,28 @@ export default function ProfilePage() {
         toast({ title: 'Image Too Large', description: `Please select an image smaller than ${MAX_FILE_SIZE / 1024 / 1024}MB.`, variant: 'destructive' });
         return;
     }
+    
+    // Get the old delete URL before starting the upload
+    const oldDeleteUrl = getValues('profilePictureDeleteUrl');
+
     setIsUploading(true);
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = async () => {
         const dataUri = reader.result as string;
         const result = await uploadImageAction(dataUri);
-        if (result.success && result.url) {
-            const cacheBustedUrl = `${result.url}?t=${new Date().getTime()}`;
+        if (result.success && result.data) {
+            const cacheBustedUrl = `${result.data.url}?t=${new Date().getTime()}`;
             setValue('profilePictureUrl', cacheBustedUrl, { shouldDirty: true });
+            setValue('profilePictureDeleteUrl', result.data.deleteUrl, { shouldDirty: true });
+            
             toast({ title: 'Image Uploaded', description: 'Your profile picture has been updated. Remember to save your profile.' });
+
+            // If there was an old delete URL, call the delete action
+            if (oldDeleteUrl) {
+                await deleteImageAction(oldDeleteUrl);
+            }
+
         } else {
             toast({ title: 'Upload Failed', description: result.error, variant: 'destructive' });
         }

@@ -6,7 +6,12 @@ import FormData from 'form-data';
 
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
-export async function uploadImage(base64DataUri: string): Promise<string> {
+interface UploadResult {
+    url: string;
+    deleteUrl: string;
+}
+
+export async function uploadImage(base64DataUri: string): Promise<UploadResult> {
     if (!IMGBB_API_KEY) {
         throw new Error("ImgBB API key is not configured. Please add NEXT_PUBLIC_IMGBB_API_KEY to your .env file.");
     }
@@ -34,7 +39,10 @@ export async function uploadImage(base64DataUri: string): Promise<string> {
         );
 
         if (response.data && response.data.success) {
-            return response.data.data.url;
+            return {
+                url: response.data.data.url,
+                deleteUrl: response.data.data.delete_url,
+            };
         } else {
             // ImgBB API might return a 200 OK status even on failure, with an error message in the body.
             throw new Error(response.data?.error?.message || 'Failed to upload image to ImgBB.');
@@ -48,5 +56,21 @@ export async function uploadImage(base64DataUri: string): Promise<string> {
         }
         console.error("ImgBB Upload Error:", errorMessage);
         throw new Error(`ImgBB Upload Error: ${errorMessage}`);
+    }
+}
+
+export async function deleteImage(deleteUrl: string): Promise<void> {
+    if (!deleteUrl) {
+        console.log("No delete URL provided, skipping deletion.");
+        return;
+    }
+    try {
+        // ImgBB deletion seems to work via a POST request to the delete URL
+        await axios.post(deleteUrl, {});
+        console.log("Successfully deleted old image.");
+    } catch (error: any) {
+        // We log the error but don't throw, as failing to delete the old image
+        // shouldn't block the user from getting their new image URL.
+        console.error("Failed to delete old image from ImgBB:", error.message);
     }
 }

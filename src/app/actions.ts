@@ -17,7 +17,7 @@ import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, s
 import { auth, db } from "@/lib/firebase";
 import { User } from "@/types/user";
 import { Feedback } from "@/types/feedback";
-import { uploadImage } from "@/services/image-upload-service";
+import { uploadImage, deleteImage } from "@/services/image-upload-service";
 
 async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
     if (!db) return;
@@ -111,10 +111,13 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
       // Otherwise, generate a new one, upload it, and save it back to the profile
       avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt })
         .then(res => uploadImage(res.imageDataUri))
-        .then(async (url) => {
-            // Save the new URL back to the user's profile for future use
-            await setDoc(profileDocRef, { profilePictureUrl: url }, { merge: true });
-            return url;
+        .then(async (uploadResult) => {
+            // Save the new URL and delete URL back to the user's profile for future use
+            await setDoc(profileDocRef, { 
+                profilePictureUrl: uploadResult.url,
+                profilePictureDeleteUrl: uploadResult.deleteUrl
+            }, { merge: true });
+            return uploadResult.url;
         })
         .catch(err => {
             console.error("Avatar generation/upload failed:", err);
@@ -125,7 +128,7 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     const projectImagePromises = (portfolioDraft.projects || []).map(async (project: Project) => {
         try {
             const imageResult = await generateProjectImageFlow({ description: project.description });
-            project.previewImage = await uploadImage(imageResult.imageDataUri);
+            project.previewImage = (await uploadImage(imageResult.imageDataUri)).url;
         } catch (e) {
             console.warn(`Failed to generate/upload image for project: ${project.name}`, e);
             // Use a placeholder if generation fails
@@ -163,14 +166,25 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
   }
 }
 
-export async function uploadImageAction(dataUri: string): Promise<{ success: boolean; url?: string; error?: string }> {
+export async function uploadImageAction(dataUri: string): Promise<{ success: boolean; data?: { url: string; deleteUrl: string }; error?: string }> {
     try {
-        const url = await uploadImage(dataUri);
-        return { success: true, url };
+        const result = await uploadImage(dataUri);
+        return { success: true, data: result };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
         console.error("Image upload action failed:", errorMessage);
         return { success: false, error: `Failed to upload image: ${errorMessage}` };
+    }
+}
+
+export async function deleteImageAction(deleteUrl: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        await deleteImage(deleteUrl);
+        return { success: true };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        console.error("Image delete action failed:", errorMessage);
+        return { success: false, error: `Failed to delete image: ${errorMessage}` };
     }
 }
 
@@ -259,5 +273,3 @@ export async function submitFeedbackAction(input: SubmitFeedbackInput): Promise<
         return { success: false, error: "Failed to submit feedback. Please try again." };
     }
 }
-
-    
