@@ -58,10 +58,10 @@ Maintain a friendly, professional, and supportive tone. Format your responses in
 Here is the conversation history:
 ---
 {{#each history}}
-{{#if (eq this.role 'user')}}
-User: {{{this.content}}}
+{{#if (eq role 'user')}}
+User: {{{content}}}
 {{else}}
-AI: {{{this.content}}}
+AI: {{{content}}}
 {{/if}}
 {{/each}}
 ---
@@ -85,5 +85,3 @@ const careerCoachChatFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
