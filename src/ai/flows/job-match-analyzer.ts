@@ -41,7 +41,7 @@ export async function jobMatchAnalyzerFlow(
 
 const prompt = ai.definePrompt({
   name: 'jobMatchAnalyzerPrompt',
-  model: 'gemini-1.5-flash',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: JobMatchAnalyzerInputSchema},
   output: {schema: JobMatchAnalyzerOutputSchema},
   prompt: `You are an expert AI career coach. Your task is to analyze a user's resume against a provided job description and give them a detailed report on their chances of getting an interview.
