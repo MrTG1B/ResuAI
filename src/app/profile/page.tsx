@@ -175,7 +175,6 @@ export default function ProfilePage() {
         return;
     }
     
-    // Get the old delete URL before starting the upload
     const oldDeleteUrl = getValues('profilePictureDeleteUrl');
 
     setIsUploading(true);
@@ -184,18 +183,23 @@ export default function ProfilePage() {
     reader.onloadend = async () => {
         const dataUri = reader.result as string;
         const result = await uploadImageAction(dataUri);
+
         if (result.success && result.data) {
-            const cacheBustedUrl = `${result.data.url}?t=${new Date().getTime()}`;
-            setValue('profilePictureUrl', cacheBustedUrl, { shouldDirty: true });
+            // Wait for 2 seconds to allow image propagation on the host CDN
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            const newUrl = `${result.data.url}?t=${new Date().getTime()}`;
+            setValue('profilePictureUrl', newUrl, { shouldDirty: true });
             setValue('profilePictureDeleteUrl', result.data.deleteUrl, { shouldDirty: true });
             
+            // Dispatch custom event to update header
+            window.dispatchEvent(new CustomEvent('profilePictureUpdated', { detail: { newUrl } }));
+
             toast({ title: 'Image Uploaded', description: 'Your profile picture has been updated. Remember to save your profile.' });
 
-            // If there was an old delete URL, call the delete action
             if (oldDeleteUrl) {
                 await deleteImageAction(oldDeleteUrl);
             }
-
         } else {
             toast({ title: 'Upload Failed', description: result.error, variant: 'destructive' });
         }
@@ -237,7 +241,6 @@ export default function ProfilePage() {
          toast({ title: "Analysis Failed", description: error.message, variant: "destructive" });
       } finally {
         setIsAnalyzingCert(null);
-        // Clear file input value
         if (e.target) e.target.value = '';
       }
     };
@@ -261,7 +264,7 @@ export default function ProfilePage() {
   const countryCodeMatch = countries.find(c => phoneValue.startsWith(c.dial_code));
   const countryCode = countryCodeMatch ? countryCodeMatch.dial_code : '+91';
   let nationalNumber = phoneValue.startsWith(countryCode) ? phoneValue.substring(countryCode.length) : phoneValue;
-  nationalNumber = nationalNumber.replace(/\s/g, ''); // remove existing spaces for re-formatting
+  nationalNumber = nationalNumber.replace(/\s/g, '');
   if (nationalNumber.length > 5) {
       nationalNumber = `${nationalNumber.slice(0, 5)} ${nationalNumber.slice(5, 10)}`;
   }
@@ -297,15 +300,14 @@ export default function ProfilePage() {
                   <TabsTrigger value="certifications">Certs</TabsTrigger>
                 </TabsList>
                 
-                {/* Personal Info Tab */}
                 <TabsContent value="personal" className="space-y-6 pt-4">
                    <SectionTitle icon={UserCircle} text="Personal Information" />
                    <div className="flex flex-col md:flex-row items-start gap-6">
-                        <div className="space-y-2 flex-shrink-0">
+                        <div className="space-y-2 flex-shrink-0 text-center">
                             <Label>Profile Picture</Label>
-                            <div className="relative w-32 h-32 group">
+                            <div className="relative w-32 h-32 group mx-auto">
                                 <Image
-                                    key={profilePictureUrl}
+                                    key={profilePictureUrl} 
                                     src={profilePictureUrl || `https://placehold.co/128x128.png`}
                                     alt="Profile Picture"
                                     width={128}
@@ -317,6 +319,7 @@ export default function ProfilePage() {
                                 </label>
                                 <Input id="profile-picture-upload" type="file" className="hidden" accept="image/*" onChange={handleProfilePictureUpload} disabled={isUploading} />
                             </div>
+                            <p className="text-xs text-muted-foreground mt-2 max-w-xs">This picture will be used in your resume and portfolio.</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                             <div className="space-y-2">
@@ -394,7 +397,6 @@ export default function ProfilePage() {
                     </div>
                 </TabsContent>
 
-                {/* Experience Tab */}
                 <TabsContent value="experience" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Briefcase} text="Work Experience" />
@@ -418,7 +420,6 @@ export default function ProfilePage() {
                   ))}
                 </TabsContent>
 
-                {/* Education Tab */}
                 <TabsContent value="education" className="space-y-6 pt-4">
                    <div className="flex items-center justify-between">
                       <SectionTitle icon={GraduationCap} text="Education" />
@@ -441,7 +442,6 @@ export default function ProfilePage() {
                     ))}
                 </TabsContent>
 
-                 {/* Projects Tab */}
                 <TabsContent value="projects" className="space-y-6 pt-4">
                     <div className="flex items-center justify-between">
                         <SectionTitle icon={Lightbulb} text="Projects" />
@@ -462,7 +462,6 @@ export default function ProfilePage() {
                     ))}
                 </TabsContent>
 
-                 {/* Certifications Tab */}
                 <TabsContent value="certifications" className="space-y-6 pt-4">
                     <div className="flex items-center justify-between">
                         <SectionTitle icon={Award} text="Licenses & Certifications" />

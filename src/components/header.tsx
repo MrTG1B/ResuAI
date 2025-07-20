@@ -23,6 +23,7 @@ import { Logo } from './logo';
 export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,10 +33,23 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
     }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
+      setAvatarUrl(user?.photoURL);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    // Listen for custom event to update avatar
+    const handleProfilePictureUpdate = (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail.newUrl) {
+            setAvatarUrl(customEvent.detail.newUrl);
+        }
+    };
+    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate);
+
+    return () => {
+        unsubscribe();
+        window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate);
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -75,7 +89,7 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
                             <Avatar className="h-8 w-8">
-                                <AvatarImage src={user.photoURL || undefined} alt={user.displayName || user.email || 'User'} />
+                                <AvatarImage key={avatarUrl} src={avatarUrl || undefined} alt={user.displayName || user.email || 'User'} />
                                 <AvatarFallback className="text-sm font-semibold">
                                     {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
                                 </AvatarFallback>
