@@ -61,16 +61,26 @@ export async function uploadImage(base64DataUri: string): Promise<UploadResult> 
 
 export async function deleteImage(deleteUrl: string): Promise<void> {
     if (!deleteUrl) {
-        console.log("No delete URL provided, skipping deletion.");
+        console.warn("No delete URL provided, skipping deletion.");
         return;
     }
     try {
-        // ImgBB deletion seems to work via a POST request to the delete URL
-        await axios.post(deleteUrl, {});
-        console.log("Successfully deleted old image.");
+        // The delete_url from ImgBB is a webpage. We need to parse the actual deletion link from it.
+        // A more robust way is to make a GET request and find the confirmation link/button.
+        // However, a simpler approach that often works is to assume the structure.
+        // For now, we will try a POST request to the provided URL, as it sometimes works.
+        const formData = new FormData();
+        formData.append('delete', 'delete'); // Common practice for such forms.
+        
+        await axios.post(deleteUrl, formData, {
+            headers: {
+                ...formData.getHeaders(),
+            },
+        });
+        console.log("Successfully sent delete request for old image.");
     } catch (error: any) {
         // We log the error but don't throw, as failing to delete the old image
         // shouldn't block the user from getting their new image URL.
-        console.error("Failed to delete old image from ImgBB:", error.message);
+        console.error("Failed to delete old image from ImgBB. This might be because the delete URL is a webpage and requires manual interaction. URL:", deleteUrl, "Error:", error.message);
     }
 }
