@@ -96,6 +96,20 @@ const _editResumeFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    return output!;
+
+    if (!output) {
+      // Handle case where the entire output is null
+      return {
+        newHtmlContent: input.htmlContent,
+        response: "Sorry, I couldn't process that request. Could you please try rephrasing?",
+      };
+    }
+    
+    // Ensure the response field is never empty
+    if (!output.response) {
+      output.response = "I've updated your resume with your changes.";
+    }
+
+    return output;
   }
 );
