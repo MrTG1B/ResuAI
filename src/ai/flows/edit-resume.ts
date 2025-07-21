@@ -65,6 +65,7 @@ const prompt = ai.definePrompt({
     *   If the user asks for an **edit** (e.g., "change my job title", "add a skills section", "apply a new template"), you **MUST** modify the HTML and return the new version in \`newHtmlContent\`. Also, provide a confirmation message in the \`response\` field.
     *   If the user asks a **question** for feedback or analysis (e.g., "is this resume good?", "what should I improve?"), you **MUST NOT** change the HTML. Return the original, unmodified HTML in \`newHtmlContent\` and answer the question in the \`response\` field by politely redirecting them to the dedicated tool: "I can only help with direct edits here. For detailed feedback and analysis, please use our dedicated [**AI Resume Analyzer**](/resume-analyzer) tool."
 5.  **Promote other tools:** After a successful edit, you can promote our other tools in your response using Markdown links. For example: "I've updated your resume. You can also create a beautiful [**AI Portfolio**](/build) to showcase your work!" Do not mention tools that don't exist, like a "Cover Letter Generator."
+6.  **Always Respond:** You **MUST** always provide a value for both the \`newHtmlContent\` and the \`response\` fields in your JSON output. Never omit a field.
 
 ---
 CURRENT RESUME HTML:
