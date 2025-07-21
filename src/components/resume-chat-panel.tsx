@@ -22,7 +22,6 @@ interface ResumeChatPanelProps {
     setEditorState: (state: SavedEditorState) => void;
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
-    disabledRoutes?: string[];
 }
 
 interface Attachment {
@@ -35,12 +34,13 @@ const getMimeTypeFromDataUri = (dataUri: string): string => {
     return dataUri.substring(dataUri.indexOf(':') + 1, dataUri.indexOf(';'));
 }
 
-export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsLoading, disabledRoutes = [] }: ResumeChatPanelProps) {
+export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsLoading }: ResumeChatPanelProps) {
     const [input, setInput] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const { toast } = useToast();
     const attachmentInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const disabledRoutes = ['/resume-builder', '/resume-builder/editor'];
 
     const messages = editorState.chatHistory || [];
 
@@ -175,7 +175,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
 
                                                     if (isDisabled) {
                                                         // Render as non-clickable bold text
-                                                        return <strong {...rest}>{children}</strong>;
+                                                        return <strong {...rest} className="text-primary font-semibold">{children}</strong>;
                                                     }
 
                                                     if (isInternal) {
