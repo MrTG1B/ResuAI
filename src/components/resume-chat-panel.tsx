@@ -16,12 +16,14 @@ import { type SavedEditorState } from '@/types/resume';
 import { editResumeAction } from '@/app/actions';
 import { PulsingDotsLoader } from './pulsing-dots-loader';
 import { Badge } from './ui/badge';
+import { type PersonalInfo } from '@/types/portfolio';
 
 interface ResumeChatPanelProps {
     editorState: SavedEditorState;
     setEditorState: (state: SavedEditorState) => void;
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
+    userProfile?: Partial<PersonalInfo>;
 }
 
 interface Attachment {
@@ -34,7 +36,7 @@ const getMimeTypeFromDataUri = (dataUri: string): string => {
     return dataUri.substring(dataUri.indexOf(':') + 1, dataUri.indexOf(';'));
 }
 
-export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsLoading }: ResumeChatPanelProps) {
+export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsLoading, userProfile }: ResumeChatPanelProps) {
     const [input, setInput] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const { toast } = useToast();
@@ -75,6 +77,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             const result = await editResumeAction({
                 htmlContent: editorState.htmlContent,
                 prompt: currentInput,
+                profilePictureUrl: userProfile?.profilePictureUrl || undefined,
                 attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.mimeType }))
             });
             

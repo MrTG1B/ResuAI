@@ -16,6 +16,7 @@ const EditResumeInputSchema = z.object({
   prompt: z
     .string()
     .describe("The user's instruction for what to change or question to answer."),
+  profilePictureUrl: z.string().optional().describe("The user's profile picture URL, if available."),
   attachments: z
     .array(z.object({
         dataUri: z.string().describe("A file as a data URI: 'data:<mimetype>;base64,<encoded_data>'."),
@@ -59,17 +60,25 @@ const prompt = ai.definePrompt({
 1.  **HTML Only:** Your output for \`newHtmlContent\` **MUST** be a single, complete block of valid HTML. Do **NOT** use \`<html>\`, \`<body>\`, or \`<head>\` tags.
 2.  **Inline CSS:** All styling **MUST** be inline CSS (e.g., \`<p style="font-size: 12pt;">\`). Preserve existing styles unless asked to change them.
 3.  **Creative Design Role:** If the user asks you to "make it look better", "apply a professional template", "make it modern", or any similar design-related request, you **MUST** take on the role of a creative designer. Redesign the resume's HTML structure and inline CSS to be modern, professional, premium, and industry-standard. Use clean typography, good spacing, and a visually appealing layout. For all other direct edits (e.g., "change my job title"), just make the specific change.
-4.  **Handle Attachments:** If the user provides an attachment (like a profile picture) and asks to use it, embed it in the HTML. For images, use the data URI from an attachment in an \`<img>\` tag's \`src\` attribute.
-5.  **Answer Questions vs. Edit:**
+4.  **Handle Profile Picture**: If the user asks for a profile picture and a \`profilePictureUrl\` is provided in the input, you **MUST** use that URL in an \`<img>\` tag. If no URL is provided, use a circular placeholder image from \`https://placehold.co/128x128.png\`.
+5.  **Handle Attachments:** If the user provides an attachment (like a new profile picture) and asks to use it, embed it in the HTML. For images, use the data URI from the attachment in an \`<img>\` tag's \`src\` attribute.
+6.  **Answer Questions vs. Edit:**
     *   If the user asks for an **edit**, you **MUST** modify the HTML and return the new version in \`newHtmlContent\`. Also, provide a confirmation message in the \`response\` field.
     *   If the user asks a **question** for feedback or analysis (e.g., "is this resume good?"), you **MUST NOT** change the HTML. Return the original, unmodified HTML in \`newHtmlContent\` and politely redirect them to the dedicated tool: "I can only help with direct edits here. For detailed feedback and analysis, please use our dedicated [**AI Resume Analyzer**](/resume-analyzer) tool."
-6.  **Promote other tools:** After a successful edit, you can promote our other tools in your response using Markdown links. For example: "I've updated your resume. You can also create a beautiful [**AI Portfolio**](/build) to showcase your work!" Do not mention tools that don't exist. **NEVER promote the AI Resume Editor itself.**
-7.  **Always Respond:** You **MUST** always provide a value for both the \`newHtmlContent\` and the \`response\` fields in your JSON output. Never omit a field.
+7.  **Promote other tools:** After a successful edit, you can promote our other tools in your response using Markdown links. For example: "I've updated your resume. You can also create a beautiful [**AI Portfolio**](/build) to showcase your work!" Do not mention tools that don't exist. **NEVER promote the AI Resume Editor itself.**
+8.  **Always Respond:** You **MUST** always provide a value for both the \`newHtmlContent\` and the \`response\` fields in your JSON output. Never omit a field.
 
 ---
 CURRENT RESUME HTML:
 {{{htmlContent}}}
 ---
+
+{{#if profilePictureUrl}}
+USER'S PROFILE PICTURE URL (use this if they ask for a profile picture):
+---
+{{{profilePictureUrl}}}
+---
+{{/if}}
 
 USER'S INSTRUCTION:
 ---

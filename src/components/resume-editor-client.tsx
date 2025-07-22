@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { type PersonalInfo } from '@/types/portfolio';
 
 
 const parsingTexts = [
@@ -54,7 +55,8 @@ export default function ResumeEditorClient() {
     const [resumeId, setResumeId] = useState<string | null>(null);
     const [editorState, setEditorState] = useState<SavedEditorState | null>(null);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    
+    const [userProfile, setUserProfile] = useState<Partial<PersonalInfo>>({});
+
     const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
     const [flow, setFlow] = useState<'upload' | 'scratch' | 'edit' | 'loading'>('loading');
     
@@ -113,6 +115,14 @@ export default function ResumeEditorClient() {
                 setCurrentUser(user);
                 const idFromUrl = searchParams.get('id');
                 const fromFlow = searchParams.get('from');
+
+                 // Fetch user profile data
+                const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+                const docSnap = await getDoc(profileDocRef);
+                if (docSnap.exists()) {
+                    setUserProfile(docSnap.data() as PersonalInfo);
+                }
+
 
                 if (idFromUrl) {
                     setResumeId(idFromUrl);
@@ -499,6 +509,7 @@ export default function ResumeEditorClient() {
                                     setEditorState={handleEditorStateUpdate}
                                     isLoading={isAILoading}
                                     setIsLoading={setIsAILoading}
+                                    userProfile={userProfile}
                                 />
                              ) : (
                                  <Card className="h-full flex items-center justify-center">
