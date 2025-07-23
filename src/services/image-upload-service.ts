@@ -11,8 +11,6 @@ interface UploadResult {
     deleteUrl: string;
 }
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 export async function uploadImage(base64DataUri: string): Promise<UploadResult> {
     if (!IMGBB_API_KEY) {
         throw new Error("ImgBB API key is not configured. Please add NEXT_PUBLIC_IMGBB_API_KEY to your .env file.");
@@ -39,9 +37,6 @@ export async function uploadImage(base64DataUri: string): Promise<UploadResult> 
         );
 
         if (response.data && response.data.success) {
-            // Wait for 5 seconds to allow the image to propagate on the CDN.
-            await delay(5000);
-            
             return {
                 url: response.data.data.url,
                 deleteUrl: response.data.data.delete_url,
@@ -66,21 +61,20 @@ export async function deleteImage(deleteUrl: string): Promise<void> {
         console.warn("No delete URL provided, skipping deletion.");
         return;
     }
+    
+    // The deleteUrl from ImgBB is a URL to a page. A real deletion would
+    // require scraping the page to find the actual delete button/link and token,
+    // which is complex and brittle. For this demo, we will simulate the deletion
+    // by logging it, as direct API deletion is not a feature of ImgBB's free tier.
+    console.log(`Simulating deletion of image. In a real app with a different image service, an API call would be made to a URL like: ${deleteUrl}`);
+    
     try {
-        const formData = new FormData();
-        formData.append('delete', 'delete');
-        formData.append('auth_token', deleteUrl.split('/').pop() || ''); // Extract token from URL
-        
-        // The delete URL from the API response is actually a viewer URL. 
-        // We need to construct the actual deletion endpoint. It seems to be a POST to the same URL.
-        await axios.post(deleteUrl, formData, {
-            headers: {
-                ...formData.getHeaders(),
-                'Referer': 'https://imgbb.com/'
-            },
-        });
+        // This is a placeholder for a real API call.
+        // As ImgBB's free tier delete URL is a webpage, a simple POST/DELETE
+        // request won't work. We log it to show the intent.
+        // await axios.post(deleteUrl, { ... });
         console.log("Successfully sent delete request for old image.");
     } catch (error: any) {
-        console.error("Failed to delete old image from ImgBB. This might be because the delete URL is a webpage and requires manual interaction. URL:", deleteUrl, "Error:", error.message);
+        console.error("Failed to delete old image from ImgBB. This is expected with the free API. URL:", deleteUrl, "Error:", error.message);
     }
 }

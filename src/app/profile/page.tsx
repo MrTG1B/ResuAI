@@ -183,10 +183,8 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
     reader.onloadend = async () => {
       const dataUri = reader.result as string;
-      // --- Start of UI Update ---
       setLocalImagePreview(dataUri); // Show local preview immediately
       window.dispatchEvent(new CustomEvent('profilePictureUpdated', { detail: { newUrl: dataUri } }));
-      // --- End of UI Update ---
 
       try {
         const result = await uploadImageAction(dataUri);
@@ -194,6 +192,9 @@ export default function ProfilePage() {
         if (result.success && result.data) {
           setValue('profilePictureUrl', result.data.url, { shouldDirty: true });
           setValue('profilePictureDeleteUrl', result.data.deleteUrl, { shouldDirty: true });
+          setLocalImagePreview(null); // Clear local preview, use permanent URL now
+          window.dispatchEvent(new CustomEvent('profilePictureUpdated', { detail: { newUrl: result.data.url } })); // Update header with permanent URL
+          
           toast({ title: 'Image Uploaded', description: 'Your new profile picture is saved. Remember to save your profile.' });
 
           if (oldDeleteUrl) {
@@ -314,6 +315,7 @@ export default function ProfilePage() {
                             <Label>Profile Picture</Label>
                             <div className="relative w-32 h-32 group mx-auto">
                                 <Image
+                                    unoptimized
                                     key={displayImageUrl} 
                                     src={displayImageUrl || `https://placehold.co/128x128.png`}
                                     alt="Profile Picture"
@@ -520,5 +522,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

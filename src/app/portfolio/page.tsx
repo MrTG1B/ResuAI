@@ -189,8 +189,8 @@ function PortfolioPageContent() {
     reader.onloadend = async () => {
       const dataUri = reader.result as string;
       const result = await uploadImageAction(dataUri);
-      if (result.success && result.url) {
-        updateFunction(result.url);
+      if (result.success && result.data) {
+        updateFunction(result.data.url);
         toast({ title: 'Image Uploaded', description: 'Your image has been updated.' });
       } else {
         toast({ title: 'Upload Failed', description: result.error, variant: 'destructive' });
@@ -372,6 +372,7 @@ function PortfolioPageContent() {
                 <div className="flex-shrink-0 mx-auto md:mx-0">
                     <div className="relative h-32 w-32 group">
                       <Image
+                          unoptimized
                           src={personalInfo?.profilePictureUrl || 'https://placehold.co/128x128.png'}
                           alt={`${personalInfo?.name || 'User'}'s profile picture`}
                           width={128}
