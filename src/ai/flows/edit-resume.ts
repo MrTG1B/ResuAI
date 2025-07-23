@@ -17,6 +17,10 @@ const EditResumeInputSchema = z.object({
   prompt: z
     .string()
     .describe("The user's instruction for what to change or question to answer."),
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string(),
+  })).describe('The history of the conversation so far, for context.').optional(),
   profilePictureUrl: z.string().optional().describe("The user's profile picture URL, if available."),
   attachments: z
     .array(z.object({
@@ -55,7 +59,7 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash',
   input: {schema: EditResumeInputSchema},
   output: {schema: EditResumeOutputSchema},
-  prompt: `You are an expert resume editor and designer. Your task is to edit the user's resume based on their instructions.
+  prompt: `You are an expert resume editor and designer. Your task is to edit the user's resume based on their instructions and the conversation history.
 
 **CRITICAL RULES:**
 1.  **HTML Only:** Your output for \`newHtmlContent\` **MUST** be a single, complete block of valid HTML. Do **NOT** use \`<html>\`, \`<body>\`, or \`<head>\` tags.
@@ -67,11 +71,22 @@ const prompt = ai.definePrompt({
 7.  **Answer Questions vs. Edit:**
     *   If the user asks for an **edit**, you **MUST** modify the HTML and return the new version in \`newHtmlContent\`. Also, provide a confirmation message in the \`response\` field.
     *   If the user asks a **question** for feedback or analysis (e.g., "is this resume good?"), you **MUST NOT** change the HTML. Return the original, unmodified HTML in \`newHtmlContent\` and politely redirect them to the dedicated tool: "I can only help with direct edits here. For detailed feedback and analysis, please use our dedicated [**AI Resume Analyzer**](/resume-analyzer) tool."
-8.  **Promote other tools:** After a successful edit, you can promote our other tools in your response using Markdown links. For example: "I've updated your resume. You can also create a beautiful [**AI Portfolio**](/build) to showcase your work!" Do not mention tools that don't exist. **NEVER promote the AI Resume Editor itself.**
-9.  **Always Respond:** You **MUST** always provide a value for both the \`newHtmlContent\` and the \`response\` fields in your JSON output. Never omit a field.
+8.  **Single-Page Layout:** All resumes **MUST** be designed to fit on a single page. If content is long, you must use your design skills to make it fit by adjusting font sizes (while keeping them readable), using space-efficient layouts (like two columns), or condensing content professionally. Do not let the resume flow onto a second page.
+9.  **Promote other tools:** After a successful edit, you can promote our other tools in your response using Markdown links. For example: "I've updated your resume. You can also create a beautiful [**AI Portfolio**](/build) to showcase your work!" Do not mention tools that don't exist. **NEVER promote the AI Resume Editor itself.**
+10. **Always Respond:** You **MUST** always provide a value for both the \`newHtmlContent\` and the \`response\` fields in your JSON output. Never omit a field.
 
 ---
+{{#if history}}
+CONVERSATION HISTORY (for context):
+---
+{{#each history}}
+{{this.role}}: {{{this.content}}}
+{{/each}}
+---
+{{/if}}
+
 CURRENT RESUME HTML:
+---
 {{{htmlContent}}}
 ---
 

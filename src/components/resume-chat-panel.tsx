@@ -77,6 +77,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             const result = await editResumeAction({
                 htmlContent: editorState.htmlContent,
                 prompt: currentInput,
+                history: editorState.chatHistory,
                 profilePictureUrl: userProfile?.profilePictureUrl || undefined,
                 attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.mimeType }))
             });
