@@ -40,7 +40,7 @@ export async function careerCoachChat(input: CareerCoachChatInput): Promise<Care
 }
 
 const prompt = ai.definePrompt({
-  model:'googleai/gemini-2.5-flash',
+  model:'googleai/gemini-1.5-flash',
   name: 'careerCoachChatPrompt',
   input: {schema: CareerCoachChatInputSchema},
   output: {schema: CareerCoachChatOutputSchema},
@@ -55,17 +55,7 @@ You can answer questions about:
 - Salary negotiation
 
 Maintain a friendly, professional, and supportive tone. Format your responses in Markdown for readability.`,
-  prompt: `Here is the conversation history:
----
-{{#each history}}
-{{this.role}}: {{{this.content}}}
-{{/each}}
----
-
-Here is the user's latest message:
----
-User: {{{prompt}}}
----
+  prompt: `User: {{{prompt}}}
 AI:
 `,
 });
@@ -76,8 +66,9 @@ const careerCoachChatFlow = ai.defineFlow(
     inputSchema: CareerCoachChatInputSchema,
     outputSchema: CareerCoachChatOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    // We pass the prompt and the history separately. Genkit handles constructing the conversation.
+    const {output} = await prompt(input, { history: input.history });
     return output!;
   }
 );

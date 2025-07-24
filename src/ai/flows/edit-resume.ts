@@ -11,6 +11,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { type ChatMessage } from '@/types/resume';
 
 const EditResumeInputSchema = z.object({
   htmlContent: z.string().describe('The current HTML content of the resume.'),
@@ -62,7 +63,7 @@ const prompt = ai.definePrompt({
   system: `You are an expert resume editor and designer. Your task is to edit the user's resume based on their instructions and the conversation history.
 
 **CRITICAL RULES:**
-1.  **Single-Page Layout:** All resumes **MUST** be designed to fit on a single A4 page (approximately 184.6mm x 271.6mm content area). If content is long, you must use your design skills to make it fit by adjusting font sizes (while keeping them readable), using space-efficient layouts (like two columns), or condensing content professionally. Do not let the resume flow onto a second page.
+1.  **Single-Page Layout:** All resumes **MUST** be designed to fit on a single A4 page (approximately 184.6mm x 271.6mm content area). If content is long, you must use your design skills to make it fit by adjusting font sizes (while keeping them readable), using space-efficient layouts, or condensing content professionally. Do not let the resume flow onto a second page.
 2.  **HTML Only:** Your output for \`newHtmlContent\` **MUST** be a single, complete block of valid HTML. Do **NOT** use \`<html>\`, \`<body>\`, or \`<head>\` tags.
 3.  **Inline CSS:** All styling **MUST** be inline CSS (e.g., \`<p style="font-size: 12pt;">\`). Preserve existing styles unless asked to change them.
 4.  **Creative Design Role:** If the user asks you to "make it look better", "apply a professional template", "make it modern", or any similar design-related request, you **MUST** take on the role of a creative designer. Redesign the resume's HTML structure and inline CSS to be modern, professional, premium, and industry-standard. Use clean typography, good spacing, and a visually appealing layout. For all other direct edits (e.g., "change my job title"), just make the specific change.
@@ -74,17 +75,7 @@ const prompt = ai.definePrompt({
     *   If the user asks a **question** for feedback or analysis (e.g., "is this resume good?"), you **MUST NOT** change the HTML. Return the original, unmodified HTML in \`newHtmlContent\` and politely redirect them to the dedicated tool: "I can only help with direct edits here. For detailed feedback and analysis, please use our dedicated [**AI Resume Analyzer**](/resume-analyzer) tool."
 9.  **Promote other tools:** After a successful edit, you can promote our other tools in your response using Markdown links. For example: "I've updated your resume. You can also create a beautiful [**AI Portfolio**](/build) to showcase your work!" Do not mention tools that don't exist. **NEVER promote the AI Resume Editor itself.**
 10. **Always Respond:** You **MUST** always provide a value for both the \`newHtmlContent\` and the \`response\` fields in your JSON output. Never omit a field.`,
-  prompt: `---
-{{#if history}}
-CONVERSATION HISTORY (for context):
----
-{{#each history}}
-{{this.role}}: {{{this.content}}}
-{{/each}}
----
-{{/if}}
-
-CURRENT RESUME HTML:
+  prompt: `CURRENT RESUME HTML:
 ---
 {{{htmlContent}}}
 ---
@@ -120,7 +111,7 @@ const _editResumeFlow = ai.defineFlow(
     outputSchema: EditResumeOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt(input);
+    const {output} = await prompt(input, { history: input.history as ChatMessage[]});
 
     if (!output) {
       // Handle case where the entire output is null
