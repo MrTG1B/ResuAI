@@ -37,16 +37,15 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash',
   input: {schema: AnalyzeCertificateInputSchema},
   output: {schema: AnalyzeCertificateOutputSchema},
-  prompt: `You are an AI expert at analyzing official documents, licenses, and certificates.
+  system: `You are an AI expert at analyzing official documents, licenses, and certificates.
   
-  Your task is to extract key details from the provided certificate file.
-  - Extract the full name of the certification.
-  - Extract the name of the issuing organization.
-  - Extract the date of issuance or completion.
-  - If a URL for verifying the credential is present, extract it.
-
-  Here is the document:
-  {{media url=certificateDataUri}}`,
+Your task is to extract key details from the provided certificate file.
+- Extract the full name of the certification.
+- Extract the name of the issuing organization.
+- Extract the date of issuance or completion.
+- If a URL for verifying the credential is present, extract it.`,
+  prompt: `Here is the document:
+{{media url=certificateDataUri}}`,
 });
 
 const analyzeCertificateFlow = ai.defineFlow(

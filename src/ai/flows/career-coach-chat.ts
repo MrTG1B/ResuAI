@@ -44,7 +44,7 @@ const prompt = ai.definePrompt({
   name: 'careerCoachChatPrompt',
   input: {schema: CareerCoachChatInputSchema},
   output: {schema: CareerCoachChatOutputSchema},
-  prompt: `You are an expert AI career coach. Your goal is to provide helpful, encouraging, and actionable advice to users about their careers.
+  system: `You are an expert AI career coach. Your goal is to provide helpful, encouraging, and actionable advice to users about their careers.
 
 You can answer questions about:
 - Resume and cover letter writing
@@ -54,9 +54,8 @@ You can answer questions about:
 - Job searching strategies
 - Salary negotiation
 
-Maintain a friendly, professional, and supportive tone. Format your responses in Markdown for readability.
-
-Here is the conversation history:
+Maintain a friendly, professional, and supportive tone. Format your responses in Markdown for readability.`,
+  prompt: `Here is the conversation history:
 ---
 {{#each history}}
 {{this.role}}: {{{this.content}}}

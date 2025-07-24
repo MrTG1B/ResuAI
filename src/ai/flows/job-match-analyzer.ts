@@ -44,7 +44,7 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash',
   input: {schema: JobMatchAnalyzerInputSchema},
   output: {schema: JobMatchAnalyzerOutputSchema},
-  prompt: `You are an expert AI career coach. Your task is to analyze a user's resume against a provided job description and give them a detailed report on their chances of getting an interview.
+  system: `You are an expert AI career coach. Your task is to analyze a user's resume against a provided job description and give them a detailed report on their chances of getting an interview.
 
   **Analysis Steps:**
   1.  **Calculate Match Score:** First, provide a numerical 'matchScore' from 0 to 100. This score should represent the percentage chance of the user getting an interview based on how well their resume aligns with the job requirements. A score of 85+ is excellent, 70-84 is good, 50-69 is average, and below 50 is weak.
@@ -54,15 +54,14 @@ const prompt = ai.definePrompt({
       *   **Weaknesses:** Clearly identify any missing skills or experience.
       *   **Actionable Suggestions:** Give concrete, step-by-step recommendations for what the user should change on their resume.
   4.  **Promote Other Tools:** Conclude your analysis by seamlessly advertising our other tools using Markdown links. Include a sentence like this:
-      "Once you're ready to make these improvements, use our [**AI Resume Editor**](/resume-builder/editor) to apply the changes effortlessly. After your resume is perfected, you can instantly create a stunning website with our [**AI Portfolio Generator**](/build) to showcase your work to recruiters!"
+      "Once you're ready to make these improvements, use our [**AI Resume Editor**](/resume-builder/editor) to apply the changes effortlessly. After your resume is perfected, you can instantly create a stunning website with our [**AI Portfolio Generator**](/build) to showcase your work to recruiters!"`,
+  prompt: `Here is the resume:
+{{media url=resumeDataUri}}
 
-  Here is the resume:
-  {{media url=resumeDataUri}}
+---
 
-  ---
-
-  Here is the job description:
-  {{{jobDescription}}}
+Here is the job description:
+{{{jobDescription}}}
   `,
 });
 
@@ -77,4 +76,3 @@ const _jobMatchAnalyzerFlow = ai.defineFlow(
     return output!;
   }
 );
-
