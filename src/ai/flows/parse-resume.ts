@@ -37,18 +37,17 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash',
   input: {schema: ParseResumeInputSchema},
   output: {schema: ParseResumeOutputSchema},
-  prompt: `You are an AI expert at parsing documents and converting them to high-fidelity HTML.
-  
-  Your task is to extract the content from the provided document and convert it into a single block of clean, semantic HTML. It is crucial that you preserve the structure, layout, and all text formatting as accurately as possible.
+  prompt: `You are an AI expert at parsing documents and converting them to high-fidelity, single-page HTML resumes.
 
-  Pay meticulous attention to detail. The goal is a pixel-perfect HTML representation of the original document.
-  - Use inline CSS styles within the HTML tags (e.g., <p style="color: #123456; font-size: 12pt;">) to ensure the visual representation is a near-perfect match to the original document.
-  - Replicate font sizes, font colors, font weights (bold, normal), font styles (italic), and text alignment.
-  - Preserve hyperlinks (<a> tags).
-  - If the document uses columns, use CSS flexbox or grid layouts to replicate them.
-  - Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.
+  Your task is to extract the content from the provided document and convert it into a single block of clean, semantic HTML that fits on a standard A4 page.
 
-  Here is the document:
+  **CRITICAL RULES:**
+  1.  **Single-Page Layout:** The final resume **MUST** be designed to fit on a single page. If the original document is longer than one page, you must use your design skills to make it fit. Do this by adjusting font sizes (while keeping them readable), using space-efficient layouts (like two-column designs), or professionally condensing content.
+  2.  **High-Fidelity Conversion:** Preserve the structure, layout, and all text formatting as accurately as possible within the single-page constraint.
+  3.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate font sizes, colors, weights (bold), styles (italic), and alignment.
+  4.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.
+
+  Here is the document to convert:
   {{media url=resumeDataUri}}`,
 });
 
