@@ -18,6 +18,7 @@ export interface PersonalInfo {
   profilePictureUrl?: string | null;
   profilePictureDeleteUrl?: string;
   socials?: SocialLink[];
+  skills?: string[];
 }
 
 export interface Experience {

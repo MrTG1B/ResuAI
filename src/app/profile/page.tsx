@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -70,6 +70,7 @@ const profileSchema = z.object({
   profilePictureUrl: z.string().url().optional().or(z.literal('')),
   profilePictureDeleteUrl: z.string().url().optional().or(z.literal('')),
   socials: z.array(socialLinkSchema).optional(),
+  skills: z.array(z.string()).optional(),
   experience: z.array(experienceSchema).optional(),
   education: z.array(educationSchema).optional(),
   projects: z.array(projectSchema).optional(),
@@ -104,6 +105,7 @@ export default function ProfilePage() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       socials: [],
+      skills: [],
       experience: [],
       education: [],
       projects: [],
@@ -324,8 +326,9 @@ export default function ProfilePage() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <Tabs defaultValue="personal" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="personal">Personal</TabsTrigger>
+                  <TabsTrigger value="skills">Skills</TabsTrigger>
                   <TabsTrigger value="experience">Experience</TabsTrigger>
                   <TabsTrigger value="education">Education</TabsTrigger>
                   <TabsTrigger value="projects">Projects</TabsTrigger>
@@ -423,20 +426,48 @@ export default function ProfilePage() {
                           </Button>
                       </div>
                       {socialFields.map((field, index) => (
-                        <div key={field.id} className="flex items-end gap-2 p-3 rounded-md border bg-muted/50">
-                          <div className="grid gap-1.5 flex-grow">
-                            <Label htmlFor={`socials.${index}.platform`} className="text-xs">Platform</Label>
-                            <Input {...register(`socials.${index}.platform`)} placeholder="e.g., LinkedIn" />
+                        <div key={field.id} className="flex items-start gap-2 p-3 rounded-md border bg-muted/50">
+                          <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div className="grid gap-1.5">
+                                <Label htmlFor={`socials.${index}.platform`} className="text-xs">Platform</Label>
+                                <Input {...register(`socials.${index}.platform`)} placeholder="e.g., LinkedIn" />
+                            </div>
+                            <div className="grid gap-1.5">
+                                <Label htmlFor={`socials.${index}.url`} className="text-xs">URL</Label>
+                                <Input {...register(`socials.${index}.url`)} placeholder="https://linkedin.com/in/..." />
+                            </div>
                           </div>
-                          <div className="grid gap-1.5 flex-grow">
-                            <Label htmlFor={`socials.${index}.url`} className="text-xs">URL</Label>
-                            <Input {...register(`socials.${index}.url`)} placeholder="https://linkedin.com/in/..." />
+                          <div className="pt-6">
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeSocial(index)} className="shrink-0">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                           </div>
-                          <Button type="button" variant="ghost" size="icon" onClick={() => removeSocial(index)} className="shrink-0">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
                         </div>
                       ))}
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="skills" className="space-y-6 pt-4">
+                    <SectionTitle icon={Wrench} text="Skills" />
+                    <div className="p-4 rounded-md border bg-muted/50">
+                        <Label htmlFor="skills" className="mb-2 block">Your Skills</Label>
+                        <Controller
+                            name="skills"
+                            control={control}
+                            render={({ field }) => (
+                                <Textarea
+                                    id="skills"
+                                    placeholder="Enter your skills, separated by commas (e.g., JavaScript, React, Node.js)"
+                                    value={Array.isArray(field.value) ? field.value.join(', ') : ''}
+                                    onChange={(e) => {
+                                        const skillsArray = e.target.value.split(',').map(skill => skill.trim()).filter(Boolean);
+                                        field.onChange(skillsArray);
+                                    }}
+                                    rows={6}
+                                />
+                            )}
+                        />
+                        <p className="text-xs text-muted-foreground mt-2">Separate each skill with a comma. This will help the AI build better resumes for you.</p>
                     </div>
                 </TabsContent>
 
@@ -448,17 +479,19 @@ export default function ProfilePage() {
                     </Button>
                   </div>
                   {expFields.map((field, index) => (
-                    <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeExp(index)} className="absolute top-2 right-2 h-8 w-8">
+                    <div key={field.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
+                        <div className="flex-grow space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <Input {...register(`experience.${index}.role`)} placeholder="Role / Title" />
+                              <Input {...register(`experience.${index}.company`)} placeholder="Company Name" />
+                              <Input {...register(`experience.${index}.location`)} placeholder="Location" />
+                              <Input {...register(`experience.${index}.dates`)} placeholder="Dates (e.g., Jan 2020 - Present)" />
+                            </div>
+                            <Textarea {...register(`experience.${index}.description`)} placeholder="Key responsibilities and achievements..." />
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeExp(index)} className="shrink-0 mt-1">
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <Input {...register(`experience.${index}.role`)} placeholder="Role / Title" />
-                          <Input {...register(`experience.${index}.company`)} placeholder="Company Name" />
-                          <Input {...register(`experience.${index}.location`)} placeholder="Location" />
-                          <Input {...register(`experience.${index}.dates`)} placeholder="Dates (e.g., Jan 2020 - Present)" />
-                        </div>
-                        <Textarea {...register(`experience.${index}.description`)} placeholder="Key responsibilities and achievements..." />
                     </div>
                   ))}
                 </TabsContent>
@@ -471,16 +504,16 @@ export default function ProfilePage() {
                       </Button>
                     </div>
                     {eduFields.map((field, index) => (
-                      <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
-                           <Button type="button" variant="ghost" size="icon" onClick={() => removeEdu(index)} className="absolute top-2 right-2 h-8 w-8">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div key={field.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
+                           <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input {...register(`education.${index}.degree`)} placeholder="Degree (e.g., B.S. in Computer Science)" />
                             <Input {...register(`education.${index}.school`)} placeholder="School Name" />
                             <Input {...register(`education.${index}.location`)} placeholder="Location" />
                             <Input {...register(`education.${index}.dates`)} placeholder="Dates (e.g., Aug 2016 - May 2020)" />
                           </div>
+                          <Button type="button" variant="ghost" size="icon" onClick={() => removeEdu(index)} className="shrink-0 mt-1">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                       </div>
                     ))}
                 </TabsContent>
@@ -493,14 +526,16 @@ export default function ProfilePage() {
                         </Button>
                     </div>
                     {projFields.map((field, index) => (
-                        <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
-                             <Button type="button" variant="ghost" size="icon" onClick={() => removeProj(index)} className="absolute top-2 right-2 h-8 w-8">
+                        <div key={field.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
+                            <div className="flex-grow space-y-3">
+                                <Input {...register(`projects.${index}.name`)} placeholder="Project Name" />
+                                <Textarea {...register(`projects.${index}.description`)} placeholder="Project description..." />
+                                <Input {...register(`projects.${index}.technologies`)} placeholder="Technologies used (comma-separated)" />
+                                <Input {...register(`projects.${index}.url`)} placeholder="Project URL" />
+                            </div>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeProj(index)} className="shrink-0 mt-1">
                                 <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
-                            <Input {...register(`projects.${index}.name`)} placeholder="Project Name" />
-                            <Textarea {...register(`projects.${index}.description`)} placeholder="Project description..." />
-                            <Input {...register(`projects.${index}.technologies`)} placeholder="Technologies used (comma-separated)" />
-                            <Input {...register(`projects.${index}.url`)} placeholder="Project URL" />
                         </div>
                     ))}
                 </TabsContent>
@@ -513,30 +548,32 @@ export default function ProfilePage() {
                         </Button>
                     </div>
                     {certFields.map((field, index) => (
-                        <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCert(index)} className="absolute top-2 right-2 h-8 w-8">
+                        <div key={field.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
+                            <div className="flex-grow space-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input {...register(`certifications.${index}.name`)} placeholder="Certification Name" />
+                                    <Input {...register(`certifications.${index}.issuingOrganization`)} placeholder="Issuing Organization" />
+                                    <Input {...register(`certifications.${index}.date`)} placeholder="Issue Date" />
+                                    <Input {...register(`certifications.${index}.credentialUrl`)} placeholder="Credential URL" />
+                                </div>
+                                <div>
+                                   <Label htmlFor={`cert-upload-${index}`} className="text-sm font-medium">Auto-fill from Certificate</Label>
+                                   <div className="flex items-center gap-2">
+                                    <Input 
+                                     id={`cert-upload-${index}`} 
+                                     type="file" 
+                                     onChange={(e) => handleCertificateUpload(index, e)}
+                                     className="text-xs flex-grow"
+                                     disabled={isAnalyzingCert === index}
+                                    />
+                                    {isAnalyzingCert === index && <Loader2 className="h-4 w-4 animate-spin" />}
+                                   </div>
+                                   <p className="text-xs text-muted-foreground mt-1">Upload a certificate file to have the AI fill in the details automatically.</p>
+                                </div>
+                            </div>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCert(index)} className="shrink-0 mt-1">
                                 <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Input {...register(`certifications.${index}.name`)} placeholder="Certification Name" />
-                                <Input {...register(`certifications.${index}.issuingOrganization`)} placeholder="Issuing Organization" />
-                                <Input {...register(`certifications.${index}.date`)} placeholder="Issue Date" />
-                                <Input {...register(`certifications.${index}.credentialUrl`)} placeholder="Credential URL" />
-                            </div>
-                            <div>
-                               <Label htmlFor={`cert-upload-${index}`} className="text-sm font-medium">Auto-fill from Certificate</Label>
-                               <div className="flex items-center gap-2">
-                                <Input 
-                                 id={`cert-upload-${index}`} 
-                                 type="file" 
-                                 onChange={(e) => handleCertificateUpload(index, e)}
-                                 className="text-xs flex-grow"
-                                 disabled={isAnalyzingCert === index}
-                                />
-                                {isAnalyzingCert === index && <Loader2 className="h-4 w-4 animate-spin" />}
-                               </div>
-                               <p className="text-xs text-muted-foreground mt-1">Upload a certificate file to have the AI fill in the details automatically.</p>
-                            </div>
                         </div>
                     ))}
                 </TabsContent>
