@@ -36,7 +36,7 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
         const analysisResult = await analyzeResumeFlow({ resumeDataUri });
         const { portfolioDraft } = analysisResult;
         
-        // Structure the extracted data
+        // Structure the extracted data, ensuring arrays are not undefined
         const extractedProfileData = {
             name: portfolioDraft.personalInfo?.name,
             title: portfolioDraft.personalInfo?.title,
@@ -44,11 +44,12 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
             phone: portfolioDraft.personalInfo?.phone,
             location: portfolioDraft.personalInfo?.location,
             summary: portfolioDraft.summary || portfolioDraft.personalInfo?.summary,
-            socials: portfolioDraft.personalInfo?.socials,
-            experience: (portfolioDraft.experience || []).map(exp => ({...exp, description: exp.description.join('\\n')})),
-            education: portfolioDraft.education,
-            projects: (portfolioDraft.projects || []).map(proj => ({...proj, technologies: proj.technologies?.join(', ')})),
-            certifications: portfolioDraft.certifications,
+            socials: portfolioDraft.personalInfo?.socials || [],
+            skills: portfolioDraft.skills || [],
+            experience: portfolioDraft.experience || [],
+            education: portfolioDraft.education || [],
+            projects: portfolioDraft.projects || [],
+            certifications: portfolioDraft.certifications || [],
         };
 
         // Merge with existing data, giving precedence to what's already in the profile
@@ -81,32 +82,35 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     // Fetch user profile data to merge with the portfolio
     const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
     const profileSnap = await getDoc(profileDocRef);
-    const userProfile = profileSnap.exists() ? profileSnap.data() as PersonalInfo : {};
+    const userProfile = profileSnap.exists() ? profileSnap.data() : {};
 
 
     // Step 1: Analyze resume for text content, get an avatar prompt, and color palette
     const analysisResult = await analyzeResumeFlow(input);
     
-    const portfolioDraft: Partial<PortfolioData> = analysisResult.portfolioDraft;
+    // This is the draft from the resume file analysis
+    const portfolioDraftFromAI: Partial<PortfolioData> = analysisResult.portfolioDraft;
 
-    // Merge profile data with analysis result for the portfolio
-    // The user's manually-saved profile data takes precedence over resume analysis
-    if (portfolioDraft.personalInfo) {
-      portfolioDraft.personalInfo = { ...portfolioDraft.personalInfo, ...userProfile };
-    } else {
-      portfolioDraft.personalInfo = userProfile;
-    }
+    // Step 2: Merge profile data with analysis result, giving profile data precedence
+    const finalPortfolioData: Partial<PortfolioData> = {
+        // Start with AI-parsed data as a base
+        ...portfolioDraftFromAI,
+        // Overwrite with user profile data if it exists
+        personalInfo: { ...portfolioDraftFromAI.personalInfo, ...userProfile },
+        summary: userProfile.summary || portfolioDraftFromAI.summary || portfolioDraftFromAI.personalInfo?.summary,
+        experience: userProfile.experience && userProfile.experience.length > 0 ? userProfile.experience : portfolioDraftFromAI.experience,
+        education: userProfile.education && userProfile.education.length > 0 ? userProfile.education : portfolioDraftFromAI.education,
+        skills: userProfile.skills && userProfile.skills.length > 0 ? userProfile.skills : portfolioDraftFromAI.skills,
+        projects: userProfile.projects && userProfile.projects.length > 0 ? userProfile.projects : portfolioDraftFromAI.projects,
+        certifications: userProfile.certifications && userProfile.certifications.length > 0 ? userProfile.certifications : portfolioDraftFromAI.certifications,
+    };
     
-    // Ensure summary is correctly merged
-    portfolioDraft.summary = userProfile.summary || portfolioDraft.summary || portfolioDraft.personalInfo?.summary;
-
-
     // Add a title and creation date
-    portfolioDraft.title = `Portfolio from ${new Date().toLocaleDateString()}`;
-    portfolioDraft.createdAt = serverTimestamp();
+    finalPortfolioData.title = `Portfolio from ${new Date().toLocaleDateString()}`;
+    finalPortfolioData.createdAt = serverTimestamp();
 
-    // Step 3: Add the color palette
-    portfolioDraft.colorPalette = analysisResult.colorPalette;
+    // Step 3: Add the color palette from the initial analysis
+    finalPortfolioData.colorPalette = analysisResult.colorPalette;
 
     // Step 4: Generate avatar (if needed) and project images in parallel
     let avatarPromise;
@@ -131,14 +135,19 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
         });
     }
 
-    const projectImagePromises = (portfolioDraft.projects || []).map(async (project: Project) => {
+    const projectImagePromises = (finalPortfolioData.projects || []).map(async (project: Project) => {
         try {
-            const imageResult = await generateProjectImageFlow({ description: project.description });
-            project.previewImage = (await uploadImage(imageResult.imageDataUri)).url;
+            // Only generate an image if one doesn't already exist from the profile
+            if (!project.previewImage) {
+                const imageResult = await generateProjectImageFlow({ description: project.description });
+                project.previewImage = (await uploadImage(imageResult.imageDataUri)).url;
+            }
         } catch (e) {
             console.warn(`Failed to generate/upload image for project: ${project.name}`, e);
-            // Use a placeholder if generation fails
-            project.previewImage = 'https://placehold.co/800x450.png';
+            // Use a placeholder if generation fails and one doesn't exist
+            if (!project.previewImage) {
+                project.previewImage = 'https://placehold.co/800x450.png';
+            }
         }
         return project;
     });
@@ -150,21 +159,21 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     ]);
 
     // Step 5: Combine all the results
-    portfolioDraft.projects = updatedProjects;
+    finalPortfolioData.projects = updatedProjects;
     
-    if (portfolioDraft.personalInfo) {
-      portfolioDraft.personalInfo.profilePictureUrl = avatarUrl;
+    if (finalPortfolioData.personalInfo) {
+      finalPortfolioData.personalInfo.profilePictureUrl = avatarUrl;
     } else {
-        portfolioDraft.personalInfo = {
+        finalPortfolioData.personalInfo = {
             name: '', title: '', email: '', phone: '', location: '', socials: [],
             profilePictureUrl: avatarUrl,
         }
     }
 
     // Step 6: Save as a new document in the user's portfolios subcollection
-    const newDocRef = await addDoc(portfolioCollectionRef, portfolioDraft);
+    const newDocRef = await addDoc(portfolioCollectionRef, finalPortfolioData);
     
-    return { success: true, data: { ...portfolioDraft, id: newDocRef.id } };
+    return { success: true, data: { ...finalPortfolioData, id: newDocRef.id } };
   } catch (error) {
     console.error("Error analyzing resume:", error);
     // It's good practice to not expose detailed internal errors to the client.
@@ -293,3 +302,5 @@ export async function refineSummaryAction(input: RefineSummaryInput): Promise<{s
         return { success: false, error: "Failed to refine summary. Please try again." };
     }
 }
+
+    
