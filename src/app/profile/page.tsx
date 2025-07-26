@@ -419,8 +419,8 @@ export default function ProfilePage() {
                 
                 <TabsContent value="personal" className="space-y-6 pt-4">
                    <SectionTitle icon={UserCircle} text="Personal Information" />
-                   <div className="flex flex-col md:flex-row items-start gap-6">
-                        <div className="space-y-2 flex-shrink-0 text-center">
+                   <div className="flex flex-col md:flex-row items-start gap-8">
+                        <div className="space-y-2 flex-shrink-0 text-center md:w-1/4">
                             <Label>Profile Picture</Label>
                             <div className="relative w-32 h-32 group mx-auto">
                                 <Image
@@ -437,9 +437,9 @@ export default function ProfilePage() {
                                 </label>
                                 <Input id="profile-picture-upload" type="file" className="hidden" accept="image/*" onChange={handleProfilePictureUpload} disabled={isUploading} />
                             </div>
-                            <p className="text-xs text-muted-foreground mt-2 max-w-xs">This picture will be used in your resume and portfolio.</p>
+                            <p className="text-xs text-muted-foreground mt-2 max-w-xs mx-auto">This picture will be used in your resume and portfolio.</p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow md:w-3/4">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Full Name</Label>
                                 <Input id="name" {...register("name")} placeholder="e.g., Jane Doe" />
@@ -452,11 +452,7 @@ export default function ProfilePage() {
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" type="email" {...register("email")} placeholder="e.g., jane.doe@example.com" />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="dob">Date of Birth</Label>
-                                <Input id="dob" {...register("dob")} placeholder="DD/MM/YYYY" />
-                            </div>
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <Label htmlFor="phone">Phone Number</Label>
                                 <div className="flex items-center">
                                     <Controller
@@ -484,22 +480,28 @@ export default function ProfilePage() {
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <Label htmlFor="location">Location</Label>
                                 <Input id="location" {...register("location")} placeholder="e.g., San Francisco, CA" />
                             </div>
-                            <div className="space-y-2 md:col-span-2">
-                                <div className="flex justify-between items-center">
-                                    <Label htmlFor="summary">About Me / Professional Summary</Label>
-                                    <Button type="button" variant="outline" size="sm" onClick={handleRefineSummary} disabled={isRefining}>
-                                        {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                        Refine with AI
-                                    </Button>
-                                </div>
-                                <Textarea id="summary" {...register("summary")} placeholder="Write a short summary about yourself..." rows={4} />
+                             <div className="space-y-2">
+                                <Label htmlFor="dob">Date of Birth</Label>
+                                <Input id="dob" {...register("dob")} placeholder="DD/MM/YYYY" />
                             </div>
                         </div>
                    </div>
+
+                    <div className="space-y-4 pt-4">
+                        <div className="flex justify-between items-center">
+                            <SectionTitle icon={UserCircle} text="About Me / Professional Summary" />
+                            <Button type="button" variant="outline" size="sm" onClick={handleRefineSummary} disabled={isRefining}>
+                                {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                Refine with AI
+                            </Button>
+                        </div>
+                        <Textarea id="summary" {...register("summary")} placeholder="Write a short summary about yourself..." rows={4} />
+                    </div>
+
                     <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between">
                             <SectionTitle icon={LinkIcon} text="Social Links" />
