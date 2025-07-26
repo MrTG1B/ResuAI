@@ -92,7 +92,7 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-type EditableSection = 'education' | 'projects' | 'certifications';
+type EditableSection = 'education' | 'projects' | 'certifications' | 'experience';
 
 const SectionTitle = ({ icon, text }: { icon: React.ElementType, text: string }) => {
   const Icon = icon;
@@ -333,6 +333,7 @@ export default function ProfilePage() {
     } else {
       // Add new item
       switch (editingSection) {
+        case 'experience': appendExp(dialogData); break;
         case 'education': appendEdu(dialogData); break;
         case 'projects': appendProj(dialogData); break;
         case 'certifications': appendCert(dialogData); break;
@@ -364,6 +365,7 @@ export default function ProfilePage() {
   const watchedEducation = watch('education');
   const watchedProjects = watch('projects');
   const watchedCerts = watch('certifications');
+  const watchedExperience = watch('experience');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -486,22 +488,22 @@ export default function ProfilePage() {
                           </Button>
                       </div>
                       {socialFields.map((field, index) => (
-                        <div key={field.id} className="flex items-start gap-4 p-3 rounded-md border bg-muted/50">
-                          <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div className="grid gap-1.5">
-                                <Label htmlFor={`socials.${index}.platform`} className="text-xs">Platform</Label>
-                                <Input {...register(`socials.${index}.platform`)} placeholder="e.g., LinkedIn" />
+                        <div key={field.id} className="flex items-start gap-2 p-3 rounded-md border bg-muted/50">
+                            <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid gap-1.5">
+                                    <Label htmlFor={`socials.${index}.platform`} className="text-xs">Platform</Label>
+                                    <Input {...register(`socials.${index}.platform`)} placeholder="e.g., LinkedIn" />
+                                </div>
+                                <div className="grid gap-1.5">
+                                    <Label htmlFor={`socials.${index}.url`} className="text-xs">URL</Label>
+                                    <Input {...register(`socials.${index}.url`)} placeholder="https://linkedin.com/in/..." />
+                                </div>
                             </div>
-                            <div className="grid gap-1.5">
-                                <Label htmlFor={`socials.${index}.url`} className="text-xs">URL</Label>
-                                <Input {...register(`socials.${index}.url`)} placeholder="https://linkedin.com/in/..." />
+                            <div className="pt-6">
+                                <Button type="button" variant="ghost" size="icon" onClick={() => removeSocial(index)} className="shrink-0">
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
                             </div>
-                          </div>
-                          <div className="pt-6">
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeSocial(index)} className="shrink-0">
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
                         </div>
                       ))}
                     </div>
@@ -534,26 +536,33 @@ export default function ProfilePage() {
                 <TabsContent value="experience" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Briefcase} text="Work Experience" />
-                    <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ role: "", company: "", dates: "", location: "", description: "" })}>
+                    <Button type="button" variant="outline" size="sm" onClick={() => openDialog('experience')}>
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Experience
                     </Button>
                   </div>
-                  {expFields.map((field, index) => (
-                    <div key={field.id} className="flex items-start gap-2 p-3 rounded-md border bg-muted/50">
-                        <div className="flex-grow space-y-3">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <Input {...register(`experience.${index}.role`)} placeholder="Role / Title" />
-                              <Input {...register(`experience.${index}.company`)} placeholder="Company Name" />
-                              <Input {...register(`experience.${index}.location`)} placeholder="Location" />
-                              <Input {...register(`experience.${index}.dates`)} placeholder="Dates (e.g., Jan 2020 - Present)" />
-                            </div>
-                            <Textarea {...register(`experience.${index}.description`)} placeholder="Key responsibilities and achievements..." />
-                        </div>
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeExp(index)} className="shrink-0">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                    </div>
-                  ))}
+                    <Card>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                <TableHead>Role</TableHead>
+                                <TableHead>Company</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {watchedExperience?.map((exp, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="font-medium">{exp.role || 'N/A'}</TableCell>
+                                    <TableCell>{exp.company || 'N/A'}</TableCell>
+                                    <TableCell className="text-right">
+                                    <Button variant="ghost" size="icon" onClick={() => openDialog('experience', index)}><Edit className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                    </TableCell>
+                                </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </Card>
                 </TabsContent>
 
                  <TabsContent value="education" className="space-y-6 pt-4">
@@ -675,6 +684,30 @@ export default function ProfilePage() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {editingSection === 'experience' && (
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="role" className="text-right">Role</Label>
+                  <Input id="role" value={dialogData.role || ''} onChange={(e) => setDialogData({ ...dialogData, role: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="company" className="text-right">Company</Label>
+                  <Input id="company" value={dialogData.company || ''} onChange={(e) => setDialogData({ ...dialogData, company: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="location" className="text-right">Location</Label>
+                  <Input id="location" value={dialogData.location || ''} onChange={(e) => setDialogData({ ...dialogData, location: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="dates" className="text-right">Dates</Label>
+                  <Input id="dates" value={dialogData.dates || ''} onChange={(e) => setDialogData({ ...dialogData, dates: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="description" className="text-right">Description</Label>
+                  <Textarea id="description" value={dialogData.description || ''} onChange={(e) => setDialogData({ ...dialogData, description: e.target.value })} className="col-span-3" />
+                </div>
+              </>
+            )}
             {editingSection === 'education' && (
               <>
                 <div className="grid grid-cols-4 items-center gap-4">

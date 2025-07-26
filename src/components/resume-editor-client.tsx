@@ -175,7 +175,7 @@ export default function ResumeEditorClient() {
                         const newState: SavedEditorState = {
                             htmlContent: initialHtml,
                             chatHistory: [],
-                            fileName: `${profile.name || 'User'}'s Resume.html`,
+                            fileName: `${profile.name || 'User'}'s Resume`,
                             initialPreviewUri: '',
                         };
                          const newId = await saveStateToFirestore(newState, null);
@@ -239,7 +239,7 @@ export default function ResumeEditorClient() {
                     const finalState: SavedEditorState = {
                         htmlContent: result.data.htmlContent,
                         chatHistory: [],
-                        fileName: file.name,
+                        fileName: file.name.replace(/\.[^/.]+$/, ""),
                         initialPreviewUri: uploadedResumeDataUri,
                     };
                     const newId = await saveStateToFirestore(finalState, null);
@@ -296,7 +296,7 @@ export default function ResumeEditorClient() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = (editorState?.fileName?.replace(/\.[^/.]+$/, "") || 'resume') + '.pdf';
+            a.download = (editorState?.fileName || 'resume') + '.pdf';
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -383,6 +383,12 @@ export default function ResumeEditorClient() {
         }
     };
 
+    const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (editorState) {
+            handleEditorStateUpdate({ ...editorState, fileName: e.target.value });
+        }
+    };
+
     if (isLoading || flow === 'loading') {
         return (
             <div className="flex flex-col min-h-screen items-center justify-center bg-background">
@@ -407,13 +413,14 @@ export default function ResumeEditorClient() {
 
     const hasBeenEdited = (editorState?.chatHistory?.length || 0) > 0;
     const showOriginalPdf = editorState?.initialPreviewUri && !hasBeenEdited;
+    const canDownload = !!editorState?.htmlContent;
 
     const editorActions = (
         <div className="flex items-center justify-end gap-2 flex-grow">
             <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
                 {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Analyze Resume"}
             </Button>
-            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting || !hasBeenEdited}>
+            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!canDownload || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
                 {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
             </Button>
             <Button onClick={handleConvertToPortfolio} size="sm" disabled={!editorState || isConverting || isParsing || isAnalyzing || !editorState.initialPreviewUri}>
@@ -464,8 +471,14 @@ export default function ResumeEditorClient() {
                         <div className="lg:col-span-2 h-full min-h-0">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="py-3 px-6 border-b flex-shrink-0">
-                                    <CardTitle className="text-base font-normal">
-                                        {editorState.htmlContent ? `Editing: ${editorState.fileName || 'Untitled'}` : "Original Resume Preview"}
+                                    <CardTitle className="text-base font-normal flex items-center">
+                                       <span className="mr-2">Editing:</span>
+                                       <Input
+                                            type="text"
+                                            value={editorState.fileName || ''}
+                                            onChange={handleFileNameChange}
+                                            className="h-7 w-auto max-w-xs text-base font-medium p-1"
+                                        />
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow flex flex-col p-0 bg-muted/30 overflow-hidden relative">
