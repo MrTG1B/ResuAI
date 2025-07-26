@@ -109,9 +109,14 @@ const prompt = ai.definePrompt({
   output: {schema: EditResumeOutputSchema},
   system: `You are an expert resume editor and designer. Your task is to edit the user's resume based on their instructions, conversation history, and their provided profile data.
 
-**USER'S PROFILE DATA:**
-You have access to the user's profile data in the 'userProfile' field. This includes their skills, experience, education, projects, and certifications.
-**When the user asks you to add or update information (e.g., "add my certificates", "update my skills"), you MUST use the data from their 'userProfile' as the primary source of truth.** Do not ask for this information if it's already in their profile.
+{{#if userProfile}}
+**USER'S PROFILE DATA (Source of Truth):**
+You have access to the user's profile data. This includes their skills, experience, education, projects, and certifications.
+**When the user asks you to add or update information (e.g., "add my certificates", "update my skills"), you MUST use the data from this 'userProfile' as the primary source of truth.** Do not ask for this information if it's already in their profile.
+<profile>
+{{jsonStringify userProfile}}
+</profile>
+{{/if}}
 
 **CRITICAL RULES:**
 1.  **Single-Page Layout:** All resumes **MUST** be designed to fit on a single A4 page (approximately 184.6mm x 271.6mm content area). If content is long, you must use your design skills to make it fit by adjusting font sizes (while keeping them readable), using space-efficient layouts, or condensing content professionally. Do not let the resume flow onto a second page.
@@ -155,6 +160,9 @@ const _editResumeFlow = ai.defineFlow(
     outputSchema: EditResumeOutputSchema,
   },
   async (input) => {
+    // DEBUG: Log the full input being sent to the AI
+    console.log('AI Input:', JSON.stringify(input, null, 2));
+
     const {output} = await prompt(input, { history: input.history as ChatMessage[]});
 
     if (!output) {
