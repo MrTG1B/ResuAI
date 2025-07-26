@@ -139,7 +139,7 @@ export default function ResumeEditorClient() {
                         router.push('/dashboard');
                     }
                 } else if (fromFlow === 'scratch') {
-                    setFlow('scratch');
+                    setFlow('edit');
                      
                     const socialLinksHtml = (profileData.socials || [])
                         .map((s: { platform: string; url: string; }) => `<span><a href="${s.url}" target="_blank" style="color: #007bff; text-decoration: none;">${s.platform}</a></span>`)
@@ -175,7 +175,6 @@ export default function ResumeEditorClient() {
                         initialPreviewUri: '', // No initial file for 'from scratch'
                     };
                     setEditorState(newState);
-                    setFlow('edit'); // Immediately switch to edit mode
                 } else {
                     setFlow('upload');
                 }
@@ -375,7 +374,7 @@ export default function ResumeEditorClient() {
 
     const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (editorState) {
-            handleEditorStateUpdate({ ...editorState, fileName: e.target.value.replace(/\.html?$/, '') });
+            handleEditorStateUpdate({ ...editorState, fileName: e.target.value });
         }
     };
 
