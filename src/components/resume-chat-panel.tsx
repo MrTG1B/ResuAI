@@ -78,7 +78,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                 htmlContent: editorState.htmlContent,
                 prompt: currentInput,
                 history: editorState.chatHistory,
-                profilePictureUrl: userProfile?.profilePictureUrl || undefined,
+                userProfile: userProfile,
                 attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.mimeType }))
             });
             
@@ -243,7 +243,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                                 if (!isLoading) handleSendMessage();
                             }
                         }}
-                        placeholder="e.g., 'Add a skills section'"
+                        placeholder="e.g., 'Add my certificates'"
                         disabled={isLoading}
                         rows={1}
                         className="resize-none w-full"

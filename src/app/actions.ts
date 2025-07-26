@@ -302,5 +302,3 @@ export async function refineSummaryAction(input: RefineSummaryInput): Promise<{s
         return { success: false, error: "Failed to refine summary. Please try again." };
     }
 }
-
-    
