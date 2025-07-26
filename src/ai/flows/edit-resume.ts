@@ -114,7 +114,7 @@ const prompt = ai.definePrompt({
 You have access to the user's profile data. This includes their skills, experience, education, projects, and certifications.
 **When the user asks you to add or update information (e.g., "add my certificates", "update my skills"), you MUST use the data from this 'userProfile' as the primary source of truth.** Do not ask for this information if it's already in their profile.
 <profile>
-{{jsonStringify userProfile}}
+{{{userProfile}}}
 </profile>
 {{/if}}
 
