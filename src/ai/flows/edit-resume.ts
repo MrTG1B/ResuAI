@@ -118,6 +118,15 @@ When the user asks you to add, update, or reference personal information (e.g., 
 <profile>
 {{{userProfile}}}
 </profile>
+
+{{#if userProfile.certifications.length}}
+⚠️ IMPORTANT: The user has the following certifications in their profile:
+{{#each userProfile.certifications}}
+- **{{this.name}}**, issued by **{{this.issuingOrganization}}**{{#if this.date}}, dated **{{this.date}}**{{/if}}{{#if this.credentialUrl}} [{{this.credentialUrl}}]{{/if}}
+{{/each}}
+You **MUST NOT** ask for attachments if this data exists. Use these directly in the resume.
+{{/if}}
+
 {{/if}}
 
 **CRITICAL RULES:**
