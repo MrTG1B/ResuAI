@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -93,7 +93,7 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-type EditableSection = 'education' | 'projects' | 'certifications' | 'experience';
+type EditableSection = 'education' | 'projects' | 'certifications' | 'experience' | 'socials' | 'skills';
 
 const SectionTitle = ({ icon, text }: { icon: React.ElementType, text: string }) => {
   const Icon = icon;
@@ -104,6 +104,18 @@ const SectionTitle = ({ icon, text }: { icon: React.ElementType, text: string })
     </h3>
   )
 };
+
+const SocialIcon = ({ platform, className }: { platform: string, className?: string }) => {
+    const lowerCasePlatform = platform.toLowerCase();
+    if (lowerCasePlatform.includes('github')) {
+        return <Github className={className} />;
+    }
+    if (lowerCasePlatform.includes('linkedin')) {
+        return <Linkedin className={className} />;
+    }
+    return <Globe className={className} />;
+};
+
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -143,6 +155,8 @@ export default function ProfilePage() {
   const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({ control, name: "education" });
   const { fields: projFields, append: appendProj, remove: removeProj } = useFieldArray({ control, name: "projects" });
   const { fields: certFields, append: appendCert, remove: removeCert } = useFieldArray({ control, name: "certifications" });
+  const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({ control, name: "skills" });
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -310,8 +324,10 @@ export default function ProfilePage() {
     setEditingSection(section);
     setEditingIndex(index);
     if (index !== null) {
-      const currentData = getValues(section);
+      const currentData = getValues(section as keyof ProfileFormData);
+      // @ts-ignore
       if (currentData && currentData[index]) {
+         // @ts-ignore
         setDialogData(currentData[index]);
       }
     } else {
@@ -329,15 +345,16 @@ export default function ProfilePage() {
     if (!editingSection) return;
 
     if (editingIndex !== null) {
-      // Update existing item
+        // @ts-ignore
       setValue(`${editingSection}.${editingIndex}`, dialogData, { shouldDirty: true });
     } else {
-      // Add new item
       switch (editingSection) {
         case 'experience': appendExp(dialogData); break;
         case 'education': appendEdu(dialogData); break;
         case 'projects': appendProj(dialogData); break;
         case 'certifications': appendCert(dialogData); break;
+        case 'socials': appendSocial(dialogData); break;
+        case 'skills': appendSkill(dialogData.skill); break;
       }
     }
     closeDialog();
@@ -367,6 +384,8 @@ export default function ProfilePage() {
   const watchedProjects = watch('projects');
   const watchedCerts = watch('certifications');
   const watchedExperience = watch('experience');
+  const watchedSocials = watch('socials');
+  const watchedSkills = watch('skills');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -481,57 +500,77 @@ export default function ProfilePage() {
                             </div>
                         </div>
                    </div>
-                   <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                          <Label className="text-lg font-semibold">Social Links</Label>
-                          <Button type="button" variant="outline" size="sm" onClick={() => appendSocial({ platform: "", url: "" })}>
-                              <PlusCircle className="mr-2 h-4 w-4" /> Add
-                          </Button>
-                      </div>
-                      {socialFields.map((field, index) => (
-                        <div key={field.id} className="flex items-start gap-2 p-3 rounded-md border bg-muted/50">
-                            <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor={`socials.${index}.platform`} className="text-xs">Platform</Label>
-                                    <Input {...register(`socials.${index}.platform`)} placeholder="e.g., LinkedIn" />
-                                </div>
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor={`socials.${index}.url`} className="text-xs">URL</Label>
-                                    <Input {...register(`socials.${index}.url`)} placeholder="https://linkedin.com/in/..." />
-                                </div>
-                            </div>
-                            <div className="pt-6">
-                                <Button type="button" variant="ghost" size="icon" onClick={() => removeSocial(index)} className="shrink-0">
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                            </div>
+                    <div className="space-y-4 pt-4">
+                        <div className="flex items-center justify-between">
+                            <SectionTitle icon={LinkIcon} text="Social Links" />
+                            <Button type="button" variant="outline" size="sm" onClick={() => openDialog('socials')}>
+                                <PlusCircle className="mr-2 h-4 w-4" /> Add Social Link
+                            </Button>
                         </div>
-                      ))}
+                        <Card>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                    <TableHead>Platform</TableHead>
+                                    <TableHead>URL</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {watchedSocials?.map((social, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell className="font-medium flex items-center gap-2">
+                                            <SocialIcon platform={social.platform} className="h-5 w-5" />
+                                            {social.platform}
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground truncate max-w-xs">
+                                            <a href={social.url} target="_blank" rel="noopener noreferrer" className="hover:underline">{social.url}</a>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon" onClick={() => openDialog('socials', index)}><Edit className="h-4 w-4" /></Button>
+                                        <Button variant="ghost" size="icon" onClick={() => removeSocial(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                        </TableCell>
+                                    </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </Card>
                     </div>
                 </TabsContent>
 
                 <TabsContent value="skills" className="space-y-6 pt-4">
+                  <div className="flex items-center justify-between">
                     <SectionTitle icon={Wrench} text="Skills" />
-                    <div className="p-4 rounded-md border bg-muted/50">
-                        <Label htmlFor="skills" className="mb-2 block">Your Skills</Label>
-                        <Controller
-                            name="skills"
-                            control={control}
-                            render={({ field }) => (
-                                <Textarea
-                                    id="skills"
-                                    placeholder="Enter your skills, separated by commas (e.g., JavaScript, React, Node.js)"
-                                    value={Array.isArray(field.value) ? field.value.join(', ') : ''}
-                                    onChange={(e) => {
-                                        const skillsArray = e.target.value.split(',').map(skill => skill.trim()).filter(Boolean);
-                                        field.onChange(skillsArray);
-                                    }}
-                                    rows={6}
-                                />
-                            )}
-                        />
-                        <p className="text-xs text-muted-foreground mt-2">Separate each skill with a comma. This will help the AI build better resumes for you.</p>
-                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => openDialog('skills')}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Skill
+                    </Button>
+                  </div>
+                    <Card>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                <TableHead>Skill</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {watchedSkills?.map((skill, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="font-medium">{skill}</TableCell>
+                                    <TableCell className="text-right">
+                                    <Button variant="ghost" size="icon" onClick={() => openDialog('skills', index)}><Edit className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => removeSkill(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                    </TableCell>
+                                </TableRow>
+                                ))}
+                                {watchedSkills?.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={2} className="text-center text-muted-foreground">No skills added yet.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </Card>
                 </TabsContent>
 
                 <TabsContent value="experience" className="space-y-6 pt-4">
@@ -785,7 +824,7 @@ export default function ProfilePage() {
                             <span className="w-full border-t" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">Or</span>
+                            <span className="bg-popover px-2 text-muted-foreground">Or</span>
                         </div>
                     </div>
 
@@ -818,6 +857,24 @@ export default function ProfilePage() {
                     </div>
                 </div>
             )}
+             {editingSection === 'socials' && (
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="platform">Platform</Label>
+                        <Input id="platform" value={dialogData.platform || ''} onChange={(e) => setDialogData({ ...dialogData, platform: e.target.value })} placeholder="e.g., GitHub"/>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="url">URL</Label>
+                        <Input id="url" value={dialogData.url || ''} onChange={(e) => setDialogData({ ...dialogData, url: e.target.value })} placeholder="https://github.com/username"/>
+                    </div>
+                </div>
+            )}
+            {editingSection === 'skills' && (
+                 <div className="space-y-1.5">
+                    <Label htmlFor="skill">Skill</Label>
+                    <Input id="skill" value={dialogData.skill || ''} onChange={(e) => setDialogData({ ...dialogData, skill: e.target.value })} placeholder="e.g., React"/>
+                </div>
+            )}
           </div>
           <DialogFooter>
             <DialogClose asChild>
@@ -830,4 +887,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
