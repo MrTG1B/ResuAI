@@ -11,6 +11,7 @@ import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/gen
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
 import { submitFeedback as submitFeedbackFlow, type SubmitFeedbackInput } from "@/ai/flows/submit-feedback";
 import { careerCoachChat as careerCoachChatFlow, type CareerCoachChatInput } from "@/ai/flows/career-coach-chat";
+import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy } from "firebase/firestore";
@@ -42,7 +43,7 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
             email: portfolioDraft.personalInfo?.email,
             phone: portfolioDraft.personalInfo?.phone,
             location: portfolioDraft.personalInfo?.location,
-            summary: portfolioDraft.personalInfo?.summary,
+            summary: portfolioDraft.summary || portfolioDraft.personalInfo?.summary,
             socials: portfolioDraft.personalInfo?.socials,
             experience: (portfolioDraft.experience || []).map(exp => ({...exp, description: exp.description.join('\\n')})),
             education: portfolioDraft.education,
@@ -95,6 +96,10 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
     } else {
       portfolioDraft.personalInfo = userProfile;
     }
+    
+    // Ensure summary is correctly merged
+    portfolioDraft.summary = userProfile.summary || portfolioDraft.summary || portfolioDraft.personalInfo?.summary;
+
 
     // Add a title and creation date
     portfolioDraft.title = `Portfolio from ${new Date().toLocaleDateString()}`;
@@ -272,5 +277,19 @@ export async function submitFeedbackAction(input: SubmitFeedbackInput): Promise<
     } catch (error: any) {
         console.error("Error submitting feedback:", error);
         return { success: false, error: "Failed to submit feedback. Please try again." };
+    }
+}
+
+export async function refineSummaryAction(input: RefineSummaryInput): Promise<{success: boolean, data?: { refinedSummary: string }, error?: string}> {
+    try {
+        const result = await refineSummaryFlow(input);
+        if (result.refinedSummary) {
+            return { success: true, data: result };
+        } else {
+            return { success: false, error: "The AI could not refine the summary." };
+        }
+    } catch (error: any) {
+        console.error("Error refining summary:", error);
+        return { success: false, error: "Failed to refine summary. Please try again." };
     }
 }

@@ -63,7 +63,7 @@ export interface PortfolioData {
   title?: string;
   createdAt?: Timestamp | any;
   personalInfo: PersonalInfo;
-  summary: string;
+  summary?: string;
   experience: Experience[];
   education: Education[];
   skills: string[];

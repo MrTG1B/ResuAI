@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth, db, doc, getDoc, setDoc } from "@/lib/firebase";
-import { analyzeCertificateAction, uploadImageAction, deleteImageAction } from "@/app/actions";
+import { analyzeCertificateAction, uploadImageAction, deleteImageAction, refineSummaryAction } from "@/app/actions";
 import Image from "next/image";
 
 import { Header } from "@/components/header";
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -95,6 +95,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRefining, setIsRefining] = useState(false);
   const [localImagePreview, setLocalImagePreview] = useState<string | null>(null);
   const [isAnalyzingCert, setIsAnalyzingCert] = useState<number | null>(null);
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -258,6 +259,28 @@ export default function ProfilePage() {
     }
   };
 
+  const handleRefineSummary = async () => {
+    const currentSummary = getValues('summary');
+    if (!currentSummary || currentSummary.trim().length < 10) {
+        toast({ title: "Summary Too Short", description: "Please write a summary of at least 10 characters before refining.", variant: "destructive" });
+        return;
+    }
+    setIsRefining(true);
+    try {
+        const result = await refineSummaryAction({ summary: currentSummary });
+        if (result.success && result.data) {
+            setValue('summary', result.data.refinedSummary, { shouldDirty: true });
+            toast({ title: "Summary Refined", description: "The AI has improved your summary." });
+        } else {
+            throw new Error(result.error || "Failed to get refined summary from AI.");
+        }
+    } catch (error: any) {
+        toast({ title: "Refinement Failed", description: error.message, variant: "destructive" });
+    } finally {
+        setIsRefining(false);
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -381,7 +404,13 @@ export default function ProfilePage() {
                                 <Input id="location" {...register("location")} placeholder="e.g., San Francisco, CA" />
                             </div>
                             <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="summary">About Me / Professional Summary</Label>
+                                <div className="flex justify-between items-center">
+                                    <Label htmlFor="summary">About Me / Professional Summary</Label>
+                                    <Button type="button" variant="outline" size="sm" onClick={handleRefineSummary} disabled={isRefining}>
+                                        {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                        Refine with AI
+                                    </Button>
+                                </div>
                                 <Textarea id="summary" {...register("summary")} placeholder="Write a short summary about yourself..." rows={4} />
                             </div>
                         </div>
@@ -514,8 +543,8 @@ export default function ProfilePage() {
               </Tabs>
               
               <div className="flex justify-end pt-4 border-t">
-                <Button type="submit" disabled={isSaving || isAnalyzingCert !== null || isUploading}>
-                  {(isSaving || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" disabled={isSaving || isAnalyzingCert !== null || isUploading || isRefining}>
+                  {(isSaving || isUploading || isRefining) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Profile
                 </Button>
               </div>
