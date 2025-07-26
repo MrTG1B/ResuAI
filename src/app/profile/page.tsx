@@ -18,11 +18,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
 import { countries } from "@/lib/countries";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 
 const socialLinkSchema = z.object({
@@ -39,22 +52,22 @@ const experienceSchema = z.object({
 });
 
 const educationSchema = z.object({
-  degree: z.string().optional(),
-  school: z.string().optional(),
+  degree: z.string().min(1, "Degree is required"),
+  school: z.string().min(1, "School is required"),
   location: z.string().optional(),
   dates: z.string().optional(),
 });
 
 const projectSchema = z.object({
-  name: z.string().optional(),
+  name: z.string().min(1, "Project name is required"),
   description: z.string().optional(),
   technologies: z.string().optional(),
   url: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
 });
 
 const certificationSchema = z.object({
-  name: z.string().optional(),
-  issuingOrganization: z.string().optional(),
+  name: z.string().min(1, "Certification name is required"),
+  issuingOrganization: z.string().min(1, "Organization is required"),
   date: z.string().optional(),
   credentialUrl: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
 });
@@ -79,6 +92,8 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
+type EditableSection = 'education' | 'projects' | 'certifications';
+
 const SectionTitle = ({ icon, text }: { icon: React.ElementType, text: string }) => {
   const Icon = icon;
   return (
@@ -98,7 +113,14 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
   const [localImagePreview, setLocalImagePreview] = useState<string | null>(null);
-  const [isAnalyzingCert, setIsAnalyzingCert] = useState<number | null>(null);
+  const [isAnalyzingCert, setIsAnalyzingCert] = useState(false);
+
+  // State for managing which dialog is open and for what purpose (add/edit)
+  const [editingSection, setEditingSection] = useState<EditableSection | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [dialogData, setDialogData] = useState<any>({});
+
+
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
   const { register, handleSubmit, control, reset, setValue, watch, getValues, formState: { errors } } = useForm<ProfileFormData>({
@@ -222,7 +244,7 @@ export default function ProfilePage() {
   };
 
 
-  const handleCertificateUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCertificateUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -231,7 +253,7 @@ export default function ProfilePage() {
       return;
     }
 
-    setIsAnalyzingCert(index);
+    setIsAnalyzingCert(true);
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = async () => {
@@ -240,10 +262,10 @@ export default function ProfilePage() {
         const result = await analyzeCertificateAction({ certificateDataUri });
 
         if (result.success && result.data) {
-            setValue(`certifications.${index}.name`, result.data.name);
-            setValue(`certifications.${index}.issuingOrganization`, result.data.issuingOrganization);
-            setValue(`certifications.${index}.date`, result.data.date);
-            setValue(`certifications.${index}.credentialUrl`, result.data.credentialUrl);
+            setDialogData((prev: any) => ({
+              ...prev,
+              ...result.data
+            }));
             toast({ title: "Certificate Analyzed", description: "Details have been auto-filled." });
         } else {
             throw new Error(result.error || "Failed to analyze certificate.");
@@ -251,13 +273,13 @@ export default function ProfilePage() {
       } catch (error: any) {
          toast({ title: "Analysis Failed", description: error.message, variant: "destructive" });
       } finally {
-        setIsAnalyzingCert(null);
+        setIsAnalyzingCert(false);
         if (e.target) e.target.value = '';
       }
     };
     reader.onerror = () => {
         toast({ title: "File Read Error", description: "There was an error reading the file.", variant: "destructive" });
-        setIsAnalyzingCert(null);
+        setIsAnalyzingCert(false);
     }
   };
 
@@ -283,6 +305,41 @@ export default function ProfilePage() {
     }
   };
 
+  const openDialog = (section: EditableSection, index: number | null = null) => {
+    setEditingSection(section);
+    setEditingIndex(index);
+    if (index !== null) {
+      const currentData = getValues(section);
+      if (currentData && currentData[index]) {
+        setDialogData(currentData[index]);
+      }
+    } else {
+      setDialogData({}); // Clear for new entry
+    }
+  };
+
+  const closeDialog = () => {
+    setEditingSection(null);
+    setEditingIndex(null);
+    setDialogData({});
+  };
+
+  const handleDialogSave = () => {
+    if (!editingSection) return;
+
+    if (editingIndex !== null) {
+      // Update existing item
+      setValue(`${editingSection}.${editingIndex}`, dialogData, { shouldDirty: true });
+    } else {
+      // Add new item
+      switch (editingSection) {
+        case 'education': appendEdu(dialogData); break;
+        case 'projects': appendProj(dialogData); break;
+        case 'certifications': appendCert(dialogData); break;
+      }
+    }
+    closeDialog();
+  };
 
   if (isLoading) {
     return (
@@ -304,6 +361,9 @@ export default function ProfilePage() {
 
   const profilePictureUrl = watch('profilePictureUrl');
   const displayImageUrl = localImagePreview || profilePictureUrl;
+  const watchedEducation = watch('education');
+  const watchedProjects = watch('projects');
+  const watchedCerts = watch('certifications');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -426,7 +486,7 @@ export default function ProfilePage() {
                           </Button>
                       </div>
                       {socialFields.map((field, index) => (
-                        <div key={field.id} className="flex items-start gap-2 p-3 rounded-md border bg-muted/50">
+                        <div key={field.id} className="flex items-start gap-4 p-3 rounded-md border bg-muted/50">
                           <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div className="grid gap-1.5">
                                 <Label htmlFor={`socials.${index}.platform`} className="text-xs">Platform</Label>
@@ -479,7 +539,7 @@ export default function ProfilePage() {
                     </Button>
                   </div>
                   {expFields.map((field, index) => (
-                    <div key={field.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
+                    <div key={field.id} className="flex items-start gap-2 p-3 rounded-md border bg-muted/50">
                         <div className="flex-grow space-y-3">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <Input {...register(`experience.${index}.role`)} placeholder="Role / Title" />
@@ -489,98 +549,113 @@ export default function ProfilePage() {
                             </div>
                             <Textarea {...register(`experience.${index}.description`)} placeholder="Key responsibilities and achievements..." />
                         </div>
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeExp(index)} className="shrink-0 mt-1">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeExp(index)} className="shrink-0">
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                     </div>
                   ))}
                 </TabsContent>
 
-                <TabsContent value="education" className="space-y-6 pt-4">
-                   <div className="flex items-center justify-between">
-                      <SectionTitle icon={GraduationCap} text="Education" />
-                      <Button type="button" variant="outline" size="sm" onClick={() => appendEdu({ degree: "", school: "", dates: "", location: "" })}>
-                          <PlusCircle className="mr-2 h-4 w-4" /> Add Education
-                      </Button>
-                    </div>
-                    {eduFields.map((field, index) => (
-                      <div key={field.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
-                           <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input {...register(`education.${index}.degree`)} placeholder="Degree (e.g., B.S. in Computer Science)" />
-                            <Input {...register(`education.${index}.school`)} placeholder="School Name" />
-                            <Input {...register(`education.${index}.location`)} placeholder="Location" />
-                            <Input {...register(`education.${index}.dates`)} placeholder="Dates (e.g., Aug 2016 - May 2020)" />
-                          </div>
-                          <Button type="button" variant="ghost" size="icon" onClick={() => removeEdu(index)} className="shrink-0 mt-1">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                      </div>
-                    ))}
+                 <TabsContent value="education" className="space-y-6 pt-4">
+                  <div className="flex items-center justify-between">
+                    <SectionTitle icon={GraduationCap} text="Education" />
+                    <Button type="button" variant="outline" size="sm" onClick={() => openDialog('education')}>
+                      <PlusCircle className="mr-2 h-4 w-4" /> Add Education
+                    </Button>
+                  </div>
+                  <Card>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Degree</TableHead>
+                          <TableHead>School</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {watchedEducation?.map((edu, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{edu.degree}</TableCell>
+                            <TableCell>{edu.school}</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => openDialog('education', index)}><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="projects" className="space-y-6 pt-4">
-                    <div className="flex items-center justify-between">
-                        <SectionTitle icon={Lightbulb} text="Projects" />
-                        <Button type="button" variant="outline" size="sm" onClick={() => appendProj({ name: "", description: "", technologies: "", url: "" })}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Project
-                        </Button>
-                    </div>
-                    {projFields.map((field, index) => (
-                        <div key={field.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
-                            <div className="flex-grow space-y-3">
-                                <Input {...register(`projects.${index}.name`)} placeholder="Project Name" />
-                                <Textarea {...register(`projects.${index}.description`)} placeholder="Project description..." />
-                                <Input {...register(`projects.${index}.technologies`)} placeholder="Technologies used (comma-separated)" />
-                                <Input {...register(`projects.${index}.url`)} placeholder="Project URL" />
-                            </div>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeProj(index)} className="shrink-0 mt-1">
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                        </div>
-                    ))}
+                  <div className="flex items-center justify-between">
+                    <SectionTitle icon={Lightbulb} text="Projects" />
+                    <Button type="button" variant="outline" size="sm" onClick={() => openDialog('projects')}>
+                      <PlusCircle className="mr-2 h-4 w-4" /> Add Project
+                    </Button>
+                  </div>
+                  <Card>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Project Name</TableHead>
+                          <TableHead>Description</TableHead>
+                           <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {watchedProjects?.map((proj, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{proj.name}</TableCell>
+                            <TableCell className="text-muted-foreground truncate max-w-xs">{proj.description}</TableCell>
+                            <TableCell className="text-right">
+                               <Button variant="ghost" size="icon" onClick={() => openDialog('projects', index)}><Edit className="h-4 w-4" /></Button>
+                               <Button variant="ghost" size="icon" onClick={() => removeProj(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="certifications" className="space-y-6 pt-4">
-                    <div className="flex items-center justify-between">
-                        <SectionTitle icon={Award} text="Licenses &amp; Certifications" />
-                        <Button type="button" variant="outline" size="sm" onClick={() => appendCert({ name: "", issuingOrganization: "", date: "", credentialUrl: "" })}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Certification
-                        </Button>
-                    </div>
-                    {certFields.map((field, index) => (
-                        <div key={field.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
-                            <div className="flex-grow space-y-3">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Input {...register(`certifications.${index}.name`)} placeholder="Certification Name" />
-                                    <Input {...register(`certifications.${index}.issuingOrganization`)} placeholder="Issuing Organization" />
-                                    <Input {...register(`certifications.${index}.date`)} placeholder="Issue Date" />
-                                    <Input {...register(`certifications.${index}.credentialUrl`)} placeholder="Credential URL" />
-                                </div>
-                                <div>
-                                   <Label htmlFor={`cert-upload-${index}`} className="text-sm font-medium">Auto-fill from Certificate</Label>
-                                   <div className="flex items-center gap-2">
-                                    <Input 
-                                     id={`cert-upload-${index}`} 
-                                     type="file" 
-                                     onChange={(e) => handleCertificateUpload(index, e)}
-                                     className="text-xs flex-grow"
-                                     disabled={isAnalyzingCert === index}
-                                    />
-                                    {isAnalyzingCert === index && <Loader2 className="h-4 w-4 animate-spin" />}
-                                   </div>
-                                   <p className="text-xs text-muted-foreground mt-1">Upload a certificate file to have the AI fill in the details automatically.</p>
-                                </div>
-                            </div>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCert(index)} className="shrink-0 mt-1">
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                        </div>
-                    ))}
+                   <div className="flex items-center justify-between">
+                    <SectionTitle icon={Award} text="Licenses & Certifications" />
+                    <Button type="button" variant="outline" size="sm" onClick={() => openDialog('certifications')}>
+                      <PlusCircle className="mr-2 h-4 w-4" /> Add Certificate
+                    </Button>
+                  </div>
+                  <Card>
+                    <Table>
+                       <TableHeader>
+                        <TableRow>
+                          <TableHead>Certificate Name</TableHead>
+                          <TableHead>Issuing Organization</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {watchedCerts?.map((cert, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{cert.name}</TableCell>
+                            <TableCell>{cert.issuingOrganization}</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => openDialog('certifications', index)}><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => removeCert(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Card>
                 </TabsContent>
+
               </Tabs>
               
               <div className="flex justify-end pt-4 border-t">
-                <Button type="submit" disabled={isSaving || isAnalyzingCert !== null || isUploading || isRefining}>
+                <Button type="submit" disabled={isSaving || isAnalyzingCert || isUploading || isRefining}>
                   {(isSaving || isUploading || isRefining) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Profile
                 </Button>
@@ -590,6 +665,99 @@ export default function ProfilePage() {
         </Card>
       </main>
       <Footer />
+
+      {/* DIALOG FOR EDITING/ADDING */}
+      <Dialog open={!!editingSection} onOpenChange={(isOpen) => !isOpen && closeDialog()}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingIndex !== null ? 'Edit' : 'Add'} {editingSection?.replace('_', ' ')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {editingSection === 'education' && (
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="degree" className="text-right">Degree</Label>
+                  <Input id="degree" value={dialogData.degree || ''} onChange={(e) => setDialogData({ ...dialogData, degree: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="school" className="text-right">School</Label>
+                  <Input id="school" value={dialogData.school || ''} onChange={(e) => setDialogData({ ...dialogData, school: e.target.value })} className="col-span-3" />
+                </div>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="location" className="text-right">Location</Label>
+                  <Input id="location" value={dialogData.location || ''} onChange={(e) => setDialogData({ ...dialogData, location: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="dates" className="text-right">Dates</Label>
+                  <Input id="dates" value={dialogData.dates || ''} onChange={(e) => setDialogData({ ...dialogData, dates: e.target.value })} className="col-span-3" />
+                </div>
+              </>
+            )}
+             {editingSection === 'projects' && (
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">Name</Label>
+                  <Input id="name" value={dialogData.name || ''} onChange={(e) => setDialogData({ ...dialogData, name: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="description" className="text-right">Description</Label>
+                  <Textarea id="description" value={dialogData.description || ''} onChange={(e) => setDialogData({ ...dialogData, description: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="technologies" className="text-right">Technologies</Label>
+                  <Input id="technologies" value={dialogData.technologies || ''} onChange={(e) => setDialogData({ ...dialogData, technologies: e.target.value })} className="col-span-3" placeholder="Comma-separated"/>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="url" className="text-right">URL</Label>
+                  <Input id="url" value={dialogData.url || ''} onChange={(e) => setDialogData({ ...dialogData, url: e.target.value })} className="col-span-3" />
+                </div>
+              </>
+            )}
+             {editingSection === 'certifications' && (
+              <>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="cert-name" className="text-right">Name</Label>
+                  <Input id="cert-name" value={dialogData.name || ''} onChange={(e) => setDialogData({ ...dialogData, name: e.target.value })} className="col-span-3" />
+                </div>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="issuingOrganization" className="text-right">Organization</Label>
+                  <Input id="issuingOrganization" value={dialogData.issuingOrganization || ''} onChange={(e) => setDialogData({ ...dialogData, issuingOrganization: e.target.value })} className="col-span-3" />
+                </div>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="date" className="text-right">Date</Label>
+                  <Input id="date" value={dialogData.date || ''} onChange={(e) => setDialogData({ ...dialogData, date: e.target.value })} className="col-span-3" />
+                </div>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="credentialUrl" className="text-right">URL</Label>
+                  <Input id="credentialUrl" value={dialogData.credentialUrl || ''} onChange={(e) => setDialogData({ ...dialogData, credentialUrl: e.target.value })} className="col-span-3" />
+                </div>
+                <div className="col-span-4 space-y-2 pt-2 border-t">
+                  <Label htmlFor="cert-upload" className="text-sm font-medium">Auto-fill from Certificate</Label>
+                   <div className="flex items-center gap-2">
+                    <Input 
+                     id="cert-upload" 
+                     type="file" 
+                     onChange={handleCertificateUpload}
+                     className="text-xs flex-grow"
+                     disabled={isAnalyzingCert}
+                    />
+                    {isAnalyzingCert && <Loader2 className="h-4 w-4 animate-spin" />}
+                   </div>
+                   <p className="text-xs text-muted-foreground mt-1">Upload a certificate file to have the AI fill in the details automatically.</p>
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">Cancel</Button>
+            </DialogClose>
+            <Button type="button" onClick={handleDialogSave}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
