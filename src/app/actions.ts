@@ -42,6 +42,7 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
             email: portfolioDraft.personalInfo?.email,
             phone: portfolioDraft.personalInfo?.phone,
             location: portfolioDraft.personalInfo?.location,
+            summary: portfolioDraft.personalInfo?.summary,
             socials: portfolioDraft.personalInfo?.socials,
             experience: (portfolioDraft.experience || []).map(exp => ({...exp, description: exp.description.join('\\n')})),
             education: portfolioDraft.education,

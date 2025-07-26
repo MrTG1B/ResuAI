@@ -13,6 +13,7 @@ export interface PersonalInfo {
   website?: string;
   location: string;
   title: string;
+  summary?: string;
   dob?: string; // Date of Birth
   profilePictureUrl?: string | null;
   profilePictureDeleteUrl?: string;

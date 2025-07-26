@@ -65,6 +65,7 @@ const profileSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
   phone: z.string().optional(),
   location: z.string().optional(),
+  summary: z.string().optional(),
   dob: z.string().optional(),
   profilePictureUrl: z.string().url().optional().or(z.literal('')),
   profilePictureDeleteUrl: z.string().url().optional().or(z.literal('')),
@@ -378,6 +379,10 @@ export default function ProfilePage() {
                             <div className="space-y-2">
                                 <Label htmlFor="location">Location</Label>
                                 <Input id="location" {...register("location")} placeholder="e.g., San Francisco, CA" />
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="summary">About Me / Professional Summary</Label>
+                                <Textarea id="summary" {...register("summary")} placeholder="Write a short summary about yourself..." rows={4} />
                             </div>
                         </div>
                    </div>

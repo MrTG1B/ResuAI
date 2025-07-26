@@ -34,6 +34,7 @@ const PersonalInfoSchema = z.object({
     phone: z.string().describe("The user's phone number.").optional(),
     website: z.string().url().describe("The user's personal website or portfolio URL.").optional(),
     location: z.string().describe("The user's location (e.g., 'San Francisco, CA').").optional(),
+    summary: z.string().describe("A professional summary or 'About Me' section from the resume.").optional(),
     socials: z.array(SocialLinkSchema).describe("A list of social media links.").optional(),
 });
 
