@@ -119,9 +119,8 @@ export default function ResumeEditorClient() {
                  // Fetch user profile data
                 const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
                 const docSnap = await getDoc(profileDocRef);
-                if (docSnap.exists()) {
-                    setUserProfile(docSnap.data() as PersonalInfo);
-                }
+                const profileData = docSnap.exists() ? (docSnap.data() as PersonalInfo) : {};
+                setUserProfile(profileData);
 
 
                 if (idFromUrl) {
@@ -142,48 +141,45 @@ export default function ResumeEditorClient() {
                 } else if (fromFlow === 'scratch') {
                      setIsParsing(true);
                      setFlow('scratch');
-                     const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
-                     const docSnap = await getDoc(profileDocRef);
-                     if (docSnap.exists()) {
-                        const profile = docSnap.data();
-                        const socialLinksHtml = (profile.socials || [])
-                            .map((s: { platform: string; url: string; }) => `<span><a href="${s.url}" target="_blank" style="color: #007bff; text-decoration: none;">${s.platform}</a></span>`)
-                            .join(' | ');
+                     
+                    const socialLinksHtml = (profileData.socials || [])
+                        .map((s: { platform: string; url: string; }) => `<span><a href="${s.url}" target="_blank" style="color: #007bff; text-decoration: none;">${s.platform}</a></span>`)
+                        .join(' | ');
 
-                        const initialHtml = `
-                          <div style="font-family: 'Roboto', sans-serif; color: #333;">
-                            <header style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
-                              <h1 style="font-size: 2.5em; margin: 0; color: #1a1a1a;">${profile.name || 'Your Name'}</h1>
-                              <p style="font-size: 1.2em; margin: 5px 0 0;">${profile.title || 'Your Title'}</p>
-                            </header>
-                            <section style="margin-bottom: 20px;">
-                              <div style="display: flex; justify-content: center; gap: 20px; font-size: 0.9em; color: #555;">
-                                ${profile.email ? `<span><a href="mailto:${profile.email}" style="color: #007bff; text-decoration: none;">${profile.email}</a></span>` : ''}
-                                ${profile.phone ? `<span>${profile.phone}</span>` : ''}
-                                ${profile.website ? `<span><a href="${profile.website}" target="_blank" style="color: #007bff; text-decoration: none;">${profile.website}</a></span>` : ''}
-                              </div>
-                              <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.9em;">
-                                ${socialLinksHtml}
-                              </div>
-                            </section>
-                            <section>
-                              <h2 style="font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px;">Summary</h2>
-                              <p>A brief professional summary here.</p>
-                            </section>
+                    const initialHtml = `
+                      <div style="font-family: 'Roboto', sans-serif; color: #333;">
+                        <header style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
+                          <h1 style="font-size: 2.5em; margin: 0; color: #1a1a1a;">${profileData.name || '<!-- YOUR NAME HERE -->'}</h1>
+                          <p style="font-size: 1.2em; margin: 5px 0 0;">${profileData.title || '<!-- YOUR TITLE HERE -->'}</p>
+                        </header>
+                        <section style="margin-bottom: 20px;">
+                          <div style="display: flex; justify-content: center; gap: 20px; font-size: 0.9em; color: #555;">
+                            <span>${profileData.email || '<!-- email@example.com -->'}</span>
+                            <span>${profileData.phone || '<!-- (123) 456-7890 -->'}</span>
+                            <span>${profileData.location || '<!-- City, State -->'}</span>
                           </div>
-                        `;
-                        const newState: SavedEditorState = {
-                            htmlContent: initialHtml,
-                            chatHistory: [],
-                            fileName: `${profile.name || 'User'}'s Resume`,
-                            initialPreviewUri: '',
-                        };
-                         const newId = await saveStateToFirestore(newState, null);
-                         if (newId) {
-                            setEditorState(newState);
-                            setResumeId(newId);
-                            setFlow('edit');
-                        }
+                          <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.9em;">
+                            ${socialLinksHtml}
+                          </div>
+                        </section>
+                        <section>
+                          <h2 style="font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px;">Summary</h2>
+                          <p>${profileData.summary || '<!-- Add a professional summary here. You can ask the AI to write one for you based on your experience! -->'}</p>
+                        </section>
+                         <!-- To add more sections like Experience, Education, Skills, Projects, or Certifications, just ask the AI! For example: 'Add my work experience' or 'Create a skills section'. The AI will use your saved profile data. -->
+                      </div>
+                    `;
+                    const newState: SavedEditorState = {
+                        htmlContent: initialHtml,
+                        chatHistory: [],
+                        fileName: `${profileData.name || 'User'}'s Resume`,
+                        initialPreviewUri: '', // No initial file for 'from scratch'
+                    };
+                     const newId = await saveStateToFirestore(newState, null);
+                     if (newId) {
+                        setEditorState(newState);
+                        setResumeId(newId);
+                        setFlow('edit');
                     }
                     setIsParsing(false);
                 } else {
@@ -385,7 +381,7 @@ export default function ResumeEditorClient() {
 
     const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (editorState) {
-            handleEditorStateUpdate({ ...editorState, fileName: e.target.value });
+            handleEditorStateUpdate({ ...editorState, fileName: e.target.value.replace(/\.html?$/, '') });
         }
     };
 
