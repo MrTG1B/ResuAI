@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -683,104 +684,139 @@ export default function ProfilePage() {
               {editingIndex !== null ? 'Edit' : 'Add'} {editingSection?.replace('_', ' ')}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="py-4 space-y-4">
             {editingSection === 'experience' && (
-              <>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="role" className="text-right">Role</Label>
-                  <Input id="role" value={dialogData.role || ''} onChange={(e) => setDialogData({ ...dialogData, role: e.target.value })} className="col-span-3" />
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="role">Role</Label>
+                    <Input id="role" value={dialogData.role || ''} onChange={(e) => setDialogData({ ...dialogData, role: e.target.value })} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company">Company</Label>
+                    <Input id="company" value={dialogData.company || ''} onChange={(e) => setDialogData({ ...dialogData, company: e.target.value })} />
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="company" className="text-right">Company</Label>
-                  <Input id="company" value={dialogData.company || ''} onChange={(e) => setDialogData({ ...dialogData, company: e.target.value })} className="col-span-3" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="location">Location</Label>
+                    <Input id="location" value={dialogData.location || ''} onChange={(e) => setDialogData({ ...dialogData, location: e.target.value })} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="dates">Dates</Label>
+                    <Input id="dates" value={dialogData.dates || ''} onChange={(e) => setDialogData({ ...dialogData, dates: e.target.value })} />
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="location" className="text-right">Location</Label>
-                  <Input id="location" value={dialogData.location || ''} onChange={(e) => setDialogData({ ...dialogData, location: e.target.value })} className="col-span-3" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea id="description" value={dialogData.description || ''} onChange={(e) => setDialogData({ ...dialogData, description: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="dates" className="text-right">Dates</Label>
-                  <Input id="dates" value={dialogData.dates || ''} onChange={(e) => setDialogData({ ...dialogData, dates: e.target.value })} className="col-span-3" />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">Description</Label>
-                  <Textarea id="description" value={dialogData.description || ''} onChange={(e) => setDialogData({ ...dialogData, description: e.target.value })} className="col-span-3" />
-                </div>
-              </>
+              </div>
             )}
             {editingSection === 'education' && (
-              <>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="degree" className="text-right">Degree</Label>
-                  <Input id="degree" value={dialogData.degree || ''} onChange={(e) => setDialogData({ ...dialogData, degree: e.target.value })} className="col-span-3" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="degree">Degree</Label>
+                  <Input id="degree" value={dialogData.degree || ''} onChange={(e) => setDialogData({ ...dialogData, degree: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="school" className="text-right">School</Label>
-                  <Input id="school" value={dialogData.school || ''} onChange={(e) => setDialogData({ ...dialogData, school: e.target.value })} className="col-span-3" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="school">School</Label>
+                  <Input id="school" value={dialogData.school || ''} onChange={(e) => setDialogData({ ...dialogData, school: e.target.value })} />
                 </div>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="location" className="text-right">Location</Label>
-                  <Input id="location" value={dialogData.location || ''} onChange={(e) => setDialogData({ ...dialogData, location: e.target.value })} className="col-span-3" />
+                 <div className="space-y-1.5">
+                  <Label htmlFor="location">Location</Label>
+                  <Input id="location" value={dialogData.location || ''} onChange={(e) => setDialogData({ ...dialogData, location: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="dates" className="text-right">Dates</Label>
-                  <Input id="dates" value={dialogData.dates || ''} onChange={(e) => setDialogData({ ...dialogData, dates: e.target.value })} className="col-span-3" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="dates">Dates</Label>
+                  <Input id="dates" value={dialogData.dates || ''} onChange={(e) => setDialogData({ ...dialogData, dates: e.target.value })} />
                 </div>
-              </>
+              </div>
             )}
              {editingSection === 'projects' && (
-              <>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">Name</Label>
-                  <Input id="name" value={dialogData.name || ''} onChange={(e) => setDialogData({ ...dialogData, name: e.target.value })} className="col-span-3" />
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="name">Project Name</Label>
+                  <Input id="name" value={dialogData.name || ''} onChange={(e) => setDialogData({ ...dialogData, name: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">Description</Label>
-                  <Textarea id="description" value={dialogData.description || ''} onChange={(e) => setDialogData({ ...dialogData, description: e.target.value })} className="col-span-3" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea id="description" value={dialogData.description || ''} onChange={(e) => setDialogData({ ...dialogData, description: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="technologies" className="text-right">Technologies</Label>
-                  <Input id="technologies" value={dialogData.technologies || ''} onChange={(e) => setDialogData({ ...dialogData, technologies: e.target.value })} className="col-span-3" placeholder="Comma-separated"/>
+                <div className="space-y-1.5">
+                  <Label htmlFor="technologies">Technologies</Label>
+                  <Input id="technologies" value={dialogData.technologies || ''} onChange={(e) => setDialogData({ ...dialogData, technologies: e.target.value })} placeholder="Comma-separated"/>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="url" className="text-right">URL</Label>
-                  <Input id="url" value={dialogData.url || ''} onChange={(e) => setDialogData({ ...dialogData, url: e.target.value })} className="col-span-3" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="url">Project URL</Label>
+                  <Input id="url" value={dialogData.url || ''} onChange={(e) => setDialogData({ ...dialogData, url: e.target.value })} />
                 </div>
-              </>
+              </div>
             )}
-             {editingSection === 'certifications' && (
-              <>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="cert-name" className="text-right">Name</Label>
-                  <Input id="cert-name" value={dialogData.name || ''} onChange={(e) => setDialogData({ ...dialogData, name: e.target.value })} className="col-span-3" />
+            {editingSection === 'certifications' && (
+                <div className="space-y-6">
+                    {/* Manual Entry Section */}
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="cert-name">Certificate Name</Label>
+                                <Input id="cert-name" value={dialogData.name || ''} onChange={(e) => setDialogData({ ...dialogData, name: e.target.value })} placeholder="e.g., Certified Developer" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="issuingOrganization">Issuing Organization</Label>
+                                <Input id="issuingOrganization" value={dialogData.issuingOrganization || ''} onChange={(e) => setDialogData({ ...dialogData, issuingOrganization: e.target.value })} placeholder="e.g., Google" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="date">Date Issued</Label>
+                                <Input id="date" value={dialogData.date || ''} onChange={(e) => setDialogData({ ...dialogData, date: e.target.value })} placeholder="e.g., May 2024" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="credentialUrl">Credential URL</Label>
+                                <Input id="credentialUrl" value={dialogData.credentialUrl || ''} onChange={(e) => setDialogData({ ...dialogData, credentialUrl: e.target.value })} placeholder="https://coursera.org/verify/..." />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Separator */}
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">Or</span>
+                        </div>
+                    </div>
+
+                    {/* AI Auto-fill Section */}
+                    <div>
+                        <Label htmlFor="cert-upload" className="text-sm font-medium">Auto-fill with AI</Label>
+                        <label
+                            htmlFor="cert-upload-input"
+                            className="relative mt-1 flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
+                        >
+                            {isAnalyzingCert ? (
+                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center text-center">
+                                    <UploadCloud className="w-6 h-6 mb-1 text-primary" />
+                                    <p className="text-sm text-foreground">
+                                        <span className="font-semibold">Upload Certificate</span>
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">PDF, JPG, or PNG (Max 2MB)</p>
+                                </div>
+                            )}
+                            <Input
+                                id="cert-upload-input"
+                                type="file"
+                                onChange={handleCertificateUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                disabled={isAnalyzingCert}
+                            />
+                        </label>
+                    </div>
                 </div>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="issuingOrganization" className="text-right">Organization</Label>
-                  <Input id="issuingOrganization" value={dialogData.issuingOrganization || ''} onChange={(e) => setDialogData({ ...dialogData, issuingOrganization: e.target.value })} className="col-span-3" />
-                </div>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="date" className="text-right">Date</Label>
-                  <Input id="date" value={dialogData.date || ''} onChange={(e) => setDialogData({ ...dialogData, date: e.target.value })} className="col-span-3" />
-                </div>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="credentialUrl" className="text-right">URL</Label>
-                  <Input id="credentialUrl" value={dialogData.credentialUrl || ''} onChange={(e) => setDialogData({ ...dialogData, credentialUrl: e.target.value })} className="col-span-3" />
-                </div>
-                <div className="col-span-4 space-y-2 pt-2 border-t">
-                  <Label htmlFor="cert-upload" className="text-sm font-medium">Auto-fill from Certificate</Label>
-                   <div className="flex items-center gap-2">
-                    <Input 
-                     id="cert-upload" 
-                     type="file" 
-                     onChange={handleCertificateUpload}
-                     className="text-xs flex-grow"
-                     disabled={isAnalyzingCert}
-                    />
-                    {isAnalyzingCert && <Loader2 className="h-4 w-4 animate-spin" />}
-                   </div>
-                   <p className="text-xs text-muted-foreground mt-1">Upload a certificate file to have the AI fill in the details automatically.</p>
-                </div>
-              </>
             )}
           </div>
           <DialogFooter>
@@ -794,3 +830,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+
