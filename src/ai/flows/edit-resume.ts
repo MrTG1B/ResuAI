@@ -119,6 +119,38 @@ When the user asks you to add, update, or reference personal information (e.g., 
 {{{userProfile}}}
 </profile>
 
+{{#if userProfile.experience.length}}
+⚠️ IMPORTANT: The user has the following work experience in their profile:
+{{#each userProfile.experience}}
+- **Role:** {{this.role}} at **{{this.company}}**{{#if this.location}} in {{this.location}}{{/if}}. (Dates: {{this.dates}}). Description: {{this.description}}
+{{/each}}
+You **MUST** use this information when asked to add or update their experience.
+{{/if}}
+
+{{#if userProfile.education.length}}
+⚠️ IMPORTANT: The user has the following education in their profile:
+{{#each userProfile.education}}
+- **{{this.degree}}** from **{{this.school}}**{{#if this.location}}, {{this.location}}{{/if}}. (Dates: {{this.dates}})
+{{/each}}
+You **MUST** use this information.
+{{/if}}
+
+{{#if userProfile.projects.length}}
+⚠️ IMPORTANT: The user has the following projects in their profile:
+{{#each userProfile.projects}}
+- **{{this.name}}**: {{this.description}} (Tech: {{this.technologies}}). URL: {{this.url}}
+{{/each}}
+You **MUST** use this information.
+{{/if}}
+
+{{#if userProfile.skills.length}}
+⚠️ IMPORTANT: The user has the following skills in their profile:
+{{#each userProfile.skills}}
+- {{this}}
+{{/each}}
+You **MUST** use this information.
+{{/if}}
+
 {{#if userProfile.certifications.length}}
 ⚠️ IMPORTANT: The user has the following certifications in their profile:
 {{#each userProfile.certifications}}
