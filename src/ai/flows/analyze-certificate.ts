@@ -23,7 +23,7 @@ const AnalyzeCertificateOutputSchema = z.object({
   name: z.string().describe("The full name or title of the certification."),
   issuingOrganization: z.string().describe("The name of the organization that issued the certificate."),
   date: z.string().describe("The date the certificate was issued or obtained (e.g., 'May 2023' or '2023-05-15')."),
-  credentialUrl: z.string().url().optional().describe("A URL to the credential if one is found on the certificate."),
+  credentialUrl: z.string().optional().describe("A URL to the credential if one is found on the certificate."),
 });
 export type AnalyzeCertificateOutput = z.infer<typeof AnalyzeCertificateOutputSchema>;
 

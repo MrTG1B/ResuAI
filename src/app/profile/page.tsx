@@ -432,7 +432,7 @@ export default function ProfilePage() {
                             <Label htmlFor={`socials.${index}.url`} className="text-xs">URL</Label>
                             <Input {...register(`socials.${index}.url`)} placeholder="https://linkedin.com/in/..." />
                           </div>
-                          <Button type="button" variant="ghost" size="icon" onClick={() => removeSocial(index)}>
+                          <Button type="button" variant="ghost" size="icon" onClick={() => removeSocial(index)} className="shrink-0">
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
@@ -449,6 +449,9 @@ export default function ProfilePage() {
                   </div>
                   {expFields.map((field, index) => (
                     <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeExp(index)} className="absolute top-2 right-2 h-8 w-8">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <Input {...register(`experience.${index}.role`)} placeholder="Role / Title" />
                           <Input {...register(`experience.${index}.company`)} placeholder="Company Name" />
@@ -456,9 +459,6 @@ export default function ProfilePage() {
                           <Input {...register(`experience.${index}.dates`)} placeholder="Dates (e.g., Jan 2020 - Present)" />
                         </div>
                         <Textarea {...register(`experience.${index}.description`)} placeholder="Key responsibilities and achievements..." />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeExp(index)} className="absolute top-2 right-2">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
                     </div>
                   ))}
                 </TabsContent>
@@ -472,15 +472,15 @@ export default function ProfilePage() {
                     </div>
                     {eduFields.map((field, index) => (
                       <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
+                           <Button type="button" variant="ghost" size="icon" onClick={() => removeEdu(index)} className="absolute top-2 right-2 h-8 w-8">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input {...register(`education.${index}.degree`)} placeholder="Degree (e.g., B.S. in Computer Science)" />
                             <Input {...register(`education.${index}.school`)} placeholder="School Name" />
                             <Input {...register(`education.${index}.location`)} placeholder="Location" />
                             <Input {...register(`education.${index}.dates`)} placeholder="Dates (e.g., Aug 2016 - May 2020)" />
                           </div>
-                          <Button type="button" variant="ghost" size="icon" onClick={() => removeEdu(index)} className="absolute top-2 right-2">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
                       </div>
                     ))}
                 </TabsContent>
@@ -494,13 +494,13 @@ export default function ProfilePage() {
                     </div>
                     {projFields.map((field, index) => (
                         <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
+                             <Button type="button" variant="ghost" size="icon" onClick={() => removeProj(index)} className="absolute top-2 right-2 h-8 w-8">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                             <Input {...register(`projects.${index}.name`)} placeholder="Project Name" />
                             <Textarea {...register(`projects.${index}.description`)} placeholder="Project description..." />
                             <Input {...register(`projects.${index}.technologies`)} placeholder="Technologies used (comma-separated)" />
                             <Input {...register(`projects.${index}.url`)} placeholder="Project URL" />
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeProj(index)} className="absolute top-2 right-2">
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
                         </div>
                     ))}
                 </TabsContent>
@@ -514,6 +514,9 @@ export default function ProfilePage() {
                     </div>
                     {certFields.map((field, index) => (
                         <div key={field.id} className="space-y-3 p-4 rounded-md border bg-muted/50 relative">
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCert(index)} className="absolute top-2 right-2 h-8 w-8">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input {...register(`certifications.${index}.name`)} placeholder="Certification Name" />
                                 <Input {...register(`certifications.${index}.issuingOrganization`)} placeholder="Issuing Organization" />
@@ -534,9 +537,6 @@ export default function ProfilePage() {
                                </div>
                                <p className="text-xs text-muted-foreground mt-1">Upload a certificate file to have the AI fill in the details automatically.</p>
                             </div>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCert(index)} className="absolute top-2 right-2">
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
                         </div>
                     ))}
                 </TabsContent>
