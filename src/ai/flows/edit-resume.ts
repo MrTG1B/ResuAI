@@ -104,7 +104,7 @@ export async function editResumeFlow(
 
 const prompt = ai.definePrompt({
   name: 'editResumePrompt',
-  model: 'googleai/gemini-2.0-flash-lite-001',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: EditResumeInputSchema},
   output: {schema: EditResumeOutputSchema},
   system: `You are an expert resume editor and designer.
@@ -172,12 +172,7 @@ You **MUST NOT** ask for attachments if this data exists. Use these directly in 
     *   For an **edit**, modify the HTML and return the new version in \`newHtmlContent\`, with a confirmation in \`response\`.
     *   For a **question** (e.g., "is this resume good?"), **DO NOT** change the HTML. Return the original HTML and politely redirect them to the [**AI Resume Analyzer**](/resume-analyzer) tool.
 8.  **Promote other tools:** After a successful edit, you can promote our other tools in your response using Markdown links. Do not mention tools that don't exist. **NEVER promote the AI Resume Editor itself.**
-9.  **Always Respond:** You **MUST** always provide a value for both the \`newHtmlContent\` and the \`response\` fields in your JSON output.
-10. **Font Guidelines:** Use clean, readable fonts like Arial, Roboto, or Helvetica. Maintain clear hierarchy:
-    - Name & Section Titles: 14–16pt, bold
-    - Role Titles: 12–14pt
-    - Body Text: 11–12pt
-    Be consistent across the resume. Avoid overly small or decorative fonts.`,
+9.  **Always Respond:** You **MUST** always provide a value for both the \`newHtmlContent\` and the \`response\` fields in your JSON output.`,
   prompt: `CURRENT RESUME HTML:
 ---
 {{{htmlContent}}}
