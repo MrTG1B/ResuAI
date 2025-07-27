@@ -223,7 +223,7 @@ export default function MentraChatClient() {
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-background text-foreground">
-        <Sidebar>
+        <Sidebar side="left">
             <SidebarHeader>
                 <Button onClick={handleNewChat} className="w-full">
                     <Plus className="mr-2 h-4 w-4"/> New Chat
@@ -273,14 +273,14 @@ export default function MentraChatClient() {
         </Sidebar>
 
         <SidebarInset>
-            <Header pageActions={<SidebarTrigger className="md:hidden"/>}/>
+            <Header pageActions={<SidebarTrigger />}/>
             <div className="flex-grow w-full max-w-4xl mx-auto flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden">
                 <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
                     <div className="space-y-6 pb-8">
                         {messages.map((message, index) => (
                             <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 {message.role === 'assistant' && (
-                                    <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1">
+                                    <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1 shrink-0">
                                         <MentraIcon className="h-full w-full" />
                                     </Avatar>
                                 )}
@@ -289,19 +289,11 @@ export default function MentraChatClient() {
                                         {message.content}
                                     </ReactMarkdown>
                                 </div>
-                                {message.role === 'user' && (
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage unoptimized src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
-                                        <AvatarFallback className="text-sm font-semibold">
-                                            {getInitials(currentUser.displayName) || <UserIcon className="h-4 w-4" />}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                )}
                             </div>
                         ))}
                         {isResponding && (
                             <div className="flex items-start gap-4 justify-start">
-                                <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1"><MentraIcon className="h-full w-full" /></Avatar>
+                                <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1 shrink-0"><MentraIcon className="h-full w-full" /></Avatar>
                                 <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
                             </div>
                         )}
@@ -347,3 +339,4 @@ export default function MentraChatClient() {
     </SidebarProvider>
   );
 }
+
