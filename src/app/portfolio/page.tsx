@@ -320,7 +320,7 @@ function PortfolioPageContent() {
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-grow flex items-center justify-center text-center">
+            <main className="flex-grow flex items-center justify-center text-center p-4">
                 <div>
                     <h1 className="text-4xl font-bold font-heading">Portfolio Not Found</h1>
                     <p className="text-muted-foreground mt-2">The portfolio you are looking for does not exist or has been moved.</p>
@@ -368,16 +368,16 @@ function PortfolioPageContent() {
 
         <div className="rounded-xl shadow-2xl overflow-hidden" style={{ backgroundColor: 'var(--p-secondary, hsl(var(--card)))', color: 'var(--p-fg, hsl(var(--foreground)))' }}>
             {/* Profile Header */}
-            <div className="p-8 md:flex md:items-center md:gap-8 border-b" style={{ borderColor: 'var(--p-primary, hsl(var(--border)))' }}>
+            <div className="p-6 md:p-8 md:flex md:items-center md:gap-8 border-b" style={{ borderColor: 'var(--p-primary, hsl(var(--border)))' }}>
                 <div className="flex-shrink-0 mx-auto md:mx-0">
-                    <div className="relative h-32 w-32 group">
+                    <div className="relative h-24 w-24 md:h-32 md:w-32 group">
                       <Image
                           unoptimized
                           src={personalInfo?.profilePictureUrl || 'https://placehold.co/128x128.png'}
                           alt={`${personalInfo?.name || 'User'}'s profile picture`}
                           width={128}
                           height={128}
-                          className="rounded-full object-cover h-32 w-32 border-4 shadow-md"
+                          className="rounded-full object-cover h-full w-full border-4 shadow-md"
                           style={{ borderColor: 'var(--p-primary, hsl(var(--primary)))' }}
                           priority
                       />
@@ -393,16 +393,16 @@ function PortfolioPageContent() {
                 </div>
                 <div className="flex-1 text-center md:text-left mt-6 md:mt-0">
                     {isEditMode ? (
-                      <Input value={personalInfo?.name || ''} onChange={(e) => handlePersonalInfoChange('name', e.target.value)} className="text-4xl font-bold tracking-tight h-auto p-0 border-0 focus-visible:ring-0 bg-transparent font-heading" />
+                      <Input value={personalInfo?.name || ''} onChange={(e) => handlePersonalInfoChange('name', e.target.value)} className="text-3xl md:text-4xl font-bold tracking-tight h-auto p-0 border-0 focus-visible:ring-0 bg-transparent font-heading" />
                     ) : (
-                      <h1 className="text-4xl font-bold tracking-tight font-heading" style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}>{personalInfo?.name}</h1>
+                      <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-heading" style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}>{personalInfo?.name}</h1>
                     )}
                     {isEditMode ? (
-                      <Input value={personalInfo?.title || ''} onChange={(e) => handlePersonalInfoChange('title', e.target.value)} className="text-xl mt-1 h-auto p-0 border-0 focus-visible:ring-0 bg-transparent" />
+                      <Input value={personalInfo?.title || ''} onChange={(e) => handlePersonalInfoChange('title', e.target.value)} className="text-lg md:text-xl mt-1 h-auto p-0 border-0 focus-visible:ring-0 bg-transparent" />
                     ) : (
-                      <p className="text-xl mt-1" style={{color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.8}}>{personalInfo?.title}</p>
+                      <p className="text-lg md:text-xl mt-1" style={{color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.8}}>{personalInfo?.title}</p>
                     )}
-                    <div className="mt-4 flex flex-wrap justify-center md:justify-start items-center gap-x-6 gap-y-2 text-sm">
+                    <div className="mt-4 flex flex-col sm:flex-row flex-wrap justify-center md:justify-start items-center gap-x-6 gap-y-2 text-sm">
                         {isEditMode ? <Input value={personalInfo?.email || ''} onChange={(e) => handlePersonalInfoChange('email', e.target.value)} placeholder="Email" className="bg-transparent"/> : (personalInfo?.email && <a href={`mailto:${personalInfo.email}`} className="flex items-center gap-2" style={{ color: 'var(--p-fg, hsl(var(--foreground)))' }}><Mail className="h-4 w-4" style={{color: 'var(--p-primary, hsl(var(--primary)))'}}/>{personalInfo.email}</a>)}
                         {isEditMode ? <Input value={personalInfo?.phone || ''} onChange={(e) => handlePersonalInfoChange('phone', e.target.value)} placeholder="Phone" className="bg-transparent"/> : (personalInfo?.phone && <span className="flex items-center gap-2"><Phone className="h-4 w-4" style={{color: 'var(--p-primary, hsl(var(--primary)))'}}/>{personalInfo.phone}</span>)}
                         {isEditMode ? <Input value={personalInfo?.website || ''} onChange={(e) => handlePersonalInfoChange('website', e.target.value)} placeholder="Website" className="bg-transparent"/> : (personalInfo?.website && <a href={personalInfo.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2" style={{ color: 'var(--p-fg, hsl(var(--foreground)))' }}><Globe className="h-4 w-4" style={{color: 'var(--p-primary, hsl(var(--primary)))'}}/>{personalInfo.website}</a>)}
@@ -438,7 +438,7 @@ function PortfolioPageContent() {
             </div>
 
             {/* Main Content Area */}
-            <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-12">
+            <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-12">
                 <div className="lg:col-span-2 space-y-12">
                     {summary && (
                         <section>

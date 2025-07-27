@@ -409,9 +409,9 @@ export default function ProfilePage() {
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-4xl">
         <Card className="shadow-lg">
           <CardHeader>
-            <div className="flex items-center gap-4">
-              <UserCircle className="h-10 w-10 text-primary"/>
-              <div>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <UserCircle className="h-10 w-10 text-primary flex-shrink-0"/>
+              <div className="text-center sm:text-left">
                 <CardTitle className="text-3xl font-bold tracking-tight font-heading">
                   Your Professional Profile
                 </CardTitle>
@@ -423,8 +423,8 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-              <Tabs defaultValue="personal" className="w-full">
-                <TabsList className="grid w-full grid-cols-8">
+              <Tabs defaultValue="personal" className="w-full" orientation="vertical">
+                <TabsList className="grid w-full grid-cols-2 sm:flex sm:w-auto sm:flex-col sm:items-start sm:h-full text-sm sm:text-base">
                   <TabsTrigger value="personal">Personal</TabsTrigger>
                   <TabsTrigger value="skills">Skills</TabsTrigger>
                   <TabsTrigger value="languages">Languages</TabsTrigger>
@@ -435,10 +435,10 @@ export default function ProfilePage() {
                   <TabsTrigger value="certifications">Certs</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="personal" className="space-y-6 pt-4">
+                <TabsContent value="personal" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
                    <SectionTitle icon={UserCircle} text="Personal Information" />
                    <div className="flex flex-col md:flex-row items-start gap-8">
-                        <div className="space-y-2 flex-shrink-0 text-center md:w-1/4">
+                        <div className="space-y-2 flex-shrink-0 text-center md:w-1/4 w-full">
                             <Label>Profile Picture</Label>
                             <div className="relative w-32 h-32 group mx-auto">
                                 <Image
@@ -457,7 +457,7 @@ export default function ProfilePage() {
                             </div>
                             <p className="text-xs text-muted-foreground mt-2 max-w-xs mx-auto">This picture will be used in your resume and portfolio.</p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow md:w-3/4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow md:w-3/4 w-full">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Full Name</Label>
                                 <Input id="name" {...register("name")} placeholder="e.g., Jane Doe" />
@@ -558,7 +558,7 @@ export default function ProfilePage() {
                     </div>
                 </TabsContent>
 
-                <TabsContent value="skills" className="space-y-6 pt-4">
+                <TabsContent value="skills" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Wrench} text="Skills" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('skills')}>
@@ -593,7 +593,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="languages" className="space-y-6 pt-4">
+                <TabsContent value="languages" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Languages} text="Languages" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('languages')}>
@@ -630,7 +630,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="interests" className="space-y-6 pt-4">
+                <TabsContent value="interests" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Smile} text="Interests" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('interests')}>
@@ -665,7 +665,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="experience" className="space-y-6 pt-4">
+                <TabsContent value="experience" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Briefcase} text="Work Experience" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('experience')}>
@@ -697,7 +697,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                 <TabsContent value="education" className="space-y-6 pt-4">
+                 <TabsContent value="education" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={GraduationCap} text="Education" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('education')}>
@@ -729,7 +729,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="projects" className="space-y-6 pt-4">
+                <TabsContent value="projects" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Lightbulb} text="Projects" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('projects')}>
@@ -761,7 +761,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="certifications" className="space-y-6 pt-4">
+                <TabsContent value="certifications" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
                    <div className="flex items-center justify-between">
                     <SectionTitle icon={Award} text="Licenses & Certifications" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('certifications')}>

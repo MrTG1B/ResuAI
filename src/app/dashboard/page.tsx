@@ -326,7 +326,7 @@ export default function DashboardPage() {
 
             <Card className="shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 w-full animate-fade-in-up">
                 <Link href="/career-coach" className="block hover:bg-card/20 rounded-lg">
-                    <CardHeader className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+                    <CardHeader className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left p-4 sm:p-6">
                         <div className="bg-primary/10 p-4 rounded-full">
                             <MentraIcon className="h-10 w-10 text-primary" />
                         </div>
@@ -334,7 +334,7 @@ export default function DashboardPage() {
                             <CardTitle className="text-2xl font-heading">Chat with Mentra</CardTitle>
                             <p className="text-muted-foreground mt-1">Get instant guidance on your career, help writing professional content, and more from your personal AI mentor.</p>
                         </div>
-                        <Button variant="ghost" className="shrink-0">
+                        <Button variant="ghost" className="shrink-0 mt-4 md:mt-0">
                             Start Chatting <Sparkles className="ml-2 h-4 w-4" />
                         </Button>
                     </CardHeader>

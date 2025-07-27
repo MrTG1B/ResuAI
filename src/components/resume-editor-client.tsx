@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
@@ -171,7 +172,7 @@ export default function ResumeEditorClient() {
                     const newState: SavedEditorState = {
                         htmlContent: initialHtml,
                         chatHistory: [],
-                        fileName: `${profileData.name || 'User'}'s Resume`,
+                        fileName: `${profileData.name || 'User'}'s Resume`.replace(/\.[^/.]+$/, ""),
                         initialPreviewUri: '',
                     };
                     setEditorState(newState);
@@ -429,7 +430,7 @@ export default function ResumeEditorClient() {
     return (
         <div className="flex flex-col h-screen bg-muted/20">
             <Header pageActions={showEditor ? editorActions: undefined} />
-            <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-hidden">
+            <main className="flex-grow p-4 md:p-6 lg:p-8 overflow-hidden h-full">
                 { !showEditor ? (
                      <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
                         {isParsing ? (
@@ -459,16 +460,16 @@ export default function ResumeEditorClient() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-                        <div className="lg:col-span-2 h-full min-h-0">
+                        <div className="lg:col-span-2 h-full min-h-0 flex flex-col">
                            <Card className="h-full flex flex-col overflow-hidden">
                                 <CardHeader className="py-3 px-6 border-b flex-shrink-0">
                                     <CardTitle className="text-base font-normal flex items-center">
-                                       <span className="mr-2">Editing:</span>
+                                       <span className="mr-2 hidden sm:inline">Editing:</span>
                                        <Input
                                             type="text"
                                             value={editorState.fileName?.replace(/\.[^/.]+$/, "") || ''}
                                             onChange={handleFileNameChange}
-                                            className="h-7 w-auto max-w-xs text-base font-medium p-1"
+                                            className="h-7 w-auto max-w-full sm:max-w-xs text-base font-medium p-1"
                                         />
                                     </CardTitle>
                                 </CardHeader>
@@ -487,7 +488,7 @@ export default function ResumeEditorClient() {
                                                 <div className="p-4 flex justify-center items-start">
                                                     <div
                                                         ref={livePreviewRef}
-                                                        className={cn("bg-white text-black shadow-lg transition-all duration-300", isAILoading && "blur-sm")}
+                                                        className={cn("bg-white text-black shadow-lg transition-all duration-300 transform scale-[0.9] sm:scale-100 origin-top", isAILoading && "blur-sm")}
                                                         style={{
                                                             width: '210mm',
                                                             minHeight: '297mm',
