@@ -139,7 +139,7 @@ export default function ResumeEditorClient() {
                         router.push('/dashboard');
                     }
                 } else if (fromFlow === 'scratch') {
-                    setFlow('edit');
+                     setFlow('edit');
                      
                     const socialLinksHtml = (profileData.socials || [])
                         .map((s: { platform: string; url: string; }) => `<span><a href="${s.url}" target="_blank" style="color: #007bff; text-decoration: none;">${s.platform}</a></span>`)
@@ -172,9 +172,10 @@ export default function ResumeEditorClient() {
                         htmlContent: initialHtml,
                         chatHistory: [],
                         fileName: `${profileData.name || 'User'}'s Resume`,
-                        initialPreviewUri: '', // No initial file for 'from scratch'
+                        initialPreviewUri: '',
                     };
                     setEditorState(newState);
+                    saveStateToFirestore(newState, null);
                 } else {
                     setFlow('upload');
                 }
@@ -185,7 +186,7 @@ export default function ResumeEditorClient() {
         });
         
         return () => unsubscribe();
-    }, [router, searchParams, toast]);
+    }, [router, searchParams, toast, saveStateToFirestore]);
 
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -285,7 +286,8 @@ export default function ResumeEditorClient() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = (editorState?.fileName || 'resume') + '.pdf';
+            const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
+            a.download = `${cleanFileName}.pdf`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -374,7 +376,7 @@ export default function ResumeEditorClient() {
 
     const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (editorState) {
-            handleEditorStateUpdate({ ...editorState, fileName: e.target.value });
+            handleEditorStateUpdate({ ...editorState, fileName: e.target.value.replace(/\.[^/.]+$/, "") });
         }
     };
 
@@ -464,7 +466,7 @@ export default function ResumeEditorClient() {
                                        <span className="mr-2">Editing:</span>
                                        <Input
                                             type="text"
-                                            value={editorState.fileName || ''}
+                                            value={editorState.fileName?.replace(/\.[^/.]+$/, "") || ''}
                                             onChange={handleFileNameChange}
                                             className="h-7 w-auto max-w-xs text-base font-medium p-1"
                                         />
