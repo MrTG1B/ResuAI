@@ -25,6 +25,7 @@ export interface PersonalInfo {
   socials?: SocialLink[];
   skills?: string[];
   languages?: Language[];
+  interests?: string[];
 }
 
 export interface Experience {
@@ -77,5 +78,6 @@ export interface PortfolioData {
   projects: Project[];
   certifications: Certification[];
   languages?: Language[];
+  interests?: string[];
   colorPalette?: ColorPalette;
 }

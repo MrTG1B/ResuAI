@@ -62,6 +62,7 @@ const UserProfileSchema = z.object({
     projects: z.array(ProjectSchema).optional(),
     certifications: z.array(CertificationSchema).optional(),
     languages: z.array(LanguageSchema).optional(),
+    interests: z.array(z.string()).optional(),
 });
 
 
@@ -170,6 +171,14 @@ You **MUST** use this information.
 - **{{this.name}}**, issued by **{{this.issuingOrganization}}**{{#if this.date}}, dated **{{this.date}}**{{/if}}{{#if this.credentialUrl}} [{{this.credentialUrl}}]{{/if}}
 {{/each}}
 You **MUST NOT** ask for attachments if this data exists. Use these directly in the resume.
+{{/if}}
+
+{{#if userProfile.interests.length}}
+⚠️ IMPORTANT: The user has the following interests in their profile:
+{{#each userProfile.interests}}
+- {{this}}
+{{/each}}
+You **MUST** use this information.
 {{/if}}
 
 {{/if}}
