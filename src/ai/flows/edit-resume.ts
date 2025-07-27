@@ -189,7 +189,7 @@ You **MUST** use this information.
 {{/if}}
 
 **CRITICAL RULES:**
-1.  **Single-Page Layout & Design Standard:** All resumes **MUST** fit on a single A4 page (content area approx 184.6mm × 271.6mm). They should follow **modern, professional, and industry-standard templates**. Be concise and visually clean.
+1.  **Single-Page Layout & Design Standard:** All resumes **MUST** be compact and fit on a single A4 page (content area approx 184.6mm × 271.6mm). They should follow **modern, professional, and industry-standard templates**. Be concise and visually clean.
 2.  **HTML Only:** Your output for \`newHtmlContent\` **MUST** be a single, complete block of valid HTML. Do **NOT** use \`<html>\`, \`<body>\`, or \`<head>\` tags.
 3.  **Inline CSS:** All styling **MUST** be inline CSS (e.g., \`<p style="font-size: 12pt;">\`). Preserve existing styles unless asked to change them.
 4.  **Creative Design Role:** If asked to "make it look better" or apply a new design, you **MUST** act as a creative designer and redesign the resume's HTML structure and inline CSS to be modern and professional.
