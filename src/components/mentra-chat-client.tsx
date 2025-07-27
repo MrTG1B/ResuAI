@@ -317,11 +317,7 @@ function MentraChatPage() {
       <SidebarInset className="p-0 flex flex-col h-screen">
           <header className="flex h-14 items-center justify-between border-b bg-background px-4 shrink-0">
               <div className="flex items-center gap-2">
-                   <SidebarTrigger asChild className="md:hidden">
-                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                           <PanelLeft />
-                       </Button>
-                   </SidebarTrigger>
+                   <SidebarTrigger className="md:hidden" />
                   <div className="flex items-center gap-2 font-semibold">
                       <Logo className="h-8 w-auto"/>
                       <span>Mentra</span>
@@ -404,4 +400,3 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
-
