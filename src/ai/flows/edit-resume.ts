@@ -125,6 +125,11 @@ When the user asks you to add, update, or reference personal information (e.g., 
 {{{userProfile}}}
 </profile>
 
+{{#if userProfile.profilePictureUrl}}
+⚠️ IMPORTANT: The user has a profile picture URL: {{userProfile.profilePictureUrl}}.
+You **MUST** use this URL when asked to add a profile picture.
+{{/if}}
+
 {{#if userProfile.experience.length}}
 ⚠️ IMPORTANT: The user has the following work experience in their profile:
 {{#each userProfile.experience}}
