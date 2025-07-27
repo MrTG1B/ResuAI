@@ -13,12 +13,14 @@ import { submitFeedback as submitFeedbackFlow, type SubmitFeedbackInput } from "
 import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
-import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
-import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy } from "firebase/firestore";
+import { type ParsedResume, type EditedResume, type CoachChatResponse, type ChatMessage } from "@/types/resume";
+import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { User } from "@/types/user";
 import { Feedback } from "@/types/feedback";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
+import { type ChatSession } from "@/types/chat";
+
 
 async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
     if (!db) return;
@@ -263,14 +265,59 @@ export async function coachChatAction(input: CoachChatInput) {
   }
 }
 
-export async function aiAssistantChatAction(input: AIAssistantChatInput) {
-  try {
-    const result = await aiAssistantChatFlow(input);
-    return { success: true, data: result };
-  } catch (error: any) {
-    console.error("Error in AI assistant chat:", error);
-    return { success: false, error: "The AI assistant is unavailable. Please try again later." };
-  }
+interface AIAssistantChatActionInput extends AIAssistantChatInput {
+    userId: string;
+    chatId?: string;
+}
+
+interface AIAssistantChatActionResult {
+    success: boolean;
+    data?: {
+        response: string;
+        chatId: string;
+    };
+    error?: string;
+}
+
+export async function aiAssistantChatAction(input: AIAssistantChatActionInput): Promise<AIAssistantChatActionResult> {
+    const { userId, chatId, ...aiInput } = input;
+    if (!db) return { success: false, error: "Database not initialized" };
+
+    try {
+        const result = await aiAssistantChatFlow(aiInput);
+        let currentChatId = chatId;
+        const userMessage: ChatMessage = { role: 'user', content: aiInput.prompt };
+        const assistantMessage: ChatMessage = { role: 'assistant', content: result.response };
+        const chatCollectionRef = collection(db, 'users', userId, 'chats');
+
+        if (currentChatId) {
+            // Update existing chat
+            const chatDocRef = doc(chatCollectionRef, currentChatId);
+            const chatDoc = await getDoc(chatDocRef);
+            if (chatDoc.exists()) {
+                const existingMessages = chatDoc.data().messages || [];
+                await updateDoc(chatDocRef, {
+                    messages: [...existingMessages, userMessage, assistantMessage],
+                    lastModified: serverTimestamp(),
+                });
+            }
+        } else {
+            // Create a new chat
+            const newChat: Omit<ChatSession, 'id'> = {
+                title: input.prompt.substring(0, 40) + '...',
+                messages: [userMessage, assistantMessage],
+                createdAt: serverTimestamp() as Timestamp,
+                lastModified: serverTimestamp() as Timestamp,
+            };
+            const newDocRef = await addDoc(chatCollectionRef, newChat);
+            currentChatId = newDocRef.id;
+        }
+
+        return { success: true, data: { response: result.response, chatId: currentChatId! } };
+    } catch (error: any) {
+        console.error("Error in AI assistant chat:", error);
+        return { success: false, error: "The AI assistant is unavailable. Please try again later." };
+    }
 }
 
 export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
