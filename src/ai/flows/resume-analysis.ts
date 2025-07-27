@@ -27,6 +27,11 @@ const SocialLinkSchema = z.object({
     url: z.string().url().describe("The full URL to the user's profile."),
 });
 
+const LanguageSchema = z.object({
+    language: z.string().describe("The language spoken (e.g., 'Spanish')."),
+    proficiency: z.string().describe("The user's proficiency level (e.g., 'Fluent', 'Conversational', 'Native')."),
+});
+
 const PersonalInfoSchema = z.object({
     name: z.string().describe("The user's full name.").optional(),
     title: z.string().describe("The user's professional title (e.g., 'Software Engineer').").optional(),
@@ -76,6 +81,7 @@ const PortfolioDraftSchema = z.object({
     skills: z.array(z.string()).describe("A list of skills extracted from the resume.").optional(),
     projects: z.array(ProjectSchema).describe("A list of projects the user has worked on.").optional(),
     certifications: z.array(CertificationSchema).describe("A list of the user's certifications.").optional(),
+    languages: z.array(LanguageSchema).describe("A list of languages the user knows and their proficiency.").optional(),
 });
 
 
@@ -107,7 +113,7 @@ const prompt = ai.definePrompt({
   system: `You are an AI expert at analyzing resumes and extracting structured information. The provided resume may be in a variety of formats and layouts. Do your best to logically parse the content.
 
   Your task is to extract the key information from the resume and populate the fields of the output schema.
-  - For sections like work experience, education, projects, and certifications, extract each item into a corresponding object in the array.
+  - For sections like work experience, education, projects, languages, and certifications, extract each item into a corresponding object in the array.
   - If a section or a specific field within a section is not present in the resume (e.g., no 'Projects' section, or a job entry is missing a 'location'), simply omit it from the output or provide an empty array/string where appropriate. Your primary goal is to extract as much information as possible while adhering to the output schema.
   - Also generate a simple, two-word, generic prompt for creating a professional avatar image for the 'avatarPrompt' field. For example: "male software engineer", "female graphic designer". Do not include any names or specific identifying details in this prompt.
   - Finally, generate a unique, stylish, and professional color palette for the portfolio for the 'colorPalette' field. Ensure the generated palette is aesthetically pleasing and that there is sufficient contrast to meet accessibility standards (WCAG AA).`,

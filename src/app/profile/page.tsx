@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -73,6 +73,11 @@ const certificationSchema = z.object({
   credentialUrl: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
 });
 
+const languageSchema = z.object({
+  language: z.string().min(1, "Language is required"),
+  proficiency: z.string().min(1, "Proficiency is required"),
+});
+
 const profileSchema = z.object({
   name: z.string().optional(),
   title: z.string().optional(),
@@ -89,11 +94,12 @@ const profileSchema = z.object({
   education: z.array(educationSchema).optional(),
   projects: z.array(projectSchema).optional(),
   certifications: z.array(certificationSchema).optional(),
+  languages: z.array(languageSchema).optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-type EditableSection = 'education' | 'projects' | 'certifications' | 'experience' | 'socials' | 'skills';
+type EditableSection = 'education' | 'projects' | 'certifications' | 'experience' | 'socials' | 'skills' | 'languages';
 
 const SectionTitle = ({ icon, text }: { icon: React.ElementType, text: string }) => {
   const Icon = icon;
@@ -145,6 +151,7 @@ export default function ProfilePage() {
       education: [],
       projects: [],
       certifications: [],
+      languages: [],
       phone: "+91",
       profilePictureUrl: ""
     },
@@ -156,6 +163,7 @@ export default function ProfilePage() {
   const { fields: projFields, append: appendProj, remove: removeProj } = useFieldArray({ control, name: "projects" });
   const { fields: certFields, append: appendCert, remove: removeCert } = useFieldArray({ control, name: "certifications" });
   const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({ control, name: "skills" });
+  const { fields: langFields, append: appendLang, remove: removeLang } = useFieldArray({ control, name: "languages" });
 
 
   useEffect(() => {
@@ -355,6 +363,7 @@ export default function ProfilePage() {
         case 'certifications': appendCert(dialogData); break;
         case 'socials': appendSocial(dialogData); break;
         case 'skills': appendSkill(dialogData.skill); break;
+        case 'languages': appendLang(dialogData); break;
       }
     }
     closeDialog();
@@ -386,6 +395,7 @@ export default function ProfilePage() {
   const watchedExperience = watch('experience');
   const watchedSocials = watch('socials');
   const watchedSkills = watch('skills');
+  const watchedLanguages = watch('languages');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -408,9 +418,10 @@ export default function ProfilePage() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <Tabs defaultValue="personal" className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
+                <TabsList className="grid w-full grid-cols-7">
                   <TabsTrigger value="personal">Personal</TabsTrigger>
                   <TabsTrigger value="skills">Skills</TabsTrigger>
+                  <TabsTrigger value="languages">Languages</TabsTrigger>
                   <TabsTrigger value="experience">Experience</TabsTrigger>
                   <TabsTrigger value="education">Education</TabsTrigger>
                   <TabsTrigger value="projects">Projects</TabsTrigger>
@@ -568,6 +579,43 @@ export default function ProfilePage() {
                                 {watchedSkills?.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={2} className="text-center text-muted-foreground">No skills added yet.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="languages" className="space-y-6 pt-4">
+                  <div className="flex items-center justify-between">
+                    <SectionTitle icon={Languages} text="Languages" />
+                    <Button type="button" variant="outline" size="sm" onClick={() => openDialog('languages')}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Language
+                    </Button>
+                  </div>
+                    <Card>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                <TableHead>Language</TableHead>
+                                <TableHead>Proficiency</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {watchedLanguages?.map((lang, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="font-medium">{lang.language}</TableCell>
+                                    <TableCell>{lang.proficiency}</TableCell>
+                                    <TableCell className="text-right">
+                                    <Button variant="ghost" size="icon" onClick={() => openDialog('languages', index)}><Edit className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => removeLang(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                    </TableCell>
+                                </TableRow>
+                                ))}
+                                {watchedLanguages?.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="text-center text-muted-foreground">No languages added yet.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
@@ -876,6 +924,18 @@ export default function ProfilePage() {
                     <Label htmlFor="skill">Skill</Label>
                     <Input id="skill" value={dialogData.skill || ''} onChange={(e) => setDialogData({ ...dialogData, skill: e.target.value })} placeholder="e.g., React"/>
                 </div>
+            )}
+            {editingSection === 'languages' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="language">Language</Label>
+                  <Input id="language" value={dialogData.language || ''} onChange={(e) => setDialogData({ ...dialogData, language: e.target.value })} placeholder="e.g., English"/>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="proficiency">Proficiency</Label>
+                  <Input id="proficiency" value={dialogData.proficiency || ''} onChange={(e) => setDialogData({ ...dialogData, proficiency: e.target.value })} placeholder="e.g., Native, Fluent, Conversational" />
+                </div>
+              </div>
             )}
           </div>
           <DialogFooter>

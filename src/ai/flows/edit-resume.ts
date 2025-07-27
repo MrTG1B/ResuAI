@@ -42,6 +42,10 @@ const CertificationSchema = z.object({
     date: z.string().optional(),
     credentialUrl: z.string().optional(),
 });
+const LanguageSchema = z.object({
+    language: z.string(),
+    proficiency: z.string(),
+});
 
 const UserProfileSchema = z.object({
     name: z.string().optional(),
@@ -57,6 +61,7 @@ const UserProfileSchema = z.object({
     education: z.array(EducationSchema).optional(),
     projects: z.array(ProjectSchema).optional(),
     certifications: z.array(CertificationSchema).optional(),
+    languages: z.array(LanguageSchema).optional(),
 });
 
 
@@ -104,7 +109,7 @@ export async function editResumeFlow(
 
 const prompt = ai.definePrompt({
   name: 'editResumePrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.0-flash-lite-001',
   input: {schema: EditResumeInputSchema},
   output: {schema: EditResumeOutputSchema},
   system: `You are an expert resume editor and designer.
@@ -147,6 +152,14 @@ You **MUST** use this information.
 ⚠️ IMPORTANT: The user has the following skills in their profile:
 {{#each userProfile.skills}}
 - {{this}}
+{{/each}}
+You **MUST** use this information.
+{{/if}}
+
+{{#if userProfile.languages.length}}
+⚠️ IMPORTANT: The user has the following languages in their profile:
+{{#each userProfile.languages}}
+- **{{this.language}}** ({{this.proficiency}})
 {{/each}}
 You **MUST** use this information.
 {{/if}}

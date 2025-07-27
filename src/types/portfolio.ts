@@ -6,6 +6,11 @@ export interface SocialLink {
   url: string;
 }
 
+export interface Language {
+  language: string;
+  proficiency: string;
+}
+
 export interface PersonalInfo {
   name: string;
   email: string;
@@ -19,6 +24,7 @@ export interface PersonalInfo {
   profilePictureDeleteUrl?: string;
   socials?: SocialLink[];
   skills?: string[];
+  languages?: Language[];
 }
 
 export interface Experience {
@@ -70,5 +76,6 @@ export interface PortfolioData {
   skills: string[];
   projects: Project[];
   certifications: Certification[];
+  languages?: Language[];
   colorPalette?: ColorPalette;
 }
