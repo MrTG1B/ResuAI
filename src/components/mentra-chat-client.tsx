@@ -273,10 +273,10 @@ export default function MentraChatClient() {
         </Sidebar>
 
         <SidebarInset>
-            <Header pageActions={<SidebarTrigger />}/>
-            <div className="flex-grow w-full max-w-4xl mx-auto flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden">
-                <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
-                    <div className="space-y-6 pb-8">
+            <Header pageActions={<div className="flex items-center gap-2"><SidebarTrigger className="md:hidden" /><span className="font-semibold text-lg">Mentra</span></div>} />
+            <div className="flex-grow w-full flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden">
+                 <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
+                    <div className="space-y-6 pb-8 max-w-4xl mx-auto">
                         {messages.map((message, index) => (
                             <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 {message.role === 'assistant' && (
@@ -289,6 +289,12 @@ export default function MentraChatClient() {
                                         {message.content}
                                     </ReactMarkdown>
                                 </div>
+                                {message.role === 'user' && (
+                                     <Avatar className="h-8 w-8 shrink-0">
+                                        <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || ''} />
+                                        <AvatarFallback>{getInitials(currentUser.displayName)}</AvatarFallback>
+                                    </Avatar>
+                                )}
                             </div>
                         ))}
                         {isResponding && (
@@ -299,7 +305,7 @@ export default function MentraChatClient() {
                         )}
                     </div>
                 </ScrollArea>
-                <div className="w-full pt-4">
+                <div className="w-full pt-4 max-w-4xl mx-auto">
                     <div className="relative rounded-lg border bg-card p-2 shadow-lg">
                         {attachments.length > 0 && (
                             <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
@@ -339,4 +345,3 @@ export default function MentraChatClient() {
     </SidebarProvider>
   );
 }
-
