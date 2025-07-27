@@ -36,7 +36,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 const socialLinkSchema = z.object({
@@ -933,7 +934,21 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="proficiency">Proficiency</Label>
-                  <Input id="proficiency" value={dialogData.proficiency || ''} onChange={(e) => setDialogData({ ...dialogData, proficiency: e.target.value })} placeholder="e.g., Native, Fluent, Conversational" />
+                   <Select
+                        value={dialogData.proficiency || ''}
+                        onValueChange={(value) => setDialogData({ ...dialogData, proficiency: value })}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select proficiency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Native">Native</SelectItem>
+                            <SelectItem value="Fluent">Fluent</SelectItem>
+                            <SelectItem value="Professional">Professional</SelectItem>
+                            <SelectItem value="Conversational">Conversational</SelectItem>
+                            <SelectItem value="Basic">Basic</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
               </div>
             )}
@@ -949,3 +964,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+
