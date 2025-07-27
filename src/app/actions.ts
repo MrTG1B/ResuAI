@@ -50,6 +50,8 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
             education: portfolioDraft.education || [],
             projects: portfolioDraft.projects || [],
             certifications: portfolioDraft.certifications || [],
+            languages: portfolioDraft.languages || [],
+            interests: portfolioDraft.interests || [],
         };
 
         // Merge with existing data, giving precedence to what's already in the profile
@@ -103,6 +105,8 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
         skills: userProfile.skills && userProfile.skills.length > 0 ? userProfile.skills : portfolioDraftFromAI.skills,
         projects: userProfile.projects && userProfile.projects.length > 0 ? userProfile.projects : portfolioDraftFromAI.projects,
         certifications: userProfile.certifications && userProfile.certifications.length > 0 ? userProfile.certifications : portfolioDraftFromAI.certifications,
+        languages: userProfile.languages && userProfile.languages.length > 0 ? userProfile.languages : portfolioDraftFromAI.languages,
+        interests: userProfile.interests && userProfile.interests.length > 0 ? userProfile.interests : portfolioDraftFromAI.interests,
     };
     
     // Add a title and creation date
@@ -118,7 +122,7 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
       // If URL exists in profile, use it directly
       avatarPromise = Promise.resolve(userProfile.profilePictureUrl);
     } else {
-      // Otherwise, generate a new one, upload it, and save it back to the profile
+      // Otherwise, generate a new one, upload it, and save it back to the user's profile
       avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt })
         .then(res => uploadImage(res.imageDataUri))
         .then(async (uploadResult) => {

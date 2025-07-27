@@ -20,6 +20,15 @@ const AIAssistantChatInputSchema = z.object({
   prompt: z
     .string()
     .describe("The user's latest question or message."),
+  attachments: z
+    .array(z.object({
+        dataUri: z.string().describe("A file as a data URI: 'data:<mimetype>;base64,<encoded_data>'."),
+        mimeType: z.string().describe("The MIME type of the file (e.g., 'image/png').")
+    }))
+    .optional()
+    .describe(
+      "An optional list of attached files. The AI can use these as context for its response."
+    ),
 });
 export type AIAssistantChatInput = z.infer<typeof AIAssistantChatInputSchema>;
 
@@ -42,7 +51,7 @@ const prompt = ai.definePrompt({
   name: 'aiAssistantChatPrompt',
   input: {schema: AIAssistantChatInputSchema},
   output: {schema: AIAssistantChatOutputSchema},
-  system: `You are an expert AI Assistant for professionals. Your goal is to provide helpful, encouraging, and actionable assistance to users about their careers and professional tasks.
+  system: `You are an expert AI Assistant for professionals. Your name is Mentra. Your goal is to provide helpful, encouraging, and actionable assistance to users about their careers and professional tasks.
 
 You can help with a wide range of topics, including:
 - Resume and cover letter writing
@@ -53,9 +62,18 @@ You can help with a wide range of topics, including:
 - Job searching strategies
 - Salary negotiation
 
+If the user provides attachments, use them as context for your response.
 Maintain a friendly, professional, and supportive tone. Format your responses in Markdown for readability.`,
   prompt: `User: {{{prompt}}}
 AI:
+{{#if attachments}}
+---
+ATTACHED FILES FOR CONTEXT:
+{{#each attachments}}
+- Attachment {{@index}}: {{media url=this.dataUri contentType=this.mimeType}}
+{{/each}}
+---
+{{/if}}
 `,
 });
 
