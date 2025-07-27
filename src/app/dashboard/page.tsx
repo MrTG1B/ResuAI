@@ -10,7 +10,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, Bot } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, BrainCircuit } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
@@ -327,10 +327,10 @@ export default function DashboardPage() {
                 <Link href="/career-coach" className="block hover:bg-card/20 rounded-lg">
                     <CardHeader className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
                         <div className="bg-primary/10 p-4 rounded-full">
-                            <Bot className="h-10 w-10 text-primary" />
+                            <BrainCircuit className="h-10 w-10 text-primary" />
                         </div>
                         <div className="flex-1">
-                            <CardTitle className="text-2xl font-heading">AI Assistant</CardTitle>
+                            <CardTitle className="text-2xl font-heading">AI Co-pilot</CardTitle>
                             <p className="text-muted-foreground mt-1">Get instant advice on your career, help writing professional content, and more from your personal AI assistant.</p>
                         </div>
                         <Button variant="ghost" className="shrink-0">
