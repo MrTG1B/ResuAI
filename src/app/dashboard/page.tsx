@@ -330,8 +330,8 @@ export default function DashboardPage() {
                             <Bot className="h-10 w-10 text-primary" />
                         </div>
                         <div className="flex-1">
-                            <CardTitle className="text-2xl font-heading">AI Career Coach</CardTitle>
-                            <p className="text-muted-foreground mt-1">Get instant advice on your career path, interview preparation, and skill development from your personal AI assistant.</p>
+                            <CardTitle className="text-2xl font-heading">AI Assistant</CardTitle>
+                            <p className="text-muted-foreground mt-1">Get instant advice on your career, help writing professional content, and more from your personal AI assistant.</p>
                         </div>
                         <Button variant="ghost" className="shrink-0">
                             Start Chatting <Sparkles className="ml-2 h-4 w-4" />

@@ -10,7 +10,7 @@ import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coac
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
 import { submitFeedback as submitFeedbackFlow, type SubmitFeedbackInput } from "@/ai/flows/submit-feedback";
-import { careerCoachChat as careerCoachChatFlow, type CareerCoachChatInput } from "@/ai/flows/career-coach-chat";
+import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
@@ -259,13 +259,13 @@ export async function coachChatAction(input: CoachChatInput) {
   }
 }
 
-export async function careerCoachChatAction(input: CareerCoachChatInput) {
+export async function aiAssistantChatAction(input: AIAssistantChatInput) {
   try {
-    const result = await careerCoachChatFlow(input);
+    const result = await aiAssistantChatFlow(input);
     return { success: true, data: result };
   } catch (error: any) {
-    console.error("Error in career coach chat:", error);
-    return { success: false, error: "The career coach is unavailable. Please try again later." };
+    console.error("Error in AI assistant chat:", error);
+    return { success: false, error: "The AI assistant is unavailable. Please try again later." };
   }
 }
 

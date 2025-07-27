@@ -20,7 +20,7 @@ import { Loader2, Send } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
-import { careerCoachChatAction } from '../actions';
+import { aiAssistantChatAction } from '../actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bot, User as UserIcon } from 'lucide-react';
 
@@ -37,7 +37,7 @@ const getInitials = (name?: string | null) => {
     return (name[0] || '').toUpperCase();
   }
 
-export default function CareerCoachPage() {
+export default function AIAssistantPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -45,7 +45,7 @@ export default function CareerCoachPage() {
   const [isResponding, setIsResponding] = useState(false);
   
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: "Hello! I'm your AI Career Coach. How can I help you today? You can ask me about resume advice, interview tips, career paths, and more." }
+    { role: 'assistant', content: "Hello! I'm your AI Assistant. How can I help you today? You can ask me for resume advice, to write a LinkedIn post, or help with interview prep." }
   ]);
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -88,7 +88,7 @@ export default function CareerCoachPage() {
     setIsResponding(true);
 
     try {
-        const result = await careerCoachChatAction({
+        const result = await aiAssistantChatAction({
             history: messages,
             prompt: currentInput,
         });
@@ -100,7 +100,7 @@ export default function CareerCoachPage() {
             setMessages(messages); // revert on error
         }
     } catch (error) {
-        toast({ title: "Request Failed", description: "Could not communicate with the AI coach.", variant: "destructive" });
+        toast({ title: "Request Failed", description: "Could not communicate with the AI assistant.", variant: "destructive" });
         setMessages(messages); // revert on error
     } finally {
         setIsResponding(false);
@@ -122,8 +122,8 @@ export default function CareerCoachPage() {
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
         <Card className="w-full max-w-2xl shadow-2xl h-[70vh] flex flex-col">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold tracking-tight font-heading">AI Career Coach</CardTitle>
-            <CardDescription>Your personal guide for career development.</CardDescription>
+            <CardTitle className="text-3xl font-bold tracking-tight font-heading">AI Assistant</CardTitle>
+            <CardDescription>Your personal guide for career and professional tasks.</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-4">
             <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
@@ -206,4 +206,3 @@ export default function CareerCoachPage() {
     </div>
   );
 }
-
