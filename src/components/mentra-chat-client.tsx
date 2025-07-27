@@ -314,9 +314,16 @@ function MentraChatPage() {
       </Sidebar>
       <SidebarInset className="p-0 flex flex-col h-screen">
           <header className="flex h-14 items-center justify-between border-b bg-background px-4 shrink-0">
-              <div className="flex items-center gap-2 font-semibold">
-                  <Logo className="h-8 w-auto"/>
-                  <span>Mentra</span>
+              <div className="flex items-center gap-2">
+                   <SidebarTrigger asChild>
+                       <Button variant="ghost" size="icon" className="h-8 w-8">
+                           <PanelLeft />
+                       </Button>
+                   </SidebarTrigger>
+                  <div className="flex items-center gap-2 font-semibold">
+                      <Logo className="h-8 w-auto"/>
+                      <span>Mentra</span>
+                  </div>
               </div>
               <div className="flex items-center gap-2">
                    <DropdownMenu>
@@ -338,27 +345,27 @@ function MentraChatPage() {
               </div>
           </header>
 
-          <div className="flex-grow w-full flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden">
-               <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
-                  <div className="space-y-6 pb-8">
-                      {messages.map((message, index) => (
-                          <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                              {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                              <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                  <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
-                                      {message.content}
-                                  </ReactMarkdown>
-                              </div>
-                          </div>
-                      ))}
-                      {isResponding && (
-                          <div className="flex items-start gap-4 justify-start">
-                              <AssistantAvatar />
-                              <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
-                          </div>
-                      )}
-                  </div>
-              </ScrollArea>
+        <div className="flex-grow w-full flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden">
+             <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
+                <div className="space-y-6 pb-8">
+                    {messages.map((message, index) => (
+                        <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            {message.role === 'assistant' && ( <AssistantAvatar /> )}
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
+                                    {message.content}
+                                </ReactMarkdown>
+                            </div>
+                        </div>
+                    ))}
+                    {isResponding && (
+                        <div className="flex items-start gap-4 justify-start">
+                            <AssistantAvatar />
+                            <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
+                        </div>
+                    )}
+                </div>
+            </ScrollArea>
               <div className="w-full pt-4">
                   <div className="relative rounded-lg border bg-card p-2 shadow-lg">
                       {attachments.length > 0 && (
