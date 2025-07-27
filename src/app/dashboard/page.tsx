@@ -28,6 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { MentraIcon } from '@/components/mentra-icon';
 
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
     return (
@@ -327,11 +328,11 @@ export default function DashboardPage() {
                 <Link href="/career-coach" className="block hover:bg-card/20 rounded-lg">
                     <CardHeader className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
                         <div className="bg-primary/10 p-4 rounded-full">
-                            <BrainCircuit className="h-10 w-10 text-primary" />
+                            <MentraIcon className="h-10 w-10 text-primary" />
                         </div>
                         <div className="flex-1">
-                            <CardTitle className="text-2xl font-heading">AI Co-pilot</CardTitle>
-                            <p className="text-muted-foreground mt-1">Get instant advice on your career, help writing professional content, and more from your personal AI assistant.</p>
+                            <CardTitle className="text-2xl font-heading">Chat with Mentra</CardTitle>
+                            <p className="text-muted-foreground mt-1">Get instant guidance on your career, help writing professional content, and more from your personal AI mentor.</p>
                         </div>
                         <Button variant="ghost" className="shrink-0">
                             Start Chatting <Sparkles className="ml-2 h-4 w-4" />

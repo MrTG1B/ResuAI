@@ -16,12 +16,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, User as UserIcon, BrainCircuit } from 'lucide-react';
+import { Loader2, Send, User as UserIcon } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
 import { aiAssistantChatAction } from '../actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MentraIcon } from '@/components/mentra-icon';
 
 
 const getInitials = (name?: string | null) => {
@@ -44,7 +45,7 @@ export default function AIAssistantPage() {
   const [isResponding, setIsResponding] = useState(false);
   
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: "Hello! I'm your AI Co-pilot. How can I help you today? You can ask me for resume advice, to write a LinkedIn post, or help with interview prep." }
+    { role: 'assistant', content: "Hello! I'm Mentra, your AI career mentor. How can I help you today? You can ask me for resume advice, to write a LinkedIn post, or help with interview prep." }
   ]);
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -121,7 +122,7 @@ export default function AIAssistantPage() {
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
         <Card className="w-full max-w-2xl shadow-2xl h-[70vh] flex flex-col">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold tracking-tight font-heading">AI Co-pilot</CardTitle>
+            <CardTitle className="text-3xl font-bold tracking-tight font-heading">Chat with Mentra</CardTitle>
             <CardDescription>Your personal guide for career and professional tasks.</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-4">
@@ -130,8 +131,8 @@ export default function AIAssistantPage() {
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                              {message.role === 'assistant' && (
-                                <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center">
-                                    <BrainCircuit className="h-5 w-5" />
+                                <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1">
+                                    <MentraIcon className="h-full w-full" />
                                 </Avatar>
                             )}
                             <div className={`max-w-md rounded-lg px-4 py-2 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
@@ -167,8 +168,8 @@ export default function AIAssistantPage() {
                     ))}
                      {isResponding && (
                         <div className="flex items-start gap-3 justify-start">
-                             <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center">
-                                <BrainCircuit className="h-5 w-5" />
+                             <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1">
+                                <MentraIcon className="h-full w-full" />
                             </Avatar>
                             <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center">
                                 <PulsingDotsLoader />
