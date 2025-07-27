@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -22,7 +23,7 @@ import { aiAssistantChatAction } from '@/app/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MentraIcon } from '@/components/mentra-icon';
 import { Badge } from '@/components/ui/badge';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -106,6 +107,7 @@ export default function MentraChatClient() {
 
     if (id && currentUser) {
         const fetchChat = async () => {
+            if (!db) return;
             const chatDoc = await getDoc(doc(db, 'users', currentUser.uid, 'chats', id));
             if (chatDoc.exists()) {
                 setMessages(chatDoc.data().messages);
@@ -196,14 +198,14 @@ export default function MentraChatClient() {
   const handleNewChat = () => router.push('/career-coach');
 
   const handleRenameChat = async () => {
-    if (!currentUser || !editingChatId || !editingTitle.trim()) return;
+    if (!currentUser || !editingChatId || !editingTitle.trim() || !db) return;
     await updateDoc(doc(db, 'users', currentUser.uid, 'chats', editingChatId), { title: editingTitle });
     fetchChatHistory(currentUser.uid);
     setEditingChatId(null);
   };
 
   const handleDeleteChat = async () => {
-    if (!currentUser || !deletingChatId) return;
+    if (!currentUser || !deletingChatId || !db) return;
     await deleteDoc(doc(db, 'users', currentUser.uid, 'chats', deletingChatId));
     if(chatId === deletingChatId) router.push('/career-coach');
     fetchChatHistory(currentUser.uid);
@@ -220,126 +222,128 @@ export default function MentraChatClient() {
 
   return (
     <SidebarProvider>
-        <div className="flex h-screen bg-background">
-            <Sidebar>
-                <SidebarHeader>
-                    <Button onClick={handleNewChat} className="w-full">
-                        <Plus className="mr-2 h-4 w-4"/> New Chat
-                    </Button>
-                </SidebarHeader>
-                <SidebarContent>
-                    <SidebarMenu>
-                        {isHistoryLoading ? (
-                            Array.from({length: 5}).map((_, i) => <SidebarMenuItem key={i}><div className="h-8 w-full bg-muted rounded animate-pulse"/></SidebarMenuItem>)
-                        ) : (
-                            chatHistory.map(chat => (
-                                <SidebarMenuItem key={chat.id}>
-                                    {editingChatId === chat.id ? (
-                                        <div className="flex items-center gap-2 p-2">
-                                            <Input value={editingTitle} onChange={e => setEditingTitle(e.target.value)} className="h-8"/>
-                                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleRenameChat}><Check className="h-4 w-4"/></Button>
-                                        </div>
-                                    ) : (
-                                        <Link href={`/career-coach?id=${chat.id}`} className="flex-1">
-                                            <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left">
-                                                {chat.title}
-                                            </SidebarMenuButton>
-                                        </Link>
-                                    )}
-                                    <div className="absolute right-1 top-1/2 -translate-y-1/2">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-7 w-7">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuItem onClick={() => {setEditingChatId(chat.id); setEditingTitle(chat.title);}}>
-                                                <Edit className="mr-2 h-4 w-4"/> Rename
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => setDeletingChatId(chat.id)} className="text-destructive">
-                                                <Trash2 className="mr-2 h-4 w-4"/> Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+      <div className="flex h-screen bg-background text-foreground">
+        <Sidebar>
+            <SidebarHeader>
+                <Button onClick={handleNewChat} className="w-full">
+                    <Plus className="mr-2 h-4 w-4"/> New Chat
+                </Button>
+            </SidebarHeader>
+            <SidebarContent>
+                <SidebarMenu>
+                    {isHistoryLoading ? (
+                        Array.from({length: 5}).map((_, i) => <SidebarMenuItem key={i}><div className="h-8 w-full bg-muted rounded animate-pulse"/></SidebarMenuItem>)
+                    ) : (
+                        chatHistory.map(chat => (
+                            <SidebarMenuItem key={chat.id} className="group/item relative">
+                                {editingChatId === chat.id ? (
+                                    <div className="flex items-center gap-2 p-2">
+                                        <Input value={editingTitle} onChange={e => setEditingTitle(e.target.value)} className="h-8"/>
+                                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleRenameChat}><Check className="h-4 w-4"/></Button>
                                     </div>
-                                </SidebarMenuItem>
-                            ))
-                        )}
-                    </SidebarMenu>
-                </SidebarContent>
-            </Sidebar>
+                                ) : (
+                                    <Link href={`/career-coach?id=${chat.id}`} className="flex-1 overflow-hidden">
+                                        <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate">
+                                            {chat.title}
+                                        </SidebarMenuButton>
+                                    </Link>
+                                )}
+                                <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => {setEditingChatId(chat.id); setEditingTitle(chat.title);}}>
+                                            <Edit className="mr-2 h-4 w-4"/> Rename
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setDeletingChatId(chat.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                                            <Trash2 className="mr-2 h-4 w-4"/> Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                </div>
+                            </SidebarMenuItem>
+                        ))
+                    )}
+                </SidebarMenu>
+            </SidebarContent>
+        </Sidebar>
 
-            <main className="flex-grow flex flex-col items-center overflow-hidden">
-                <Header pageActions={<SidebarTrigger className="md:hidden"/>}/>
-                <div className="w-full max-w-4xl h-full flex flex-col justify-between p-4 sm:p-6 md:p-8">
-                    <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
-                        <div className="space-y-6 pb-8">
-                            {messages.map((message, index) => (
-                                <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    {message.role === 'assistant' && (
-                                        <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1">
-                                            <MentraIcon className="h-full w-full" />
-                                        </Avatar>
-                                    )}
-                                    <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                        <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
-                                            {message.content}
-                                        </ReactMarkdown>
-                                    </div>
-                                    {message.role === 'user' && (
-                                        <Avatar className="h-8 w-8">
-                                            <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
-                                            <AvatarFallback className="text-sm font-semibold">
-                                                {getInitials(currentUser.displayName) || <UserIcon className="h-4 w-4" />}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                    )}
+        <SidebarInset>
+            <Header pageActions={<SidebarTrigger className="md:hidden"/>}/>
+            <div className="flex-grow w-full max-w-4xl mx-auto flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden">
+                <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
+                    <div className="space-y-6 pb-8">
+                        {messages.map((message, index) => (
+                            <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                {message.role === 'assistant' && (
+                                    <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1">
+                                        <MentraIcon className="h-full w-full" />
+                                    </Avatar>
+                                )}
+                                <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                    <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
+                                        {message.content}
+                                    </ReactMarkdown>
                                 </div>
-                            ))}
-                            {isResponding && (
-                                <div className="flex items-start gap-4 justify-start">
-                                    <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1"><MentraIcon className="h-full w-full" /></Avatar>
-                                    <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
-                                </div>
-                            )}
-                        </div>
-                    </ScrollArea>
-                    <div className="w-full pt-4">
-                        <div className="relative rounded-lg border bg-card p-2 shadow-lg">
-                            {attachments.length > 0 && (
-                                <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
-                                    {attachments.map((attachment, index) => (
-                                        <Badge key={index} variant="secondary" className="flex items-center gap-1.5">
-                                            <span className="truncate max-w-[150px]">{attachment.name}</span>
-                                            <button onClick={() => setAttachments(p => p.filter((_, i) => i !== index))} className="rounded-full hover:bg-muted-foreground/20"><X className="h-3 w-3" /></button>
-                                        </Badge>
-                                    ))}
-                                </div>
-                            )}
-                            <div className="flex w-full items-start gap-2">
-                                <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
-                                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding}><Paperclip className="h-4 w-4" /></Button>
-                                <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2" />
-                                <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10">{isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
+                                {message.role === 'user' && (
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage unoptimized src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
+                                        <AvatarFallback className="text-sm font-semibold">
+                                            {getInitials(currentUser.displayName) || <UserIcon className="h-4 w-4" />}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                )}
                             </div>
+                        ))}
+                        {isResponding && (
+                            <div className="flex items-start gap-4 justify-start">
+                                <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center p-1"><MentraIcon className="h-full w-full" /></Avatar>
+                                <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
+                <div className="w-full pt-4">
+                    <div className="relative rounded-lg border bg-card p-2 shadow-lg">
+                        {attachments.length > 0 && (
+                            <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
+                                {attachments.map((attachment, index) => (
+                                    <Badge key={index} variant="secondary" className="flex items-center gap-1.5">
+                                        <span className="truncate max-w-[150px]">{attachment.name}</span>
+                                        <button onClick={() => setAttachments(p => p.filter((_, i) => i !== index))} className="rounded-full hover:bg-muted-foreground/20"><X className="h-3 w-3" /></button>
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
+                        <div className="flex w-full items-start gap-2">
+                            <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
+                            <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding}><Paperclip className="h-4 w-4" /></Button>
+                            <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 bg-transparent" />
+                            <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10 w-10 p-0">
+                                {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            </Button>
                         </div>
                     </div>
                 </div>
-            </main>
-            <AlertDialog open={!!deletingChatId} onOpenChange={(open) => !open && setDeletingChatId(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>This will permanently delete this chat. This action cannot be undone.</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteChat}>Delete</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
+            </div>
+        </SidebarInset>
+        <AlertDialog open={!!deletingChatId} onOpenChange={(open) => !open && setDeletingChatId(null)}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>This will permanently delete this chat. This action cannot be undone.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteChat} variant="destructive">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </SidebarProvider>
   );
 }
