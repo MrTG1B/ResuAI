@@ -21,7 +21,6 @@ import { type ChatMessage } from '@/types/resume';
 import { type ChatSession } from '@/types/chat';
 import { aiAssistantChatAction } from '@/app/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MentraIcon } from '@/components/mentra-icon';
 import { Logo } from '@/components/logo';
 import { Badge } from '@/components/ui/badge';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, useSidebar, SidebarFooter } from '@/components/ui/sidebar';
@@ -241,9 +240,7 @@ function MentraChatPage() {
                   <Button onClick={handleNewChat} className="flex-1 justify-start">
                       <Plus className="mr-2 h-4 w-4"/> New Chat
                   </Button>
-                  <SidebarTrigger asChild className="hidden md:flex">
-                    <Button variant="ghost" size="icon" className="h-8 w-8"><PanelLeft /></Button>
-                  </SidebarTrigger>
+                   <SidebarTrigger className="hidden md:flex" />
               </div>
           </SidebarHeader>
           <SidebarContent>
@@ -317,7 +314,7 @@ function MentraChatPage() {
       <SidebarInset className="p-0 flex flex-col h-screen">
           <header className="flex h-14 items-center justify-between border-b bg-background px-4 shrink-0">
               <div className="flex items-center gap-2">
-                   <SidebarTrigger className="md:hidden" />
+                  <SidebarTrigger className="md:hidden" />
                   <div className="flex items-center gap-2 font-semibold">
                       <Logo className="h-8 w-auto"/>
                       <span>Mentra</span>
@@ -400,3 +397,5 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
+
+  
