@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -234,102 +235,102 @@ function MentraChatPage() {
   return (
     <div className="flex h-screen w-full bg-background text-foreground">
       <Sidebar side="left" collapsible="icon">
-          <SidebarHeader className="border-b">
-              <div className="flex items-center justify-between w-full">
-                  <Button onClick={handleNewChat} className="flex-1 justify-start">
-                      <Plus className="mr-2 h-4 w-4"/> New Chat
-                  </Button>
-                  <SidebarTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <PanelLeft />
-                    </Button>
-                  </SidebarTrigger>
-              </div>
-          </SidebarHeader>
-          <SidebarContent>
-              <SidebarMenu>
-                  {isHistoryLoading ? (
-                      Array.from({length: 5}).map((_, i) => <SidebarMenuItem key={i}><div className="h-8 w-full bg-muted rounded animate-pulse"/></SidebarMenuItem>)
-                  ) : (
-                      chatHistory.map(chat => (
-                          <SidebarMenuItem key={chat.id} className="group/item relative">
-                              {editingChatId === chat.id ? (
-                                  <div className="flex items-center gap-2 p-2">
-                                      <Input value={editingTitle} onChange={e => setEditingTitle(e.target.value)} className="h-8"/>
-                                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleRenameChat}><Check className="h-4 w-4"/></Button>
-                                  </div>
-                              ) : (
-                                  <Link href={`/career-coach?id=${chat.id}`} className="flex-1 overflow-hidden">
-                                      <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate">
-                                          {chat.title}
-                                      </SidebarMenuButton>
-                                  </Link>
-                              )}
-                              <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                              <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                                          <MoreVertical className="h-4 w-4" />
-                                      </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent>
-                                      <DropdownMenuItem onClick={() => {setEditingChatId(chat.id); setEditingTitle(chat.title);}}>
-                                          <Edit className="mr-2 h-4 w-4"/> Rename
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => setDeletingChatId(chat.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                                          <Trash2 className="mr-2 h-4 w-4"/> Delete
-                                      </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                              </DropdownMenu>
-                              </div>
-                          </SidebarMenuItem>
-                      ))
-                  )}
-              </SidebarMenu>
-          </SidebarContent>
+        <SidebarHeader className="border-b p-2">
+            <div className="flex items-center justify-between w-full">
+                <Button onClick={handleNewChat} className="flex-1 justify-start">
+                    <Plus className="mr-2 h-4 w-4"/> New Chat
+                </Button>
+                <SidebarTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" />
+                </SidebarTrigger>
+            </div>
+        </SidebarHeader>
+        <SidebarContent>
+            <SidebarMenu>
+                {isHistoryLoading ? (
+                    Array.from({length: 5}).map((_, i) => <SidebarMenuItem key={i}><div className="h-8 w-full bg-muted rounded animate-pulse"/></SidebarMenuItem>)
+                ) : (
+                    chatHistory.map(chat => (
+                        <SidebarMenuItem key={chat.id} className="group/item relative">
+                            {editingChatId === chat.id ? (
+                                <div className="flex items-center gap-2 p-2">
+                                    <Input value={editingTitle} onChange={e => setEditingTitle(e.target.value)} className="h-8"/>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleRenameChat}><Check className="h-4 w-4"/></Button>
+                                </div>
+                            ) : (
+                                <Link href={`/career-coach?id=${chat.id}`} className="flex-1 overflow-hidden">
+                                    <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate">
+                                        {chat.title}
+                                    </SidebarMenuButton>
+                                </Link>
+                            )}
+                            <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => {setEditingChatId(chat.id); setEditingTitle(chat.title);}}>
+                                        <Edit className="mr-2 h-4 w-4"/> Rename
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setDeletingChatId(chat.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                                        <Trash2 className="mr-2 h-4 w-4"/> Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            </div>
+                        </SidebarMenuItem>
+                    ))
+                )}
+            </SidebarMenu>
+        </SidebarContent>
 
-          <AlertDialog open={!!deletingChatId} onOpenChange={(open) => !open && setDeletingChatId(null)}>
-              <AlertDialogContent>
-                  <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>This will permanently delete this chat. This action cannot be undone.</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteChat} variant="destructive">Delete</AlertDialogAction>
-                  </AlertDialogFooter>
-              </AlertDialogContent>
-          </AlertDialog>
+        <AlertDialog open={!!deletingChatId} onOpenChange={(open) => !open && setDeletingChatId(null)}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>This will permanently delete this chat. This action cannot be undone.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteChat} variant="destructive">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
       </Sidebar>
       
       <SidebarInset className="p-0 flex flex-col h-screen">
-          <header className="flex h-14 items-center justify-between border-b bg-background px-4 shrink-0">
-              <div className="flex items-center gap-2">
-                  <SidebarTrigger className="md:hidden" />
-                  <div className="flex items-center gap-2 font-semibold">
-                      <Logo className="h-8 w-auto"/>
-                      <span>Mentra</span>
-                  </div>
-              </div>
-              <div className="flex items-center gap-2">
-                   <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
-                              <Avatar className="h-8 w-8">
-                                  <AvatarImage unoptimized key={currentUser.photoURL} src={currentUser.photoURL || undefined} alt={currentUser.displayName || currentUser.email || 'User'} />
-                                  <AvatarFallback className="text-sm font-semibold">
-                                      {getInitials(currentUser.displayName)}
-                                  </AvatarFallback>
-                              </Avatar>
-                          </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56" align="end" forceMount>
-                          <DropdownMenuItem onClick={() => router.push('/dashboard')}>Dashboard</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
-                      </DropdownMenuContent>
-                   </DropdownMenu>
-              </div>
-          </header>
+        <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
+            <div className="flex items-center gap-2">
+                <SidebarTrigger className="md:hidden" asChild>
+                    <Button variant="ghost" size="icon"/>
+                </SidebarTrigger>
+                <div className="flex items-center gap-2 font-semibold">
+                    <Logo className="h-8 w-auto"/>
+                    <span>Mentra</span>
+                </div>
+            </div>
+            <div className="flex items-center gap-2">
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage unoptimized key={currentUser.photoURL} src={currentUser.photoURL || undefined} alt={currentUser.displayName || currentUser.email || 'User'} />
+                                <AvatarFallback className="text-sm font-semibold">
+                                    {getInitials(currentUser.displayName)}
+                                </AvatarFallback>
+                            </Avatar>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                        <DropdownMenuItem onClick={() => router.push('/dashboard')}>Dashboard</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
+                    </DropdownMenuContent>
+                 </DropdownMenu>
+            </div>
+        </header>
 
         <div className="flex-grow w-full flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden">
              <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
@@ -388,5 +389,3 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
-
-    
