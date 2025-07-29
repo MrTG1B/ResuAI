@@ -23,7 +23,7 @@ import { aiAssistantChatAction } from '@/app/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Logo } from '@/components/logo';
 import { Badge } from '@/components/ui/badge';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, useSidebar, SidebarFooter } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, useSidebar } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,6 +68,7 @@ function MentraChatPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { isMobile } = useSidebar();
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);
@@ -240,9 +241,7 @@ function MentraChatPage() {
                 <Button onClick={handleNewChat} className="flex-1 justify-start">
                     <Plus className="mr-2 h-4 w-4"/> New Chat
                 </Button>
-                <SidebarTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" />
-                </SidebarTrigger>
+                <SidebarTrigger className="h-8 w-8" />
             </div>
         </SidebarHeader>
         <SidebarContent>
@@ -301,13 +300,11 @@ function MentraChatPage() {
         </AlertDialog>
       </Sidebar>
       
-      <SidebarInset className="p-0 flex flex-col h-screen">
+      <SidebarInset className="p-0 flex flex-col h-screen max-w-full">
         <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
             <div className="flex items-center gap-2">
-                <SidebarTrigger className="md:hidden" asChild>
-                    <Button variant="ghost" size="icon"/>
-                </SidebarTrigger>
-                <div className="flex items-center gap-2 font-semibold">
+                 <SidebarTrigger className="md:hidden" />
+                 <div className="hidden md:flex items-center gap-2 font-semibold">
                     <Logo className="h-8 w-auto"/>
                     <span>Mentra</span>
                 </div>
