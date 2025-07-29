@@ -259,11 +259,14 @@ function MentraChatPage() {
 
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="border-b p-2 flex items-center justify-between">
-            <Button asChild variant="ghost" className="p-0 h-auto flex-1 justify-start group-data-[collapsible=icon]:justify-center">
-                <Link href="/career-coach" className="flex items-center gap-2">
-                    <Logo className="h-6 w-auto" />
-                </Link>
-            </Button>
+            <div className="relative group/logo-area flex items-center justify-center group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8">
+              <Link href="/career-coach" className="group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:group-hover/logo-area:opacity-0 transition-opacity">
+                  <Logo className="h-6 w-auto" />
+              </Link>
+              <div className="absolute inset-0 flex items-center justify-center group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:group-hover/logo-area:opacity-100 transition-opacity">
+                <SidebarTrigger className="h-8 w-8" />
+              </div>
+            </div>
             <SidebarTrigger className="h-8 w-8 group-data-[collapsible=icon]:hidden" />
         </SidebarHeader>
         <SidebarContent>
