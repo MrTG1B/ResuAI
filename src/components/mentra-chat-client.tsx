@@ -259,22 +259,22 @@ function MentraChatPage() {
 
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="border-b p-2 flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-                 <Button onClick={() => {}} variant="ghost" className="p-0 h-auto">
+            <Button asChild variant="ghost" className="p-0 h-auto flex-1 justify-start group-data-[collapsible=icon]:justify-center">
+                <Link href="/career-coach" className="flex items-center gap-2">
                     <Logo className="h-6 w-auto" />
-                 </Button>
-            </div>
-            <SidebarTrigger className="h-8 w-8" />
+                </Link>
+            </Button>
+            <SidebarTrigger className="h-8 w-8 group-data-[collapsible=icon]:hidden" />
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start">
-                    <Edit className="h-4 w-4 mr-2" />
-                    <span className="group-data-[collapsible=icon]:hidden">New Chat</span>
+                <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
+                    <Edit className="h-4 w-4" />
+                    <span className="group-data-[collapsible=icon]:hidden ml-2">New Chat</span>
                 </Button>
-                <Button onClick={() => setIsSearchOpen(true)} variant="ghost" className="w-full justify-start">
-                    <Search className="h-4 w-4 mr-2" />
-                     <span className="group-data-[collapsible=icon]:hidden">Search chats</span>
+                <Button onClick={() => setIsSearchOpen(true)} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
+                    <Search className="h-4 w-4" />
+                     <span className="group-data-[collapsible=icon]:hidden ml-2">Search chats</span>
                 </Button>
             </div>
             <SidebarMenu>
