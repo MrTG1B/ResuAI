@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical } from 'lucide-react';
+import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, Search } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
@@ -40,6 +40,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
   } from "@/components/ui/alert-dialog"
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 
 interface Attachment {
     name: string;
@@ -84,6 +85,8 @@ function MentraChatPage() {
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
@@ -234,16 +237,46 @@ function MentraChatPage() {
 
   return (
     <div className="flex h-screen w-full bg-background text-foreground">
+        <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+            <CommandInput placeholder="Type to search chats..." />
+            <CommandList>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup heading="Chats">
+                {chatHistory.map((chat) => (
+                    <CommandItem
+                        key={chat.id}
+                        onSelect={() => {
+                            router.push(`/career-coach?id=${chat.id}`);
+                            setIsSearchOpen(false);
+                        }}
+                    >
+                        <span>{chat.title}</span>
+                    </CommandItem>
+                ))}
+                </CommandGroup>
+            </CommandList>
+        </CommandDialog>
+
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="border-b p-2 flex items-center justify-between">
-            <Button onClick={handleNewChat} variant="ghost" className="flex-1 justify-start p-2">
-                <Logo className="h-6 w-auto group-data-[collapsible=icon]:hidden" />
-                <span className="font-semibold text-lg ml-2 group-data-[collapsible=icon]:hidden">Mentra</span>
-                <Plus className="h-5 w-5 hidden group-data-[collapsible=icon]:block" />
-            </Button>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+                 <Button onClick={() => {}} variant="ghost" className="p-0 h-auto">
+                    <Logo className="h-6 w-auto" />
+                 </Button>
+            </div>
             <SidebarTrigger className="h-8 w-8" />
         </SidebarHeader>
         <SidebarContent>
+            <div className="p-2 space-y-1">
+                <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start">
+                    <Edit className="h-4 w-4 mr-2" />
+                    <span className="group-data-[collapsible=icon]:hidden">New Chat</span>
+                </Button>
+                <Button onClick={() => setIsSearchOpen(true)} variant="ghost" className="w-full justify-start">
+                    <Search className="h-4 w-4 mr-2" />
+                     <span className="group-data-[collapsible=icon]:hidden">Search chats</span>
+                </Button>
+            </div>
             <SidebarMenu>
                 {isHistoryLoading ? (
                     Array.from({length: 5}).map((_, i) => <SidebarMenuItem key={i}><div className="h-8 w-full bg-muted rounded animate-pulse"/></SidebarMenuItem>)
