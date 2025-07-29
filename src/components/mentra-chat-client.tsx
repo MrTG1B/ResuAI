@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, PanelLeft } from 'lucide-react';
+import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
@@ -68,7 +68,6 @@ function MentraChatPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const { isMobile } = useSidebar();
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);
@@ -236,13 +235,13 @@ function MentraChatPage() {
   return (
     <div className="flex h-screen w-full bg-background text-foreground">
       <Sidebar side="left" collapsible="icon">
-        <SidebarHeader className="border-b p-2">
-            <div className="flex items-center justify-between w-full">
-                <Button onClick={handleNewChat} className="flex-1 justify-start">
-                    <Plus className="mr-2 h-4 w-4"/> New Chat
-                </Button>
-                <SidebarTrigger className="h-8 w-8" />
-            </div>
+        <SidebarHeader className="border-b p-2 flex items-center justify-between">
+            <Button onClick={handleNewChat} variant="ghost" className="flex-1 justify-start p-2">
+                <Logo className="h-6 w-auto group-data-[collapsible=icon]:hidden" />
+                <span className="font-semibold text-lg ml-2 group-data-[collapsible=icon]:hidden">Mentra</span>
+                <Plus className="h-5 w-5 hidden group-data-[collapsible=icon]:block" />
+            </Button>
+            <SidebarTrigger className="h-8 w-8" />
         </SidebarHeader>
         <SidebarContent>
             <SidebarMenu>
@@ -300,14 +299,11 @@ function MentraChatPage() {
         </AlertDialog>
       </Sidebar>
       
-      <SidebarInset className="p-0 flex flex-col h-screen max-w-full">
+      <SidebarInset>
         <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
             <div className="flex items-center gap-2">
                  <SidebarTrigger className="md:hidden" />
-                 <div className="hidden md:flex items-center gap-2 font-semibold">
-                    <Logo className="h-8 w-auto"/>
-                    <span>Mentra</span>
-                </div>
+                 <span className="font-semibold md:hidden">Mentra</span>
             </div>
             <div className="flex items-center gap-2">
                  <DropdownMenu>
