@@ -257,7 +257,7 @@ function MentraChatPage() {
         </CommandDialog>
 
       <Sidebar side="left" collapsible="icon">
-        <SidebarHeader className="border-b p-2 flex items-center justify-between">
+        <SidebarHeader className="border-b p-2 flex items-center justify-between flex-direction-row">
             {/* This container handles the logo/trigger hover effect */}
             <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
                 {/* Expanded state: Full logo visible */}
