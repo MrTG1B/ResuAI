@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -259,14 +258,22 @@ function MentraChatPage() {
 
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="border-b p-2 flex items-center justify-between">
-            <div className="relative group/logo-area flex items-center justify-center group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8">
-              <Link href="/career-coach" className="group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:group-hover/logo-area:opacity-0 transition-opacity">
-                  <Logo className="h-6 w-auto" />
-              </Link>
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:group-hover/logo-area:opacity-100 transition-opacity">
-                <SidebarTrigger className="h-8 w-8" />
-              </div>
+            {/* This container handles the logo/trigger hover effect */}
+            <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
+                {/* Expanded state: Full logo visible */}
+                <Link href="/dashboard" className="group-data-[collapsible=icon]:opacity-0 transition-opacity">
+                    <Logo className="h-6 w-auto" />
+                </Link>
+                {/* Collapsed state: Small icon logo visible by default */}
+                <Link href="/dashboard" className="absolute inset-0 opacity-0 group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:group-hover/logo-area:opacity-0 transition-opacity flex items-center justify-center">
+                    <Logo className="h-6 w-6"/>
+                </Link>
+                {/* Collapsed state hover: Trigger visible */}
+                <div className="absolute inset-0 opacity-0 group-data-[collapsible=icon]:group-hover/logo-area:opacity-100 transition-opacity">
+                    <SidebarTrigger className="h-8 w-8" />
+                </div>
             </div>
+            {/* Expanded state: Trigger visible */}
             <SidebarTrigger className="h-8 w-8 group-data-[collapsible=icon]:hidden" />
         </SidebarHeader>
         <SidebarContent>
@@ -418,3 +425,6 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
+
+
+    
