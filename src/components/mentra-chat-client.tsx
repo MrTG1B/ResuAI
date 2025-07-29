@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -240,7 +239,11 @@ function MentraChatPage() {
                   <Button onClick={handleNewChat} className="flex-1 justify-start">
                       <Plus className="mr-2 h-4 w-4"/> New Chat
                   </Button>
-                   <SidebarTrigger className="hidden md:flex" />
+                  <SidebarTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <PanelLeft />
+                    </Button>
+                  </SidebarTrigger>
               </div>
           </SidebarHeader>
           <SidebarContent>
@@ -284,18 +287,6 @@ function MentraChatPage() {
                   )}
               </SidebarMenu>
           </SidebarContent>
-          <SidebarFooter className="border-t">
-              <Link href="/profile" className="flex items-center gap-3 p-2 rounded-md hover:bg-sidebar-accent w-full">
-                  <Avatar className="h-8 w-8 shrink-0">
-                      <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || ''} />
-                      <AvatarFallback>{getInitials(currentUser.displayName)}</AvatarFallback>
-                  </Avatar>
-                  <div className="overflow-hidden group-data-[collapsible=icon]:hidden">
-                      <p className="font-semibold text-sm truncate">{currentUser.displayName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{currentUser.email}</p>
-                  </div>
-              </Link>
-          </SidebarFooter>
 
           <AlertDialog open={!!deletingChatId} onOpenChange={(open) => !open && setDeletingChatId(null)}>
               <AlertDialogContent>
@@ -398,4 +389,4 @@ export default function MentraChatClient() {
     )
 }
 
-  
+    
