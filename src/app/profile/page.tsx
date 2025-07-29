@@ -423,8 +423,8 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-              <Tabs defaultValue="personal" className="w-full" orientation="vertical">
-                <TabsList className="grid w-full grid-cols-2 sm:flex sm:w-auto sm:flex-col sm:items-start sm:h-full text-sm sm:text-base">
+              <Tabs defaultValue="personal" className="w-full">
+                <TabsList className="grid w-full grid-cols-4 md:grid-cols-8">
                   <TabsTrigger value="personal">Personal</TabsTrigger>
                   <TabsTrigger value="skills">Skills</TabsTrigger>
                   <TabsTrigger value="languages">Languages</TabsTrigger>
@@ -435,7 +435,7 @@ export default function ProfilePage() {
                   <TabsTrigger value="certifications">Certs</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="personal" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
+                <TabsContent value="personal" className="space-y-6 pt-4">
                    <SectionTitle icon={UserCircle} text="Personal Information" />
                    <div className="flex flex-col md:flex-row items-start gap-8">
                         <div className="space-y-2 flex-shrink-0 text-center md:w-1/4 w-full">
@@ -511,7 +511,7 @@ export default function ProfilePage() {
 
                     <div className="space-y-4 pt-4">
                         <div className="flex justify-between items-center">
-                            <SectionTitle icon={UserCircle} text="About Me / Professional Summary" />
+                            <SectionTitle icon={UserCircle} text="About Me" />
                             <Button type="button" variant="outline" size="sm" onClick={handleRefineSummary} disabled={isRefining}>
                                 {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                                 Refine with AI
@@ -558,7 +558,7 @@ export default function ProfilePage() {
                     </div>
                 </TabsContent>
 
-                <TabsContent value="skills" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
+                <TabsContent value="skills" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Wrench} text="Skills" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('skills')}>
@@ -593,7 +593,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="languages" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
+                <TabsContent value="languages" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Languages} text="Languages" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('languages')}>
@@ -630,7 +630,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="interests" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
+                <TabsContent value="interests" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Smile} text="Interests" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('interests')}>
@@ -665,7 +665,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="experience" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
+                <TabsContent value="experience" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Briefcase} text="Work Experience" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('experience')}>
@@ -697,7 +697,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                 <TabsContent value="education" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
+                 <TabsContent value="education" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={GraduationCap} text="Education" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('education')}>
@@ -729,7 +729,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="projects" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
+                <TabsContent value="projects" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Lightbulb} text="Projects" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('projects')}>
@@ -761,7 +761,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="certifications" className="space-y-6 pt-4 sm:pt-0 sm:pl-6">
+                <TabsContent value="certifications" className="space-y-6 pt-4">
                    <div className="flex items-center justify-between">
                     <SectionTitle icon={Award} text="Licenses & Certifications" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('certifications')}>

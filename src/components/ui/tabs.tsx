@@ -9,10 +9,15 @@ import { cn } from "@/lib/utils"
 const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
->(({ className, ...props }, ref) => (
+>(({ className, orientation = "vertical", ...props }, ref) => (
   <TabsPrimitive.Root
     ref={ref}
-    className={cn("flex flex-col sm:flex-row", className)}
+    orientation={orientation}
+    className={cn(
+        "flex",
+        orientation === 'vertical' && "flex-col sm:flex-row",
+        orientation === 'horizontal' && "flex-col",
+         className)}
     {...props}
   />
 ));
@@ -26,7 +31,9 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-auto items-start justify-start rounded-md bg-muted p-1 text-muted-foreground flex-shrink-0 flex-wrap sm:flex-col sm:h-auto",
+      "inline-flex h-auto items-start justify-start rounded-md bg-muted p-1 text-muted-foreground flex-shrink-0",
+      "[&[aria-orientation=vertical]]:flex-wrap [&[aria-orientation=vertical]]:sm:flex-col [&[aria-orientation=vertical]]:sm:h-auto",
+      "[&[aria-orientation=horizontal]]:flex-row",
       className
     )}
     {...props}
@@ -57,6 +64,8 @@ const TabsContent = React.forwardRef<
     ref={ref}
     className={cn(
       "w-full mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "[&[aria-orientation=vertical]]:mt-0 [&[aria-orientation=vertical]]:sm:ml-4",
+      "[&[aria-orientation=horizontal]]:mt-4",
       className
     )}
     {...props}
