@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -76,6 +77,7 @@ const calculateProfileCompletion = (profile: any, user: User | null): number => 
         (combinedData.education?.length || 0) > 0,
         (combinedData.projects?.length || 0) > 0,
         (combinedData.certifications?.length || 0) > 0,
+        (combinedData.publications?.length || 0) > 0,
         (combinedData.languages?.length || 0) > 0,
         (combinedData.interests?.length || 0) > 0,
     ];

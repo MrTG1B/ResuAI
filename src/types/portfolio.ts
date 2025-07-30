@@ -26,6 +26,7 @@ export interface PersonalInfo {
   skills?: string[];
   languages?: Language[];
   interests?: string[];
+  publications?: Publication[];
 }
 
 export interface Experience {
@@ -58,6 +59,13 @@ export interface Certification {
   credentialUrl?: string;
 }
 
+export interface Publication {
+  title: string;
+  journal: string;
+  date: string;
+  url: string;
+}
+
 export interface ColorPalette {
   primary: string;
   secondary: string;
@@ -77,6 +85,7 @@ export interface PortfolioData {
   skills: string[];
   projects: Project[];
   certifications: Certification[];
+  publications?: Publication[];
   languages?: Language[];
   interests?: string[];
   colorPalette?: ColorPalette;

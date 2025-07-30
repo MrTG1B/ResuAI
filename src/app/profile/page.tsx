@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages, Smile } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages, Smile, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -74,6 +74,13 @@ const certificationSchema = z.object({
   credentialUrl: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
 });
 
+const publicationSchema = z.object({
+  title: z.string().min(1, "Publication title is required"),
+  journal: z.string().min(1, "Journal/Conference name is required"),
+  date: z.string().optional(),
+  url: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
+});
+
 const languageSchema = z.object({
   language: z.string().min(1, "Language is required"),
   proficiency: z.string().min(1, "Proficiency is required"),
@@ -95,13 +102,14 @@ const profileSchema = z.object({
   education: z.array(educationSchema).optional(),
   projects: z.array(projectSchema).optional(),
   certifications: z.array(certificationSchema).optional(),
+  publications: z.array(publicationSchema).optional(),
   languages: z.array(languageSchema).optional(),
   interests: z.array(z.string()).optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-type EditableSection = 'education' | 'projects' | 'certifications' | 'experience' | 'socials' | 'skills' | 'languages' | 'interests';
+type EditableSection = 'education' | 'projects' | 'certifications' | 'experience' | 'socials' | 'skills' | 'languages' | 'interests' | 'publications';
 
 const SectionTitle = ({ icon, text }: { icon: React.ElementType, text: string }) => {
   const Icon = icon;
@@ -153,6 +161,7 @@ export default function ProfilePage() {
       education: [],
       projects: [],
       certifications: [],
+      publications: [],
       languages: [],
       interests: [],
       phone: "+91",
@@ -165,6 +174,7 @@ export default function ProfilePage() {
   const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({ control, name: "education" });
   const { fields: projFields, append: appendProj, remove: removeProj } = useFieldArray({ control, name: "projects" });
   const { fields: certFields, append: appendCert, remove: removeCert } = useFieldArray({ control, name: "certifications" });
+  const { fields: pubFields, append: appendPub, remove: removePub } = useFieldArray({ control, name: "publications" });
   const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({ control, name: "skills" });
   const { fields: langFields, append: appendLang, remove: removeLang } = useFieldArray({ control, name: "languages" });
   const { fields: interestFields, append: appendInterest, remove: removeInterest } = useFieldArray({ control, name: "interests" });
@@ -365,6 +375,7 @@ export default function ProfilePage() {
         case 'education': appendEdu(dialogData); break;
         case 'projects': appendProj(dialogData); break;
         case 'certifications': appendCert(dialogData); break;
+        case 'publications': appendPub(dialogData); break;
         case 'socials': appendSocial(dialogData); break;
         case 'skills': appendSkill(dialogData.skill); break;
         case 'languages': appendLang(dialogData); break;
@@ -397,6 +408,7 @@ export default function ProfilePage() {
   const watchedEducation = watch('education');
   const watchedProjects = watch('projects');
   const watchedCerts = watch('certifications');
+  const watchedPubs = watch('publications');
   const watchedExperience = watch('experience');
   const watchedSocials = watch('socials');
   const watchedSkills = watch('skills');
@@ -423,8 +435,8 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-              <Tabs defaultValue="personal" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 md:grid-cols-8">
+              <Tabs defaultValue="personal" className="w-full" orientation="horizontal">
+                <TabsList className="grid w-full grid-cols-5 md:grid-cols-9">
                   <TabsTrigger value="personal">Personal</TabsTrigger>
                   <TabsTrigger value="skills">Skills</TabsTrigger>
                   <TabsTrigger value="languages">Languages</TabsTrigger>
@@ -433,6 +445,7 @@ export default function ProfilePage() {
                   <TabsTrigger value="education">Education</TabsTrigger>
                   <TabsTrigger value="projects">Projects</TabsTrigger>
                   <TabsTrigger value="certifications">Certs</TabsTrigger>
+                  <TabsTrigger value="publications">Pubs</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="personal" className="space-y-6 pt-4">
@@ -793,6 +806,39 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
+                <TabsContent value="publications" className="space-y-6 pt-4">
+                  <div className="flex items-center justify-between">
+                    <SectionTitle icon={FileText} text="Publications" />
+                    <Button type="button" variant="outline" size="sm" onClick={() => openDialog('publications')}>
+                      <PlusCircle className="mr-2 h-4 w-4" /> Add Publication
+                    </Button>
+                  </div>
+                  <Card>
+                    <Table>
+                       <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Journal / Conference</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {watchedPubs?.map((pub, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{pub.title}</TableCell>
+                            <TableCell>{pub.journal}</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => openDialog('publications', index)}><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => removePub(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Card>
+                </TabsContent>
+
+
               </Tabs>
               
               <div className="flex justify-end pt-4 border-t">
@@ -948,6 +994,26 @@ export default function ProfilePage() {
                         </label>
                     </div>
                 </div>
+            )}
+             {editingSection === 'publications' && (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="pub-title">Title</Label>
+                  <Input id="pub-title" value={dialogData.title || ''} onChange={(e) => setDialogData({ ...dialogData, title: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="pub-journal">Journal / Conference</Label>
+                  <Input id="pub-journal" value={dialogData.journal || ''} onChange={(e) => setDialogData({ ...dialogData, journal: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="pub-date">Date</Label>
+                  <Input id="pub-date" value={dialogData.date || ''} onChange={(e) => setDialogData({ ...dialogData, date: e.target.value })} placeholder="e.g., May 2024"/>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="pub-url">Publication URL</Label>
+                  <Input id="pub-url" value={dialogData.url || ''} onChange={(e) => setDialogData({ ...dialogData, url: e.target.value })} />
+                </div>
+              </div>
             )}
              {editingSection === 'socials' && (
                 <div className="grid grid-cols-2 gap-4">
