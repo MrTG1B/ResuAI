@@ -42,6 +42,12 @@ const CertificationSchema = z.object({
     date: z.string().optional(),
     credentialUrl: z.string().optional(),
 });
+const PublicationSchema = z.object({
+  title: z.string(),
+  journal: z.string(),
+  date: z.string().optional(),
+  url: z.string().url().optional(),
+});
 const LanguageSchema = z.object({
     language: z.string(),
     proficiency: z.string(),
@@ -61,6 +67,7 @@ const UserProfileSchema = z.object({
     education: z.array(EducationSchema).optional(),
     projects: z.array(ProjectSchema).optional(),
     certifications: z.array(CertificationSchema).optional(),
+    publications: z.array(PublicationSchema).optional(),
     languages: z.array(LanguageSchema).optional(),
     interests: z.array(z.string()).optional(),
 });
@@ -176,6 +183,14 @@ You **MUST** use this information.
 - **{{this.name}}**, issued by **{{this.issuingOrganization}}**{{#if this.date}}, dated **{{this.date}}**{{/if}}{{#if this.credentialUrl}} [{{this.credentialUrl}}]{{/if}}
 {{/each}}
 You **MUST NOT** ask for attachments if this data exists. Use these directly in the resume.
+{{/if}}
+
+{{#if userProfile.publications.length}}
+⚠️ IMPORTANT: The user has the following publications in their profile:
+{{#each userProfile.publications}}
+- **{{this.title}}**, published in **{{this.journal}}**{{#if this.date}}, dated **{{this.date}}**{{/if}}{{#if this.url}} [{{this.url}}]{{/if}}
+{{/each}}
+You **MUST** use this information.
 {{/if}}
 
 {{#if userProfile.interests.length}}
