@@ -1,44 +1,21 @@
-{
-  "rules": {
-    "users": {
-      "{userId}": {
-        ".read": "request.auth.uid == userId",
-        ".write": "request.auth.uid == userId",
-        "portfolios": {
-          "{portfolioId}": {
-            ".read": "request.auth.uid == userId",
-            ".write": "request.auth.uid == userId"
-          }
-        },
-        "resumes": {
-          "{resumeId}": {
-            ".read": "request.auth.uid == userId",
-            ".write": "request.auth.uid == userId"
-          }
-        },
-        "chats": {
-          "{chatId}": {
-            ".read": "request.auth.uid == userId",
-            ".write": "request.auth.uid == userId"
-          }
-        },
-        "coverletters": {
-          "{coverletterId}": {
-            ".read": "request.auth.uid == userId",
-            ".write": "request.auth.uid == userId"
-          }
-        },
-        "profile": {
-          "data": {
-            ".read": "request.auth.uid == userId",
-            ".write": "request.auth.uid == userId"
-          }
-        }
-      }
-    },
-    "feedback": {
-      ".read": "request.auth != null && request.auth.token.email == 'tirthankardasgupta2004@gmail.com'",
-      ".write": "request.auth != null && request.resource.data.userId == request.auth.uid"
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users can only read and write to their own data.
+    // This rule covers the profile subcollection and all other subcollections
+    // like resumes, portfolios, coverletters, and chats.
+    match /users/{userId}/{documents=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Feedback can be created by any authenticated user, but they can't read
+    // or modify any feedback after it's submitted.
+    // The userId in the document must match the creator's uid.
+    match /feedback/{feedbackId} {
+      allow read, update, delete: if false; // No one can read/change feedback directly.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
   }
 }
