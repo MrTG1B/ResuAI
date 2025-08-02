@@ -42,6 +42,11 @@ export default function ResumeAnalyzerPage() {
   const [analysisResult, setAnalysisResult] = useState<AtsAnalyzerOutput | null>(null);
 
   useEffect(() => {
+    // Clear session storage on initial load to prevent carrying over old data
+    sessionStorage.removeItem('resumeForAnalysisDataUri');
+    sessionStorage.removeItem('resumeForAnalysisFileName');
+    sessionStorage.removeItem('resumeSuggestions');
+
     if (!auth) {
       toast({
         title: "Configuration Error",
@@ -85,6 +90,9 @@ export default function ResumeAnalyzerPage() {
     setResumeFile(null);
     setResumeFileName("");
     setJobDescription("");
+    sessionStorage.removeItem('resumeForAnalysisDataUri');
+    sessionStorage.removeItem('resumeForAnalysisFileName');
+    sessionStorage.removeItem('resumeSuggestions');
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -103,6 +111,10 @@ export default function ResumeAnalyzerPage() {
     
     const performAnalysis = async (dataUri: string) => {
         try {
+            // Store the resume data in session storage before analysis
+            sessionStorage.setItem('resumeForAnalysisDataUri', dataUri);
+            sessionStorage.setItem('resumeForAnalysisFileName', resumeFileName);
+
             const result = await atsAnalyzeAction({ resumeDataUri: dataUri, jobDescription });
 
             if (result.success && result.data) {
@@ -158,7 +170,7 @@ export default function ResumeAnalyzerPage() {
                 <Card className="shadow-2xl">
                     <CardHeader className="text-center">
                         <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
-                            ATS Resume Scanner
+                            AI-Powered ATS Resume Checker
                         </h1>
                         <CardDescription className="mt-2 text-lg">
                             Upload your resume and paste a job description to see if you can beat the bots.

@@ -39,12 +39,10 @@ export function AtsResult({ result, onTryAgain }: AtsResultProps) {
 
     const handleApplySuggestionsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
-        // This logic will need to be implemented if you want to pass suggestions to the editor
-        // For now, it just navigates. A more robust solution might use sessionStorage
-        // or a global state manager (like Zustand or Redux).
-        router.push('/resume-builder/editor');
-        // You could store the analysis in sessionStorage before navigating:
-        // sessionStorage.setItem('resumeSuggestions', result.detailedAnalysis);
+        // The resume data URI should already be in sessionStorage from the upload page.
+        // We just need to add the suggestions.
+        sessionStorage.setItem('resumeSuggestions', result.detailedAnalysis);
+        router.push('/resume-builder/editor?from=analysis');
     };
 
     return (
@@ -75,8 +73,9 @@ export function AtsResult({ result, onTryAgain }: AtsResultProps) {
                         remarkPlugins={[remarkGfm]}
                         components={{
                             a: ({ node, children, href, ...rest }) => {
+                                // Specifically handle the link to the editor
                                 if (href === '/resume-builder/editor') {
-                                    return <a href={href} onClick={handleApplySuggestionsClick} {...rest}>{children}</a>;
+                                    return <a href={href} onClick={handleApplySuggestionsClick} {...rest} className="font-bold no-underline">{children}</a>;
                                 }
                                 if (href && href.startsWith('/')) {
                                     return <Link href={href} {...rest}>{children}</Link>;

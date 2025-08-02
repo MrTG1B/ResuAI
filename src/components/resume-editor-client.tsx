@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
-import { parseResumeAction, analyzeResumeAction } from '@/app/actions';
+import { parseResumeAction, editResumeAction } from '@/app/actions';
 import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
@@ -59,7 +59,7 @@ export default function ResumeEditorClient() {
     const [userProfile, setUserProfile] = useState<Partial<PersonalInfo>>({});
 
     const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
-    const [flow, setFlow] = useState<'upload' | 'scratch' | 'edit' | 'loading'>('loading');
+    const [flow, setFlow] = useState<'upload' | 'scratch' | 'edit' | 'loading' | 'analysis'>('loading');
     
     const livePreviewRef = useRef<HTMLDivElement>(null);
     const MAX_RESUMES = 10;
@@ -108,6 +108,61 @@ export default function ResumeEditorClient() {
         setEditorState(newState);
         saveStateToFirestore(newState, resumeId);
     }, [saveStateToFirestore, resumeId]);
+
+    const applyAtsSuggestions = useCallback(async (resumeDataUri: string, suggestions: string) => {
+        setIsApplyingSuggestions(true);
+    
+        try {
+            // Step 1: Parse the resume to get its HTML content
+            const parseResult = await parseResumeAction(currentUser!.uid, { resumeDataUri });
+            if (!parseResult.success || !parseResult.data) {
+                throw new Error(parseResult.error || "Failed to parse resume for editing.");
+            }
+    
+            const initialHtmlContent = parseResult.data.htmlContent;
+    
+            // Step 2: Use editResumeAction to apply the suggestions
+            const editPrompt = `Based on the following analysis and suggestions, please apply the necessary changes to my resume. Focus on improving ATS compatibility by adjusting keywords, formatting, and structure as recommended.\n\nANALYSIS:\n${suggestions}`;
+            
+            const editResult = await editResumeAction({
+                htmlContent: initialHtmlContent,
+                prompt: editPrompt,
+                history: [],
+                userProfile: userProfile
+            });
+    
+            if (editResult.success && editResult.data) {
+                const finalState: SavedEditorState = {
+                    htmlContent: editResult.data.newHtmlContent,
+                    chatHistory: [
+                        { role: 'user', content: "Apply the ATS suggestions." },
+                        { role: 'assistant', content: editResult.data.response }
+                    ],
+                    fileName: (sessionStorage.getItem('resumeForAnalysisFileName') || "Edited Resume").replace(/\.[^/.]+$/, ""),
+                    initialPreviewUri: resumeDataUri,
+                };
+    
+                const newId = await saveStateToFirestore(finalState, null);
+                if (newId) {
+                    setEditorState(finalState);
+                    setResumeId(newId);
+                    setFlow('edit');
+                }
+            } else {
+                throw new Error(editResult.error || "Failed to apply suggestions.");
+            }
+    
+        } catch (error: any) {
+            toast({ title: "Failed to Apply Suggestions", description: error.message, variant: "destructive" });
+            router.push('/resume-analyzer'); // Go back if it fails
+        } finally {
+            setIsApplyingSuggestions(false);
+            // Clean up session storage
+            sessionStorage.removeItem('resumeSuggestions');
+            sessionStorage.removeItem('resumeForAnalysisDataUri');
+            sessionStorage.removeItem('resumeForAnalysisFileName');
+        }
+    }, [currentUser, saveStateToFirestore, router, toast, userProfile]);
 
     // Initial load effect
     useEffect(() => {
@@ -177,7 +232,18 @@ export default function ResumeEditorClient() {
                     };
                     setEditorState(newState);
                     saveStateToFirestore(newState, null);
-                } else {
+                } else if (fromFlow === 'analysis') {
+                    setFlow('analysis');
+                    const suggestions = sessionStorage.getItem('resumeSuggestions');
+                    const resumeDataUri = sessionStorage.getItem('resumeForAnalysisDataUri');
+                    if (suggestions && resumeDataUri) {
+                        applyAtsSuggestions(resumeDataUri, suggestions);
+                    } else {
+                        toast({ title: "Missing Data", description: "Could not find ATS suggestions to apply.", variant: "destructive" });
+                        router.push('/resume-analyzer');
+                    }
+                }
+                else {
                     setFlow('upload');
                 }
             } else {
@@ -187,7 +253,7 @@ export default function ResumeEditorClient() {
         });
         
         return () => unsubscribe();
-    }, [router, searchParams, toast, saveStateToFirestore]);
+    }, [router, searchParams, toast, saveStateToFirestore, applyAtsSuggestions]);
 
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -389,8 +455,8 @@ export default function ResumeEditorClient() {
             </div>
         );
     }
-    
-    if (isApplyingSuggestions) {
+
+    if (isApplyingSuggestions || flow === 'analysis') {
         return (
             <div className="flex flex-col h-screen bg-muted/20">
                 <Header />
