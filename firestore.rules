@@ -11,30 +11,36 @@ service cloud.firestore {
 
     // 🔐 Helper function to check if user is admin
     function isAdmin() {
-      // IMPORTANT: Replace this with your actual Admin UID in a real project
+      // This is a placeholder admin UID. In a real application,
+      // this should be managed securely (e.g., via custom claims).
       return request.auth != null && request.auth.uid == 'Q5xQ2E0S4hR1D3rA9N7pX2wO3Yf2';
     }
 
-    // 👤 User data collections
+    // Match any document in the 'users' collection
     match /users/{userId} {
-      // Profile data is readable and writable only by the owner or admin
-      allow read, write: if isOwner(userId) || isAdmin();
-
-      // Subcollections can only be accessed by the owner or admin
-      match /profile/{docId} {
+      // Profile document
+      match /profile/data {
         allow read, write: if isOwner(userId) || isAdmin();
       }
+
+      // Resumes subcollection
       match /resumes/{resumeId} {
-        allow read, write, delete: if isOwner(userId) || isAdmin();
+        allow read, write, create, delete: if isOwner(userId) || isAdmin();
       }
+
+      // Portfolios subcollection
       match /portfolios/{portfolioId} {
-        allow read, write, delete: if isOwner(userId) || isAdmin();
+        allow read, write, create, delete: if isOwner(userId) || isAdmin();
       }
+
+      // Chats subcollection
       match /chats/{chatId} {
-        allow read, write, delete: if isOwner(userId) || isAdmin();
+        allow read, write, create, delete: if isOwner(userId) || isAdmin();
       }
+
+      // Cover Letters subcollection
       match /coverletters/{coverletterId} {
-        allow read, write, delete: if isOwner(userId) || isAdmin();
+        allow read, write, create, delete: if isOwner(userId) || isAdmin();
       }
     }
 
