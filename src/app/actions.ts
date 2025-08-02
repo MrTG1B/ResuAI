@@ -9,7 +9,7 @@ import { atsAnalyzerFlow, type AtsAnalyzerInput, type AtsAnalyzerOutput } from "
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
-import { submitFeedback as submitFeedbackFlow } from "@/ai/flows/submit-feedback";
+import { submitFeedbackFlow } from "@/ai/flows/submit-feedback";
 import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
