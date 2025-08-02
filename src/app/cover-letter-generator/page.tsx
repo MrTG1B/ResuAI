@@ -74,7 +74,6 @@ function CoverLetterGeneratorPageContent() {
       if (user) {
         setCurrentUser(user);
         
-        // Fetch user profile data
         const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
         const docSnap = await getDoc(profileDocRef);
         if (docSnap.exists()) {
@@ -129,10 +128,11 @@ function CoverLetterGeneratorPageContent() {
     }
 
     try {
+      const idToken = await currentUser.getIdToken();
       const result = await generateCoverLetterAction({
         id: coverLetterId ?? undefined,
         ...data,
-      });
+      }, idToken);
 
       if (result.success && result.data) {
         setGeneratedLetter(result.data.coverLetter);

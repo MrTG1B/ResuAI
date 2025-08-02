@@ -102,6 +102,7 @@ function MentraChatPage() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        console.log(user);
       if (user) {
         setCurrentUser(user);
         await fetchChatHistory(user.uid);

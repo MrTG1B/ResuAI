@@ -17,6 +17,7 @@ import { type PortfolioData, type Project, type PersonalInfo } from "@/types/por
 import { type ParsedResume, type EditedResume, type CoachChatResponse, type ChatMessage } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import { admin } from '@/lib/firebaseAdmin';
 import { User } from "@/types/user";
 import { Feedback } from "@/types/feedback";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
@@ -342,26 +343,30 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   }
 }
 
-export async function submitFeedbackAction(feedback: string): Promise<{success: boolean, error?: string}> {
-    if (!auth?.currentUser) {
-        return { success: false, error: "You must be logged in to submit feedback." };
-    }
+export async function submitFeedbackAction(feedback: string, idToken: string): Promise<{success: boolean, error?: string}> {
     if (!db) {
         return { success: false, error: "Database not configured."};
     }
 
     try {
-        const { uid, email, displayName } = auth.currentUser;
+        // Verify ID token on server
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const { uid, email, name } = decodedToken;
+
         await submitFeedbackFlow({
           feedback,
           userId: uid,
           userEmail: email || undefined,
-          userName: displayName || undefined,
+          userName: name || undefined,
         });
+
         return { success: true };
     } catch (error: any) {
-        console.error("Error submitting feedback:", error);
-        return { success: false, error: "Failed to submit feedback. Please try again." };
+        console.error("Feedback submission error:", error);
+        if (error.code === 'auth/id-token-expired') {
+            return { success: false, error: 'Your session has expired. Please log in again.' };
+        }
+        return { success: false, error: 'You must be logged in to submit feedback.' };
     }
 }
 
@@ -388,18 +393,17 @@ interface GenerateCoverLetterActionInput {
     id?: string;
 }
 
-export async function generateCoverLetterAction(input: GenerateCoverLetterActionInput): Promise<{ success: boolean; data?: { coverLetter: string, id: string }; error?: string }> {
-    if (!auth?.currentUser) {
-        return { success: false, error: "User not authenticated." };
-    }
+export async function generateCoverLetterAction(input: GenerateCoverLetterActionInput, idToken: string): Promise<{ success: boolean; data?: { coverLetter: string, id: string }; error?: string }> {
     if (!db) {
         return { success: false, error: "Database not available." };
     }
 
-    const { uid } = auth.currentUser;
-    const { id, title, ...aiInput } = input;
-    
     try {
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const { uid } = decodedToken;
+        
+        const { id, title, ...aiInput } = input;
+        
         const profileDocRef = doc(db, 'users', uid, 'profile', 'data');
         const profileSnap = await getDoc(profileDocRef);
         if (!profileSnap.exists()) {
@@ -438,6 +442,9 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
         console.error("Cover letter generation/saving failed:", errorMessage);
+        if (error instanceof Error && error.message.includes('PERMISSION_DENIED')) {
+            return { success: false, error: `Permission denied. Please ensure you are logged in.` };
+        }
         return { success: false, error: `Failed to process cover letter: ${errorMessage}` };
     }
 }

@@ -52,10 +52,20 @@ export default function FeedbackPage() {
   }, [router]);
 
   const onSubmit = async (data: FeedbackFormData) => {
-    // The action now gets the user from the server-side auth context,
-    // so we don't need to check for currentUser here before calling.
-    // The action itself handles the "not logged in" case.
-    const result = await submitFeedbackAction(data.feedback);
+    if (!currentUser) {
+      toast({
+        title: 'Submission Failed',
+        description: 'You must be logged in to submit feedback.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Get Firebase ID token
+    const idToken = await currentUser.getIdToken();
+
+    // Send it to the server
+    const result = await submitFeedbackAction(data.feedback, idToken);
 
     if (result.success) {
       toast({ title: 'Feedback Submitted!', description: "Thank you for helping us improve ResuAI." });
