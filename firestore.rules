@@ -2,20 +2,54 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Users can only read and write to their own data.
-    // This rule covers the profile subcollection and all other subcollections
-    // like resumes, portfolios, coverletters, and chats.
-    match /users/{userId}/{documents=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+    // 🔐 Helper function to check if user is the document owner
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
     }
 
-    // Feedback can be created by any authenticated user, but they can't read
-    // or modify any feedback after it's submitted.
-    // The userId in the document must match the creator's uid.
+    // 🔐 Helper function to check if user is admin
+    function isAdmin() {
+      // This is a placeholder admin UID. In a real application,
+      // this should be managed securely (e.g., via custom claims).
+      return request.auth != null && request.auth.uid == 'Q5xQ2E0S4hR1D3rA9N7pX2wO3Yf2';
+    }
+
+    // Match any document in the 'users' collection
+    match /users/{userId} {
+      // Profile document
+      match /profile/data {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // Resumes subcollection
+      match /resumes/{resumeId} {
+        allow read, write, create, delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Portfolios subcollection
+      match /portfolios/{portfolioId} {
+        allow read, write, create, delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Chats subcollection
+      match /chats/{chatId} {
+        allow read, write, create, delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Cover Letters subcollection
+      match /coverletters/{coverletterId} {
+        allow read, write, create, delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // 📝 Feedback collection
     match /feedback/{feedbackId} {
-      allow read, update, delete: if false; // No one can read/change feedback directly.
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Any signed-in user can submit feedback
+      allow create: if request.auth != null;
+
+      // Only admin can read, update, delete feedback
+      allow read, update, delete: if isAdmin();
     }
   }
 }

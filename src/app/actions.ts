@@ -17,7 +17,7 @@ import { type PortfolioData, type Project, type PersonalInfo } from "@/types/por
 import { type ParsedResume, type EditedResume, type CoachChatResponse, type ChatMessage } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import { admin } from '@/lib/firebaseAdmin';
+import { admin, initializeFirebaseAdmin } from '@/lib/firebaseAdmin';
 import { User } from "@/types/user";
 import { Feedback } from "@/types/feedback";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
@@ -57,7 +57,7 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
             certifications: portfolioDraft.certifications || [],
             languages: portfolioDraft.languages || [],
             interests: portfolioDraft.interests || [],
-            publications: portfolioDraft.publications || [],
+            publications: [], // publications is not in the resume analysis output
         };
 
         // Merge with existing data, giving precedence to what's already in the profile
@@ -344,11 +344,10 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
 }
 
 export async function submitFeedbackAction(feedback: string, idToken: string): Promise<{success: boolean, error?: string}> {
-    if (!db) {
-        return { success: false, error: "Database not configured."};
-    }
-
     try {
+        // Ensure Firebase Admin is initialized
+        initializeFirebaseAdmin();
+
         // Verify ID token on server
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const { uid, email, name } = decodedToken;
@@ -356,8 +355,8 @@ export async function submitFeedbackAction(feedback: string, idToken: string): P
         await submitFeedbackFlow({
           feedback,
           userId: uid,
-          userEmail: email || undefined,
-          userName: name || undefined,
+          userEmail: email,
+          userName: name,
         });
 
         return { success: true };
@@ -365,6 +364,9 @@ export async function submitFeedbackAction(feedback: string, idToken: string): P
         console.error("Feedback submission error:", error);
         if (error.code === 'auth/id-token-expired') {
             return { success: false, error: 'Your session has expired. Please log in again.' };
+        }
+        if (error.message.includes("Missing Firebase Admin credentials")) {
+            return { success: false, error: "Server configuration error. Cannot submit feedback."};
         }
         return { success: false, error: 'You must be logged in to submit feedback.' };
     }
@@ -399,6 +401,9 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
     }
 
     try {
+        // Ensure Firebase Admin is initialized
+        initializeFirebaseAdmin();
+
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const { uid } = decodedToken;
         
