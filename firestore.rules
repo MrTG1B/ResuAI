@@ -4,49 +4,47 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
+    // 🔐 Helper function to check if user is the document owner
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
+
+    // 🔐 Helper function to check if user is admin
     function isAdmin() {
-      // Hardcode your admin UID here for security
-      return request.auth != null && request.auth.uid == 'tirthankardasgupta2004@gmail.com';
+      // IMPORTANT: Replace this with your actual Admin UID in a real project
+      return request.auth != null && request.auth.uid == 'Q5xQ2E0S4hR1D3rA9N7pX2wO3Yf2';
     }
 
-    // User-specific data
+    // 👤 User data collections
     match /users/{userId} {
-      // The user document itself can be read by its owner or admin
-      allow read: if isOwner(userId) || isAdmin();
-      
-      // Profile subcollection: owner can read/write
-      match /profile/data {
-        allow read, write: if isOwner(userId);
+      // Profile data is readable and writable only by the owner or admin
+      allow read, write: if isOwner(userId) || isAdmin();
+
+      // Subcollections can only be accessed by the owner or admin
+      match /profile/{docId} {
+        allow read, write: if isOwner(userId) || isAdmin();
       }
-      
-      // Resumes subcollection: owner has full access
       match /resumes/{resumeId} {
-        allow read, write, create, delete: if isOwner(userId);
+        allow read, write, delete: if isOwner(userId) || isAdmin();
       }
-
-      // Portfolios subcollection: owner has full access
       match /portfolios/{portfolioId} {
-        allow read, write, create, delete: if isOwner(userId);
+        allow read, write, delete: if isOwner(userId) || isAdmin();
       }
-
-      // Chats subcollection: owner has full access
       match /chats/{chatId} {
-        allow read, write, create, delete: if isOwner(userId);
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+      match /coverletters/{coverletterId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
       }
     }
 
-    // Feedback collection
+    // 📝 Feedback collection
     match /feedback/{feedbackId} {
-      // Any authenticated user can create feedback
+      // Any signed-in user can submit feedback
       allow create: if request.auth != null;
-      // Only admin can read or delete feedback
-      allow read, delete: if isAdmin();
-      // No one can update feedback after it's created
-      allow update: if false;
+
+      // Only admin can read, update, delete feedback
+      allow read, update, delete: if isAdmin();
     }
   }
 }

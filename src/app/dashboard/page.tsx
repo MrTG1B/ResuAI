@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, BrainCircuit, NotebookPen } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
+import { type CoverLetter } from '@/types/cover-letter';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -96,19 +97,27 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  
   const [resumes, setResumes] = useState<(SavedEditorState & {id: string})[]>([]);
   const [isResumeLoading, setIsResumeLoading] = useState(true);
+  
   const [portfolios, setPortfolios] = useState<(PortfolioData & {id: string})[]>([]);
   const [isPortfolioLoading, setIsPortfolioLoading] = useState(true);
+  
+  const [coverLetters, setCoverLetters] = useState<(CoverLetter & {id: string})[]>([]);
+  const [isCoverLetterLoading, setIsCoverLetterLoading] = useState(true);
+  
   const [profileCompletion, setProfileCompletion] = useState(0);
 
-  const [deleteTarget, setDeleteTarget] = useState<{type: 'resume' | 'portfolio', id: string} | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{type: 'resume' | 'portfolio' | 'coverletter', id: string} | null>(null);
 
   const MAX_RESUMES = 10;
   const MAX_PORTFOLIOS = 5;
+  const MAX_COVER_LETTERS = 10;
 
   const hasReachedResumeLimit = resumes.length >= MAX_RESUMES;
   const hasReachedPortfolioLimit = portfolios.length >= MAX_PORTFOLIOS;
+  const hasReachedCoverLetterLimit = coverLetters.length >= MAX_COVER_LETTERS;
 
   const isEmailUser = user?.providerData.some(p => p.providerId === 'password');
   const isEmailVerified = user?.emailVerified;
@@ -124,7 +133,21 @@ export default function DashboardPage() {
       if (user) {
         setUser(user);
         
-        // Fetch profile data for completion status
+        const fetchData = async (collectionName: string, setter: Function, loaderSetter: Function) => {
+            try {
+                if (!db) throw new Error("Firestore not initialized");
+                const q = query(collection(db, `users/${user.uid}/${collectionName}`), orderBy('lastModified', 'desc'));
+                const snapshot = await getDocs(q);
+                const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setter(items);
+            } catch (error) {
+                console.error(`Failed to fetch ${collectionName}:`, error);
+                 toast({ title: "Error", description: `Could not fetch your ${collectionName}.`, variant: "destructive" });
+            } finally {
+                loaderSetter(false);
+            }
+        };
+
         try {
             if (!db) throw new Error("Firestore not initialized");
             const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
@@ -136,48 +159,27 @@ export default function DashboardPage() {
             console.error("Failed to fetch profile data:", error);
         }
 
-        // Fetch resumes
-        try {
-            if (!db) throw new Error("Firestore not initialized");
-            const resumeQuery = query(collection(db, `users/${user.uid}/resumes`), orderBy('lastModified', 'desc'));
-            const resumeSnapshot = await getDocs(resumeQuery);
-            const userResumes = resumeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SavedEditorState & {id: string}));
-            setResumes(userResumes);
-        } catch (error) {
-            console.error("Failed to fetch saved resumes:", error);
-        } finally {
-            setIsResumeLoading(false);
-        }
-        
-        // Fetch portfolios
-        try {
-            if (!db) throw new Error("Firestore not initialized");
-            const portfolioQuery = query(collection(db, `users/${user.uid}/portfolios`), orderBy('createdAt', 'desc'));
-            const portfolioSnapshot = await getDocs(portfolioQuery);
-            const userPortfolios = portfolioSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PortfolioData & {id: string}));
-            setPortfolios(userPortfolios);
-        } catch (error) {
-            console.error("Failed to fetch portfolios:", error);
-        } finally {
-            setIsPortfolioLoading(false);
-        }
+        fetchData('resumes', setResumes, setIsResumeLoading);
+        fetchData('portfolios', setPortfolios, setIsPortfolioLoading);
+        fetchData('coverletters', setCoverLetters, setIsCoverLetterLoading);
+        setIsLoading(false);
 
       } else {
         router.push('/login');
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, toast]);
 
-  const handleContinueEditing = (resumeId: string) => {
-    router.push(`/resume-builder/editor?id=${resumeId}`);
-  };
-
-  const handleStartNew = () => {
-    sessionStorage.removeItem('resumeEditorState');
-    router.push('/resume-builder/editor?from=scratch');
+  const handleStartNew = (type: 'resume' | 'coverletter') => {
+    if (type === 'resume') {
+        sessionStorage.removeItem('resumeEditorState');
+        router.push('/resume-builder/editor?from=scratch');
+    } else {
+        router.push('/cover-letter-generator');
+    }
   }
 
   const confirmDelete = async () => {
@@ -192,15 +194,14 @@ export default function DashboardPage() {
     setDeleteTarget(null); // Clear target immediately
   
     try {
-      const collectionName = type === 'resume' ? 'resumes' : 'portfolios';
+      const collectionName = type === 'coverletter' ? 'coverletters' : `${type}s`;
       const docRef = doc(db, "users", uid, collectionName, id);
       await deleteDoc(docRef);
   
-      if (type === 'resume') {
-        setResumes(prev => prev.filter(r => r.id !== id));
-      } else {
-        setPortfolios(prev => prev.filter(p => p.id !== id));
-      }
+      if (type === 'resume') setResumes(prev => prev.filter(r => r.id !== id));
+      else if (type === 'portfolio') setPortfolios(prev => prev.filter(p => p.id !== id));
+      else if (type === 'coverletter') setCoverLetters(prev => prev.filter(cl => cl.id !== id));
+      
       toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} Deleted`, description: `The ${type} has been successfully deleted.` });
     } catch (error: any) {
       console.error(`Error deleting ${type}:`, error);
@@ -249,7 +250,7 @@ export default function DashboardPage() {
         <Tooltip>
             <TooltipTrigger asChild>
                 <div className="w-full">
-                    <Button onClick={handleStartNew} className="w-full" disabled={hasReachedResumeLimit}>
+                    <Button onClick={() => handleStartNew('resume')} className="w-full" disabled={hasReachedResumeLimit}>
                         <PlusCircle className="mr-2 h-4 w-4" /> Create New Resume
                     </Button>
                 </div>
@@ -276,6 +277,25 @@ export default function DashboardPage() {
             {hasReachedPortfolioLimit && (
                 <TooltipContent>
                     <p>You have reached the free limit of {MAX_PORTFOLIOS} portfolios.</p>
+                </TooltipContent>
+            )}
+        </Tooltip>
+    </TooltipProvider>
+  );
+
+  const createNewCoverLetterButton = (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div className="w-full">
+                    <Button onClick={() => handleStartNew('coverletter')} className="w-full" disabled={hasReachedCoverLetterLimit}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Create New Cover Letter
+                    </Button>
+                </div>
+            </TooltipTrigger>
+            {hasReachedCoverLetterLimit && (
+                <TooltipContent>
+                    <p>You have reached the free limit of {MAX_COVER_LETTERS} cover letters.</p>
                 </TooltipContent>
             )}
         </Tooltip>
@@ -395,7 +415,7 @@ export default function DashboardPage() {
                                     <li key={r.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
                                         <div 
                                             className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow"
-                                            onClick={() => handleContinueEditing(r.id)}
+                                            onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}
                                         >
                                             <div className="w-12 h-16 rounded border bg-white flex justify-center items-start overflow-hidden flex-shrink-0">
                                                 <div
@@ -416,7 +436,7 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
-                                            <Button variant="ghost" size="sm" onClick={() => handleContinueEditing(r.id)}>
+                                            <Button variant="ghost" size="sm" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
                                                 <Edit className="mr-2 h-4 w-4"/>
                                                 Edit
                                             </Button>
@@ -516,6 +536,73 @@ export default function DashboardPage() {
                     )}
                 </Card>
             </div>
+            
+            <div className="grid grid-cols-1 gap-8 items-start animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+                 {/* Saved Cover Letters Section */}
+                <Card className="shadow-lg">
+                    <CardHeader>
+                        <CardTitle>Your Cover Letters ({coverLetters.length}/{MAX_COVER_LETTERS})</CardTitle>
+                        <CardDescription>Manage and edit your saved cover letters.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow space-y-4">
+                        {isCoverLetterLoading ? (
+                            <div className="flex items-center justify-center min-h-[200px]">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : coverLetters.length > 0 ? (
+                           <ul className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
+                                {coverLetters.map(cl => (
+                                    <li key={cl.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
+                                        <div 
+                                            className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow"
+                                            onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}
+                                        >
+                                            <div className="flex-shrink-0 bg-primary/10 p-3 rounded-full">
+                                                <NotebookPen className="h-5 w-5 text-primary" />
+                                            </div>
+                                            <div className="overflow-hidden">
+                                                <p className="font-semibold text-sm truncate group-hover:underline">{cl.title || "Untitled Cover Letter"}</p>
+                                                <p className="text-xs text-muted-foreground truncate">
+                                                    For: {cl.companyName} | Last modified: {cl.lastModified ? new Date(cl.lastModified.seconds * 1000).toLocaleDateString() : 'N/A'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
+                                            <Button variant="ghost" size="sm" onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}>
+                                                <Edit className="mr-2 h-4 w-4"/>
+                                                Edit
+                                            </Button>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'coverletter', id: cl.id })}>
+                                                            <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/>
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Delete Cover Letter</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                             <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
+                                <CardTitle>No Saved Cover Letters</CardTitle>
+                                <CardDescription className="mt-2 mb-4">You haven't created a cover letter yet.</CardDescription>
+                                {createNewCoverLetterButton}
+                            </div>
+                        )}
+                    </CardContent>
+                     {coverLetters.length > 0 && (
+                        <CardFooter>
+                           {createNewCoverLetterButton}
+                        </CardFooter>
+                    )}
+                </Card>
+            </div>
         </div>
       </main>
       <Footer />
@@ -538,5 +625,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    

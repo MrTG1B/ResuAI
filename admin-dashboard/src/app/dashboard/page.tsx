@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users, FileText, LayoutTemplate, MessageSquare } from 'lucide-react';
+import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen } from 'lucide-react';
 import { User } from '@/types/user';
 import { Feedback } from '@/types/feedback';
 import { UserTable } from '@/components/user-table';
@@ -33,7 +33,7 @@ export default function AdminDashboardPage() {
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const [feedback, setFeedback] = useState<Feedback[]>([]);
-    const [stats, setStats] = useState({ users: 0, resumes: 0, portfolios: 0, feedbacks: 0 });
+    const [stats, setStats] = useState({ users: 0, resumes: 0, portfolios: 0, feedbacks: 0, coverLetters: 0 });
 
     useEffect(() => {
         const isAdmin = sessionStorage.getItem('admin-auth') === 'true';
@@ -53,6 +53,7 @@ export default function AdminDashboardPage() {
                 // Fetch users and their subcollection counts
                 const usersCollectionRef = collection(db, 'users');
                 const usersSnapshot = await getDocs(usersCollectionRef);
+                let totalCoverLetters = 0;
 
                 const fetchedUsers: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
                     const user: User = { id: userDoc.id, name: 'N/A', email: 'N/A', resumes: 0, portfolios: 0 };
@@ -71,6 +72,11 @@ export default function AdminDashboardPage() {
                         const resumesCollectionRef = collection(db, 'users', user.id, 'resumes');
                         const resumesSnapshot = await getDocs(resumesCollectionRef);
                         user.resumes = resumesSnapshot.size;
+
+                        const coverLettersCollectionRef = collection(db, 'users', user.id, 'coverletters');
+                        const coverLettersSnapshot = await getDocs(coverLettersCollectionRef);
+                        totalCoverLetters += coverLettersSnapshot.size;
+
                     } catch (error) {
                         console.error(`Failed to fetch details for user ${user.id}`, error);
                     }
@@ -105,6 +111,7 @@ export default function AdminDashboardPage() {
                     resumes: totalResumes,
                     portfolios: totalPortfolios,
                     feedbacks: fetchedFeedback.length,
+                    coverLetters: totalCoverLetters,
                 });
 
             } catch (error: any) {
@@ -135,9 +142,10 @@ export default function AdminDashboardPage() {
             <Header />
             <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
                 <h1 className="text-3xl font-bold tracking-tight font-heading">Admin Dashboard</h1>
-                <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5">
                     <StatCard title="Total Users" value={stats.users} icon={Users} />
                     <StatCard title="Total Resumes" value={stats.resumes} icon={FileText} />
+                    <StatCard title="Total Cover Letters" value={stats.coverLetters} icon={NotebookPen} />
                     <StatCard title="Total Portfolios" value={stats.portfolios} icon={LayoutTemplate} />
                     <StatCard title="Total Feedbacks" value={stats.feedbacks} icon={MessageSquare} />
                 </div>

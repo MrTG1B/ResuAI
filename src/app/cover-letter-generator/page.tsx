@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, db, doc, getDoc } from '@/lib/firebase';
 import { useForm } from 'react-hook-form';
@@ -23,10 +23,12 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { useToast } from '@/hooks/use-toast';
 import { generateCoverLetterAction } from '@/app/actions';
 import { type PersonalInfo } from '@/types/portfolio';
-import { Loader2, Sparkles, Clipboard, RefreshCw } from 'lucide-react';
+import { type CoverLetter } from '@/types/cover-letter';
+import { Loader2, Sparkles, Clipboard, RefreshCw, Save } from 'lucide-react';
 import { CreativeLoader } from '@/components/creative-loader';
 
 const coverLetterSchema = z.object({
+  title: z.string().min(3, { message: 'Title must be at least 3 characters.' }),
   jobDescription: z.string().min(50, { message: 'Please provide a more detailed job description.' }),
   companyName: z.string().min(1, { message: 'Company name is required.' }),
   hiringManager: z.string().optional(),
@@ -45,16 +47,20 @@ const generatingTexts = [
 
 export default function CoverLetterGeneratorPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<Partial<PersonalInfo> | null>(null);
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
+  const [coverLetterId, setCoverLetterId] = useState<string | null>(null);
 
   const form = useForm<CoverLetterFormData>({
     resolver: zodResolver(coverLetterSchema),
     defaultValues: {
+      title: '',
       jobDescription: '',
       companyName: '',
       hiringManager: '',
@@ -77,38 +83,70 @@ export default function CoverLetterGeneratorPage() {
             variant: 'destructive',
           });
           router.push('/profile');
+          return;
         }
+
+        const idFromParams = searchParams.get('id');
+        if (idFromParams) {
+          setCoverLetterId(idFromParams);
+          const letterDocRef = doc(db, 'users', user.uid, 'coverletters', idFromParams);
+          const letterDocSnap = await getDoc(letterDocRef);
+          if (letterDocSnap.exists()) {
+            const letterData = letterDocSnap.data() as CoverLetter;
+            form.reset({
+                title: letterData.title,
+                jobDescription: letterData.jobDescription,
+                companyName: letterData.companyName,
+                hiringManager: letterData.hiringManager,
+                tone: letterData.tone
+            });
+            setGeneratedLetter(letterData.content);
+          } else {
+             toast({ title: 'Not Found', description: 'Cover letter not found.', variant: 'destructive' });
+             router.push('/dashboard');
+          }
+        }
+
       } else {
         router.push('/login');
       }
       setIsPageLoading(false);
     });
     return () => unsubscribe();
-  }, [router, toast]);
+  }, [router, toast, searchParams, form]);
 
   const onSubmit = async (data: CoverLetterFormData) => {
     if (!currentUser || !userProfile) {
       toast({ title: 'Error', description: 'User profile is not available.', variant: 'destructive' });
       return;
     }
-    setIsGenerating(true);
-    setGeneratedLetter('');
+    setIsProcessing(true);
+    if (!coverLetterId) {
+        setGeneratedLetter('');
+    }
 
     try {
       const result = await generateCoverLetterAction({
+        userId: currentUser.uid,
+        id: coverLetterId ?? undefined,
         ...data,
         userProfile: userProfile as PersonalInfo,
       });
 
       if (result.success && result.data) {
         setGeneratedLetter(result.data.coverLetter);
+        if (!coverLetterId) {
+            setCoverLetterId(result.data.id);
+            router.replace(`/cover-letter-generator?id=${result.data.id}`);
+        }
+        toast({ title: 'Success!', description: 'Your cover letter has been generated and saved.' });
       } else {
         throw new Error(result.error || 'Failed to generate cover letter.');
       }
     } catch (error: any) {
       toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
     } finally {
-      setIsGenerating(false);
+      setIsProcessing(false);
     }
   };
 
@@ -116,11 +154,6 @@ export default function CoverLetterGeneratorPage() {
     navigator.clipboard.writeText(generatedLetter);
     toast({ title: 'Copied!', description: 'Cover letter copied to clipboard.' });
   };
-  
-  const handleRefine = () => {
-    // This is a placeholder for a future refinement feature
-    toast({ title: 'Refine Clicked', description: 'Refinement feature coming soon!' });
-  }
 
   if (isPageLoading || !currentUser) {
     return (
@@ -129,6 +162,9 @@ export default function CoverLetterGeneratorPage() {
       </div>
     );
   }
+
+  const actionButtonText = coverLetterId ? 'Regenerate & Save' : 'Generate Cover Letter';
+  const ActionIcon = coverLetterId ? RefreshCw : Sparkles;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -144,6 +180,19 @@ export default function CoverLetterGeneratorPage() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Label htmlFor="title">Cover Letter Title</Label>
+                        <FormControl>
+                          <Input id="title" placeholder="e.g., Application for Software Engineer at Acme" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="companyName"
@@ -176,7 +225,7 @@ export default function CoverLetterGeneratorPage() {
                     render={({ field }) => (
                       <FormItem>
                         <Label>Tone</Label>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue="Professional">
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a tone" />
@@ -211,9 +260,9 @@ export default function CoverLetterGeneratorPage() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full text-lg" size="lg" disabled={isGenerating}>
-                    {isGenerating ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
-                    Generate Cover Letter
+                  <Button type="submit" className="w-full text-lg" size="lg" disabled={isProcessing}>
+                    {isProcessing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <ActionIcon className="mr-2 h-5 w-5" />}
+                    {actionButtonText}
                   </Button>
                 </form>
               </Form>
@@ -224,11 +273,11 @@ export default function CoverLetterGeneratorPage() {
           <Card className="shadow-2xl flex flex-col">
             <CardHeader>
               <CardTitle className="text-2xl font-bold tracking-tight font-heading">Your Generated Cover Letter</CardTitle>
-              <CardDescription>Review the generated letter below. You can copy it or refine it further.</CardDescription>
+              <CardDescription>Review the generated letter below. You can copy it or regenerate it with new details.</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col">
                 <div className="flex-grow rounded-md border bg-muted/50 p-4 prose prose-sm prose-invert max-w-none prose-p:my-2 overflow-y-auto min-h-[400px]">
-                    {isGenerating ? (
+                    {isProcessing && !coverLetterId ? (
                         <div className="flex items-center justify-center h-full">
                            <CreativeLoader texts={generatingTexts} />
                         </div>
@@ -257,5 +306,3 @@ export default function CoverLetterGeneratorPage() {
     </div>
   );
 }
-
-    

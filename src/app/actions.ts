@@ -21,6 +21,7 @@ import { User } from "@/types/user";
 import { Feedback } from "@/types/feedback";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
 import { type ChatSession } from "@/types/chat";
+import { type CoverLetter } from "@/types/cover-letter";
 
 
 async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
@@ -55,6 +56,7 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
             certifications: portfolioDraft.certifications || [],
             languages: portfolioDraft.languages || [],
             interests: portfolioDraft.interests || [],
+            publications: portfolioDraft.publications || [],
         };
 
         // Merge with existing data, giving precedence to what's already in the profile
@@ -107,9 +109,10 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
         education: userProfile.education && userProfile.education.length > 0 ? userProfile.education : portfolioDraftFromAI.education,
         skills: userProfile.skills && userProfile.skills.length > 0 ? userProfile.skills : portfolioDraftFromAI.skills,
         projects: userProfile.projects && userProfile.projects.length > 0 ? userProfile.projects : portfolioDraftFromAI.projects,
-        certifications: userProfile.certifications && userProfile.certifications.length > 0 ? userProfile.certifications : portfolioDraftFromAI.certifications,
+        certifications: userProfile.certifications && user.certifications.length > 0 ? userProfile.certifications : portfolioDraftFromAI.certifications,
         languages: userProfile.languages && userProfile.languages.length > 0 ? userProfile.languages : portfolioDraftFromAI.languages,
         interests: userProfile.interests && userProfile.interests.length > 0 ? userProfile.interests : portfolioDraftFromAI.interests,
+        publications: userProfile.publications && userProfile.publications.length > 0 ? userProfile.publications : portfolioDraftFromAI.publications,
     };
     
     // Add a title and creation date
@@ -355,15 +358,51 @@ export async function refineSummaryAction(input: RefineSummaryInput): Promise<{s
     }
 }
 
-export async function generateCoverLetterAction(input: GenerateCoverLetterInput): Promise<{ success: boolean; data?: { coverLetter: string }; error?: string }> {
-    try {
-        const result = await generateCoverLetterFlow(input);
-        return { success: true, data: result };
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-        console.error("Cover letter generation failed:", errorMessage);
-        return { success: false, error: `Failed to generate cover letter: ${errorMessage}` };
-    }
+interface GenerateCoverLetterActionInput extends GenerateCoverLetterInput {
+    userId: string;
+    title: string;
+    id?: string;
 }
 
-    
+export async function generateCoverLetterAction(input: GenerateCoverLetterActionInput): Promise<{ success: boolean; data?: { coverLetter: string, id: string }; error?: string }> {
+    if (!db || !input.userId) {
+        return { success: false, error: "User not authenticated or database not available." };
+    }
+    const { userId, id, title, ...aiInput } = input;
+
+    try {
+        const result = await generateCoverLetterFlow(aiInput);
+        if (!result.coverLetter) {
+             throw new Error("AI failed to generate the cover letter content.");
+        }
+
+        const letterData: Omit<CoverLetter, 'id' | 'createdAt'> & { lastModified: any, createdAt?: any } = {
+            title: title,
+            content: result.coverLetter,
+            jobDescription: aiInput.jobDescription,
+            companyName: aiInput.companyName,
+            hiringManager: aiInput.hiringManager,
+            tone: aiInput.tone,
+            lastModified: serverTimestamp(),
+        };
+
+        const collectionRef = collection(db, 'users', userId, 'coverletters');
+        let docId = id;
+
+        if (docId) {
+            // Update existing cover letter
+            await setDoc(doc(collectionRef, docId), letterData, { merge: true });
+        } else {
+            // Create new cover letter
+            letterData.createdAt = serverTimestamp();
+            const newDocRef = await addDoc(collectionRef, letterData);
+            docId = newDocRef.id;
+        }
+
+        return { success: true, data: { coverLetter: result.coverLetter, id: docId } };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        console.error("Cover letter generation/saving failed:", errorMessage);
+        return { success: false, error: `Failed to process cover letter: ${errorMessage}` };
+    }
+}
