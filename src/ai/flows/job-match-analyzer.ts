@@ -12,7 +12,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const AtsAnalyzerInputSchema = z.object({
+const AtsAnalyzerInputSchema = z.object({
   resumeDataUri: z
     .string()
     .describe(
@@ -22,7 +22,7 @@ export const AtsAnalyzerInputSchema = z.object({
 });
 export type AtsAnalyzerInput = z.infer<typeof AtsAnalyzerInputSchema>;
 
-export const AtsAnalyzerOutputSchema = z.object({
+const AtsAnalyzerOutputSchema = z.object({
   isAtsFriendly: z.boolean().describe("A simple pass/fail boolean. True if atsFriendlinessScore is 70 or above, otherwise false."),
   atsFriendlinessScore: z.number().min(0).max(100).describe("A numerical score from 0-100 representing how well the resume is optimized for an Applicant Tracking System (ATS)."),
   atsSummary: z.string().describe("A concise, one-sentence summary explaining the ATS score and the primary reason for it."),
