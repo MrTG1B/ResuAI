@@ -1,6 +1,7 @@
 
 'use client';
 
+import { Suspense } from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
@@ -45,7 +46,7 @@ const generatingTexts = [
   "Putting on the final touches...",
 ];
 
-export default function CoverLetterGeneratorPage() {
+function CoverLetterGeneratorPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -305,4 +306,16 @@ export default function CoverLetterGeneratorPage() {
       <Footer />
     </div>
   );
+}
+
+export default function CoverLetterGeneratorPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        }>
+            <CoverLetterGeneratorPageContent />
+        </Suspense>
+    );
 }
