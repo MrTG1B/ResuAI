@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -51,11 +52,9 @@ export default function FeedbackPage() {
   }, [router]);
 
   const onSubmit = async (data: FeedbackFormData) => {
-    if (!currentUser) {
-      toast({ title: 'Not authenticated', description: 'You must be logged in to submit feedback.', variant: 'destructive' });
-      return;
-    }
-
+    // The action now gets the user from the server-side auth context,
+    // so we don't need to check for currentUser here before calling.
+    // The action itself handles the "not logged in" case.
     const result = await submitFeedbackAction(data.feedback);
 
     if (result.success) {

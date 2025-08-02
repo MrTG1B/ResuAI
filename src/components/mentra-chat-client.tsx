@@ -101,10 +101,10 @@ function MentraChatPage() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        fetchChatHistory(user.uid);
+        await fetchChatHistory(user.uid);
       } else {
         router.push('/login');
       }
@@ -425,6 +425,3 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
-
-
-    

@@ -73,6 +73,8 @@ function CoverLetterGeneratorPageContent() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
+        
+        // Fetch user profile data
         const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
         const docSnap = await getDoc(profileDocRef);
         if (docSnap.exists()) {
@@ -128,10 +130,8 @@ function CoverLetterGeneratorPageContent() {
 
     try {
       const result = await generateCoverLetterAction({
-        userId: currentUser.uid,
         id: coverLetterId ?? undefined,
         ...data,
-        userProfile: userProfile as PersonalInfo,
       });
 
       if (result.success && result.data) {

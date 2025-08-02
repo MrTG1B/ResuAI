@@ -1,8 +1,9 @@
+
 'use server';
 /**
  * @fileOverview Saves user feedback to Firestore.
  *
- * - submitFeedback - A function that handles saving feedback.
+ * - submitFeedbackFlow - A function that handles saving feedback.
  * - SubmitFeedbackInput - The input type for the function.
  */
 
@@ -18,28 +19,17 @@ const SubmitFeedbackInputSchema = z.object({
 });
 export type SubmitFeedbackInput = z.infer<typeof SubmitFeedbackInputSchema>;
 
-export async function submitFeedback(input: SubmitFeedbackInput): Promise<{success: boolean}> {
-  return submitFeedbackFlow(input);
-}
-
-const submitFeedbackFlow = ai.defineFlow(
-  {
-    name: 'submitFeedbackFlow',
-    inputSchema: SubmitFeedbackInputSchema,
-    outputSchema: z.object({ success: z.boolean() }),
-  },
-  async (input) => {
-    if (!db) {
-      throw new Error("Firestore is not initialized.");
-    }
-    
-    const feedbackCollectionRef = collection(db, 'feedback');
-    
-    await addDoc(feedbackCollectionRef, {
-      ...input,
-      createdAt: serverTimestamp(),
-    });
-
-    return { success: true };
+export async function submitFeedbackFlow(input: SubmitFeedbackInput): Promise<{success: boolean}> {
+  if (!db) {
+    throw new Error("Firestore is not initialized.");
   }
-);
+  
+  const feedbackCollectionRef = collection(db, 'feedback');
+  
+  await addDoc(feedbackCollectionRef, {
+    ...input,
+    createdAt: serverTimestamp(),
+  });
+
+  return { success: true };
+}

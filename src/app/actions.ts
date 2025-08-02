@@ -352,13 +352,13 @@ export async function submitFeedbackAction(feedback: string): Promise<{success: 
 
     try {
         const { uid, email, displayName } = auth.currentUser;
-        const result = await submitFeedbackFlow({
+        await submitFeedbackFlow({
           feedback,
           userId: uid,
           userEmail: email || undefined,
           userName: displayName || undefined,
         });
-        return { success: result.success };
+        return { success: true };
     } catch (error: any) {
         console.error("Error submitting feedback:", error);
         return { success: false, error: "Failed to submit feedback. Please try again." };
