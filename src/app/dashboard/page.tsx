@@ -11,7 +11,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, BrainCircuit } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, BrainCircuit, NotebookPen } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import Image from 'next/image';
@@ -346,7 +346,7 @@ export default function DashboardPage() {
             </Card>
 
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up">
                 <ToolCard 
                     href="/resume-builder"
                     icon={FileText}
@@ -354,11 +354,18 @@ export default function DashboardPage() {
                     description="Upload, create from scratch, and enhance your resume with AI-powered suggestions."
                     actionText="Open Editor"
                 />
+                 <ToolCard 
+                    href="/cover-letter-generator"
+                    icon={NotebookPen}
+                    title="AI Cover Letter Generator"
+                    description="Create a professional cover letter tailored to any job description in seconds."
+                    actionText="Create Letter"
+                />
                 <ToolCard 
                     href="/resume-analyzer"
                     icon={SearchCheck}
-                    title="AI Resume Analyzer"
-                    description="Get instant feedback on how well your resume matches a specific job description."
+                    title="AI Resume ATS Checker"
+                    description="Scan your resume against a job description to see if it passes the ATS check."
                     actionText="Analyze Resume"
                 />
                  <ToolCard 
@@ -531,3 +538,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

@@ -13,5 +13,8 @@ import '@/ai/flows/analyze-certificate.ts';
 import '@/ai/flows/submit-feedback.ts';
 import '@/ai/flows/ai-assistant-chat.ts';
 import '@/ai/flows/refine-summary.ts';
+import '@/ai/flows/generate-cover-letter.ts';
+
+    
 
     

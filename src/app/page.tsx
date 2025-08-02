@@ -9,7 +9,7 @@ import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { ArrowRight, Bot, PenSquare, Eye, Loader2, Star, Quote, FileText, LayoutTemplate, SearchCheck } from 'lucide-react';
+import { ArrowRight, Bot, PenSquare, Eye, Loader2, Star, Quote, FileText, LayoutTemplate, SearchCheck, NotebookPen } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 export default function HomePage() {
@@ -138,42 +138,55 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Your AI-Powered Career Toolkit</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Everything you need to analyze, edit, and showcase your professional story.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="animate-fade-in-up group" style={{ animationDelay: '0ms' }}>
-                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <FileText className="h-10 w-10 text-primary" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-2 text-center font-heading">AI Resume Editor</h3>
-                  <p className="text-muted-foreground text-center flex-grow mb-6">
+                  <h3 className="text-xl font-semibold mb-2 font-heading">AI Resume Editor</h3>
+                  <p className="text-muted-foreground flex-grow mb-6">
                     Upload your existing resume and let our AI assistant help you refine content, fix typos, and even redesign the entire layout with professional templates.
                   </p>
                 </Card>
               </div>
-              <div className="animate-fade-in-up group" style={{ animationDelay: '200ms' }}>
-                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full">
+              <div className="animate-fade-in-up group" style={{ animationDelay: '150ms' }}>
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full text-center">
+                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                      <NotebookPen className="h-10 w-10 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 font-heading">AI Cover Letter Generator</h3>
+                  <p className="text-muted-foreground flex-grow mb-6">
+                    Create a professional cover letter tailored to any job description in seconds, using your profile data to highlight your strengths.
+                  </p>
+                </Card>
+              </div>
+              <div className="animate-fade-in-up group" style={{ animationDelay: '300ms' }}>
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <SearchCheck className="h-10 w-10 text-primary" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-2 text-center font-heading">AI Resume Analyzer</h3>
-                  <p className="text-muted-foreground text-center flex-grow mb-6">
+                  <h3 className="text-xl font-semibold mb-2 font-heading">AI Resume ATS Checker</h3>
+                  <p className="text-muted-foreground flex-grow mb-6">
                     Get instant, detailed feedback. Our AI coach analyzes your resume against a job description to identify strengths, weaknesses, and actionable steps.
                   </p>
                 </Card>
               </div>
-              <div className="animate-fade-in-up group" style={{ animationDelay: '400ms' }}>
-                <Card className="p-8 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full">
+              <div className="animate-fade-in-up group" style={{ animationDelay: '450ms' }}>
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <LayoutTemplate className="h-10 w-10 text-primary" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-2 text-center font-heading">AI Portfolio Generator</h3>
-                  <p className="text-muted-foreground text-center flex-grow mb-6">
+                  <h3 className="text-xl font-semibold mb-2 font-heading">AI Portfolio Generator</h3>
+                  <p className="text-muted-foreground flex-grow mb-6">
                     Transform your resume into a stunning, professional portfolio website in seconds. Choose from beautiful themes and share your unique link.
                   </p>
                 </Card>
@@ -240,3 +253,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    

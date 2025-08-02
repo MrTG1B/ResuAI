@@ -12,6 +12,7 @@ import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateIn
 import { submitFeedback as submitFeedbackFlow, type SubmitFeedbackInput } from "@/ai/flows/submit-feedback";
 import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
+import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse, type ChatMessage } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
@@ -353,3 +354,16 @@ export async function refineSummaryAction(input: RefineSummaryInput): Promise<{s
         return { success: false, error: "Failed to refine summary. Please try again." };
     }
 }
+
+export async function generateCoverLetterAction(input: GenerateCoverLetterInput): Promise<{ success: boolean; data?: { coverLetter: string }; error?: string }> {
+    try {
+        const result = await generateCoverLetterFlow(input);
+        return { success: true, data: result };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        console.error("Cover letter generation failed:", errorMessage);
+        return { success: false, error: `Failed to generate cover letter: ${errorMessage}` };
+    }
+}
+
+    
