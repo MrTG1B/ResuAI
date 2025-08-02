@@ -56,12 +56,7 @@ export default function FeedbackPage() {
       return;
     }
 
-    const result = await submitFeedbackAction({
-      feedback: data.feedback,
-      userId: currentUser.uid,
-      userEmail: currentUser.email,
-      userName: currentUser.displayName,
-    });
+    const result = await submitFeedbackAction(data.feedback);
 
     if (result.success) {
       toast({ title: 'Feedback Submitted!', description: "Thank you for helping us improve ResuAI." });

@@ -1,56 +1,44 @@
-
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    // 🔐 Helper function to check if user is the document owner
-    function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
-    }
-
-    // 🔐 Helper function to check if user is admin
-    function isAdmin() {
-      // This is a placeholder admin UID. In a real application,
-      // this should be managed securely (e.g., via custom claims).
-      return request.auth != null && request.auth.uid == 'Q5xQ2E0S4hR1D3rA9N7pX2wO3Yf2';
-    }
-
-    // Match any document in the 'users' collection
-    match /users/{userId} {
-      // Profile document
-      match /profile/data {
-        allow read, write: if isOwner(userId) || isAdmin();
+{
+  "rules": {
+    "users": {
+      "{userId}": {
+        ".read": "request.auth.uid == userId",
+        ".write": "request.auth.uid == userId",
+        "portfolios": {
+          "{portfolioId}": {
+            ".read": "request.auth.uid == userId",
+            ".write": "request.auth.uid == userId"
+          }
+        },
+        "resumes": {
+          "{resumeId}": {
+            ".read": "request.auth.uid == userId",
+            ".write": "request.auth.uid == userId"
+          }
+        },
+        "chats": {
+          "{chatId}": {
+            ".read": "request.auth.uid == userId",
+            ".write": "request.auth.uid == userId"
+          }
+        },
+        "coverletters": {
+          "{coverletterId}": {
+            ".read": "request.auth.uid == userId",
+            ".write": "request.auth.uid == userId"
+          }
+        },
+        "profile": {
+          "data": {
+            ".read": "request.auth.uid == userId",
+            ".write": "request.auth.uid == userId"
+          }
+        }
       }
-
-      // Resumes subcollection
-      match /resumes/{resumeId} {
-        allow read, write, create, delete: if isOwner(userId) || isAdmin();
-      }
-
-      // Portfolios subcollection
-      match /portfolios/{portfolioId} {
-        allow read, write, create, delete: if isOwner(userId) || isAdmin();
-      }
-
-      // Chats subcollection
-      match /chats/{chatId} {
-        allow read, write, create, delete: if isOwner(userId) || isAdmin();
-      }
-
-      // Cover Letters subcollection
-      match /coverletters/{coverletterId} {
-        allow read, write, create, delete: if isOwner(userId) || isAdmin();
-      }
-    }
-
-    // 📝 Feedback collection
-    match /feedback/{feedbackId} {
-      // Any signed-in user can submit feedback
-      allow create: if request.auth != null;
-
-      // Only admin can read, update, delete feedback
-      allow read, update, delete: if isAdmin();
+    },
+    "feedback": {
+      ".read": "request.auth != null && request.auth.token.email == 'tirthankardasgupta2004@gmail.com'",
+      ".write": "request.auth != null && request.resource.data.userId == request.auth.uid"
     }
   }
 }

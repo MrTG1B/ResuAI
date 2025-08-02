@@ -9,7 +9,6 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { db, addDoc, collection, serverTimestamp } from "@/lib/firebase";
-import { Auth } from 'firebase/auth';
 
 const SubmitFeedbackInputSchema = z.object({
   feedback: z.string().min(10, "Feedback must be at least 10 characters long."),

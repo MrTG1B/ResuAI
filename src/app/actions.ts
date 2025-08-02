@@ -9,7 +9,7 @@ import { atsAnalyzerFlow, type AtsAnalyzerInput, type AtsAnalyzerOutput } from "
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
-import { submitFeedback as submitFeedbackFlow, type SubmitFeedbackInput } from "@/ai/flows/submit-feedback";
+import { submitFeedback as submitFeedbackFlow } from "@/ai/flows/submit-feedback";
 import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
@@ -109,7 +109,7 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
         education: userProfile.education && userProfile.education.length > 0 ? userProfile.education : portfolioDraftFromAI.education,
         skills: userProfile.skills && userProfile.skills.length > 0 ? userProfile.skills : portfolioDraftFromAI.skills,
         projects: userProfile.projects && userProfile.projects.length > 0 ? userProfile.projects : portfolioDraftFromAI.projects,
-        certifications: userProfile.certifications && user.certifications.length > 0 ? userProfile.certifications : portfolioDraftFromAI.certifications,
+        certifications: userProfile.certifications && userProfile.certifications.length > 0 ? userProfile.certifications : portfolioDraftFromAI.certifications,
         languages: userProfile.languages && userProfile.languages.length > 0 ? userProfile.languages : portfolioDraftFromAI.languages,
         interests: userProfile.interests && userProfile.interests.length > 0 ? userProfile.interests : portfolioDraftFromAI.interests,
         publications: userProfile.publications && userProfile.publications.length > 0 ? userProfile.publications : portfolioDraftFromAI.publications,
@@ -284,7 +284,15 @@ interface AIAssistantChatActionResult {
 }
 
 export async function aiAssistantChatAction(input: AIAssistantChatActionInput): Promise<AIAssistantChatActionResult> {
+    if (!auth?.currentUser) return { success: false, error: "User not authenticated" };
+    
     const { userId, chatId, ...aiInput } = input;
+
+    // Security: Ensure the action is performed for the currently logged-in user
+    if (auth.currentUser.uid !== userId) {
+        return { success: false, error: "Unauthorized operation." };
+    }
+    
     if (!db) return { success: false, error: "Database not initialized" };
 
     try {
@@ -334,9 +342,22 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   }
 }
 
-export async function submitFeedbackAction(input: SubmitFeedbackInput): Promise<{success: boolean, error?: string}> {
+export async function submitFeedbackAction(feedback: string): Promise<{success: boolean, error?: string}> {
+    if (!auth?.currentUser) {
+        return { success: false, error: "You must be logged in to submit feedback." };
+    }
+    if (!db) {
+        return { success: false, error: "Database not configured."};
+    }
+
     try {
-        const result = await submitFeedbackFlow(input);
+        const { uid, email, displayName } = auth.currentUser;
+        const result = await submitFeedbackFlow({
+          feedback,
+          userId: uid,
+          userEmail: email,
+          userName: displayName,
+        });
         return { success: result.success };
     } catch (error: any) {
         console.error("Error submitting feedback:", error);
@@ -358,20 +379,32 @@ export async function refineSummaryAction(input: RefineSummaryInput): Promise<{s
     }
 }
 
-interface GenerateCoverLetterActionInput extends GenerateCoverLetterInput {
-    userId: string;
+interface GenerateCoverLetterActionInput extends Omit<GenerateCoverLetterInput, 'userProfile'> {
     title: string;
     id?: string;
 }
 
 export async function generateCoverLetterAction(input: GenerateCoverLetterActionInput): Promise<{ success: boolean; data?: { coverLetter: string, id: string }; error?: string }> {
-    if (!db || !input.userId) {
-        return { success: false, error: "User not authenticated or database not available." };
+    if (!auth?.currentUser) {
+        return { success: false, error: "User not authenticated." };
     }
-    const { userId, id, title, ...aiInput } = input;
+    if (!db) {
+        return { success: false, error: "Database not available." };
+    }
 
+    const { uid } = auth.currentUser;
+    const { id, title, ...aiInput } = input;
+    
     try {
-        const result = await generateCoverLetterFlow(aiInput);
+        const profileDocRef = doc(db, 'users', uid, 'profile', 'data');
+        const profileSnap = await getDoc(profileDocRef);
+        if (!profileSnap.exists()) {
+            return { success: false, error: "User profile not found. Please complete your profile first." };
+        }
+        const userProfile = profileSnap.data() as PersonalInfo;
+        
+        const result = await generateCoverLetterFlow({ ...aiInput, userProfile });
+
         if (!result.coverLetter) {
              throw new Error("AI failed to generate the cover letter content.");
         }
@@ -386,17 +419,15 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
             lastModified: serverTimestamp(),
         };
 
-        const collectionRef = collection(db, 'users', userId, 'coverletters');
+        const collectionRef = collection(db, 'users', uid, 'coverletters');
         let docId = id;
 
         if (docId) {
-            // Update existing cover letter
             await setDoc(doc(collectionRef, docId), letterData, { merge: true });
         } else {
-            // Create new cover letter
             letterData.createdAt = serverTimestamp();
             const newDocRef = await addDoc(collectionRef, letterData);
-            docId = newDocRef.id;
+docId = newDocRef.id;
         }
 
         return { success: true, data: { coverLetter: result.coverLetter, id: docId } };
