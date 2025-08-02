@@ -15,9 +15,10 @@ export interface EditedResume {
     response: string;
 }
 
-export interface JobMatchAnalysis {
-    matchScore: number;
-    matchSummary: string;
+export interface AtsAnalysis {
+    isAtsFriendly: boolean;
+    atsFriendlinessScore: number;
+    atsSummary: string;
     detailedAnalysis: string;
 }
 

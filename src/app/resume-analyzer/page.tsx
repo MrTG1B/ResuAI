@@ -14,15 +14,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, UploadCloud, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { jobMatchAnalyzeAction } from '@/app/actions';
+import { atsAnalyzeAction } from '@/app/actions';
 import { CreativeLoader } from '@/components/creative-loader';
+import { AtsResult } from '@/components/ats-result';
+import { type AtsAnalyzerOutput } from '@/ai/flows/job-match-analyzer';
 
 const analysisTexts = [
-    "Reading your resume...",
-    "Scanning the job description...",
-    "Comparing skills and experience...",
-    "Identifying keywords and gaps...",
-    "Formulating coaching advice...",
+    "Simulating ATS scan...",
+    "Checking for parsing errors...",
+    "Analyzing keyword alignment...",
+    "Evaluating resume structure...",
+    "Compiling your report...",
     "Just a moment...",
 ];
 
@@ -37,8 +39,7 @@ export default function ResumeAnalyzerPage() {
   const [resumeFileName, setResumeFileName] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   
-  const [resumeFromEditorDataUri, setResumeFromEditorDataUri] = useState<string | null>(null);
-  const [resumeFromEditorFileName, setResumeFromEditorFileName] = useState("");
+  const [analysisResult, setAnalysisResult] = useState<AtsAnalyzerOutput | null>(null);
 
   useEffect(() => {
     if (!auth) {
@@ -60,19 +61,6 @@ export default function ResumeAnalyzerPage() {
       setIsLoading(false);
     });
 
-    const dataUri = sessionStorage.getItem('resumeForAnalysisDataUri');
-    const name = sessionStorage.getItem('resumeForAnalysisFileName');
-
-    if (dataUri) {
-        setResumeFromEditorDataUri(dataUri);
-        if (name) {
-            setResumeFromEditorFileName(name);
-        }
-        // Clean up sessionStorage
-        sessionStorage.removeItem('resumeForAnalysisDataUri');
-        sessionStorage.removeItem('resumeForAnalysisFileName');
-    }
-
     return () => unsubscribe();
   }, [router, toast]);
   
@@ -92,16 +80,16 @@ export default function ResumeAnalyzerPage() {
     }
   };
 
-  const handleUseDifferentResume = () => {
-    setResumeFromEditorDataUri(null);
-    setResumeFromEditorFileName("");
+  const handleStartNewAnalysis = () => {
+    setAnalysisResult(null);
     setResumeFile(null);
     setResumeFileName("");
-  };
+    setJobDescription("");
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!resumeFile && !resumeFromEditorDataUri) {
+    if (!resumeFile) {
       toast({ title: "No resume selected", description: "Please upload your resume.", variant: "destructive" });
       return;
     }
@@ -111,31 +99,25 @@ export default function ResumeAnalyzerPage() {
     }
 
     setIsAnalyzing(true);
+    setAnalysisResult(null);
     
     const performAnalysis = async (dataUri: string) => {
         try {
-            const result = await jobMatchAnalyzeAction({ resumeDataUri: dataUri, jobDescription });
+            const result = await atsAnalyzeAction({ resumeDataUri: dataUri, jobDescription });
 
             if (result.success && result.data) {
-                if (typeof window !== "undefined") {
-                    sessionStorage.setItem('analysisResult', JSON.stringify(result.data));
-                    sessionStorage.setItem('analysisResumeDataUri', dataUri);
-                    sessionStorage.setItem('analysisJobDescription', jobDescription);
-                    sessionStorage.setItem('analysisResumeFileName', resumeFromEditorFileName || resumeFileName);
-                }
-                router.push('/resume-analyzer/coach');
+                setAnalysisResult(result.data);
             } else {
                 throw new Error(result.error || "Failed to analyze resume.");
             }
         } catch (error: any) {
             toast({ title: "Analysis Failed", description: error.message, variant: "destructive" });
+        } finally {
             setIsAnalyzing(false);
         }
     };
     
-    if (resumeFromEditorDataUri) {
-        await performAnalysis(resumeFromEditorDataUri);
-    } else if (resumeFile) {
+    if (resumeFile) {
         const reader = new FileReader();
         reader.readAsDataURL(resumeFile);
         reader.onload = async () => performAnalysis(reader.result as string);
@@ -164,53 +146,44 @@ export default function ResumeAnalyzerPage() {
       <Header />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-4xl mx-auto space-y-8">
-            <Card className="shadow-2xl">
-                <CardHeader className="text-center">
-                    <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
-                        AI Resume Analyzer
-                    </h1>
-                    <CardDescription className="mt-2 text-lg">
-                        Upload your resume and paste a job description to get a detailed analysis from our AI.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {isAnalyzing ? (
-                        <div className="h-64 flex items-center justify-center">
-                            <CreativeLoader texts={analysisTexts} />
-                        </div>
-                    ) : (
+            {isAnalyzing ? (
+                <Card className="shadow-2xl">
+                    <CardContent className="p-8 h-96 flex items-center justify-center">
+                        <CreativeLoader texts={analysisTexts} />
+                    </CardContent>
+                </Card>
+            ) : analysisResult ? (
+                <AtsResult result={analysisResult} onTryAgain={handleStartNewAnalysis} />
+            ) : (
+                <Card className="shadow-2xl">
+                    <CardHeader className="text-center">
+                        <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
+                            ATS Resume Scanner
+                        </h1>
+                        <CardDescription className="mt-2 text-lg">
+                            Upload your resume and paste a job description to see if you can beat the bots.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid md:grid-cols-2 gap-6">
-                                {resumeFromEditorDataUri ? (
-                                    <div className="space-y-2">
-                                        <Label className="text-lg font-semibold">Your Resume</Label>
-                                        <div className="relative flex flex-col items-start justify-center w-full h-40 border-2 border-dashed rounded-lg bg-muted/50 p-4">
-                                            <p className="font-semibold text-foreground">Using resume from editor</p>
-                                            <p className="mt-1 text-sm text-muted-foreground truncate max-w-full">{resumeFromEditorFileName}</p>
-                                            <Button variant="link" className="p-0 h-auto mt-auto" onClick={handleUseDifferentResume}>
-                                                Use a different resume
-                                            </Button>
+                                <div className="space-y-2">
+                                    <Label htmlFor="resume-upload" className="text-lg font-semibold">Your Resume</Label>
+                                    <label
+                                        htmlFor="resume-upload"
+                                        className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
+                                    >
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                                            <UploadCloud className="w-8 h-8 mb-2 text-primary" />
+                                            <p className="text-sm text-foreground">
+                                            <span className="font-semibold">Click to upload</span>
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
+                                            {resumeFileName && <p className="mt-2 text-xs font-medium text-primary truncate max-w-full px-2">{resumeFileName}</p>}
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="resume-upload" className="text-lg font-semibold">Your Resume</Label>
-                                        <label
-                                            htmlFor="resume-upload"
-                                            className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
-                                        >
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                                                <UploadCloud className="w-8 h-8 mb-2 text-primary" />
-                                                <p className="text-sm text-foreground">
-                                                <span className="font-semibold">Click to upload</span>
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
-                                                {resumeFileName && <p className="mt-2 text-xs font-medium text-primary truncate max-w-full px-2">{resumeFileName}</p>}
-                                            </div>
-                                            <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" disabled={isAnalyzing}/>
-                                        </label>
-                                    </div>
-                                )}
+                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" disabled={isAnalyzing}/>
+                                    </label>
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="job-description" className="text-lg font-semibold">Job Description</Label>
                                     <Textarea
@@ -225,19 +198,13 @@ export default function ResumeAnalyzerPage() {
                                 </div>
                             </div>
                             <Button type="submit" className="w-full text-lg" size="lg" disabled={isAnalyzing}>
-                                {isAnalyzing ? (
-                                    <>
-                                        <Bot className="mr-2 h-5 w-5 animate-spin" />
-                                        Analyzing...
-                                    </>
-                                ) : (
-                                    "Generate Analysis Report"
-                                )}
+                                <Bot className="mr-2 h-5 w-5" />
+                                Scan My Resume
                             </Button>
                         </form>
-                    )}
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            )}
         </div>
       </main>
       <Footer />

@@ -5,7 +5,7 @@ import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flo
 import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
-import { jobMatchAnalyzerFlow, type JobMatchAnalyzerInput, type JobMatchAnalyzerOutput } from "@/ai/flows/job-match-analyzer";
+import { atsAnalyzerFlow, type AtsAnalyzerInput, type AtsAnalyzerOutput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
@@ -242,12 +242,12 @@ export async function editResumeAction(input: EditResumeInput) {
   }
 }
 
-export async function jobMatchAnalyzeAction(input: JobMatchAnalyzerInput) {
+export async function atsAnalyzeAction(input: AtsAnalyzerInput) {
   try {
-    const result = await jobMatchAnalyzerFlow(input);
+    const result = await atsAnalyzerFlow(input);
     return { success: true, data: result };
   } catch (error) {
-    console.error("Error analyzing resume for job match:", error);
+    console.error("Error analyzing resume for ATS:", error);
     return { success: false, error: "Failed to analyze resume. The AI model might be busy, please try again." };
   }
 }
