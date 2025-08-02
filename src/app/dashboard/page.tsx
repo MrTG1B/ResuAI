@@ -5,13 +5,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, type User, sendEmailVerification, signOut } from 'firebase/auth';
+import { onAuthStateChanged, type User, sendEmailVerification } from 'firebase/auth';
 import { auth, db, doc, getDoc, collection, getDocs, query, orderBy, deleteDoc } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, BrainCircuit, NotebookPen } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
@@ -31,6 +31,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MentraIcon } from '@/components/mentra-icon';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
     return (
@@ -58,7 +60,6 @@ function ToolCard({ href, icon: Icon, title, description, actionText }: { href: 
 const calculateProfileCompletion = (profile: any, user: User | null): number => {
     if (!profile && !user) return 0;
 
-    // Combine profile data with user auth data for a complete picture
     const combinedData = {
         ...profile,
         name: profile?.name || user?.displayName,
@@ -114,10 +115,6 @@ export default function DashboardPage() {
   const MAX_RESUMES = 10;
   const MAX_PORTFOLIOS = 5;
   const MAX_COVER_LETTERS = 10;
-
-  const hasReachedResumeLimit = resumes.length >= MAX_RESUMES;
-  const hasReachedPortfolioLimit = portfolios.length >= MAX_PORTFOLIOS;
-  const hasReachedCoverLetterLimit = coverLetters.length >= MAX_COVER_LETTERS;
 
   const isEmailUser = user?.providerData.some(p => p.providerId === 'password');
   const isEmailVerified = user?.emailVerified;
@@ -191,7 +188,7 @@ export default function DashboardPage() {
   
     const { type, id } = deleteTarget;
     const { uid } = user;
-    setDeleteTarget(null); // Clear target immediately
+    setDeleteTarget(null);
   
     try {
       const collectionName = type === 'coverletter' ? 'coverletters' : `${type}s`;
@@ -244,63 +241,6 @@ export default function DashboardPage() {
   if (!user) {
     return null;
   }
-
-  const createNewResumeButton = (
-    <TooltipProvider>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <div className="w-full">
-                    <Button onClick={() => handleStartNew('resume')} className="w-full" disabled={hasReachedResumeLimit}>
-                        <PlusCircle className="mr-2 h-4 w-4" /> Create New Resume
-                    </Button>
-                </div>
-            </TooltipTrigger>
-            {hasReachedResumeLimit && (
-                <TooltipContent>
-                    <p>You have reached the free limit of {MAX_RESUMES} resumes.</p>
-                </TooltipContent>
-            )}
-        </Tooltip>
-    </TooltipProvider>
-  );
-
-  const createNewPortfolioButton = (
-    <TooltipProvider>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <div className="w-full">
-                    <Button asChild className="w-full" disabled={hasReachedPortfolioLimit}>
-                        <Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create New Portfolio</Link>
-                    </Button>
-                </div>
-            </TooltipTrigger>
-            {hasReachedPortfolioLimit && (
-                <TooltipContent>
-                    <p>You have reached the free limit of {MAX_PORTFOLIOS} portfolios.</p>
-                </TooltipContent>
-            )}
-        </Tooltip>
-    </TooltipProvider>
-  );
-
-  const createNewCoverLetterButton = (
-    <TooltipProvider>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <div className="w-full">
-                    <Button onClick={() => handleStartNew('coverletter')} className="w-full" disabled={hasReachedCoverLetterLimit}>
-                        <PlusCircle className="mr-2 h-4 w-4" /> Create New Cover Letter
-                    </Button>
-                </div>
-            </TooltipTrigger>
-            {hasReachedCoverLetterLimit && (
-                <TooltipContent>
-                    <p>You have reached the free limit of {MAX_COVER_LETTERS} cover letters.</p>
-                </TooltipContent>
-            )}
-        </Tooltip>
-    </TooltipProvider>
-  );
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/40">
@@ -365,16 +305,22 @@ export default function DashboardPage() {
                 </Link>
             </Card>
 
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up">
                 <ToolCard 
                     href="/resume-builder"
                     icon={FileText}
                     title="AI Resume Editor"
-                    description="Upload, create from scratch, and enhance your resume with AI-powered suggestions."
+                    description="Create from scratch or enhance your resume with AI-powered suggestions."
                     actionText="Open Editor"
                 />
-                 <ToolCard 
+                <ToolCard 
+                    href="/resume-analyzer"
+                    icon={SearchCheck}
+                    title="AI Resume ATS Checker"
+                    description="Scan your resume against a job description to check for ATS-friendliness."
+                    actionText="Analyze Resume"
+                />
+                <ToolCard 
                     href="/cover-letter-generator"
                     icon={NotebookPen}
                     title="AI Cover Letter Generator"
@@ -382,227 +328,103 @@ export default function DashboardPage() {
                     actionText="Create Letter"
                 />
                 <ToolCard 
-                    href="/resume-analyzer"
-                    icon={SearchCheck}
-                    title="AI Resume ATS Checker"
-                    description="Scan your resume against a job description to see if it passes the ATS check."
-                    actionText="Analyze Resume"
-                />
-                 <ToolCard 
                     href="/build"
                     icon={LayoutTemplate}
                     title="AI Portfolio Generator"
-                    description="Instantly transform your resume into a stunning, professional portfolio website."
+                    description="Instantly transform your resume into a stunning portfolio website."
                     actionText="Create Portfolio"
                 />
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                {/* Saved Resumes Section */}
-                <Card className="shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            <Card className="shadow-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                <Tabs defaultValue="resumes" className="flex-col">
                     <CardHeader>
-                        <CardTitle>Your Saved Resumes ({resumes.length}/{MAX_RESUMES})</CardTitle>
-                        <CardDescription>Continue where you left off or create a new one.</CardDescription>
+                        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                            <div>
+                                <CardTitle>Your Saved Work</CardTitle>
+                                <CardDescription>Manage your generated resumes, portfolios, and cover letters.</CardDescription>
+                            </div>
+                            <TabsList className="grid grid-cols-3 w-full sm:w-auto">
+                                <TabsTrigger value="resumes">Resumes</TabsTrigger>
+                                <TabsTrigger value="portfolios">Portfolios</TabsTrigger>
+                                <TabsTrigger value="coverletters">Cover Letters</TabsTrigger>
+                            </TabsList>
+                        </div>
                     </CardHeader>
-                    <CardContent className="flex-grow space-y-4">
-                        {isResumeLoading ? (
-                            <div className="flex items-center justify-center min-h-[200px]">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            </div>
-                        ) : resumes.length > 0 ? (
-                           <ul className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
-                                {resumes.map(r => (
-                                    <li key={r.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
-                                        <div 
-                                            className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow"
-                                            onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}
-                                        >
-                                            <div className="w-12 h-16 rounded border bg-white flex justify-center items-start overflow-hidden flex-shrink-0">
-                                                <div
-                                                    className="text-black shadow-sm scale-[0.1] origin-top"
-                                                    style={{
-                                                        width: '210mm',
-                                                        minHeight: '297mm',
-                                                        padding: '10mm'
-                                                    }}
-                                                    dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }}
-                                                />
+                    <CardContent>
+                        <TabsContent value="resumes" className="space-y-4">
+                            {isResumeLoading ? (
+                                <div className="flex items-center justify-center min-h-[200px]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                            ) : resumes.length > 0 ? (
+                                <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                                    {resumes.map(r => (
+                                        <li key={r.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
+                                            <div className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
+                                                <div className="w-12 h-16 rounded border bg-white flex justify-center items-start overflow-hidden flex-shrink-0"><div className="text-black shadow-sm scale-[0.1] origin-top" style={{ width: '210mm', minHeight: '297mm', padding: '10mm' }} dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} /></div>
+                                                <div className="overflow-hidden"><p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p><p className="text-xs text-muted-foreground truncate">Last modified: {r.lastModified ? new Date(r.lastModified.seconds * 1000).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p></div>
                                             </div>
-                                            <div className="overflow-hidden">
-                                                <p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p>
-                                                <p className="text-xs text-muted-foreground truncate">
-                                                    Last modified: {r.lastModified ? new Date(r.lastModified.seconds * 1000).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
-                                                </p>
+                                            <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
+                                                <Button variant="ghost" size="sm" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}><Edit className="mr-2 h-4 w-4"/>Edit</Button>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/></Button></TooltipTrigger><TooltipContent><p>Delete Resume</p></TooltipContent></Tooltip></TooltipProvider>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
-                                            <Button variant="ghost" size="sm" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
-                                                <Edit className="mr-2 h-4 w-4"/>
-                                                Edit
-                                            </Button>
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}>
-                                                            <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/>
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Delete Resume</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                             <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
-                                <CardTitle>No Saved Resumes</CardTitle>
-                                <CardDescription className="mt-2 mb-4">You haven't started editing a resume yet.</CardDescription>
-                                {createNewResumeButton}
-                            </div>
-                        )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="text-center p-8 bg-muted/50 rounded-lg"><CardTitle className="text-lg">No Saved Resumes</CardTitle><CardDescription className="mt-2 mb-4">You haven't started editing a resume yet.</CardDescription></div>
+                            )}
+                            <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button onClick={() => handleStartNew('resume')} className="w-full" disabled={resumes.length >= MAX_RESUMES}><PlusCircle className="mr-2 h-4 w-4" /> Create New Resume</Button></div></TooltipTrigger>{resumes.length >= MAX_RESUMES && (<TooltipContent><p>You have reached the free limit of {MAX_RESUMES} resumes.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
+                        </TabsContent>
+                        <TabsContent value="portfolios" className="space-y-4">
+                             {isPortfolioLoading ? (
+                                <div className="flex items-center justify-center min-h-[200px]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                            ) : portfolios.length > 0 ? (
+                                <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                                    {portfolios.map(p => (
+                                        <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
+                                            <div className='flex items-center gap-3 overflow-hidden flex-grow cursor-pointer' onClick={() => router.push(`/portfolio?id=${p.id}`)}>
+                                                <Image src={p.personalInfo?.profilePictureUrl || 'https://placehold.co/40x40.png'} alt="avatar" width={40} height={40} className="rounded-full object-cover flex-shrink-0" />
+                                                <div className="overflow-hidden"><p className="font-semibold text-sm truncate group-hover:underline">{p.title || "Untitled Portfolio"}</p><p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p></div>
+                                            </div>
+                                            <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
+                                                <Button variant="ghost" size="sm" asChild><Link href={`/portfolio?id=${p.id}`}><Eye className="mr-2 h-4 w-4"/>View</Link></Button>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/></Button></TooltipTrigger><TooltipContent><p>Delete Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="text-center p-8 bg-muted/50 rounded-lg"><CardTitle className="text-lg">No Portfolios Yet</CardTitle><CardDescription className="mt-2 mb-4">You haven't created a portfolio.</CardDescription></div>
+                            )}
+                            <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button asChild className="w-full" disabled={portfolios.length >= MAX_PORTFOLIOS}><Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create New Portfolio</Link></Button></div></TooltipTrigger>{portfolios.length >= MAX_PORTFOLIOS && (<TooltipContent><p>You have reached the free limit of {MAX_PORTFOLIOS} portfolios.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
+                        </TabsContent>
+                        <TabsContent value="coverletters" className="space-y-4">
+                             {isCoverLetterLoading ? (
+                                <div className="flex items-center justify-center min-h-[200px]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                            ) : coverLetters.length > 0 ? (
+                               <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                                    {coverLetters.map(cl => (
+                                        <li key={cl.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
+                                            <div className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow" onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}>
+                                                <div className="flex-shrink-0 bg-primary/10 p-3 rounded-full"><NotebookPen className="h-5 w-5 text-primary" /></div>
+                                                <div className="overflow-hidden"><p className="font-semibold text-sm truncate group-hover:underline">{cl.title || "Untitled Cover Letter"}</p><p className="text-xs text-muted-foreground truncate">For: {cl.companyName} | Last modified: {cl.lastModified ? new Date(cl.lastModified.seconds * 1000).toLocaleDateString() : 'N/A'}</p></div>
+                                            </div>
+                                            <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
+                                                <Button variant="ghost" size="sm" onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}><Edit className="mr-2 h-4 w-4"/>Edit</Button>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'coverletter', id: cl.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/></Button></TooltipTrigger><TooltipContent><p>Delete Cover Letter</p></TooltipContent></Tooltip></TooltipProvider>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="text-center p-8 bg-muted/50 rounded-lg"><CardTitle className="text-lg">No Saved Cover Letters</CardTitle><CardDescription className="mt-2 mb-4">You haven't created a cover letter yet.</CardDescription></div>
+                            )}
+                             <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button onClick={() => handleStartNew('coverletter')} className="w-full" disabled={coverLetters.length >= MAX_COVER_LETTERS}><PlusCircle className="mr-2 h-4 w-4" /> Create New Cover Letter</Button></div></TooltipTrigger>{coverLetters.length >= MAX_COVER_LETTERS && (<TooltipContent><p>You have reached the free limit of {MAX_COVER_LETTERS} cover letters.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
+                        </TabsContent>
                     </CardContent>
-                     {resumes.length > 0 && (
-                        <CardFooter>
-                           {createNewResumeButton}
-                        </CardFooter>
-                    )}
-                </Card>
+                </Tabs>
+            </Card>
 
-                {/* Saved Portfolios Section */}
-                <Card className="flex flex-col shadow-lg animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-                    <CardHeader>
-                        <CardTitle>Your Portfolios ({portfolios.length}/{MAX_PORTFOLIOS})</CardTitle>
-                        <CardDescription>View, edit, and share your generated portfolios.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow space-y-4">
-                        {isPortfolioLoading ? (
-                            <div className="flex items-center justify-center min-h-[200px]">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            </div>
-                        ) : portfolios.length > 0 ? (
-                            <ul className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
-                                {portfolios.map(p => (
-                                    <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
-                                        <div className='flex items-center gap-3 overflow-hidden flex-grow cursor-pointer' onClick={() => router.push(`/portfolio?id=${p.id}`)}>
-                                            <Image 
-                                                src={p.personalInfo?.profilePictureUrl || 'https://placehold.co/40x40.png'} 
-                                                alt="avatar" 
-                                                width={40} height={40} 
-                                                className="rounded-full object-cover flex-shrink-0"
-                                            />
-                                            <div className="overflow-hidden">
-                                                <p className="font-semibold text-sm truncate group-hover:underline">{p.title || "Untitled Portfolio"}</p>
-                                                <p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={`/portfolio?id=${p.id}`}>
-                                                    <Eye className="mr-2 h-4 w-4"/>
-                                                    View
-                                                </Link>
-                                            </Button>
-                                             <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}>
-                                                            <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/>
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Delete Portfolio</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                             <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
-                                <CardTitle>No Portfolios Yet</CardTitle>
-                                <CardDescription className="mt-2 mb-4">You haven't created a portfolio.</CardDescription>
-                                {createNewPortfolioButton}
-                            </div>
-                        )}
-                    </CardContent>
-                    {portfolios.length > 0 && (
-                        <CardFooter>
-                            {createNewPortfolioButton}
-                        </CardFooter>
-                    )}
-                </Card>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-8 items-start animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-                 {/* Saved Cover Letters Section */}
-                <Card className="shadow-lg">
-                    <CardHeader>
-                        <CardTitle>Your Cover Letters ({coverLetters.length}/{MAX_COVER_LETTERS})</CardTitle>
-                        <CardDescription>Manage and edit your saved cover letters.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow space-y-4">
-                        {isCoverLetterLoading ? (
-                            <div className="flex items-center justify-center min-h-[200px]">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            </div>
-                        ) : coverLetters.length > 0 ? (
-                           <ul className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
-                                {coverLetters.map(cl => (
-                                    <li key={cl.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
-                                        <div 
-                                            className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow"
-                                            onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}
-                                        >
-                                            <div className="flex-shrink-0 bg-primary/10 p-3 rounded-full">
-                                                <NotebookPen className="h-5 w-5 text-primary" />
-                                            </div>
-                                            <div className="overflow-hidden">
-                                                <p className="font-semibold text-sm truncate group-hover:underline">{cl.title || "Untitled Cover Letter"}</p>
-                                                <p className="text-xs text-muted-foreground truncate">
-                                                    For: {cl.companyName} | Last modified: {cl.lastModified ? new Date(cl.lastModified.seconds * 1000).toLocaleDateString() : 'N/A'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
-                                            <Button variant="ghost" size="sm" onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}>
-                                                <Edit className="mr-2 h-4 w-4"/>
-                                                Edit
-                                            </Button>
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'coverletter', id: cl.id })}>
-                                                            <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/>
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Delete Cover Letter</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                             <div className="flex flex-col items-center justify-center text-center p-8 min-h-[200px] bg-muted/50 rounded-lg">
-                                <CardTitle>No Saved Cover Letters</CardTitle>
-                                <CardDescription className="mt-2 mb-4">You haven't created a cover letter yet.</CardDescription>
-                                {createNewCoverLetterButton}
-                            </div>
-                        )}
-                    </CardContent>
-                     {coverLetters.length > 0 && (
-                        <CardFooter>
-                           {createNewCoverLetterButton}
-                        </CardFooter>
-                    )}
-                </Card>
-            </div>
         </div>
       </main>
       <Footer />

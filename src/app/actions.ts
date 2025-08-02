@@ -247,14 +247,14 @@ export async function editResumeAction(input: EditResumeInput) {
 }
 
 export async function atsAnalyzeAction(input: AtsAnalyzerInput) {
-  try {
-    const result = await atsAnalyzerFlow(input);
-    return { success: true, data: result };
-  } catch (error) {
-    console.error("Error analyzing resume for ATS:", error);
-    return { success: false, error: "Failed to analyze resume. The AI model might be busy, please try again." };
+    try {
+      const result = await atsAnalyzerFlow(input);
+      return { success: true, data: result };
+    } catch (error: any) {
+      console.error("Error analyzing resume for ATS:", error);
+      return { success: false, error: `Failed to analyze resume. ${error.message}` };
+    }
   }
-}
 
 export async function coachChatAction(input: CoachChatInput) {
   try {
@@ -355,8 +355,8 @@ export async function submitFeedbackAction(feedback: string): Promise<{success: 
         const result = await submitFeedbackFlow({
           feedback,
           userId: uid,
-          userEmail: email,
-          userName: displayName,
+          userEmail: email || undefined,
+          userName: displayName || undefined,
         });
         return { success: result.success };
     } catch (error: any) {
@@ -379,8 +379,12 @@ export async function refineSummaryAction(input: RefineSummaryInput): Promise<{s
     }
 }
 
-interface GenerateCoverLetterActionInput extends Omit<GenerateCoverLetterInput, 'userProfile'> {
+interface GenerateCoverLetterActionInput {
     title: string;
+    jobDescription: string;
+    companyName: string;
+    hiringManager?: string;
+    tone: 'Professional' | 'Enthusiastic' | 'Formal' | 'Creative';
     id?: string;
 }
 
@@ -427,10 +431,10 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
         } else {
             letterData.createdAt = serverTimestamp();
             const newDocRef = await addDoc(collectionRef, letterData);
-docId = newDocRef.id;
+            docId = newDocRef.id;
         }
 
-        return { success: true, data: { coverLetter: result.coverLetter, id: docId } };
+        return { success: true, data: { coverLetter: result.coverLetter, id: docId! } };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
         console.error("Cover letter generation/saving failed:", errorMessage);
