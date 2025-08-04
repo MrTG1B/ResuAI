@@ -453,3 +453,5 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
         return { success: false, error: `Failed to process cover letter: ${errorMessage}` };
     }
 }
+
+    
