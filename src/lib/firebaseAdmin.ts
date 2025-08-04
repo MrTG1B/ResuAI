@@ -17,26 +17,28 @@ if (!hasAdminConfig) {
 }
 
 export const initializeFirebaseAdmin = () => {
-  if (admin.apps.length > 0) return;
+  if (admin.apps.length > 0) {
+    return;
+  }
 
   if (!hasAdminConfig) {
     throw new Error("Missing Firebase Admin credentials. Cannot initialize.");
   }
   
-  // Log values for debugging, as requested.
-  console.log("🛠 Firebase Admin init with:");
-  console.log("FIREBASE_PROJECT_ID:", projectId);
-  console.log("FIREBASE_CLIENT_EMAIL:", clientEmail);
-  console.log("FIREBASE_PRIVATE_KEY starts with:", privateKey?.slice(0, 30));
-
   try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
+    const cred = admin.credential.cert({
         projectId,
         clientEmail,
         privateKey,
-      }),
     });
+    
+    console.log("🛠 Firebase Admin init with:");
+    console.log("FIREBASE_PROJECT_ID:", projectId);
+    console.log("FIREBASE_CLIENT_EMAIL:", clientEmail);
+    console.log("FIREBASE_PRIVATE_KEY starts with:", privateKey?.slice(0, 30));
+    console.log("Type of credential:", typeof cred);
+
+    admin.initializeApp({ credential: cred });
     console.log("✅ Firebase Admin initialized.");
   } catch (error: any) {
     console.error("🔥 Firebase Admin initialization error:", error.stack);
