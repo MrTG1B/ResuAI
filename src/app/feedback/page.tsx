@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db, collection, addDoc, serverTimestamp } from '@/lib/firebase';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +16,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { submitFeedbackAction } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
 
 const feedbackSchema = z.object({
@@ -52,7 +51,7 @@ export default function FeedbackPage() {
   }, [router]);
 
   const onSubmit = async (data: FeedbackFormData) => {
-    if (!currentUser) {
+    if (!currentUser || !db) {
       toast({
         title: 'Submission Failed',
         description: 'You must be logged in to submit feedback.',
@@ -61,18 +60,30 @@ export default function FeedbackPage() {
       return;
     }
 
-    // Get Firebase ID token
-    const idToken = await currentUser.getIdToken();
+    form.control._setFormState({ isSubmitting: true });
 
-    // Send it to the server
-    const result = await submitFeedbackAction(data.feedback, idToken);
+    try {
+      await addDoc(collection(db, 'feedback'), {
+        feedback: data.feedback,
+        userId: currentUser.uid,
+        userEmail: currentUser.email || 'N/A',
+        userName: currentUser.displayName || 'Anonymous',
+        createdAt: serverTimestamp(),
+      });
 
-    if (result.success) {
       toast({ title: 'Feedback Submitted!', description: "Thank you for helping us improve ResuAI." });
       form.reset();
       router.push('/dashboard');
-    } else {
-      toast({ title: 'Submission Failed', description: result.error, variant: 'destructive' });
+
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      toast({
+        title: 'Submission Failed',
+        description: 'An error occurred while saving your feedback. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+        form.control._setFormState({ isSubmitting: false });
     }
   };
 

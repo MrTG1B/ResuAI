@@ -9,7 +9,6 @@ import { atsAnalyzerFlow, type AtsAnalyzerInput, type AtsAnalyzerOutput } from "
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
-import { submitFeedbackFlow } from "@/ai/flows/submit-feedback";
 import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
@@ -344,35 +343,6 @@ export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   }
 }
 
-export async function submitFeedbackAction(feedback: string, idToken: string): Promise<{success: boolean, error?: string}> {
-    try {
-        // Ensure Firebase Admin is initialized
-        initializeFirebaseAdmin();
-
-        // Verify ID token on server
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const { uid, email, name } = decodedToken;
-
-        await submitFeedbackFlow({
-          feedback,
-          userId: uid,
-          userEmail: email,
-          userName: name,
-        });
-
-        return { success: true };
-    } catch (error: any) {
-        console.error("Feedback submission error:", error);
-        if (error.code === 'auth/id-token-expired') {
-            return { success: false, error: 'Your session has expired. Please log in again.' };
-        }
-        if (error.message.includes("Missing Firebase Admin credentials")) {
-            return { success: false, error: "Server configuration error. Cannot submit feedback."};
-        }
-        return { success: false, error: 'You must be logged in to submit feedback.' };
-    }
-}
-
 export async function refineSummaryAction(input: RefineSummaryInput): Promise<{success: boolean, data?: { refinedSummary: string }, error?: string}> {
     try {
         const result = await refineSummaryFlow(input);
@@ -526,5 +496,6 @@ export async function interviewPrepAction(input: InterviewPrepActionInput): Prom
     }
 }
     
+
 
 

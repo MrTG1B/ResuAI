@@ -1,35 +1,6 @@
 
 'use server';
 /**
- * @fileOverview Saves user feedback to Firestore.
- *
- * - submitFeedbackFlow - A function that handles saving feedback.
- * - SubmitFeedbackInput - The input type for the function.
+ * @fileOverview This file is intentionally left blank.
+ * The feedback submission logic has been moved to a client-side action in FeedbackPage.
  */
-
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import { db, addDoc, collection, serverTimestamp } from "@/lib/firebase";
-
-const SubmitFeedbackInputSchema = z.object({
-  feedback: z.string().min(10, "Feedback must be at least 10 characters long."),
-  userId: z.string(),
-  userEmail: z.string().email().optional(),
-  userName: z.string().optional(),
-});
-export type SubmitFeedbackInput = z.infer<typeof SubmitFeedbackInputSchema>;
-
-export async function submitFeedbackFlow(input: SubmitFeedbackInput): Promise<{success: boolean}> {
-  if (!db) {
-    throw new Error("Firestore is not initialized.");
-  }
-  
-  const feedbackCollectionRef = collection(db, 'feedback');
-  
-  await addDoc(feedbackCollectionRef, {
-    ...input,
-    createdAt: serverTimestamp(),
-  });
-
-  return { success: true };
-}
