@@ -16,7 +16,7 @@ import { interviewPrep as interviewPrepFlow, type InterviewPrepInput } from "@/a
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse, type ChatMessage } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { admin, initializeFirebaseAdmin } from '@/lib/firebaseAdmin';
 import { User } from "@/types/user";
 import { Feedback } from "@/types/feedback";
@@ -76,34 +76,25 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
 }
 
 
-export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
+export async function analyzeResumeAction(userId: string, idToken: string, input: AnalyzeResumeInput) {
   try {
-    if (!db) {
-      throw new Error("Firestore is not initialized.");
-    }
-    
-    // Attempt to auto-fill profile if it's the user's first time
+    if (!db) throw new Error("Firestore is not initialized.");
+    initializeFirebaseAdmin();
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    if (decodedToken.uid !== userId) throw new Error("User ID mismatch.");
+
     await maybeAutoFillProfile(userId, input.resumeDataUri);
     
     const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
-    
-    // Fetch user profile data to merge with the portfolio
     const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
     const profileSnap = await getDoc(profileDocRef);
     const userProfile = profileSnap.exists() ? profileSnap.data() : {};
 
-
-    // Step 1: Analyze resume for text content, get an avatar prompt, and color palette
     const analysisResult = await analyzeResumeFlow(input);
-    
-    // This is the draft from the resume file analysis
     const portfolioDraftFromAI: Partial<PortfolioData> = analysisResult.portfolioDraft;
 
-    // Step 2: Merge profile data with analysis result, giving profile data precedence
     const finalPortfolioData: Partial<PortfolioData> = {
-        // Start with AI-parsed data as a base
         ...portfolioDraftFromAI,
-        // Overwrite with user profile data if it exists
         personalInfo: { ...portfolioDraftFromAI.personalInfo, ...userProfile },
         summary: userProfile.summary || portfolioDraftFromAI.summary || portfolioDraftFromAI.personalInfo?.summary,
         experience: userProfile.experience && userProfile.experience.length > 0 ? userProfile.experience : portfolioDraftFromAI.experience,
@@ -116,24 +107,17 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
         publications: userProfile.publications && userProfile.publications.length > 0 ? userProfile.publications : portfolioDraftFromAI.publications,
     };
     
-    // Add a title and creation date
     finalPortfolioData.title = `Portfolio from ${new Date().toLocaleDateString()}`;
     finalPortfolioData.createdAt = serverTimestamp();
-
-    // Step 3: Add the color palette from the initial analysis
     finalPortfolioData.colorPalette = analysisResult.colorPalette;
 
-    // Step 4: Generate avatar (if needed) and project images in parallel
     let avatarPromise;
     if (userProfile.profilePictureUrl) {
-      // If URL exists in profile, use it directly
       avatarPromise = Promise.resolve(userProfile.profilePictureUrl);
     } else {
-      // Otherwise, generate a new one, upload it, and save it back to the user's profile
       avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt })
         .then(res => uploadImage(res.imageDataUri))
         .then(async (uploadResult) => {
-            // Save the new URL and delete URL back to the user's profile for future use
             await setDoc(profileDocRef, { 
                 profilePictureUrl: uploadResult.url,
                 profilePictureDeleteUrl: uploadResult.deleteUrl
@@ -142,20 +126,18 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
         })
         .catch(err => {
             console.error("Avatar generation/upload failed:", err);
-            return 'https://placehold.co/128x128.png'; // Fallback URL
+            return 'https://placehold.co/128x128.png';
         });
     }
 
     const projectImagePromises = (finalPortfolioData.projects || []).map(async (project: Project) => {
         try {
-            // Only generate an image if one doesn't already exist from the profile
             if (!project.previewImage) {
                 const imageResult = await generateProjectImageFlow({ description: project.description });
                 project.previewImage = (await uploadImage(imageResult.imageDataUri)).url;
             }
         } catch (e) {
             console.warn(`Failed to generate/upload image for project: ${project.name}`, e);
-            // Use a placeholder if generation fails and one doesn't exist
             if (!project.previewImage) {
                 project.previewImage = 'https://placehold.co/800x450.png';
             }
@@ -163,13 +145,11 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
         return project;
     });
 
-    // Wait for all image generation to complete
     const [avatarUrl, updatedProjects] = await Promise.all([
         avatarPromise,
         Promise.all(projectImagePromises),
     ]);
 
-    // Step 5: Combine all the results
     finalPortfolioData.projects = updatedProjects;
     
     if (finalPortfolioData.personalInfo) {
@@ -181,13 +161,11 @@ export async function analyzeResumeAction(userId: string, input: AnalyzeResumeIn
         }
     }
 
-    // Step 6: Save as a new document in the user's portfolios subcollection
     const newDocRef = await addDoc(portfolioCollectionRef, finalPortfolioData);
     
     return { success: true, data: { ...finalPortfolioData, id: newDocRef.id } };
   } catch (error) {
     console.error("Error analyzing resume:", error);
-    // It's good practice to not expose detailed internal errors to the client.
     return { success: false, error: "Failed to analyze resume. Please check the file format and try again." };
   }
 }
@@ -214,9 +192,12 @@ export async function deleteImageAction(deleteUrl: string): Promise<{ success: b
     }
 }
 
-export async function parseResumeAction(userId: string, input: ParseResumeInput) {
+export async function parseResumeAction(userId: string, idToken: string, input: ParseResumeInput) {
   try {
-     // Attempt to auto-fill profile if it's the user's first time
+    initializeFirebaseAdmin();
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    if (decodedToken.uid !== userId) throw new Error("User ID mismatch.");
+
     await maybeAutoFillProfile(userId, input.resumeDataUri);
     
     const result = await parseResumeFlow(input);
@@ -273,6 +254,7 @@ export async function coachChatAction(input: CoachChatInput) {
 interface AIAssistantChatActionInput extends AIAssistantChatInput {
     userId: string;
     chatId?: string;
+    idToken: string;
 }
 
 interface AIAssistantChatActionResult {
@@ -285,18 +267,16 @@ interface AIAssistantChatActionResult {
 }
 
 export async function aiAssistantChatAction(input: AIAssistantChatActionInput): Promise<AIAssistantChatActionResult> {
-    if (!auth?.currentUser) return { success: false, error: "User not authenticated" };
-    
-    const { userId, chatId, ...aiInput } = input;
-
-    // Security: Ensure the action is performed for the currently logged-in user
-    if (auth.currentUser.uid !== userId) {
-        return { success: false, error: "Unauthorized operation." };
-    }
-    
+    const { userId, chatId, idToken, ...aiInput } = input;
     if (!db) return { success: false, error: "Database not initialized" };
 
     try {
+        initializeFirebaseAdmin();
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        if (decodedToken.uid !== userId) {
+            return { success: false, error: "Unauthorized operation." };
+        }
+        
         const result = await aiAssistantChatFlow(aiInput);
         let currentChatId = chatId;
         const userMessage: ChatMessage = { role: 'user', content: aiInput.prompt };
@@ -304,7 +284,6 @@ export async function aiAssistantChatAction(input: AIAssistantChatActionInput): 
         const chatCollectionRef = collection(db, 'users', userId, 'chats');
 
         if (currentChatId) {
-            // Update existing chat
             const chatDocRef = doc(chatCollectionRef, currentChatId);
             const chatDoc = await getDoc(chatDocRef);
             if (chatDoc.exists()) {
@@ -315,7 +294,6 @@ export async function aiAssistantChatAction(input: AIAssistantChatActionInput): 
                 });
             }
         } else {
-            // Create a new chat
             const newChat: Omit<ChatSession, 'id'> = {
                 title: input.prompt.substring(0, 40) + '...',
                 messages: [userMessage, assistantMessage],
@@ -372,9 +350,7 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
     }
 
     try {
-        // Ensure Firebase Admin is initialized
         initializeFirebaseAdmin();
-
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const { uid } = decodedToken;
         
@@ -499,3 +475,6 @@ export async function interviewPrepAction(input: InterviewPrepActionInput): Prom
 
 
 
+
+
+    

@@ -71,7 +71,8 @@ export function ResumeForm({ user }: { user: User }) {
     reader.onload = async () => {
       try {
         const resumeDataUri = reader.result as string;
-        const result = await analyzeResumeAction(user.uid, { resumeDataUri });
+        const idToken = await user.getIdToken();
+        const result = await analyzeResumeAction(user.uid, idToken, { resumeDataUri });
 
         if (result.success && result.data?.id) {
           router.push(`/portfolio?id=${result.data.id}`);
@@ -129,3 +130,5 @@ export function ResumeForm({ user }: { user: User }) {
     </form>
   );
 }
+
+    

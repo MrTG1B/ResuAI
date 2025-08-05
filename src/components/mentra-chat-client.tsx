@@ -78,7 +78,7 @@ function MentraChatPage() {
   
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isPageLoading, setIsPageLoading] = useState(isSearchOpen);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isResponding, setIsResponding] = useState(false);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
@@ -102,7 +102,6 @@ function MentraChatPage() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        console.log(user);
       if (user) {
         setCurrentUser(user);
         await fetchChatHistory(user.uid);
@@ -161,8 +160,10 @@ function MentraChatPage() {
     setIsResponding(true);
 
     try {
+        const idToken = await currentUser.getIdToken();
         const result = await aiAssistantChatAction({
             userId: currentUser.uid,
+            idToken,
             chatId: currentChatId ?? undefined,
             history: messages,
             prompt: currentInput,
@@ -426,3 +427,5 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
+
+    

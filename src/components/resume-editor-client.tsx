@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
-import { parseResumeAction, editResumeAction } from '@/app/actions';
+import { parseResumeAction, editResumeAction, analyzeResumeAction } from '@/app/actions';
 import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
@@ -113,15 +113,15 @@ export default function ResumeEditorClient() {
         setIsApplyingSuggestions(true);
     
         try {
-            // Step 1: Parse the resume to get its HTML content
-            const parseResult = await parseResumeAction(currentUser!.uid, { resumeDataUri });
+            if (!currentUser) throw new Error("User not authenticated.");
+            const idToken = await currentUser.getIdToken();
+            const parseResult = await parseResumeAction(currentUser.uid, idToken, { resumeDataUri });
             if (!parseResult.success || !parseResult.data) {
                 throw new Error(parseResult.error || "Failed to parse resume for editing.");
             }
     
             const initialHtmlContent = parseResult.data.htmlContent;
     
-            // Step 2: Use editResumeAction to apply the suggestions
             const editPrompt = `Based on the following analysis and suggestions, please apply the necessary changes to my resume. Focus on improving ATS compatibility by adjusting keywords, formatting, and structure as recommended.\n\nANALYSIS:\n${suggestions}`;
             
             const editResult = await editResumeAction({
@@ -289,8 +289,8 @@ export default function ResumeEditorClient() {
         reader.onload = async () => {
             try {
                 const uploadedResumeDataUri = reader.result as string;
-    
-                const result = await parseResumeAction(currentUser.uid, { resumeDataUri: uploadedResumeDataUri });
+                const idToken = await currentUser.getIdToken();
+                const result = await parseResumeAction(currentUser.uid, idToken, { resumeDataUri: uploadedResumeDataUri });
     
                 if (result.success && result.data) {
                     const finalState: SavedEditorState = {
@@ -387,8 +387,9 @@ export default function ResumeEditorClient() {
         if (!analysisInput.resumeDataUri) {
           throw new Error("No resume file has been uploaded to create a portfolio from.");
         }
-    
-        const result = await analyzeResumeAction(currentUser.uid, analysisInput);
+        
+        const idToken = await currentUser.getIdToken();
+        const result = await analyzeResumeAction(currentUser.uid, idToken, analysisInput);
     
         if (result.success && result.data?.id) {
           toast({
@@ -594,3 +595,5 @@ export default function ResumeEditorClient() {
         </div>
     );
 }
+
+    
