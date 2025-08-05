@@ -78,7 +78,7 @@ function MentraChatPage() {
   
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [isPageLoading, setIsPageLoading] = useState(isSearchOpen);
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isResponding, setIsResponding] = useState(false);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
@@ -427,5 +427,3 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
-
-    
