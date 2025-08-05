@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -80,8 +81,9 @@ export default function InterviewPrepClient() {
         setIsResponding(true);
 
         try {
+            const idToken = await currentUser.getIdToken();
             const result = await interviewPrepAction({
-                userId: currentUser.uid,
+                idToken,
                 jobTitle,
                 jobDescription,
                 history: [],
@@ -114,8 +116,9 @@ export default function InterviewPrepClient() {
         setIsResponding(true);
 
         try {
+            const idToken = await currentUser.getIdToken();
             const result = await interviewPrepAction({
-                userId: currentUser.uid,
+                idToken,
                 chatId,
                 jobTitle,
                 jobDescription,

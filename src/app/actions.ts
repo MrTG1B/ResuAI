@@ -456,7 +456,7 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
 }
 
 interface InterviewPrepActionInput {
-    userId: string;
+    idToken: string;
     chatId?: string;
     jobTitle: string;
     jobDescription: string;
@@ -465,13 +465,18 @@ interface InterviewPrepActionInput {
 }
 
 export async function interviewPrepAction(input: InterviewPrepActionInput): Promise<AIAssistantChatActionResult> {
-    const { userId, chatId, jobTitle, jobDescription, history, prompt } = input;
-    if (!db || !auth.currentUser || auth.currentUser.uid !== userId) {
-        return { success: false, error: "Authentication error." };
+    const { idToken, chatId, jobTitle, jobDescription, history, prompt } = input;
+    
+    if (!db) {
+        return { success: false, error: "Database service is not available." };
     }
 
     try {
-        const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
+        initializeFirebaseAdmin();
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const { uid } = decodedToken;
+
+        const profileDocRef = doc(db, 'users', uid, 'profile', 'data');
         const profileSnap = await getDoc(profileDocRef);
         const userProfile = profileSnap.exists() ? profileSnap.data() : {};
 
@@ -486,7 +491,7 @@ export async function interviewPrepAction(input: InterviewPrepActionInput): Prom
         let currentChatId = chatId;
         const userMessage: ChatMessage = { role: 'user', content: prompt };
         const assistantMessage: ChatMessage = { role: 'assistant', content: result.response };
-        const chatCollectionRef = collection(db, 'users', userId, 'interview-prep');
+        const chatCollectionRef = collection(db, 'users', uid, 'interview-prep');
 
         if (currentChatId) {
             const chatDocRef = doc(chatCollectionRef, currentChatId);
@@ -514,8 +519,12 @@ export async function interviewPrepAction(input: InterviewPrepActionInput): Prom
         return { success: true, data: { response: result.response, chatId: currentChatId! } };
     } catch (error: any) {
         console.error("Error in interview prep action:", error);
+        if (error.code === 'auth/id-token-expired') {
+            return { success: false, error: "Your session has expired. Please log in again." };
+        }
         return { success: false, error: "The AI coach is unavailable. Please try again later." };
     }
 }
     
+
 
