@@ -60,8 +60,6 @@ export default function FeedbackPage() {
       return;
     }
 
-    form.control._setFormState({ isSubmitting: true });
-
     try {
       await addDoc(collection(db, 'feedback'), {
         feedback: data.feedback,
@@ -82,8 +80,6 @@ export default function FeedbackPage() {
         description: 'An error occurred while saving your feedback. Please try again.',
         variant: 'destructive',
       });
-    } finally {
-        form.control._setFormState({ isSubmitting: false });
     }
   };
 
