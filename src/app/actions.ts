@@ -13,6 +13,7 @@ import { submitFeedbackFlow } from "@/ai/flows/submit-feedback";
 import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
+import { interviewPrep as interviewPrepFlow, type InterviewPrepInput } from "@/ai/flows/interview-prep";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse, type ChatMessage } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
@@ -454,4 +455,67 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
     }
 }
 
+interface InterviewPrepActionInput {
+    userId: string;
+    chatId?: string;
+    jobTitle: string;
+    jobDescription: string;
+    history: ChatMessage[];
+    prompt: string;
+}
+
+export async function interviewPrepAction(input: InterviewPrepActionInput): Promise<AIAssistantChatActionResult> {
+    const { userId, chatId, jobTitle, jobDescription, history, prompt } = input;
+    if (!db || !auth.currentUser || auth.currentUser.uid !== userId) {
+        return { success: false, error: "Authentication error." };
+    }
+
+    try {
+        const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
+        const profileSnap = await getDoc(profileDocRef);
+        const userProfile = profileSnap.exists() ? profileSnap.data() : {};
+
+        const result = await interviewPrepFlow({
+            jobTitle,
+            jobDescription,
+            userProfile,
+            history,
+            prompt,
+        });
+
+        let currentChatId = chatId;
+        const userMessage: ChatMessage = { role: 'user', content: prompt };
+        const assistantMessage: ChatMessage = { role: 'assistant', content: result.response };
+        const chatCollectionRef = collection(db, 'users', userId, 'interview-prep');
+
+        if (currentChatId) {
+            const chatDocRef = doc(chatCollectionRef, currentChatId);
+            const chatDoc = await getDoc(chatDocRef);
+            if (chatDoc.exists()) {
+                const existingMessages = chatDoc.data().messages || [];
+                await updateDoc(chatDocRef, {
+                    messages: [...existingMessages, userMessage, assistantMessage],
+                    lastModified: serverTimestamp(),
+                });
+            }
+        } else {
+            const newChat = {
+                title: `Interview Prep: ${jobTitle}`,
+                jobTitle,
+                jobDescription,
+                messages: [userMessage, assistantMessage],
+                createdAt: serverTimestamp(),
+                lastModified: serverTimestamp(),
+            };
+            const newDocRef = await addDoc(chatCollectionRef, newChat);
+            currentChatId = newDocRef.id;
+        }
+
+        return { success: true, data: { response: result.response, chatId: currentChatId! } };
+    } catch (error: any) {
+        console.error("Error in interview prep action:", error);
+        return { success: false, error: "The AI coach is unavailable. Please try again later." };
+    }
+}
     
+
