@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -305,7 +304,7 @@ export default function DashboardPage() {
                 </Link>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 animate-fade-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up">
                 <ToolCard 
                     href="/resume-builder"
                     icon={FileText}
@@ -454,3 +453,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
