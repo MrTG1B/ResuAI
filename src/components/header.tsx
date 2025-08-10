@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from "next/link";
+import Image from 'next/image';
 import { LogOut, User as UserIcon, LayoutDashboard, Info, FileText, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
 import { auth } from '@/lib/firebase';
@@ -18,7 +19,6 @@ import {
   } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Skeleton } from './ui/skeleton';
-import { Logo } from './logo';
 
 export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -75,7 +75,7 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center">
-            <Logo className="h-8 w-auto" />
+            <Image src="/logo.png" alt="ResuAI Logo" width={110} height={28} priority />
           </Link>
           {pageActions}
         </div>

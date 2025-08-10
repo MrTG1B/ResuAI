@@ -3,13 +3,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { Logo } from "@/components/logo";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
   return (
     <div className="flex flex-col min-h-screen items-center justify-center p-4">
         <div className="absolute top-8">
-            <Logo className="h-10 w-auto"/>
+            <Image src="/logo.png" alt="ResuAI Logo" width={140} height={35} />
         </div>
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
