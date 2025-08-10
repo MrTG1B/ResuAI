@@ -39,7 +39,7 @@ import {
     AlertDialogTitle,
   } from "@/components/ui/alert-dialog"
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
-import { AIAssistantChatInput } from '@/ai/flows/ai-assistant-chat';
+import { aiAssistantChatAction } from '@/app/actions';
 
 interface Attachment {
     name: string;
@@ -62,20 +62,6 @@ const AssistantAvatar = () => (
         </svg>
     </div>
 );
-
-async function fetchAIResponse(payload: AIAssistantChatInput): Promise<string> {
-    const response = await fetch(`/api/genkit/flow/aiAssistantChatFlow`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`AI service failed: ${errorText}`);
-    }
-    const data = await response.json();
-    return data?.response ?? "Sorry, I couldn’t generate a response.";
-}
 
 
 function MentraChatPage() {
@@ -175,8 +161,10 @@ function MentraChatPage() {
     setIsResponding(true);
 
     try {
-        const aiResponse = await fetchAIResponse({
-            history: messages, // Send history *before* the new user message
+        const idToken = await currentUser.getIdToken();
+        const result = await aiAssistantChatAction({
+            idToken,
+            history: messages,
             prompt: currentInput,
             attachments: currentAttachments.map(a => ({
                 dataUri: a.dataUri,
@@ -184,24 +172,26 @@ function MentraChatPage() {
             })),
         });
 
-        const assistantMessage: ChatMessage = { role: 'assistant', content: aiResponse };
+        if (!result.success || !result.data) {
+            throw new Error(result.error || "Failed to get AI response.");
+        }
+
+        const assistantMessage: ChatMessage = { role: 'assistant', content: result.data.response };
         setMessages(prev => [...prev, assistantMessage]);
 
         const finalMessages = [...currentMessages, assistantMessage];
         
         let newChatId = currentChatId;
         const chatsCollectionRef = collection(db, 'users', currentUser.uid, 'chats');
-
+        
         if (newChatId) {
-            // Update existing chat
             const chatDocRef = doc(chatsCollectionRef, newChatId);
             await setDoc(chatDocRef, {
                 messages: finalMessages,
                 lastModified: serverTimestamp(),
             }, { merge: true });
         } else {
-            // Create new chat
-            const newChatDocRef = doc(chatsCollectionRef); // Create a ref with a new ID
+            const newChatDocRef = doc(chatsCollectionRef);
             newChatId = newChatDocRef.id;
             await setDoc(newChatDocRef, {
                 messages: finalMessages,
@@ -216,7 +206,7 @@ function MentraChatPage() {
 
     } catch (error: any) {
         toast({ title: "Request Failed", description: error.message, variant: "destructive" });
-        setMessages(messages); // Revert messages on error
+        setMessages(messages);
     } finally {
         setIsResponding(false);
     }
@@ -440,7 +430,7 @@ function MentraChatPage() {
                       <div className="flex w-full items-start gap-2">
                           <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
                           <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding}><Paperclip className="h-4 w-4" /></Button>
-                          <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 bg-transparent" />
+                          <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 text-card-foreground bg-transparent" />
                           <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10 w-10 p-0">
                               {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                           </Button>

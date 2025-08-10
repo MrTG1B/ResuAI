@@ -4,26 +4,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Default deny all reads and writes
-    match /{document=**} {
-      allow read, write: if false;
+    // Feedback: Logged-in users can submit, but not read/edit/delete.
+    match /feedback/{feedbackId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
     }
-    
-    // Allow authenticated users to manage their own subcollections
+
+    // User data is private to the authenticated user.
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Allow authenticated users to create feedback
-    match /feedback/{feedbackId} {
-      allow create: if request.auth != null;
-      allow read, update, delete: if false; // Users cannot see or edit feedback
-    }
-
-    // Allow authenticated users to read, write, and delete their own chats
+    // Chat sessions: Authenticated users can create, read, and update their own chats.
     match /users/{userId}/chats/{chatId} {
-      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      allow read, create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
-    
   }
 }

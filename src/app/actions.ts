@@ -5,7 +5,7 @@ import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flo
 import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
-import { atsAnalyzerFlow, type AtsAnalyzerInput, type AtsAnalyzerOutput } from "@/ai/flows/job-match-analyzer";
+import { atsAnalyzerFlow, type AtsAnalyzerOutput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
@@ -23,6 +23,7 @@ import { Feedback } from "@/types/feedback";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
 import { type ChatSession } from "@/types/chat";
 import { type CoverLetter } from "@/types/cover-letter";
+import { aiAssistantChat, AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 
 
 async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
@@ -439,7 +440,34 @@ export async function generateAptitudeExamAction(
     return { success: false, error: `Failed to generate exam. The AI may be busy. Please try again later.` };
   }
 }
-    
 
-    
+interface AIAssistantChatActionInput {
+    idToken: string;
+    chatId?: string;
+    history: ChatMessage[];
+    prompt: string;
+    attachments?: { dataUri: string; mimeType: string }[];
+}
 
+export async function aiAssistantChatAction(input: AIAssistantChatActionInput): Promise<{success: boolean, data?: { response: string }, error?: string}> {
+    const { idToken, history, prompt, attachments } = input;
+    try {
+        initializeFirebaseAdmin();
+        await admin.auth().verifyIdToken(idToken);
+
+        const result = await aiAssistantChat({
+            history,
+            prompt,
+            attachments
+        });
+
+        return { success: true, data: { response: result.response } };
+
+    } catch (error: any) {
+        console.error("Error in AI Assistant chat action:", error);
+        if (error.code === 'auth/id-token-expired') {
+            return { success: false, error: "Your session has expired. Please log in again." };
+        }
+        return { success: false, error: "The AI assistant is unavailable. Please try again later." };
+    }
+}
