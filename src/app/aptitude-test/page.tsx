@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
@@ -10,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Clock, CheckCircle, XCircle, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { generateAptitudeExamAction } from '@/app/actions';
 import { type GenerateAptitudeExamOutput } from '@/ai/flows/generate-aptitude-exam';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -77,33 +77,42 @@ function AptitudeTestPageContent() {
     }
     const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
     return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [examState, timeLeft]);
 
   const startExam = async () => {
     if (!currentUser) return;
     setExamState('loading');
     try {
-      const idToken = await currentUser.getIdToken();
-      const result = await generateAptitudeExamAction({
-        logicalReasoningCount: 5,
-        quantitativeAnalysisCount: 5,
-        verbalAbilityCount: 5
-      }, idToken);
+      // Call the Genkit flow API endpoint directly
+      const response = await fetch('/api/genkit/flow/generateAptitudeExamFlow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          logicalReasoningCount: 5,
+          quantitativeAnalysisCount: 5,
+          verbalAbilityCount: 5
+        })
+      });
 
-      if (result.success && result.data) {
-        const allQuestions = [
-          ...result.data.logicalReasoning,
-          ...result.data.quantitativeAnalysis,
-          ...result.data.verbalAbility
-        ];
-        setExamQuestions(allQuestions);
-        setExamState('ongoing');
-        setTimeLeft(TOTAL_TIME);
-        setUserAnswers({});
-        setCurrentQuestionIndex(0);
-      } else {
-        throw new Error(result.error || 'Failed to generate exam.');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate exam.');
       }
+
+      const result = await response.json() as GenerateAptitudeExamOutput;
+      
+      const allQuestions = [
+        ...result.logicalReasoning,
+        ...result.quantitativeAnalysis,
+        ...result.verbalAbility
+      ];
+      setExamQuestions(allQuestions);
+      setExamState('ongoing');
+      setTimeLeft(TOTAL_TIME);
+      setUserAnswers({});
+      setCurrentQuestionIndex(0);
+
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
       setExamState('idle');

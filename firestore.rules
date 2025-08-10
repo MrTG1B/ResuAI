@@ -3,22 +3,42 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Feedback: Logged-in users can submit, but not read/edit/delete.
+    // Users can read/write their own user document and profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /profile/data {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Users can manage their own subcollections
+      match /resumes/{resumeId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+      match /portfolios/{portfolioId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+      match /coverletters/{letterId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+      match /chats/{chatId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+       match /interview-prep/{prepId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Feedback can be created by any authenticated user
     match /feedback/{feedbackId} {
       allow create: if request.auth != null;
-      allow read, update, delete: if false;
+      // Admin-only access for reading feedback
+      allow read, delete: if get(/databases/$(database)/documents/admins/$(request.auth.uid)).exists == true;
     }
 
-    // User data is private to the authenticated user.
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Chat sessions: Authenticated users can create, read, and update their own chats.
-    match /users/{userId}/chats/{chatId} {
-      allow read, create, update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if request.auth != null && request.auth.uid == userId;
+    // Admin collection for role-based access
+    match /admins/{adminId} {
+        allow read: if request.auth != null && request.auth.uid == adminId;
     }
   }
 }

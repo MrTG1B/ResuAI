@@ -12,18 +12,12 @@ import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateIn
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
 import { interviewPrep as interviewPrepFlow, type InterviewPrepInput } from "@/ai/flows/interview-prep";
-import { generateAptitudeExam as generateAptitudeExamFlow, type GenerateAptitudeExamInput, type GenerateAptitudeExamOutput } from "@/ai/flows/generate-aptitude-exam";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
-import { type ParsedResume, type EditedResume, type CoachChatResponse, type ChatMessage } from "@/types/resume";
+import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { admin, initializeFirebaseAdmin } from '@/lib/firebaseAdmin';
-import { User } from "@/types/user";
-import { Feedback } from "@/types/feedback";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
-import { type ChatSession } from "@/types/chat";
 import { type CoverLetter } from "@/types/cover-letter";
-import { aiAssistantChat, AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 
 
 async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
@@ -77,12 +71,9 @@ async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
 }
 
 
-export async function analyzeResumeAction(userId: string, idToken: string, input: AnalyzeResumeInput) {
+export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
   try {
     if (!db) throw new Error("Firestore is not initialized.");
-    initializeFirebaseAdmin();
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    if (decodedToken.uid !== userId) throw new Error("User ID mismatch.");
 
     await maybeAutoFillProfile(userId, input.resumeDataUri);
     
@@ -193,12 +184,8 @@ export async function deleteImageAction(deleteUrl: string): Promise<{ success: b
     }
 }
 
-export async function parseResumeAction(userId: string, idToken: string, input: ParseResumeInput) {
+export async function parseResumeAction(userId: string, input: ParseResumeInput) {
   try {
-    initializeFirebaseAdmin();
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    if (decodedToken.uid !== userId) throw new Error("User ID mismatch.");
-
     await maybeAutoFillProfile(userId, input.resumeDataUri);
     
     const result = await parseResumeFlow(input);
@@ -285,19 +272,15 @@ interface GenerateCoverLetterActionInput {
     id?: string;
 }
 
-export async function generateCoverLetterAction(input: GenerateCoverLetterActionInput, idToken: string): Promise<{ success: boolean; data?: { coverLetter: string, id: string }; error?: string }> {
+export async function generateCoverLetterAction(userId: string, input: GenerateCoverLetterActionInput): Promise<{ success: boolean; data?: { coverLetter: string, id: string }; error?: string }> {
     if (!db) {
         return { success: false, error: "Database not available." };
     }
 
     try {
-        initializeFirebaseAdmin();
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const { uid } = decodedToken;
-        
         const { id, title, ...aiInput } = input;
         
-        const profileDocRef = doc(db, 'users', uid, 'profile', 'data');
+        const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
         const profileSnap = await getDoc(profileDocRef);
         if (!profileSnap.exists()) {
             return { success: false, error: "User profile not found. Please complete your profile first." };
@@ -320,7 +303,7 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
             lastModified: serverTimestamp(),
         };
 
-        const collectionRef = collection(db, 'users', uid, 'coverletters');
+        const collectionRef = collection(db, 'users', userId, 'coverletters');
         let docId = id;
 
         if (docId) {
@@ -343,36 +326,22 @@ export async function generateCoverLetterAction(input: GenerateCoverLetterAction
 }
 
 interface InterviewPrepActionInput {
-    idToken: string;
-    chatId?: string;
+    userId: string;
     jobTitle: string;
     jobDescription: string;
-    history: ChatMessage[];
+    history: any[];
     prompt: string;
 }
 
-interface AIAssistantChatActionResult {
-    success: boolean;
-    data?: {
-        response: string;
-        chatId: string;
-    };
-    error?: string;
-}
-
-export async function interviewPrepAction(input: InterviewPrepActionInput): Promise<AIAssistantChatActionResult> {
-    const { idToken, chatId, jobTitle, jobDescription, history, prompt } = input;
+export async function interviewPrepAction(input: InterviewPrepActionInput): Promise<{ success: boolean; data?: { response: string }; error?: string }> {
+    const { userId, jobTitle, jobDescription, history, prompt } = input;
     
     if (!db) {
         return { success: false, error: "Database service is not available." };
     }
 
     try {
-        initializeFirebaseAdmin();
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const { uid } = decodedToken;
-
-        const profileDocRef = doc(db, 'users', uid, 'profile', 'data');
+        const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
         const profileSnap = await getDoc(profileDocRef);
         const userProfile = profileSnap.exists() ? profileSnap.data() : {};
 
@@ -384,90 +353,10 @@ export async function interviewPrepAction(input: InterviewPrepActionInput): Prom
             prompt,
         });
 
-        let currentChatId = chatId;
-        const userMessage: ChatMessage = { role: 'user', content: prompt };
-        const assistantMessage: ChatMessage = { role: 'assistant', content: result.response };
-        const chatCollectionRef = collection(db, 'users', uid, 'interview-prep');
-
-        if (currentChatId) {
-            const chatDocRef = doc(chatCollectionRef, currentChatId);
-            const chatDoc = await getDoc(chatDocRef);
-            if (chatDoc.exists()) {
-                const existingMessages = chatDoc.data().messages || [];
-                await updateDoc(chatDocRef, {
-                    messages: [...existingMessages, userMessage, assistantMessage],
-                    lastModified: serverTimestamp(),
-                });
-            }
-        } else {
-            const newChat = {
-                title: `Interview Prep: ${jobTitle}`,
-                jobTitle,
-                jobDescription,
-                messages: [userMessage, assistantMessage],
-                createdAt: serverTimestamp(),
-                lastModified: serverTimestamp(),
-            };
-            const newDocRef = await addDoc(chatCollectionRef, newChat);
-            currentChatId = newDocRef.id;
-        }
-
-        return { success: true, data: { response: result.response, chatId: currentChatId! } };
-    } catch (error: any) {
-        console.error("Error in interview prep action:", error);
-        if (error.code === 'auth/id-token-expired') {
-            return { success: false, error: "Your session has expired. Please log in again." };
-        }
-        return { success: false, error: "The AI coach is unavailable. Please try again later." };
-    }
-}
-
-export async function generateAptitudeExamAction(
-    input: GenerateAptitudeExamInput, 
-    idToken: string
-): Promise<{ success: boolean; data?: GenerateAptitudeExamOutput; error?: string }> {
-  try {
-    initializeFirebaseAdmin();
-    await admin.auth().verifyIdToken(idToken);
-    
-    const result = await generateAptitudeExamFlow(input);
-    return { success: true, data: result };
-  } catch (error: any) {
-    console.error("Error generating aptitude exam:", error);
-    if (error.code === 'auth/id-token-expired') {
-      return { success: false, error: "Your session has expired. Please log in again." };
-    }
-    return { success: false, error: `Failed to generate exam. The AI may be busy. Please try again later.` };
-  }
-}
-
-interface AIAssistantChatActionInput {
-    idToken: string;
-    chatId?: string;
-    history: ChatMessage[];
-    prompt: string;
-    attachments?: { dataUri: string; mimeType: string }[];
-}
-
-export async function aiAssistantChatAction(input: AIAssistantChatActionInput): Promise<{success: boolean, data?: { response: string }, error?: string}> {
-    const { idToken, history, prompt, attachments } = input;
-    try {
-        initializeFirebaseAdmin();
-        await admin.auth().verifyIdToken(idToken);
-
-        const result = await aiAssistantChat({
-            history,
-            prompt,
-            attachments
-        });
-
         return { success: true, data: { response: result.response } };
 
     } catch (error: any) {
-        console.error("Error in AI Assistant chat action:", error);
-        if (error.code === 'auth/id-token-expired') {
-            return { success: false, error: "Your session has expired. Please log in again." };
-        }
-        return { success: false, error: "The AI assistant is unavailable. Please try again later." };
+        console.error("Error in interview prep action:", error);
+        return { success: false, error: "The AI coach is unavailable. Please try again later." };
     }
 }

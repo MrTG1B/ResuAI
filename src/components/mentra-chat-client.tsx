@@ -39,7 +39,7 @@ import {
     AlertDialogTitle,
   } from "@/components/ui/alert-dialog"
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
-import { aiAssistantChatAction } from '@/app/actions';
+import { type AIAssistantChatOutput } from '@/ai/flows/ai-assistant-chat';
 
 interface Attachment {
     name: string;
@@ -161,22 +161,27 @@ function MentraChatPage() {
     setIsResponding(true);
 
     try {
-        const idToken = await currentUser.getIdToken();
-        const result = await aiAssistantChatAction({
-            idToken,
-            history: messages,
-            prompt: currentInput,
-            attachments: currentAttachments.map(a => ({
-                dataUri: a.dataUri,
-                mimeType: a.dataUri.substring(a.dataUri.indexOf(':') + 1, a.dataUri.indexOf(';'))
-            })),
+        const response = await fetch('/api/genkit/flow/aiAssistantChatFlow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                history: messages,
+                prompt: currentInput,
+                attachments: currentAttachments.map(a => ({
+                    dataUri: a.dataUri,
+                    mimeType: a.dataUri.substring(a.dataUri.indexOf(':') + 1, a.dataUri.indexOf(';'))
+                })),
+            })
         });
 
-        if (!result.success || !result.data) {
-            throw new Error(result.error || "Failed to get AI response.");
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'The AI assistant is currently unavailable.');
         }
 
-        const assistantMessage: ChatMessage = { role: 'assistant', content: result.data.response };
+        const result = (await response.json()) as AIAssistantChatOutput;
+
+        const assistantMessage: ChatMessage = { role: 'assistant', content: result.response };
         const finalMessages = [...currentMessageHistory, assistantMessage];
         setMessages(finalMessages);
 
@@ -190,10 +195,11 @@ function MentraChatPage() {
                 lastModified: serverTimestamp(),
             }, { merge: true });
         } else {
+            const title = finalMessages[1]?.content.substring(0, 40) + '...' || "New Chat";
             const newChatDocRef = doc(chatsCollectionRef);
             await setDoc(newChatDocRef, {
                 messages: finalMessages,
-                title: currentInput.substring(0, 40) + '...',
+                title: title,
                 createdAt: serverTimestamp(),
                 lastModified: serverTimestamp(),
             });
@@ -229,7 +235,9 @@ function MentraChatPage() {
         });
 
         Promise.all(filePromises)
-            .then(setAttachments)
+            .then(newlyReadAttachments => {
+                setAttachments(prev => [...prev, ...newlyReadAttachments]);
+            })
             .catch(error => toast({ title: 'File Attach Error', description: error.message, variant: 'destructive' }));
     }
     if (e.target) e.target.value = '';
@@ -400,7 +408,7 @@ function MentraChatPage() {
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-slate-700 text-white' : 'bg-muted'}`}>
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-slate-700 text-primary-foreground' : 'bg-muted'}`}>
                                 <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                     {message.content}
                                 </ReactMarkdown>
