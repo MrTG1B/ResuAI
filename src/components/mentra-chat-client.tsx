@@ -19,7 +19,7 @@ import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
 import { type ChatSession } from '@/types/chat';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Logo } from '@/components/logo';
+import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, useSidebar } from '@/components/ui/sidebar';
 import {
@@ -126,7 +126,7 @@ function MentraChatPage() {
                 setMessages(chatDoc.data().messages);
             } else {
                 toast({title: "Chat not found", variant: "destructive"});
-                router.push('/career-coach');
+                router.push('/mentra');
             }
             setIsResponding(false);
         };
@@ -204,7 +204,7 @@ function MentraChatPage() {
                 lastModified: serverTimestamp(),
             });
             docId = newChatDocRef.id;
-            router.push(`/career-coach?id=${docId}`);
+            router.push(`/mentra?id=${docId}`);
         }
         
         await fetchChatHistory(currentUser.uid);
@@ -243,7 +243,7 @@ function MentraChatPage() {
     if (e.target) e.target.value = '';
   };
 
-  const handleNewChat = () => router.push('/career-coach');
+  const handleNewChat = () => router.push('/mentra');
 
   const handleRenameChat = async () => {
     if (!currentUser || !editingChatId || !editingTitle.trim() || !db) return;
@@ -255,7 +255,7 @@ function MentraChatPage() {
   const handleDeleteChat = async () => {
     if (!currentUser || !deletingChatId || !db) return;
     await deleteDoc(doc(db, 'users', currentUser.uid, 'chats', deletingChatId));
-    if(chatId === deletingChatId) router.push('/career-coach');
+    if(chatId === deletingChatId) router.push('/mentra');
     fetchChatHistory(currentUser.uid);
     setDeletingChatId(null);
   };
@@ -279,7 +279,7 @@ function MentraChatPage() {
                     <CommandItem
                         key={chat.id}
                         onSelect={() => {
-                            router.push(`/career-coach?id=${chat.id}`);
+                            router.push(`/mentra?id=${chat.id}`);
                             setIsSearchOpen(false);
                         }}
                     >
@@ -292,22 +292,17 @@ function MentraChatPage() {
 
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="border-b p-2 flex items-center justify-between flex-direction-row">
-            {/* This container handles the logo/trigger hover effect */}
             <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
-                {/* Expanded state: Full logo visible */}
                 <Link href="/dashboard" className="group-data-[collapsible=icon]:opacity-0 transition-opacity">
-                    <Logo className="h-6 w-auto" />
+                    <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} />
                 </Link>
-                {/* Collapsed state: Small icon logo visible by default */}
                 <Link href="/dashboard" className="absolute inset-0 opacity-0 group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:group-hover/logo-area:opacity-0 transition-opacity flex items-center justify-center">
-                    <Logo className="h-6 w-6"/>
+                    <Image src="/logo.png" alt="ResuAI Logo" width={24} height={24} />
                 </Link>
-                {/* Collapsed state hover: Trigger visible */}
                 <div className="absolute inset-0 opacity-0 group-data-[collapsible=icon]:group-hover/logo-area:opacity-100 transition-opacity">
                     <SidebarTrigger className="h-8 w-8" />
                 </div>
             </div>
-            {/* Expanded state: Trigger visible */}
             <SidebarTrigger className="h-8 w-8 group-data-[collapsible=icon]:hidden" />
         </SidebarHeader>
         <SidebarContent>
@@ -333,7 +328,7 @@ function MentraChatPage() {
                                     <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleRenameChat}><Check className="h-4 w-4"/></Button>
                                 </div>
                             ) : (
-                                <Link href={`/career-coach?id=${chat.id}`} className="flex-1 overflow-hidden">
+                                <Link href={`/mentra?id=${chat.id}`} className="flex-1 overflow-hidden">
                                     <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate">
                                         {chat.title}
                                     </SidebarMenuButton>
@@ -408,7 +403,7 @@ function MentraChatPage() {
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-slate-700 text-primary-foreground' : 'bg-muted'}`}>
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-slate-700 text-slate-50' : 'bg-muted'}`}>
                                 <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                     {message.content}
                                 </ReactMarkdown>
@@ -459,3 +454,5 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
+
+    
