@@ -288,7 +288,7 @@ export default function DashboardPage() {
             )}
 
             <Card className="shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 w-full animate-fade-in-up">
-                <Link href="/career-coach" className="block hover:bg-card/20 rounded-lg">
+                <Link href="/mentra" className="block hover:bg-card/20 rounded-lg">
                     <CardHeader className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left p-4 sm:p-6">
                         <div className="bg-primary/10 p-4 rounded-full">
                             <MentraIcon className="h-10 w-10 text-primary" isAnimated={true} />

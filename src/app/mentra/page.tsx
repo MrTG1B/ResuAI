@@ -14,7 +14,7 @@ const MentraChatClient = dynamic(() => import('@/components/mentra-chat-client')
   ),
 });
 
-export default function AIAssistantPage() {
+export default function MentraPage() {
   return (
     // Suspense is a good practice for dynamic imports, providing a fallback.
     <Suspense fallback={
