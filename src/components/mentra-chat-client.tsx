@@ -149,22 +149,22 @@ function MentraChatPage() {
     if (!currentUser || (!input.trim() && attachments.length === 0)) return;
 
     const userMessage: ChatMessage = { role: 'user', content: input };
-    const currentMessages = [...messages, userMessage];
-    setMessages(currentMessages);
+    setMessages(prev => [...prev, userMessage]);
 
     const currentInput = input;
     const currentAttachments = attachments;
     const currentChatId = chatId;
+    const currentMessageHistory = messages;
 
     setInput('');
     setAttachments([]);
     setIsResponding(true);
 
     try {
-        const idToken = await currentUser.getIdToken(true);
+        const idToken = await currentUser.getIdToken();
         const result = await aiAssistantChatAction({
             idToken,
-            history: messages,
+            history: currentMessageHistory,
             prompt: currentInput,
             attachments: currentAttachments.map(a => ({
                 dataUri: a.dataUri,
@@ -177,38 +177,39 @@ function MentraChatPage() {
         }
 
         const assistantMessage: ChatMessage = { role: 'assistant', content: result.data.response };
-        const finalMessages = [...currentMessages, assistantMessage];
-        setMessages(finalMessages);
+        setMessages(prev => [...prev, assistantMessage]);
 
-        let newChatId = currentChatId;
+        let docId = currentChatId;
         const chatsCollectionRef = collection(db, 'users', currentUser.uid, 'chats');
-        const chatDocRef = newChatId ? doc(chatsCollectionRef, newChatId) : doc(chatsCollectionRef);
-        
-        if (newChatId) {
+
+        if (docId) {
+            const chatDocRef = doc(chatsCollectionRef, docId);
             await setDoc(chatDocRef, {
-                messages: finalMessages,
+                messages: [...currentMessageHistory, userMessage, assistantMessage],
                 lastModified: serverTimestamp(),
             }, { merge: true });
         } else {
-            await setDoc(chatDocRef, {
-                messages: finalMessages,
+            const newChatDocRef = doc(chatsCollectionRef);
+            await setDoc(newChatDocRef, {
+                messages: [...currentMessageHistory, userMessage, assistantMessage],
                 title: currentInput.substring(0, 40) + '...',
                 createdAt: serverTimestamp(),
                 lastModified: serverTimestamp(),
             });
-            newChatId = chatDocRef.id;
-            router.push(`/career-coach?id=${newChatId}`);
+            docId = newChatDocRef.id;
+            router.push(`/career-coach?id=${docId}`);
         }
         
         await fetchChatHistory(currentUser.uid);
 
     } catch (error: any) {
         toast({ title: "Request Failed", description: error.message, variant: "destructive" });
-        setMessages(messages);
+        setMessages(currentMessageHistory); // Revert on error
     } finally {
         setIsResponding(false);
     }
   };
+
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -398,7 +399,7 @@ function MentraChatPage() {
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-muted'}`}>
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-slate-700 text-white' : 'bg-muted'}`}>
                                 <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                     {message.content}
                                 </ReactMarkdown>
