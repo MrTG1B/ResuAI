@@ -147,7 +147,7 @@ function MentraChatPage() {
   
   const handleSendMessage = async () => {
     if (!currentUser || (!input.trim() && attachments.length === 0)) return;
-
+  
     const userMessage: ChatMessage = { role: 'user', content: input };
     const currentMessages = [...messages, userMessage];
     setMessages(currentMessages);
@@ -155,13 +155,13 @@ function MentraChatPage() {
     const currentInput = input;
     const currentAttachments = attachments;
     const currentChatId = chatId;
-
+  
     setInput('');
     setAttachments([]);
     setIsResponding(true);
-
+  
     try {
-        const idToken = await currentUser.getIdToken();
+        const idToken = await currentUser.getIdToken(true);
         const result = await aiAssistantChatAction({
             idToken,
             history: messages,
@@ -171,16 +171,15 @@ function MentraChatPage() {
                 mimeType: a.dataUri.substring(a.dataUri.indexOf(':') + 1, a.dataUri.indexOf(';'))
             })),
         });
-
+  
         if (!result.success || !result.data) {
             throw new Error(result.error || "Failed to get AI response.");
         }
-
+  
         const assistantMessage: ChatMessage = { role: 'assistant', content: result.data.response };
-        setMessages(prev => [...prev, assistantMessage]);
-
         const finalMessages = [...currentMessages, assistantMessage];
-        
+        setMessages(finalMessages);
+  
         let newChatId = currentChatId;
         const chatsCollectionRef = collection(db, 'users', currentUser.uid, 'chats');
         
@@ -191,19 +190,18 @@ function MentraChatPage() {
                 lastModified: serverTimestamp(),
             }, { merge: true });
         } else {
-            const newChatDocRef = doc(chatsCollectionRef);
-            newChatId = newChatDocRef.id;
-            await setDoc(newChatDocRef, {
+            const newDocRef = await addDoc(chatsCollectionRef, {
                 messages: finalMessages,
                 title: currentInput.substring(0, 40) + '...',
                 createdAt: serverTimestamp(),
                 lastModified: serverTimestamp(),
             });
+            newChatId = newDocRef.id;
             router.push(`/career-coach?id=${newChatId}`);
         }
         
         await fetchChatHistory(currentUser.uid);
-
+  
     } catch (error: any) {
         toast({ title: "Request Failed", description: error.message, variant: "destructive" });
         setMessages(messages);
