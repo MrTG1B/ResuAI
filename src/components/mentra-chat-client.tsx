@@ -8,7 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, collection, query, orderBy, getDocs, doc, getDoc, deleteDoc, updateDoc } from '@/lib/firebase';
+import { auth, db, collection, query, orderBy, getDocs, doc, getDoc, deleteDoc, updateDoc, setDoc, serverTimestamp } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,7 +18,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
 import { type ChatSession } from '@/types/chat';
-import { aiAssistantChatAction } from '@/app/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Logo } from '@/components/logo';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +39,7 @@ import {
     AlertDialogTitle,
   } from "@/components/ui/alert-dialog"
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
+import { AIAssistantChatInput } from '@/ai/flows/ai-assistant-chat';
 
 interface Attachment {
     name: string;
@@ -62,6 +62,20 @@ const AssistantAvatar = () => (
         </svg>
     </div>
 );
+
+async function fetchAIResponse(payload: AIAssistantChatInput): Promise<string> {
+    const response = await fetch(`/api/genkit/flow/aiAssistantChatFlow`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`AI service failed: ${errorText}`);
+    }
+    const data = await response.json();
+    return data?.response ?? "Sorry, I couldn’t generate a response.";
+}
 
 
 function MentraChatPage() {
@@ -149,7 +163,8 @@ function MentraChatPage() {
     if (!currentUser || (!input.trim() && attachments.length === 0)) return;
 
     const userMessage: ChatMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const currentMessages = [...messages, userMessage];
+    setMessages(currentMessages);
     
     const currentInput = input;
     const currentAttachments = attachments;
@@ -160,29 +175,48 @@ function MentraChatPage() {
     setIsResponding(true);
 
     try {
-        const idToken = await currentUser.getIdToken();
-        const result = await aiAssistantChatAction({
-            userId: currentUser.uid,
-            idToken,
-            chatId: currentChatId ?? undefined,
-            history: messages,
+        const aiResponse = await fetchAIResponse({
+            history: messages, // Send history *before* the new user message
             prompt: currentInput,
-            attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.dataUri.substring(a.dataUri.indexOf(':') + 1, a.dataUri.indexOf(';')) })),
+            attachments: currentAttachments.map(a => ({
+                dataUri: a.dataUri,
+                mimeType: a.dataUri.substring(a.dataUri.indexOf(':') + 1, a.dataUri.indexOf(';'))
+            })),
         });
 
-        if (result.success && result.data) {
-            setMessages(prev => [...prev, { role: 'assistant', content: result.data.response }]);
-            if (!currentChatId && result.data.chatId) {
-                router.push(`/career-coach?id=${result.data.chatId}`);
-            }
-            fetchChatHistory(currentUser.uid);
+        const assistantMessage: ChatMessage = { role: 'assistant', content: aiResponse };
+        setMessages(prev => [...prev, assistantMessage]);
+
+        const finalMessages = [...currentMessages, assistantMessage];
+        
+        let newChatId = currentChatId;
+        const chatsCollectionRef = collection(db, 'users', currentUser.uid, 'chats');
+
+        if (newChatId) {
+            // Update existing chat
+            const chatDocRef = doc(chatsCollectionRef, newChatId);
+            await setDoc(chatDocRef, {
+                messages: finalMessages,
+                lastModified: serverTimestamp(),
+            }, { merge: true });
         } else {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
-            setMessages(messages);
+            // Create new chat
+            const newChatDocRef = doc(chatsCollectionRef); // Create a ref with a new ID
+            newChatId = newChatDocRef.id;
+            await setDoc(newChatDocRef, {
+                messages: finalMessages,
+                title: currentInput.substring(0, 40) + '...',
+                createdAt: serverTimestamp(),
+                lastModified: serverTimestamp(),
+            });
+            router.push(`/career-coach?id=${newChatId}`);
         }
-    } catch (error) {
-        toast({ title: "Request Failed", description: "Could not communicate with the AI assistant.", variant: "destructive" });
-        setMessages(messages);
+        
+        await fetchChatHistory(currentUser.uid);
+
+    } catch (error: any) {
+        toast({ title: "Request Failed", description: error.message, variant: "destructive" });
+        setMessages(messages); // Revert messages on error
     } finally {
         setIsResponding(false);
     }

@@ -9,7 +9,6 @@ import { atsAnalyzerFlow, type AtsAnalyzerInput, type AtsAnalyzerOutput } from "
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
-import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
 import { interviewPrep as interviewPrepFlow, type InterviewPrepInput } from "@/ai/flows/interview-prep";
@@ -252,66 +251,6 @@ export async function coachChatAction(input: CoachChatInput) {
   }
 }
 
-interface AIAssistantChatActionInput extends AIAssistantChatInput {
-    userId: string;
-    chatId?: string;
-    idToken: string;
-}
-
-interface AIAssistantChatActionResult {
-    success: boolean;
-    data?: {
-        response: string;
-        chatId: string;
-    };
-    error?: string;
-}
-
-export async function aiAssistantChatAction(input: AIAssistantChatActionInput): Promise<AIAssistantChatActionResult> {
-    const { userId, chatId, idToken, ...aiInput } = input;
-    if (!db) return { success: false, error: "Database not initialized" };
-
-    try {
-        initializeFirebaseAdmin();
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        if (decodedToken.uid !== userId) {
-            return { success: false, error: "Unauthorized operation." };
-        }
-        
-        const result = await aiAssistantChatFlow(aiInput);
-        let currentChatId = chatId;
-        const userMessage: ChatMessage = { role: 'user', content: aiInput.prompt };
-        const assistantMessage: ChatMessage = { role: 'assistant', content: result.response };
-        const chatCollectionRef = collection(db, 'users', userId, 'chats');
-
-        if (currentChatId) {
-            const chatDocRef = doc(chatCollectionRef, currentChatId);
-            const chatDoc = await getDoc(chatDocRef);
-            if (chatDoc.exists()) {
-                const existingMessages = chatDoc.data().messages || [];
-                await updateDoc(chatDocRef, {
-                    messages: [...existingMessages, userMessage, assistantMessage],
-                    lastModified: serverTimestamp(),
-                });
-            }
-        } else {
-            const newChat: Omit<ChatSession, 'id'> = {
-                title: input.prompt.substring(0, 40) + '...',
-                messages: [userMessage, assistantMessage],
-                createdAt: serverTimestamp() as Timestamp,
-                lastModified: serverTimestamp() as Timestamp,
-            };
-            const newDocRef = await addDoc(chatCollectionRef, newChat);
-            currentChatId = newDocRef.id;
-        }
-
-        return { success: true, data: { response: result.response, chatId: currentChatId! } };
-    } catch (error: any) {
-        console.error("Error in AI assistant chat:", error);
-        return { success: false, error: "The AI assistant is unavailable. Please try again later." };
-    }
-}
-
 export async function analyzeCertificateAction(input: AnalyzeCertificateInput) {
   try {
     const result = await analyzeCertificateFlow(input);
@@ -411,6 +350,15 @@ interface InterviewPrepActionInput {
     prompt: string;
 }
 
+interface AIAssistantChatActionResult {
+    success: boolean;
+    data?: {
+        response: string;
+        chatId: string;
+    };
+    error?: string;
+}
+
 export async function interviewPrepAction(input: InterviewPrepActionInput): Promise<AIAssistantChatActionResult> {
     const { idToken, chatId, jobTitle, jobDescription, history, prompt } = input;
     
@@ -494,3 +442,4 @@ export async function generateAptitudeExamAction(
     
 
     
+
