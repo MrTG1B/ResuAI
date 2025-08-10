@@ -1,4 +1,3 @@
-
 'use server';
 import { config } from 'dotenv';
 config();
@@ -15,8 +14,10 @@ import '@/ai/flows/ai-assistant-chat.ts';
 import '@/ai/flows/refine-summary.ts';
 import '@/ai/flows/generate-cover-letter.ts';
 import '@/ai/flows/interview-prep.ts';
+import '@/ai/flows/generate-aptitude-exam.ts';
 
     
 
     
 
+    

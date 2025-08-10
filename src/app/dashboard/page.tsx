@@ -10,7 +10,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion } from 'lucide-react';
+import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
@@ -332,6 +332,13 @@ export default function DashboardPage() {
                     title="AI Interview Assister"
                     description="Practice common interview questions and get AI-powered feedback."
                     actionText="Start Practice"
+                />
+                 <ToolCard 
+                    href="/aptitude-test"
+                    icon={BrainCircuit}
+                    title="Aptitude Test"
+                    description="Take a timed test with unique questions to sharpen your skills for interviews."
+                    actionText="Start Test"
                 />
                 <ToolCard 
                     href="/build"

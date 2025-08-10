@@ -13,6 +13,7 @@ import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } fro
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
 import { interviewPrep as interviewPrepFlow, type InterviewPrepInput } from "@/ai/flows/interview-prep";
+import { generateAptitudeExam as generateAptitudeExamFlow, type GenerateAptitudeExamInput, type GenerateAptitudeExamOutput } from "@/ai/flows/generate-aptitude-exam";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse, type ChatMessage } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
@@ -471,10 +472,25 @@ export async function interviewPrepAction(input: InterviewPrepActionInput): Prom
         return { success: false, error: "The AI coach is unavailable. Please try again later." };
     }
 }
+
+export async function generateAptitudeExamAction(
+    input: GenerateAptitudeExamInput, 
+    idToken: string
+): Promise<{ success: boolean; data?: GenerateAptitudeExamOutput; error?: string }> {
+  try {
+    initializeFirebaseAdmin();
+    await admin.auth().verifyIdToken(idToken);
     
-
-
-
-
+    const result = await generateAptitudeExamFlow(input);
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error("Error generating aptitude exam:", error);
+    if (error.code === 'auth/id-token-expired') {
+      return { success: false, error: "Your session has expired. Please log in again." };
+    }
+    return { success: false, error: `Failed to generate exam. The AI may be busy. Please try again later.` };
+  }
+}
+    
 
     
