@@ -47,10 +47,6 @@ export default function AdminLoginPage() {
         await signInWithEmailAndPassword(auth, email, password);
 
         sessionStorage.setItem("admin-auth", "true");
-        toast({
-            title: "Login Successful",
-            description: "Redirecting to the admin dashboard...",
-        });
         router.push("/dashboard");
 
     } catch (error: any) {

@@ -43,10 +43,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast({
-        title: "Login Successful",
-        description: "Redirecting you to the dashboard...",
-      });
       router.push("/dashboard");
     } catch (error: any) {
       toast({
@@ -68,10 +64,6 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
         await signInWithPopup(auth, provider);
-        toast({
-            title: "Signed In Successfully",
-            description: "Redirecting you to the dashboard...",
-        });
         router.push("/dashboard");
     } catch (error: any) {
         toast({

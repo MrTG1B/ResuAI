@@ -91,10 +91,6 @@ export default function SignupPage() {
     const provider = new GoogleAuthProvider();
     try {
         await signInWithPopup(auth, provider);
-        toast({
-            title: "Signed In Successfully",
-            description: "Redirecting you to the dashboard...",
-        });
         router.push("/dashboard");
     } catch (error: any) {
         toast({
