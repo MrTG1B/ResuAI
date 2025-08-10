@@ -149,12 +149,12 @@ function MentraChatPage() {
     if (!currentUser || (!input.trim() && attachments.length === 0)) return;
 
     const userMessage: ChatMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const currentMessageHistory = [...messages, userMessage];
+    setMessages(currentMessageHistory);
 
     const currentInput = input;
     const currentAttachments = attachments;
     const currentChatId = chatId;
-    const currentMessageHistory = messages;
 
     setInput('');
     setAttachments([]);
@@ -164,7 +164,7 @@ function MentraChatPage() {
         const idToken = await currentUser.getIdToken();
         const result = await aiAssistantChatAction({
             idToken,
-            history: currentMessageHistory,
+            history: messages,
             prompt: currentInput,
             attachments: currentAttachments.map(a => ({
                 dataUri: a.dataUri,
@@ -177,7 +177,8 @@ function MentraChatPage() {
         }
 
         const assistantMessage: ChatMessage = { role: 'assistant', content: result.data.response };
-        setMessages(prev => [...prev, assistantMessage]);
+        const finalMessages = [...currentMessageHistory, assistantMessage];
+        setMessages(finalMessages);
 
         let docId = currentChatId;
         const chatsCollectionRef = collection(db, 'users', currentUser.uid, 'chats');
@@ -185,13 +186,13 @@ function MentraChatPage() {
         if (docId) {
             const chatDocRef = doc(chatsCollectionRef, docId);
             await setDoc(chatDocRef, {
-                messages: [...currentMessageHistory, userMessage, assistantMessage],
+                messages: finalMessages,
                 lastModified: serverTimestamp(),
             }, { merge: true });
         } else {
             const newChatDocRef = doc(chatsCollectionRef);
             await setDoc(newChatDocRef, {
-                messages: [...currentMessageHistory, userMessage, assistantMessage],
+                messages: finalMessages,
                 title: currentInput.substring(0, 40) + '...',
                 createdAt: serverTimestamp(),
                 lastModified: serverTimestamp(),
@@ -204,7 +205,7 @@ function MentraChatPage() {
 
     } catch (error: any) {
         toast({ title: "Request Failed", description: error.message, variant: "destructive" });
-        setMessages(currentMessageHistory); // Revert on error
+        setMessages(messages); // Revert on error
     } finally {
         setIsResponding(false);
     }
