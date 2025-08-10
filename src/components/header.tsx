@@ -71,11 +71,11 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
   }
 
   return (
-    <header className="py-2 px-4 sm:px-6 lg:px-8 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
+    <header className="py-1 px-4 sm:px-6 lg:px-8 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center">
-            <Image src="/logo.png" alt="ResuAI Logo" width={110} height={28} priority />
+            <Image src="/logo.png" alt="ResuAI Logo" width={100} height={25} priority />
           </Link>
           {pageActions}
         </div>
