@@ -19,8 +19,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ['"Open Sans"', 'sans-serif'],
-        heading: ['Poppins', 'sans-serif'],
+        sans: ['"Inter Tight"', 'sans-serif'],
+        heading: ['"Archivo Black"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

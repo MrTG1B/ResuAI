@@ -11,8 +11,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Open Sans"', 'sans-serif'],
-        heading: ['Poppins', 'sans-serif'],
+        sans: ['"Inter Tight"', 'sans-serif'],
+        heading: ['"Archivo Black"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
