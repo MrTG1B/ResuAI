@@ -7,7 +7,7 @@
  * request under /api/genkit/.
  */
 
-import {createApiHandler} from 'genkit/next';
+import {createApiHandler} from '@genkit-ai/next';
 import '@/ai/dev'; // Make sure to import your flows so they are registered.
 
 export const POST = createApiHandler();
