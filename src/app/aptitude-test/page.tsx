@@ -96,8 +96,16 @@ function AptitudeTestPageContent() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate exam.');
+        let errorDetails = "Failed to generate exam.";
+        try {
+            // Try to parse error as JSON, but fall back to text if it's HTML
+            const errorData = await response.json();
+            errorDetails = errorData.error || errorDetails;
+        } catch (e) {
+            // This will happen if the response is HTML, so we just use a generic message.
+            console.error("Could not parse error response as JSON:", await response.text());
+        }
+        throw new Error(errorDetails);
       }
 
       const result = await response.json() as GenerateAptitudeExamOutput;
