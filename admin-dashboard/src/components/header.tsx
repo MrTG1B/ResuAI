@@ -56,10 +56,10 @@ export function Header() {
 
   return (
     <header className="py-1 px-4 sm:px-6 lg:px-8 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container mx-auto flex justify-between items-center h-14">
+      <div className="container mx-auto flex justify-between items-center h-12">
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="flex items-center">
-            <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} priority />
+            <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} priority style={{ height: 'auto' }} />
              <span className="ml-2 font-bold text-lg">Admin</span>
           </Link>
         </div>

@@ -75,7 +75,7 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
       <div className="container mx-auto flex justify-between items-center h-12">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center">
-            <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} priority />
+            <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} priority style={{ height: 'auto' }} />
           </Link>
           {pageActions}
         </div>
