@@ -37,7 +37,6 @@ export default function InterviewPrepClient() {
     const [jobDescription, setJobDescription] = useState('');
     const [hasStarted, setHasStarted] = useState(false);
     
-    const [chatId, setChatId] = useState<string | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isResponding, setIsResponding] = useState(false);
@@ -81,9 +80,7 @@ export default function InterviewPrepClient() {
         setIsResponding(true);
 
         try {
-            const idToken = await currentUser.getIdToken();
-            const result = await interviewPrepAction({
-                idToken,
+            const result = await interviewPrepAction(currentUser.uid, {
                 jobTitle,
                 jobDescription,
                 history: [],
@@ -92,7 +89,6 @@ export default function InterviewPrepClient() {
 
             if (result.success && result.data) {
                 setMessages([{ role: 'assistant', content: result.data.response }]);
-                setChatId(result.data.chatId);
             } else {
                 throw new Error(result.error || 'Failed to start interview session.');
             }
@@ -116,10 +112,7 @@ export default function InterviewPrepClient() {
         setIsResponding(true);
 
         try {
-            const idToken = await currentUser.getIdToken();
-            const result = await interviewPrepAction({
-                idToken,
-                chatId,
+            const result = await interviewPrepAction(currentUser.uid, {
                 jobTitle,
                 jobDescription,
                 history: messages,

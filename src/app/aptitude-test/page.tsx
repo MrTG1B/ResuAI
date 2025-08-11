@@ -85,36 +85,38 @@ function AptitudeTestPageContent() {
     setExamState('loading');
     try {
       // Call the Genkit flow API endpoint directly
-      const response = await fetch('/api/genkit/flow/generateAptitudeExamFlow', {
+      const response = await fetch('/api/genkit/flow/generateAptitudeExam', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          logicalReasoningCount: 5,
-          quantitativeAnalysisCount: 5,
-          verbalAbilityCount: 5
+          input: {
+            logicalReasoningCount: 5,
+            quantitativeAnalysisCount: 5,
+            verbalAbilityCount: 5
+          }
         })
       });
 
       if (!response.ok) {
         let errorDetails = "Failed to generate exam.";
         try {
-            // Try to parse error as JSON, but fall back to text if it's HTML
             const errorData = await response.json();
-            errorDetails = errorData.error || errorDetails;
+            errorDetails = errorData.error?.message || errorData.error || errorDetails;
         } catch (e) {
-            // This will happen if the response is HTML, so we just use a generic message.
             console.error("Could not parse error response as JSON:", await response.text());
         }
         throw new Error(errorDetails);
       }
-
-      const result = await response.json() as GenerateAptitudeExamOutput;
+      
+      const result = await response.json();
+      const examData = result.output as GenerateAptitudeExamOutput;
       
       const allQuestions = [
-        ...result.logicalReasoning,
-        ...result.quantitativeAnalysis,
-        ...result.verbalAbility
+        ...examData.logicalReasoning,
+        ...examData.quantitativeAnalysis,
+        ...examData.verbalAbility
       ];
+
       setExamQuestions(allQuestions);
       setExamState('ongoing');
       setTimeLeft(TOTAL_TIME);

@@ -326,15 +326,14 @@ export async function generateCoverLetterAction(userId: string, input: GenerateC
 }
 
 interface InterviewPrepActionInput {
-    userId: string;
     jobTitle: string;
     jobDescription: string;
     history: any[];
     prompt: string;
 }
 
-export async function interviewPrepAction(input: InterviewPrepActionInput): Promise<{ success: boolean; data?: { response: string }; error?: string }> {
-    const { userId, jobTitle, jobDescription, history, prompt } = input;
+export async function interviewPrepAction(userId: string, input: InterviewPrepActionInput): Promise<{ success: boolean; data?: { response: string }; error?: string }> {
+    const { jobTitle, jobDescription, history, prompt } = input;
     
     if (!db) {
         return { success: false, error: "Database service is not available." };

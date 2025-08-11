@@ -114,8 +114,8 @@ export default function ResumeEditorClient() {
     
         try {
             if (!currentUser) throw new Error("User not authenticated.");
-            const idToken = await currentUser.getIdToken();
-            const parseResult = await parseResumeAction(currentUser.uid, idToken, { resumeDataUri });
+            
+            const parseResult = await parseResumeAction(currentUser.uid, { resumeDataUri });
             if (!parseResult.success || !parseResult.data) {
                 throw new Error(parseResult.error || "Failed to parse resume for editing.");
             }
@@ -289,8 +289,7 @@ export default function ResumeEditorClient() {
         reader.onload = async () => {
             try {
                 const uploadedResumeDataUri = reader.result as string;
-                const idToken = await currentUser.getIdToken();
-                const result = await parseResumeAction(currentUser.uid, idToken, { resumeDataUri: uploadedResumeDataUri });
+                const result = await parseResumeAction(currentUser.uid, { resumeDataUri: uploadedResumeDataUri });
     
                 if (result.success && result.data) {
                     const finalState: SavedEditorState = {
@@ -388,8 +387,7 @@ export default function ResumeEditorClient() {
           throw new Error("No resume file has been uploaded to create a portfolio from.");
         }
         
-        const idToken = await currentUser.getIdToken();
-        const result = await analyzeResumeAction(currentUser.uid, idToken, analysisInput);
+        const result = await analyzeResumeAction(currentUser.uid, analysisInput);
     
         if (result.success && result.data?.id) {
           toast({
@@ -595,5 +593,3 @@ export default function ResumeEditorClient() {
         </div>
     );
 }
-
-    

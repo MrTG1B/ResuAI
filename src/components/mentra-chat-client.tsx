@@ -161,16 +161,18 @@ function MentraChatPage() {
     setIsResponding(true);
 
     try {
-        const response = await fetch('/api/genkit/flow/aiAssistantChatFlow', {
+        const response = await fetch('/api/genkit/flow/aiAssistantChat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              input: {
                 history: messages,
                 prompt: currentInput,
                 attachments: currentAttachments.map(a => ({
                     dataUri: a.dataUri,
                     mimeType: a.dataUri.substring(a.dataUri.indexOf(':') + 1, a.dataUri.indexOf(';'))
                 })),
+              }
             })
         });
 
@@ -179,7 +181,7 @@ function MentraChatPage() {
             throw new Error(errorData.error || 'The AI assistant is currently unavailable.');
         }
 
-        const result = (await response.json()) as AIAssistantChatOutput;
+        const result = (await response.json()).output as AIAssistantChatOutput;
 
         const assistantMessage: ChatMessage = { role: 'assistant', content: result.response };
         const finalMessages = [...currentMessageHistory, assistantMessage];
@@ -454,5 +456,3 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
-
-    

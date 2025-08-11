@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileoverview This file is the API route handler for all Genkit flows.
@@ -6,7 +7,7 @@
  * request under /api/genkit/.
  */
 
-import { createNextApiHandler } from '@genkit-ai/next';
+import {createApiHandler} from 'genkit/next';
 import '@/ai/dev'; // Make sure to import your flows so they are registered.
 
-export const POST = createNextApiHandler();
+export const POST = createApiHandler();
