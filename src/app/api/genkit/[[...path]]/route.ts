@@ -1,12 +1,13 @@
 'use server';
 /**
- * @fileoverview This file is the API route handler for all Genkit flows.
- * It uses the Genkit Next.js plugin to expose flows as API endpoints.
- * The [[...path]] is a catch-all route that allows Genkit to handle any
- * request under /api/genkit/.
+ * @fileoverview API route handler for all Genkit flows.
+ * This catch-all route lets Genkit handle any request under /api/genkit/.
  */
 
-import { createApiRouteHandler } from '@genkit-ai/next/server';
-import '@/ai/dev'; // Make sure to import your flows so they are registered.
+import { appRoute } from '@genkit-ai/next';
+import '@/ai/dev'; // Registers all flows in Genkit
 
-export const { GET, POST, OPTIONS } = createApiRouteHandler();
+// Use a wildcard route handler for all registered flows
+export const POST = appRoute();
+export const GET = appRoute();
+export const OPTIONS = appRoute();
