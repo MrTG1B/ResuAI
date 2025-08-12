@@ -1,44 +1,41 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read/write their own user document and profile
+    
+    // NOTE: Replace 'REPLACE_WITH_ADMIN_UID' with the actual UID of your admin user 
+    // from the Firebase Authentication console. This user corresponds to the 
+    // tirthankardasgupta2004@gmail.com account.
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'REPLACE_WITH_ADMIN_UID';
+    }
+
+    // Rules for the 'users' collection
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-
-      match /profile/data {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-
-      // Users can manage their own subcollections
-      match /resumes/{resumeId} {
-        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
-      }
-      match /portfolios/{portfolioId} {
-        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
-      }
-      match /coverletters/{letterId} {
-        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
-      }
-      match /chats/{chatId} {
-        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
-      }
-       match /interview-prep/{prepId} {
-        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
-      }
-    }
-
-    // Feedback can be created by any authenticated user
-    match /feedback/{feedbackId} {
+      // Admin can read any user document.
+      // A user can read, update, and delete their own document.
+      allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+      
+      // Any authenticated user can create their own user document.
       allow create: if request.auth != null;
-      // Admin-only access for reading feedback
-      allow read, delete: if get(/databases/$(database)/documents/admins/$(request.auth.uid)).exists == true;
+
+      // Rules for all subcollections within a user document (e.g., resumes, portfolios)
+      match /{subcollection}/{docId} {
+        // Admin can read any document in any user's subcollection.
+        // A user can read and write to their own subcollections.
+        allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
-    // Admin collection for role-based access
-    match /admins/{adminId} {
-        allow read: if request.auth != null && request.auth.uid == adminId;
+    // Rules for the 'feedback' collection
+    match /feedback/{feedbackId} {
+      // Admin can read, write, and delete any feedback.
+      allow read, write, delete: if isAdmin();
+      
+      // Any authenticated user can create feedback.
+      allow create: if request.auth != null;
     }
   }
 }
