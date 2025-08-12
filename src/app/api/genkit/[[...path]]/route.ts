@@ -11,11 +11,16 @@ export async function POST(request: Request, { params }: { params: { path?: stri
     return new Response(JSON.stringify({ error: 'Flow name missing in URL' }), { status: 400 });
   }
 
-  const flow = getFlow(flowName);
-  if (!flow) {
-    return new Response(JSON.stringify({ error: `Flow "${flowName}" not found` }), { status: 404 });
+  try {
+    const flow = getFlow(flowName);
+    if (!flow) {
+      return new Response(JSON.stringify({ error: `Flow "${flowName}" not found` }), { status: 404 });
+    }
+  
+    // Call appRoute for this specific flow
+    return appRoute(flow)(request);
+  } catch (error: any) {
+    console.error(`Error processing flow "${flowName}":`, error);
+    return new Response(JSON.stringify({ error: `An error occurred while processing flow "${flowName}".` }), { status: 500 });
   }
-
-  // Call appRoute for this specific flow
-  return appRoute(flow)(request);
 }
