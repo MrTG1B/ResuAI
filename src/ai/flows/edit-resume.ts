@@ -129,7 +129,7 @@ When the user asks you to add, update, or reference personal information (e.g., 
 **DO NOT ask for this information if it's already in their profile. Use it directly.**
 
 <profile>
-{{{userProfile}}}
+{{{json userProfile}}}
 </profile>
 
 {{#if userProfile.profilePictureUrl}}
@@ -137,7 +137,7 @@ When the user asks you to add, update, or reference personal information (e.g., 
 You **MUST** use this URL when asked to add a profile picture.
 {{/if}}
 
-{{#if userProfile.experience.length}}
+{{#if userProfile.experience}}
 ⚠️ IMPORTANT: The user has the following work experience in their profile:
 {{#each userProfile.experience}}
 - **Role:** {{this.role}} at **{{this.company}}**{{#if this.location}} in {{this.location}}{{/if}}. (Dates: {{this.dates}}). Description: {{this.description}}
@@ -145,7 +145,7 @@ You **MUST** use this URL when asked to add a profile picture.
 You **MUST** use this information when asked to add or update their experience.
 {{/if}}
 
-{{#if userProfile.education.length}}
+{{#if userProfile.education}}
 ⚠️ IMPORTANT: The user has the following education in their profile:
 {{#each userProfile.education}}
 - **{{this.degree}}** from **{{this.school}}**{{#if this.location}}, {{this.location}}{{/if}}. (Dates: {{this.dates}})
@@ -153,7 +153,7 @@ You **MUST** use this information when asked to add or update their experience.
 You **MUST** use this information.
 {{/if}}
 
-{{#if userProfile.projects.length}}
+{{#if userProfile.projects}}
 ⚠️ IMPORTANT: The user has the following projects in their profile:
 {{#each userProfile.projects}}
 - **{{this.name}}**: {{this.description}} (Tech: {{this.technologies}}). URL: {{this.url}}
@@ -161,7 +161,7 @@ You **MUST** use this information.
 You **MUST** use this information.
 {{/if}}
 
-{{#if userProfile.skills.length}}
+{{#if userProfile.skills}}
 ⚠️ IMPORTANT: The user has the following skills in their profile:
 {{#each userProfile.skills}}
 - {{this}}
@@ -169,7 +169,7 @@ You **MUST** use this information.
 You **MUST** use this information.
 {{/if}}
 
-{{#if userProfile.languages.length}}
+{{#if userProfile.languages}}
 ⚠️ IMPORTANT: The user has the following languages in their profile:
 {{#each userProfile.languages}}
 - **{{this.language}}** ({{this.proficiency}})
@@ -177,7 +177,7 @@ You **MUST** use this information.
 You **MUST** use this information.
 {{/if}}
 
-{{#if userProfile.certifications.length}}
+{{#if userProfile.certifications}}
 ⚠️ IMPORTANT: The user has the following certifications in their profile:
 {{#each userProfile.certifications}}
 - **{{this.name}}**, issued by **{{this.issuingOrganization}}**{{#if this.date}}, dated **{{this.date}}**{{/if}}{{#if this.credentialUrl}} [{{this.credentialUrl}}]{{/if}}
@@ -185,7 +185,7 @@ You **MUST** use this information.
 You **MUST NOT** ask for attachments if this data exists. Use these directly in the resume.
 {{/if}}
 
-{{#if userProfile.publications.length}}
+{{#if userProfile.publications}}
 ⚠️ IMPORTANT: The user has the following publications in their profile:
 {{#each userProfile.publications}}
 - **{{this.title}}**, published in **{{this.journal}}**{{#if this.date}}, dated **{{this.date}}**{{/if}}{{#if this.url}} [{{this.url}}]{{/if}}
@@ -193,12 +193,14 @@ You **MUST NOT** ask for attachments if this data exists. Use these directly in 
 You **MUST** use this information.
 {{/if}}
 
-{{#if userProfile.interests.length}}
+{{#if userProfile.interests}}
 ⚠️ IMPORTANT: The user has the following interests in their profile:
 {{#each userProfile.interests}}
 - {{this}}
 {{/each}}
 You **MUST** use this information.
+{{/if}}
+
 {{/if}}
 
 **CRITICAL RULES:**
