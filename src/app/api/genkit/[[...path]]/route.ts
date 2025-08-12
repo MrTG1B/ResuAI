@@ -6,7 +6,7 @@
  * request under /api/genkit/.
  */
 
-import { createApiRouteHandler } from '@genkit-ai/next';
+import { createApiRouteHandler } from '@genkit-ai/next/server';
 import '@/ai/dev'; // Make sure to import your flows so they are registered.
 
 export const { GET, POST, OPTIONS } = createApiRouteHandler();
