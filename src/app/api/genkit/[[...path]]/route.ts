@@ -1,13 +1,21 @@
 'use server';
-/**
- * @fileoverview API route handler for all Genkit flows.
- * This catch-all route lets Genkit handle any request under /api/genkit/.
- */
-
 import { appRoute } from '@genkit-ai/next';
-import '@/ai/dev'; // Registers all flows in Genkit
+import { getFlow } from 'genkit';
+import '@/ai/dev'; // Registers all your flows
 
-// Use a wildcard route handler for all registered flows
-export const POST = appRoute();
-export const GET = appRoute();
-export const OPTIONS = appRoute();
+// Dynamic route for any registered flow
+export async function POST(request: Request, { params }: { params: { path?: string[] } }) {
+  const flowName = params.path?.[0]; // first path segment after /api/genkit/
+  
+  if (!flowName) {
+    return new Response(JSON.stringify({ error: 'Flow name missing in URL' }), { status: 400 });
+  }
+
+  const flow = getFlow(flowName);
+  if (!flow) {
+    return new Response(JSON.stringify({ error: `Flow "${flowName}" not found` }), { status: 404 });
+  }
+
+  // Call appRoute for this specific flow
+  return appRoute(flow)(request);
+}
