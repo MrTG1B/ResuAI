@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -56,19 +55,20 @@ export default function HomePage() {
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative text-center py-20 md:py-32 bg-background animate-fade-in-down overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full bg-primary/10 blur-[100px] -z-10" />
           <div 
             className="container mx-auto px-4 relative z-10"
             style={{ transform: `translateY(${offsetY * 0.4}px)` }}
           >
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Your AI-Powered Career Toolkit
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-heading text-primary-foreground">
+              Craft Your Future with AI-Powered Career Tools
             </h1>
             <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-              From resume editing and portfolio generation to interview prep and aptitude tests, ResuAI provides a full suite of AI tools to accelerate your career.
+             Build the perfect resume, write compelling cover letters, and ace your interviews. ResuAI is your personal career assistant.
             </p>
             <div className="flex justify-center gap-4">
               <Button asChild size="lg" className="font-bold">
-                <Link href="/signup">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                <Link href="/signup">Get Started <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
             </div>
           </div>
