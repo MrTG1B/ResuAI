@@ -64,7 +64,7 @@ export default function HomePage() {
               Your AI-Powered Career Toolkit
             </h1>
             <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-              ResuAI is your ultimate career tool. Analyze your resume against any job description, edit it to perfection with AI assistance, and instantly generate a stunning portfolio website.
+              From resume editing and portfolio generation to interview prep and aptitude tests, ResuAI provides a full suite of AI tools to accelerate your career.
             </p>
             <div className="flex justify-center gap-4">
               <Button asChild size="lg" className="font-bold">
@@ -253,5 +253,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    
