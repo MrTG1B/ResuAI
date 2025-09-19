@@ -44,38 +44,38 @@ body {
     --sidebar-ring: 39 98% 51%;
   }
   .dark {
-    --background: 222 13% 15%; /* #111111 */
-    --foreground: 0 0% 98%; /* #fbf9f9 */
-    --card: 223 11% 30%; /* #444c57 */
-    --card-foreground: 0 0% 98%; /* #fbf9f9 */
-    --popover: 223 11% 30%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 3.7% 15.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 3.7% 15.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 39 98% 51%;
+    --primary: 39 98% 51%; /* Retained yellow for brand consistency */
     --primary-foreground: 222 13% 15%;
-    --secondary: 222 13% 20%;
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 222 13% 25%;
-    --muted-foreground: 222 9% 65%;
-    --accent: 39 98% 61%;
-    --accent-foreground: 222 13% 15%;
-    --destructive: 0 63% 31%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 0 0% 62.8%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 223 11% 35%; /* Lighter border for dark mode */
-    --input: 222 13% 25%;
-    --ring: 39 98% 51%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 39 98% 51%; /* Ring remains yellow */
     --chart-1: 39 98% 51%;
     --chart-2: 39 88% 61%;
     --chart-3: 39 78% 71%;
     --chart-4: 39 68% 81%;
     --chart-5: 39 58% 91%;
     --radius: 0.5rem;
-    --sidebar-background: 222 13% 15%; /* #111111 */
-    --sidebar-foreground: 0 0% 98%; /* #fbf9f9 */
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 39 98% 51%;
     --sidebar-primary-foreground: 222 13% 15%;
-    --sidebar-accent: 223 11% 30%; /* #444c57 */
+    --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 223 11% 35%;
+    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 39 98% 51%;
   }
 }
