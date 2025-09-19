@@ -43,11 +43,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-grow scroll-container">
+      <main className="flex-grow">
         {/* Hero Section */}
-        <section className="scroll-section relative text-center bg-background animate-fade-in-down">
+        <section className="relative flex flex-col justify-center items-center text-center min-h-screen py-20 animate-fade-in-down">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full bg-primary/10 blur-[100px] -z-10" />
           <div 
             className="container mx-auto px-4 relative z-10"
@@ -67,7 +67,7 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section className="scroll-section bg-card/40">
+        <section className="py-20 lg:py-32 bg-card/40">
           <div className="container mx-auto px-4">
             <div 
               className="text-center mb-16"
@@ -122,7 +122,7 @@ export default function HomePage() {
         </section>
 
         {/* Toolkit Section */}
-        <section className="scroll-section bg-background">
+        <section className="py-20 lg:py-32 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Your AI-Powered Career Toolkit</h2>
@@ -186,7 +186,7 @@ export default function HomePage() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="scroll-section bg-card/40">
+        <section className="py-20 lg:py-32 bg-card/40">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Why Professionals Love ResuAI</h2>
@@ -225,7 +225,7 @@ export default function HomePage() {
         </section>
 
         {/* Final CTA Section */}
-        <section className="scroll-section bg-background">
+        <section className="py-20 lg:py-32 bg-background">
            <div className="container mx-auto px-4 text-center">
              <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Ready to Build Your Future?</h2>
              <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
@@ -238,10 +238,8 @@ export default function HomePage() {
              </div>
            </div>
          </section>
-        <div className="scroll-section-footer">
-          <Footer />
-        </div>
       </main>
+      <Footer />
     </div>
   );
 }
