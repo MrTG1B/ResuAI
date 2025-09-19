@@ -43,11 +43,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background">
       <Header />
       <main className="flex-grow scroll-container">
         {/* Hero Section */}
-        <section className="scroll-section relative text-center bg-background animate-fade-in-down overflow-hidden">
+        <section className="scroll-section relative text-center bg-background animate-fade-in-down">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full bg-primary/10 blur-[100px] -z-10" />
           <div 
             className="container mx-auto px-4 relative z-10"
@@ -130,7 +130,7 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="animate-fade-in-up group" style={{ animationDelay: '0ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <FileText className="h-10 w-10 text-primary" />
@@ -143,7 +143,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '150ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <NotebookPen className="h-10 w-10 text-primary" />
@@ -156,7 +156,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '300ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <SearchCheck className="h-10 w-10 text-primary" />
@@ -169,7 +169,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '450ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <LayoutTemplate className="h-10 w-10 text-primary" />

@@ -3,8 +3,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  overflow: hidden; /* Prevent body from scrolling to remove extra scrollbar */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -97,8 +97,7 @@ body {
     .scroll-container {
         scroll-snap-type: y mandatory;
         overflow-y: scroll;
-        height: 100vh;
-        scroll-behavior: smooth;
+        height: 100%;
     }
     .scroll-section {
         scroll-snap-align: start;
