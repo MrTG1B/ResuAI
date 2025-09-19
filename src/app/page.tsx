@@ -55,7 +55,7 @@ export default function HomePage() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative text-center py-20 md:py-32 bg-gradient-to-b from-background to-card/20 animate-fade-in-down overflow-hidden">
+        <section className="relative text-center py-20 md:py-32 bg-background animate-fade-in-down overflow-hidden">
           <div 
             className="container mx-auto px-4 relative z-10"
             style={{ transform: `translateY(${offsetY * 0.4}px)` }}
@@ -71,41 +71,6 @@ export default function HomePage() {
                 <Link href="/signup">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
             </div>
-          </div>
-           <div className="absolute inset-0 -z-0 flex items-center justify-center overflow-hidden">
-            <svg
-              width="800"
-              height="800"
-              viewBox="0 0 800 800"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute opacity-20"
-              style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-            >
-              <defs>
-                <radialGradient
-                  id="grad1"
-                  cx="50%"
-                  cy="50%"
-                  r="50%"
-                  fx="50%"
-                  fy="50%"
-                >
-                  <stop offset="0%" style={{ stopColor: '#458A7D', stopOpacity: 1 }} />
-                  <stop offset="100%" style={{ stopColor: '#293B81', stopOpacity: 1 }} />
-                </radialGradient>
-                <filter id="blur1">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="50" />
-                </filter>
-              </defs>
-              <circle
-                cx="400"
-                cy="400"
-                r="300"
-                fill="url(#grad1)"
-                filter="url(#blur1)"
-              />
-            </svg>
           </div>
         </section>
 
