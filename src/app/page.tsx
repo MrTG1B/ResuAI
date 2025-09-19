@@ -67,7 +67,8 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section className="py-20 lg:py-32 bg-card/40">
+        <div className="parallax-bg">
+        <section className="py-20 lg:py-32 bg-transparent">
           <div className="container mx-auto px-4">
             <div 
               className="text-center mb-16"
@@ -77,7 +78,7 @@ export default function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
+                className="p-8 rounded-lg border bg-card/80 backdrop-blur-sm shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
               >
                 <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
@@ -90,7 +91,7 @@ export default function HomePage() {
                 </p>
               </div>
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
+                className="p-8 rounded-lg border bg-card/80 backdrop-blur-sm shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
                 style={{ animationDelay: '200ms' }}
               >
                  <div className="flex justify-center items-center mb-4">
@@ -104,7 +105,7 @@ export default function HomePage() {
                 </p>
               </div>
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
+                className="p-8 rounded-lg border bg-card/80 backdrop-blur-sm shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
                 style={{ animationDelay: '400ms' }}
               >
                  <div className="flex justify-center items-center mb-4">
@@ -120,6 +121,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        </div>
 
         {/* Toolkit Section */}
         <section className="py-20 lg:py-32 bg-background">
@@ -186,14 +188,15 @@ export default function HomePage() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-20 lg:py-32 bg-card/40">
+        <div className="parallax-bg">
+        <section className="py-20 lg:py-32 bg-transparent">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Why Professionals Love ResuAI</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Don't just take our word for it. Here's what our users are saying.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20">
+              <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20">
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"I created a portfolio in under 5 minutes that looked better than what I spent weeks trying to build myself. Truly magical!"</p>
                 <div className="flex items-center gap-2 mb-2">
@@ -202,7 +205,7 @@ export default function HomePage() {
                 <p className="font-semibold">Sarah L.</p>
                 <p className="text-sm text-muted-foreground">UX Designer</p>
               </Card>
-               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20" style={{ animationDelay: '200ms' }}>
+               <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20" style={{ animationDelay: '200ms' }}>
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"The AI Resume Analyzer gave me the exact feedback I needed to land three interviews. It's like having a personal career coach."</p>
                 <div className="flex items-center gap-2 mb-2">
@@ -211,7 +214,7 @@ export default function HomePage() {
                 <p className="font-semibold">Michael B.</p>
                 <p className="text-sm text-muted-foreground">Software Engineer</p>
               </Card>
-               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20" style={{ animationDelay: '400ms' }}>
+               <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20" style={{ animationDelay: '400ms' }}>
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"As a recent graduate, this tool was a lifesaver. It helped me create a resume that got noticed and felt professional."</p>
                  <div className="flex items-center gap-2 mb-2">
@@ -223,6 +226,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        </div>
 
         {/* Final CTA Section */}
         <section className="py-20 lg:py-32 bg-background">
