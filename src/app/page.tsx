@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -60,11 +61,11 @@ export default function HomePage() {
             className="container mx-auto px-4 relative z-10"
             style={{ transform: `translateY(${offsetY * 0.4}px)` }}
           >
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-heading text-primary">
-              Craft Your Future with AI-Powered Career Tools
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4 font-heading text-primary">
+              Your Career, Elevated by AI
             </h1>
-            <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-             Build the perfect resume, write compelling cover letters, and ace your interviews. ResuAI is your personal career assistant.
+            <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
+              Build standout resumes, portfolios, and cover letters. Ace your interviews with intelligent, personalized coaching.
             </p>
             <div className="flex justify-center gap-4">
               <Button asChild size="lg" className="font-bold">
@@ -203,7 +204,7 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Don't just take our word for it. Here's what our users are saying.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105">
+              <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20">
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"I created a portfolio in under 5 minutes that looked better than what I spent weeks trying to build myself. Truly magical!"</p>
                 <div className="flex items-center gap-2 mb-2">
@@ -212,7 +213,7 @@ export default function HomePage() {
                 <p className="font-semibold">Sarah L.</p>
                 <p className="text-sm text-muted-foreground">UX Designer</p>
               </Card>
-               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105" style={{ animationDelay: '200ms' }}>
+               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20" style={{ animationDelay: '200ms' }}>
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"The AI Resume Analyzer gave me the exact feedback I needed to land three interviews. It's like having a personal career coach."</p>
                 <div className="flex items-center gap-2 mb-2">
@@ -221,7 +222,7 @@ export default function HomePage() {
                 <p className="font-semibold">Michael B.</p>
                 <p className="text-sm text-muted-foreground">Software Engineer</p>
               </Card>
-               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105" style={{ animationDelay: '400ms' }}>
+               <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20" style={{ animationDelay: '400ms' }}>
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"As a recent graduate, this tool was a lifesaver. It helped me create a resume that got noticed and felt professional."</p>
                  <div className="flex items-center gap-2 mb-2">
