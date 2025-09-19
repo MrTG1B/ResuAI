@@ -86,7 +86,7 @@ export default function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20"
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/30"
                 style={{ transform: `translateY(${offsetY * 0.1}px)` }}
               >
                 <div className="flex justify-center items-center mb-4">
@@ -100,7 +100,7 @@ export default function HomePage() {
                 </p>
               </div>
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20" 
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/30" 
                 style={{ animationDelay: '200ms', transform: `translateY(${offsetY * 0.15}px)` }}
               >
                  <div className="flex justify-center items-center mb-4">
@@ -114,7 +114,7 @@ export default function HomePage() {
                 </p>
               </div>
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20" 
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/30" 
                 style={{ animationDelay: '400ms', transform: `translateY(${offsetY * 0.2}px)` }}
               >
                  <div className="flex justify-center items-center mb-4">
@@ -203,7 +203,7 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Don't just take our word for it. Here's what our users are saying.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105" style={{ animationDelay: '0ms' }}>
+              <Card className="p-8 bg-card flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105">
                 <Quote className="h-10 w-10 text-primary mb-4" />
                 <p className="text-muted-foreground mb-6 flex-grow">"I created a portfolio in under 5 minutes that looked better than what I spent weeks trying to build myself. Truly magical!"</p>
                 <div className="flex items-center gap-2 mb-2">
