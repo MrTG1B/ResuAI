@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -14,13 +13,8 @@ export async function POST(
   request: Request,
   context: { params: { path?: string[] } }
 ) {
-  // The flow name is the first segment after /api/genkit/...
+  // The flow name is the last segment after /api/genkit/...
   // e.g., /api/genkit/flow/myFlow -> path is ['flow', 'myFlow'] -> we need 'myFlow'
-  // But the frontend calls /api/genkit/flow/flowName, so we expect it at index 1
-  // Let's adjust to be more robust and find the actual flow name.
-  // The actual registered flow name doesn't have 'Flow' at the end.
-  // E.g. generateAptitudeExamFlow is called as generateAptitudeExam.
-  
   const flowName = context.params?.path?.slice(-1)[0];
 
   if (!flowName) {
