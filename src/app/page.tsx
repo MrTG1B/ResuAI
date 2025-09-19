@@ -15,14 +15,6 @@ import { Card } from '@/components/ui/card';
 export default function HomePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [offsetY, setOffsetY] = useState(0);
-
-  const handleScroll = () => setOffsetY(window.pageYOffset);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     if (!auth) {
@@ -53,13 +45,12 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow scroll-container">
         {/* Hero Section */}
-        <section className="relative text-center py-20 md:py-32 bg-background animate-fade-in-down overflow-hidden">
+        <section className="scroll-section relative text-center bg-background animate-fade-in-down overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full bg-primary/10 blur-[100px] -z-10" />
           <div 
             className="container mx-auto px-4 relative z-10"
-            style={{ transform: `translateY(${offsetY * 0.4}px)` }}
           >
             <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4 font-heading text-primary">
               Your Career, Elevated by AI
@@ -76,19 +67,17 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section className="py-20 bg-card/40">
+        <section className="scroll-section bg-card/40">
           <div className="container mx-auto px-4">
             <div 
               className="text-center mb-16"
-              style={{ transform: `translateY(${Math.min(offsetY * 0.2, 50)}px)` }}
             >
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Simple, Powerful, and Fast</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our AI streamlines the entire process, from analyzing your experience to designing a beautiful final product.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/30"
-                style={{ transform: `translateY(${offsetY * 0.1}px)` }}
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
               >
                 <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
@@ -101,8 +90,8 @@ export default function HomePage() {
                 </p>
               </div>
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/30" 
-                style={{ animationDelay: '200ms', transform: `translateY(${offsetY * 0.15}px)` }}
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
+                style={{ animationDelay: '200ms' }}
               >
                  <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
@@ -115,8 +104,8 @@ export default function HomePage() {
                 </p>
               </div>
               <div 
-                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/30" 
-                style={{ animationDelay: '400ms', transform: `translateY(${offsetY * 0.2}px)` }}
+                className="p-8 rounded-lg border bg-card shadow-lg animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30 hover:shadow-primary/20"
+                style={{ animationDelay: '400ms' }}
               >
                  <div className="flex justify-center items-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
@@ -133,7 +122,7 @@ export default function HomePage() {
         </section>
 
         {/* Toolkit Section */}
-        <section className="py-20 bg-background">
+        <section className="scroll-section bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Your AI-Powered Career Toolkit</h2>
@@ -141,7 +130,7 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="animate-fade-in-up group" style={{ animationDelay: '0ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <FileText className="h-10 w-10 text-primary" />
@@ -154,7 +143,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '150ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <NotebookPen className="h-10 w-10 text-primary" />
@@ -167,7 +156,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '300ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <SearchCheck className="h-10 w-10 text-primary" />
@@ -180,7 +169,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '450ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:border-primary/30 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 group-hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <LayoutTemplate className="h-10 w-10 text-primary" />
@@ -197,7 +186,7 @@ export default function HomePage() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-20 bg-card/40">
+        <section className="scroll-section bg-card/40">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Why Professionals Love ResuAI</h2>
@@ -236,7 +225,7 @@ export default function HomePage() {
         </section>
 
         {/* Final CTA Section */}
-        <section className="py-20 md:py-32 bg-background">
+        <section className="scroll-section bg-background">
            <div className="container mx-auto px-4 text-center">
              <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Ready to Build Your Future?</h2>
              <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
@@ -249,8 +238,10 @@ export default function HomePage() {
              </div>
            </div>
          </section>
+        <div className="scroll-section-footer">
+          <Footer />
+        </div>
       </main>
-      <Footer />
     </div>
   );
 }
