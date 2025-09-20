@@ -119,6 +119,11 @@ export default {
             '25%': { transform: 'rotate(-3deg)' },
             '75%': { transform: 'rotate(3deg)' },
         },
+        'gradient': {
+          '0%': { 'background-position': '0% 50%' },
+          '50%': { 'background-position': '100% 50%' },
+          '100%': { 'background-position': '0% 50%' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -127,6 +132,7 @@ export default {
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
         'wave': 'wave 4s ease infinite',
         'wobble': 'wobble 1s ease-in-out infinite',
+        'gradient': 'gradient 3s ease infinite',
       },
     },
   },
