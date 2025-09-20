@@ -53,7 +53,7 @@ export default function HomePage() {
             className="container mx-auto px-4 relative z-10"
           >
             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-[#FFA62E] to-[#F71B3D] bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-              Your Career, Elevated
+              Your Career Elevated by AI
             </h1>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
               Create standout resumes and portfolios with intelligent, personalized AI tools.
