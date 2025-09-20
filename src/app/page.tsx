@@ -58,10 +58,13 @@ export default function HomePage() {
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
               Create standout resumes and portfolios with intelligent, personalized AI tools.
             </p>
-            <div className="flex justify-center gap-4">
-              <Button asChild size="lg" className="font-bold">
-                <Link href="/signup">Get Started <ArrowRight className="ml-2 h-5 w-5" /></Link>
-              </Button>
+            <div className="flex justify-center gap-4 mt-8">
+              <div className="group relative">
+                <div className="absolute -inset-0.5 rounded-lg bg-gradient-to-r from-[#FFA62E] to-[#F71B3D] opacity-0 transition-opacity duration-1000 group-hover:opacity-75 group-hover:animate-gradient" />
+                <Button asChild size="lg" className="font-bold relative">
+                  <Link href="/signup">Get Started <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
