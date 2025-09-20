@@ -60,7 +60,7 @@ export default function HomePage() {
             </p>
             <div className="flex justify-center gap-4 mt-8">
               <div className="group relative">
-                <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-[#FFA62E] to-[#F71B3D] opacity-0 transition-opacity duration-1000 group-hover:opacity-75 group-hover:animate-gradient" />
+                <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-[#FFA62E] to-[#F71B3D] opacity-0 transition-opacity duration-300 group-hover:opacity-75 animate-gradient" />
                 <Button asChild size="lg" className="font-bold relative bg-primary text-primary-foreground hover:bg-transparent transition-all">
                   <Link href="/signup">Get Started <ArrowRight className="ml-2 h-5 w-5" /></Link>
                 </Button>
