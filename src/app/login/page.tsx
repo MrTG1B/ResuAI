@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -82,7 +81,7 @@ export default function LoginPage() {
       <main className="flex-grow flex items-center justify-center p-4">
         <Card className="w-full max-w-sm shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-2xl">Login</CardTitle>
+            <CardTitle className="text-2xl font-heading">Login</CardTitle>
             <CardDescription>
               Enter your email below to login to your account.
             </CardDescription>
@@ -130,12 +129,12 @@ export default function LoginPage() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-card px-2 text-muted-foreground">
                   Or continue with
                 </span>
               </div>
             </div>
-             <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading || isGoogleLoading}>
+             <Button variant="tertiary" className="w-full" onClick={handleGoogleLogin} disabled={isLoading || isGoogleLoading}>
                 {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
                 Sign in with Google
             </Button>

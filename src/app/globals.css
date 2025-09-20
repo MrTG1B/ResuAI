@@ -96,17 +96,6 @@ body {
 }
 
 @layer utilities {
-    @keyframes wobble {
-        0%, 100% { transform: rotate(0deg); }
-        25% { transform: rotate(-3deg); }
-        75% { transform: rotate(3deg); }
-    }
-
-    .animate-wobble {
-        animation: wobble 1s ease-in-out infinite;
-        transform-origin: center;
-    }
-
     @property --angle {
         syntax: '<angle>';
         initial-value: 0deg;
@@ -121,29 +110,28 @@ body {
 
     .animated-border-glow {
         position: relative;
-        border-radius: 0.75rem; /* 12px */
+        border-radius: 0.5rem; 
     }
 
     .animated-border-glow::before {
         content: '';
         position: absolute;
-        inset: -3px; /* Controls border thickness & space for glow */
+        inset: -3px; 
         z-index: -1;
         border-radius: inherit;
         background: conic-gradient(
             from var(--angle),
             hsl(var(--primary) / 0.8),
             #45b8ac,
-            #f71b3d,
             hsl(var(--primary) / 0.8)
         );
-        filter: blur(8px); /* This creates the glow effect */
+        filter: blur(8px); 
         animation: border-spin 4s linear infinite;
         transition: all 300ms ease-in-out;
     }
     
     .animated-border-glow:hover::before {
-        filter: blur(16px); /* Expand the glow on hover */
+        filter: blur(16px); 
         opacity: 1;
     }
 }
