@@ -145,8 +145,8 @@ export default function HomePage() {
               <div className="animate-fade-in-up group" style={{ animationDelay: '150ms' }}>
                 <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
-                    <div className="bg-primary/10 p-4 rounded-full">
-                      <NotebookPen className="h-10 w-10 text-primary" />
+                    <div style={{ backgroundColor: '#F71B3D1A' }} className="p-4 rounded-full">
+                      <NotebookPen className="h-10 w-10" style={{ color: '#F71B3D' }} />
                     </div>
                   </div>
                   <h3 className="text-xl font-semibold mb-2 font-heading">AI Cover Letter Generator</h3>
@@ -158,8 +158,8 @@ export default function HomePage() {
               <div className="animate-fade-in-up group" style={{ animationDelay: '300ms' }}>
                 <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
-                    <div className="bg-primary/10 p-4 rounded-full">
-                      <SearchCheck className="h-10 w-10 text-primary" />
+                    <div style={{ backgroundColor: '#45B8AC1A' }} className="p-4 rounded-full">
+                      <SearchCheck className="h-10 w-10" style={{ color: '#45B8AC' }} />
                     </div>
                   </div>
                   <h3 className="text-xl font-semibold mb-2 font-heading">AI Resume ATS Checker</h3>
@@ -194,7 +194,7 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20">
-                <Quote className="h-10 w-10 text-primary mb-4" />
+                <Quote className="h-10 w-10 mb-4" style={{ color: '#45B8AC' }} />
                 <p className="text-muted-foreground mb-6 flex-grow">"I created a portfolio in under 5 minutes that looked better than what I spent weeks trying to build myself. Truly magical!"</p>
                 <div className="flex items-center gap-2 mb-2">
                   {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />)}
@@ -203,7 +203,7 @@ export default function HomePage() {
                 <p className="text-sm text-muted-foreground">UX Designer</p>
               </Card>
                <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20" style={{ animationDelay: '200ms' }}>
-                <Quote className="h-10 w-10 text-primary mb-4" />
+                <Quote className="h-10 w-10 mb-4" style={{ color: '#45B8AC' }} />
                 <p className="text-muted-foreground mb-6 flex-grow">"The AI Resume Analyzer gave me the exact feedback I needed to land three interviews. It's like having a personal career coach."</p>
                 <div className="flex items-center gap-2 mb-2">
                   {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />)}
@@ -212,7 +212,7 @@ export default function HomePage() {
                 <p className="text-sm text-muted-foreground">Software Engineer</p>
               </Card>
                <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20" style={{ animationDelay: '400ms' }}>
-                <Quote className="h-10 w-10 text-primary mb-4" />
+                <Quote className="h-10 w-10 mb-4" style={{ color: '#45B8AC' }} />
                 <p className="text-muted-foreground mb-6 flex-grow">"As a recent graduate, this tool was a lifesaver. It helped me create a resume that got noticed and felt professional."</p>
                  <div className="flex items-center gap-2 mb-2">
                   {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />)}
