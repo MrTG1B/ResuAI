@@ -135,7 +135,7 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="animate-fade-in-up group" style={{ animationDelay: '0ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 group-hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <FileText className="h-10 w-10 text-primary" />
@@ -148,10 +148,12 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '150ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
-                  <div style={{ backgroundColor: '#F71B3D1A' }} className="p-4 rounded-full">
+                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 group-hover:shadow-[#F71B3D]/20 flex flex-col h-full text-center">
+                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
+                    <div style={{ backgroundColor: '#F71B3D1A' }} className="p-4 rounded-full">
                       <NotebookPen className="h-10 w-10" style={{ color: '#F71B3D' }} />
                     </div>
+                  </div>
                   <h3 className="text-xl font-semibold mb-2 font-heading">AI Cover Letter Generator</h3>
                   <p className="text-muted-foreground flex-grow mb-6">
                     Create a professional cover letter tailored to any job description in seconds, using your profile data to highlight your strengths.
@@ -159,7 +161,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '300ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 group-hover:shadow-[#45B8AC]/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div style={{ backgroundColor: '#45B8AC1A' }} className="p-4 rounded-full">
                       <SearchCheck className="h-10 w-10" style={{ color: '#45B8AC' }} />
@@ -172,7 +174,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '450ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 group-hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <LayoutTemplate className="h-10 w-10 text-primary" />
