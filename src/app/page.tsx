@@ -47,8 +47,9 @@ export default function HomePage() {
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="relative flex flex-col justify-center items-center text-center min-h-screen py-20 animate-fade-in-down">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full bg-primary/10 blur-[100px] -z-10" />
+        <section className="relative flex flex-col justify-center items-center text-center min-h-screen py-20 animate-fade-in-down overflow-hidden">
+          <div className="absolute top-0 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full bg-primary/10 blur-[120px] -z-10" />
+          <div className="absolute top-0 left-2/3 -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full bg-[#45b8ac]/10 blur-[120px] -z-10" />
           <div 
             className="container mx-auto px-4 relative z-10"
           >
@@ -135,7 +136,7 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="animate-fade-in-up group" style={{ animationDelay: '0ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 group-hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <FileText className="h-10 w-10 text-primary" />
@@ -148,7 +149,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '150ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 group-hover:shadow-[#F71B3D]/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 hover:shadow-[#F71B3D]/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div style={{ backgroundColor: '#F71B3D1A' }} className="p-4 rounded-full">
                       <NotebookPen className="h-10 w-10" style={{ color: '#F71B3D' }} />
@@ -161,7 +162,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '300ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 group-hover:shadow-[#45B8AC]/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 hover:shadow-[#45B8AC]/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div style={{ backgroundColor: '#45B8AC1A' }} className="p-4 rounded-full">
                       <SearchCheck className="h-10 w-10" style={{ color: '#45B8AC' }} />
@@ -174,7 +175,7 @@ export default function HomePage() {
                 </Card>
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '450ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 group-hover:shadow-primary/20 flex flex-col h-full text-center">
+                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 hover:shadow-primary/20 flex flex-col h-full text-center">
                   <div className="flex-shrink-0 flex justify-center items-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-full">
                       <LayoutTemplate className="h-10 w-10 text-primary" />
@@ -248,3 +249,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
