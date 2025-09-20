@@ -64,7 +64,7 @@ export default function HomePage() {
                     <Button asChild size="lg" className="font-bold relative bg-background hover:bg-background text-foreground transition-all duration-300 transform group-hover:scale-105 group-hover:-translate-y-2 text-xl px-8 py-6">
                       <Link href="/signup">
                         Get Started
-                         <ArrowRight className="ml-2 h-5 w-5" />
+                         <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
                       </Link>
                     </Button>
                 </div>
@@ -249,5 +249,7 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
 
     
