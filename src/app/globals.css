@@ -127,7 +127,7 @@ body {
     .animated-border-glow::before {
         content: '';
         position: absolute;
-        inset: -2px; /* Controls border thickness */
+        inset: -3px; /* Controls border thickness & space for glow */
         z-index: -1;
         border-radius: inherit;
         background: conic-gradient(
@@ -137,7 +137,14 @@ body {
             #f71b3d,
             hsl(var(--primary) / 0.8)
         );
+        filter: blur(8px); /* This creates the glow effect */
         animation: border-spin 4s linear infinite;
+        transition: all 300ms ease-in-out;
+    }
+    
+    .animated-border-glow:hover::before {
+        filter: blur(16px); /* Expand the glow on hover */
+        opacity: 1;
     }
 }
 

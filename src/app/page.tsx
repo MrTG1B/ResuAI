@@ -149,11 +149,9 @@ export default function HomePage() {
               </div>
               <div className="animate-fade-in-up group" style={{ animationDelay: '150ms' }}>
                 <Card className="p-6 rounded-lg border bg-card shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:border-primary/30 hover:shadow-primary/20 flex flex-col h-full text-center">
-                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
-                    <div style={{ backgroundColor: '#F71B3D1A' }} className="p-4 rounded-full">
+                  <div style={{ backgroundColor: '#F71B3D1A' }} className="p-4 rounded-full">
                       <NotebookPen className="h-10 w-10" style={{ color: '#F71B3D' }} />
                     </div>
-                  </div>
                   <h3 className="text-xl font-semibold mb-2 font-heading">AI Cover Letter Generator</h3>
                   <p className="text-muted-foreground flex-grow mb-6">
                     Create a professional cover letter tailored to any job description in seconds, using your profile data to highlight your strengths.
