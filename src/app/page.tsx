@@ -60,8 +60,8 @@ export default function HomePage() {
             </p>
             <div className="flex justify-center gap-4 mt-12">
                 <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-[#FFA62E] via-[#F71B3D] to-[#45B8AC] rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient bg-[length:200%_auto]"></div>
-                    <Button asChild size="lg" className="font-bold relative bg-background hover:bg-background/80 text-foreground transition-all duration-200">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#FFA62E] via-[#F71B3D] to-[#45B8AC] rounded-lg blur-md opacity-75 group-hover:opacity-100 group-hover:blur-xl transition duration-300 animate-gradient bg-[length:200%_auto]"></div>
+                    <Button asChild size="lg" className="font-bold relative bg-background hover:bg-background/80 text-foreground transition-all duration-300 transform group-hover:scale-105 group-hover:-translate-y-2">
                       <Link href="/signup">
                         Get Started
                          <ArrowRight className="ml-2 h-5 w-5" />
