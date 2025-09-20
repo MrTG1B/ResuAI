@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 
 const socialLinkSchema = z.object({
@@ -110,10 +111,11 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 type EditableSection = 'education' | 'projects' | 'certifications' | 'experience' | 'socials' | 'skills' | 'languages' | 'interests' | 'publications';
 
-const SectionTitle = ({ icon, text }: { icon: React.ElementType, text: string }) => {
+const SectionTitle = ({ icon, text, color = 'primary' }: { icon: React.ElementType, text: string, color?: 'primary' | 'secondary' }) => {
   const Icon = icon;
+  const textColor = color === 'primary' ? 'text-primary' : 'text-[#45B8AC]';
   return (
-    <h3 className="text-xl font-semibold flex items-center gap-2 mb-4 text-primary font-heading">
+    <h3 className={cn("text-xl font-semibold flex items-center gap-2 mb-4 font-heading", textColor)}>
       <Icon className="h-5 w-5" />
       {text}
     </h3>
@@ -521,8 +523,8 @@ export default function ProfilePage() {
 
                     <div className="space-y-4 pt-4">
                         <div className="flex justify-between items-center">
-                            <SectionTitle icon={UserCircle} text="About Me" />
-                            <Button type="button" variant="outline" size="sm" onClick={handleRefineSummary} disabled={isRefining}>
+                            <SectionTitle icon={UserCircle} text="About Me" color="secondary"/>
+                            <Button type="button" variant="outline" size="sm" onClick={handleRefineSummary} disabled={isRefining} style={{borderColor: '#45B8AC', color: '#45B8AC'}}>
                                 {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                                 Refine with AI
                             </Button>
@@ -570,7 +572,7 @@ export default function ProfilePage() {
 
                 <TabsContent value="skills" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
-                    <SectionTitle icon={Wrench} text="Skills" />
+                    <SectionTitle icon={Wrench} text="Skills" color="secondary" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('skills')}>
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Skill
                     </Button>
@@ -642,7 +644,7 @@ export default function ProfilePage() {
 
                 <TabsContent value="interests" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
-                    <SectionTitle icon={Smile} text="Interests" />
+                    <SectionTitle icon={Smile} text="Interests" color="secondary" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('interests')}>
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Interest
                     </Button>
@@ -709,7 +711,7 @@ export default function ProfilePage() {
 
                  <TabsContent value="education" className="space-y-6 pt-4">
                   <div className="flex items-center justify-between">
-                    <SectionTitle icon={GraduationCap} text="Education" />
+                    <SectionTitle icon={GraduationCap} text="Education" color="secondary"/>
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('education')}>
                       <PlusCircle className="mr-2 h-4 w-4" /> Add Education
                     </Button>
@@ -773,7 +775,7 @@ export default function ProfilePage() {
 
                 <TabsContent value="certifications" className="space-y-6 pt-4">
                    <div className="flex items-center justify-between">
-                    <SectionTitle icon={Award} text="Licenses & Certifications" />
+                    <SectionTitle icon={Award} text="Licenses & Certifications" color="secondary" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('certifications')}>
                       <PlusCircle className="mr-2 h-4 w-4" /> Add Certificate
                     </Button>
@@ -971,10 +973,10 @@ export default function ProfilePage() {
                             className="relative mt-1 flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
                         >
                             {isAnalyzingCert ? (
-                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                <Loader2 className="h-6 w-6 animate-spin text-[#45B8AC]" />
                             ) : (
                                 <div className="flex flex-col items-center justify-center text-center">
-                                    <UploadCloud className="w-6 h-6 mb-1 text-primary" />
+                                    <UploadCloud className="w-6 h-6 mb-1 text-[#45B8AC]" />
                                     <p className="text-sm text-foreground">
                                         <span className="font-semibold">Upload Certificate</span>
                                     </p>
@@ -1074,5 +1076,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

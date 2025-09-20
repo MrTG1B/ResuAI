@@ -291,11 +291,11 @@ export default function DashboardPage() {
                 </Card>
             )}
 
-            <Card className="shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 w-full animate-fade-in-up">
+            <Card className="shadow-lg hover:shadow-2xl hover:shadow-[#45B8AC]/25 transition-all duration-300 w-full animate-fade-in-up">
                 <Link href="/mentra" className="block hover:bg-card/20 rounded-lg">
                     <CardHeader className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left p-4 sm:p-6">
-                        <div className="bg-primary/10 p-4 rounded-full">
-                            <MentraIcon className="h-10 w-10 text-primary" isAnimated={true} />
+                        <div className="bg-[#45B8AC]/10 p-4 rounded-full">
+                            <MentraIcon className="h-10 w-10 text-[#45B8AC]" isAnimated={true} />
                         </div>
                         <div className="flex-1">
                             <CardTitle className="text-2xl">Chat with Mentra</CardTitle>
@@ -314,6 +314,7 @@ export default function DashboardPage() {
                     title="AI Resume Editor"
                     description="Create from scratch or enhance your resume with AI-powered suggestions."
                     actionText="Open Editor"
+                    color="primary"
                 />
                 <ToolCard 
                     href="/resume-analyzer"
@@ -329,6 +330,7 @@ export default function DashboardPage() {
                     title="AI Cover Letter Generator"
                     description="Create a professional cover letter tailored to any job description in seconds."
                     actionText="Create Letter"
+                    color="primary"
                 />
                  <ToolCard 
                     href="/interview-prep"
@@ -344,6 +346,7 @@ export default function DashboardPage() {
                     title="Aptitude Test"
                     description="Take a timed test with unique questions to sharpen your skills for interviews."
                     actionText="Start Test"
+                    color="primary"
                 />
                 <ToolCard 
                     href="/build"
@@ -466,5 +469,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
