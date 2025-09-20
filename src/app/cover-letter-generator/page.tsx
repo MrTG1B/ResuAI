@@ -128,11 +128,10 @@ function CoverLetterGeneratorPageContent() {
     }
 
     try {
-      const idToken = await currentUser.getIdToken();
-      const result = await generateCoverLetterAction({
+      const result = await generateCoverLetterAction(currentUser.uid, {
         id: coverLetterId ?? undefined,
         ...data,
-      }, idToken);
+      });
 
       if (result.success && result.data) {
         setGeneratedLetter(result.data.coverLetter);
@@ -175,7 +174,7 @@ function CoverLetterGeneratorPageContent() {
           {/* Form Column */}
           <Card className="shadow-2xl">
             <CardHeader>
-              <CardTitle className="text-3xl font-bold tracking-tight font-heading">AI Cover Letter Generator</CardTitle>
+              <CardTitle>AI Cover Letter Generator</CardTitle>
               <CardDescription>Fill in the details below, and our AI will write a tailored cover letter for you based on your profile.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -273,7 +272,7 @@ function CoverLetterGeneratorPageContent() {
           {/* Result Column */}
           <Card className="shadow-2xl flex flex-col">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold tracking-tight font-heading">Your Generated Cover Letter</CardTitle>
+              <CardTitle>Your Generated Cover Letter</CardTitle>
               <CardDescription>Review the generated letter below. You can copy it or regenerate it with new details.</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col">
@@ -319,3 +318,5 @@ export default function CoverLetterGeneratorPage() {
         </Suspense>
     );
 }
+
+    

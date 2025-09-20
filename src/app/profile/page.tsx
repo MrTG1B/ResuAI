@@ -35,7 +35,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -424,9 +423,7 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <UserCircle className="h-10 w-10 text-primary flex-shrink-0"/>
               <div className="text-center sm:text-left">
-                <CardTitle className="text-3xl font-bold tracking-tight font-heading">
-                  Your Professional Profile
-                </CardTitle>
+                <CardTitle>Your Professional Profile</CardTitle>
                 <CardDescription>
                   This information will be used to auto-fill your resumes and portfolios. Keep it up-to-date!
                 </CardDescription>
@@ -1077,3 +1074,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

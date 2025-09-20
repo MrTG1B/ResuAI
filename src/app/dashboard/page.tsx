@@ -36,15 +36,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
     return (
         <Card className="shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 flex flex-col h-full">
-            <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
-                <div className="bg-primary/10 p-3 rounded-full">
-                    <Icon className="h-6 w-6 text-primary" />
+            <CardHeader>
+                <div className="flex justify-center items-center mb-4">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                        <Icon className="h-8 w-8 text-primary" />
+                    </div>
                 </div>
-                <div>
-                    <CardTitle className="text-xl font-heading">{title}</CardTitle>
-                </div>
+                <CardTitle className="text-xl text-center">{title}</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow">
+            <CardContent className="flex-grow text-center">
                 <p className="text-muted-foreground">{description}</p>
             </CardContent>
             <CardFooter>
@@ -269,7 +269,7 @@ export default function DashboardPage() {
             )}
 
             {profileCompletion < 100 && (
-                <Card className="bg-primary/10 border-primary/20 animate-fade-in-up">
+                <Card className="bg-primary/10 border-primary/20 animate-fade-in-up shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-shadow">
                     <CardHeader>
                         <CardTitle>Complete Your Profile!</CardTitle>
                         <CardDescription>
@@ -294,12 +294,11 @@ export default function DashboardPage() {
                             <MentraIcon className="h-10 w-10 text-primary" isAnimated={true} />
                         </div>
                         <div className="flex-1">
-                            <CardTitle className="text-2xl font-heading">Chat with Mentra</CardTitle>
+                            <CardTitle className="text-2xl">Chat with Mentra</CardTitle>
                             <p className="text-muted-foreground mt-1">Get instant guidance on your career, help writing professional content, and more from your personal AI mentor.</p>
                         </div>
                         <Button variant="ghost" className="shrink-0 mt-4 md:mt-0">
-                            Start Chatting <Sparkles className="ml-2 h-4 w-4" />
-                        </Button>
+                            Start Chatting <Sparkles className="ml-2 h-4 w-4" /></Button>
                     </CardHeader>
                 </Link>
             </Card>
