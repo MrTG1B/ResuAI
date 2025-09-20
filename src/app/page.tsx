@@ -52,7 +52,7 @@ export default function HomePage() {
           <div 
             className="container mx-auto px-4 relative z-10"
           >
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-[#FF8C42] to-[#FF5C5C] bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-[#F71B3D] to-[#FFA62E] bg-clip-text text-transparent">
               Your Career, Elevated by AI
             </h1>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
