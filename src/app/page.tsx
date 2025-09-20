@@ -45,14 +45,14 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-grow">
+      <main>
         {/* Hero Section */}
         <section className="relative flex flex-col justify-center items-center text-center min-h-screen py-20 animate-fade-in-down">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full bg-primary/10 blur-[100px] -z-10" />
           <div 
             className="container mx-auto px-4 relative z-10"
           >
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-[#F71B3D] to-[#FFA62E] bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-[#FFA62E] to-[#F71B3D] bg-clip-text text-transparent">
               Your Career, Elevated by AI
             </h1>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
@@ -67,8 +67,7 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <div className="parallax-bg">
-        <section className="py-20 lg:py-32 bg-transparent">
+        <section className="parallax-bg py-20 lg:py-32 bg-transparent">
           <div className="container mx-auto px-4">
             <div 
               className="text-center mb-16"
@@ -121,7 +120,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        </div>
 
         {/* Toolkit Section */}
         <section className="py-20 lg:py-32 bg-background">
@@ -188,8 +186,7 @@ export default function HomePage() {
         </section>
 
         {/* Testimonials Section */}
-        <div className="parallax-bg">
-        <section className="py-20 lg:py-32 bg-transparent">
+        <section className="parallax-bg py-20 lg:py-32 bg-transparent">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Why Professionals Love ResuAI</h2>
@@ -226,7 +223,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        </div>
 
         {/* Final CTA Section */}
         <section className="py-20 lg:py-32 bg-background">
@@ -247,3 +243,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
