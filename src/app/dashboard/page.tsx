@@ -33,13 +33,17 @@ import { MentraIcon } from '@/components/mentra-icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
-function ToolCard({ href, icon: Icon, title, description, actionText }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string }) {
+function ToolCard({ href, icon: Icon, title, description, actionText, color = 'primary' }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string, color?: 'primary' | 'secondary' }) {
+    const shadowColor = color === 'primary' ? 'hover:shadow-primary/25' : 'hover:shadow-[#45B8AC]/25';
+    const iconColor = color === 'primary' ? 'text-primary' : 'text-[#45B8AC]';
+    const bgColor = color === 'primary' ? 'bg-primary/10' : 'bg-[#45B8AC]/10';
+
     return (
-        <Card className="shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 flex flex-col h-full">
+        <Card className={`shadow-lg hover:shadow-2xl ${shadowColor} transition-all duration-300 flex flex-col h-full`}>
             <CardHeader>
                 <div className="flex justify-center items-center mb-4">
-                    <div className="bg-primary/10 p-4 rounded-full">
-                        <Icon className="h-8 w-8 text-primary" />
+                    <div className={`p-4 rounded-full ${bgColor}`}>
+                        <Icon className={`h-8 w-8 ${iconColor}`} />
                     </div>
                 </div>
                 <CardTitle className="text-xl text-center">{title}</CardTitle>
@@ -317,6 +321,7 @@ export default function DashboardPage() {
                     title="AI Resume ATS Checker"
                     description="Scan your resume against a job description to check for ATS-friendliness."
                     actionText="Analyze Resume"
+                    color="secondary"
                 />
                 <ToolCard 
                     href="/cover-letter-generator"
@@ -331,6 +336,7 @@ export default function DashboardPage() {
                     title="AI Interview Assister"
                     description="Practice common interview questions and get AI-powered feedback."
                     actionText="Start Practice"
+                    color="secondary"
                 />
                  <ToolCard 
                     href="/aptitude-test"
@@ -345,6 +351,7 @@ export default function DashboardPage() {
                     title="AI Portfolio Generator"
                     description="Instantly transform your resume into a stunning portfolio website."
                     actionText="Create Portfolio"
+                    color="secondary"
                 />
             </div>
             
