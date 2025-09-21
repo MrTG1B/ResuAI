@@ -463,7 +463,7 @@ function MentraChatPage() {
                                     ))}
                                 </div>
                             )}
-                            <div className="relative flex w-full items-center rounded-full border bg-card px-2 shadow-lg">
+                            <div className="relative flex w-full items-center rounded-full border bg-card px-2 shadow-lg py-1">
                                 <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
                                 <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
                                 <Input
@@ -508,6 +508,7 @@ export default function MentraChatClient() {
     
 
     
+
 
 
 
