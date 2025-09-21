@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -301,7 +300,7 @@ function MentraChatPage() {
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-white hover:text-white hover:bg-[#3aa195]/90 transition-all duration-300 transform hover:scale-105" style={{backgroundColor: '#3aa195'}}>
+                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-white hover:text-white hover:bg-[#3aa195]/90 transition-all duration-300 transform hover:scale-105" style={{backgroundColor: '#45B8AC'}}>
                     <Plus className="h-4 w-4" />
                     <span className="group-data-[collapsible=icon]:hidden ml-2 text-sm">New Chat</span>
                 </Button>
@@ -323,7 +322,7 @@ function MentraChatPage() {
                                 </div>
                             ) : (
                                 <Link href={`/mentra?id=${chat.id}`} className="flex-1 overflow-hidden">
-                                    <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200 hover:bg-muted/50" style={chatId === chat.id ? { backgroundColor: 'hsl(var(--muted))' } : {}}>
+                                    <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200 hover:bg-muted/50" style={chatId === chat.id ? { backgroundColor: '#45B8AC' } : {}}>
                                         {chat.title}
                                     </SidebarMenuButton>
                                 </Link>
@@ -428,7 +427,7 @@ function MentraChatPage() {
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted/70'}`}>
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary/90 text-primary-foreground' : 'bg-muted/70'}`}>
                                 <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                     {message.content}
                                 </ReactMarkdown>
@@ -485,3 +484,6 @@ export default function MentraChatClient() {
     
 
 
+
+
+    
