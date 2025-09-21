@@ -462,7 +462,7 @@ function MentraChatPage() {
                                     ))}
                                 </div>
                             )}
-                            <div className="relative flex w-full items-center rounded-full border bg-card px-2 shadow-lg py-2">
+                            <div className="relative flex w-full items-center rounded-full border bg-card px-2 shadow-lg h-12">
                                 <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
                                 <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
                                 <Textarea
@@ -472,7 +472,7 @@ function MentraChatPage() {
                                     onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}}
                                     placeholder="Ask Mentra anything..."
                                     disabled={isResponding}
-                                    className="flex-1 w-full border-0 shadow-none focus-visible:ring-0 text-card-foreground bg-transparent resize-none h-auto py-1.5 leading-tight max-h-[120px]"
+                                    className="flex-1 w-full border-0 shadow-none focus-visible:ring-0 text-card-foreground bg-transparent resize-none py-1.5 max-h-[120px]"
                                 />
                                 <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-8 w-8 p-0 rounded-full">
                                     {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -504,6 +504,8 @@ export default function MentraChatClient() {
 
 
 
+
+    
 
     
 
