@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -6,7 +7,7 @@
  */
 
 import { appRoute } from '@genkit-ai/next';
-import { defineFlow, getFlow } from 'genkit/flow';
+import { getFlow } from 'genkit';
 import '@/ai/dev'; // Make sure to import your flows so they are registered.
 
 export async function POST(
