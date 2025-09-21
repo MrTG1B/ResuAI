@@ -324,11 +324,11 @@ function MentraChatPage() {
                             ) : (
                                 <>
                                     <Link href={`/mentra?id=${chat.id}`} className="flex-1 overflow-hidden">
-                                        <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200 hover:bg-muted/50" style={chatId === chat.id ? { backgroundColor: '#45B8AC' } : {}}>
+                                        <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200 hover:bg-muted/50" style={chatId === chat.id ? { backgroundColor: '#3aa195' } : {}}>
                                             {chat.title}
                                         </SidebarMenuButton>
                                     </Link>
-                                    <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                    <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity group-data-[collapsible=icon]:hidden">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon" className="h-7 w-7">
