@@ -463,7 +463,7 @@ function MentraChatPage() {
                                     ))}
                                 </div>
                             )}
-                            <div className="flex w-full items-center gap-2">
+                            <div className="flex w-full items-start gap-2">
                                 <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
                                 <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
                                 <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 text-card-foreground bg-transparent" />
