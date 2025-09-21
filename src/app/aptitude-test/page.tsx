@@ -58,6 +58,11 @@ function AptitudeTestPageContent() {
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
 
   useEffect(() => {
+    if (!auth) {
+        toast({ title: "Authentication Error", description: "Firebase is not configured.", variant: "destructive" });
+        router.push('/login');
+        return;
+    }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         router.push('/login');
@@ -67,7 +72,7 @@ function AptitudeTestPageContent() {
       }
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [router, toast]);
 
   useEffect(() => {
     if (examState !== 'ongoing') return;
