@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to generate a unique aptitude exam.
@@ -62,7 +63,7 @@ const prompt = ai.definePrompt({
 
 const generateAptitudeExamFlow = ai.defineFlow(
   {
-    name: 'generateAptitudeExamFlow',
+    name: 'generateAptitudeExam',
     inputSchema: GenerateAptitudeExamInputSchema,
     outputSchema: GenerateAptitudeExamOutputSchema,
   },

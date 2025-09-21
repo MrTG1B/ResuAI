@@ -107,7 +107,7 @@ Please generate the cover letter now.
 
 const generateCoverLetterFlow = ai.defineFlow(
   {
-    name: 'generateCoverLetterFlow',
+    name: 'generateCoverLetter',
     inputSchema: GenerateCoverLetterInputSchema,
     outputSchema: GenerateCoverLetterOutputSchema,
   },
@@ -116,5 +116,3 @@ const generateCoverLetterFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    

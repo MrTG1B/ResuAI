@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates a preview image for a portfolio project using AI.
@@ -26,7 +27,7 @@ export async function generateProjectImage(input: GenerateProjectImageInput): Pr
 
 const generateProjectImageFlow = ai.defineFlow(
   {
-    name: 'generateProjectImageFlow',
+    name: 'generateProjectImage',
     inputSchema: GenerateProjectImageInputSchema,
     outputSchema: GenerateProjectImageOutputSchema,
   },

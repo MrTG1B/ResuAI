@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates a professional avatar image using AI.
@@ -26,7 +27,7 @@ export async function generateAvatar(input: GenerateAvatarInput): Promise<Genera
 
 const generateAvatarFlow = ai.defineFlow(
   {
-    name: 'generateAvatarFlow',
+    name: 'generateAvatar',
     inputSchema: GenerateAvatarInputSchema,
     outputSchema: GenerateAvatarOutputSchema,
   },

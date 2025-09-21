@@ -51,7 +51,7 @@ Your task is to extract key details from the provided certificate file.
 
 const analyzeCertificateFlow = ai.defineFlow(
   {
-    name: 'analyzeCertificateFlow',
+    name: 'analyzeCertificate',
     inputSchema: AnalyzeCertificateInputSchema,
     outputSchema: AnalyzeCertificateOutputSchema,
   },

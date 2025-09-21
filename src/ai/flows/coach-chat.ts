@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -87,7 +88,7 @@ Attachment {{@index}}:
 
 const coachChatFlow = ai.defineFlow(
   {
-    name: 'coachChatFlow',
+    name: 'coachChat',
     inputSchema: CoachChatInputSchema,
     outputSchema: CoachChatOutputSchema,
   },

@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -79,7 +80,7 @@ ATTACHED FILES FOR CONTEXT:
 
 const aiAssistantChatFlow = ai.defineFlow(
   {
-    name: 'aiAssistantChatFlow',
+    name: 'aiAssistantChat',
     inputSchema: AIAssistantChatInputSchema,
     outputSchema: AIAssistantChatOutputSchema,
   },

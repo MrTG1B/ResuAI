@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -70,7 +71,7 @@ AI Coach's Response (Feedback and Next Question):
 
 const interviewPrepFlow = ai.defineFlow(
   {
-    name: 'interviewPrepFlow',
+    name: 'interviewPrep',
     inputSchema: InterviewPrepInputSchema,
     outputSchema: InterviewPrepOutputSchema,
   },

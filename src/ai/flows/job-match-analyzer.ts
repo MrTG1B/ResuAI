@@ -74,7 +74,7 @@ Here is the job description:
 
 const _atsAnalyzerFlow = ai.defineFlow(
   {
-    name: 'atsAnalyzerFlow',
+    name: 'atsAnalyzer',
     inputSchema: AtsAnalyzerInputSchema,
     outputSchema: AtsAnalyzerOutputSchema,
   },

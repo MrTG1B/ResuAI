@@ -125,7 +125,7 @@ const prompt = ai.definePrompt({
 
 const analyzeResumeFlow = ai.defineFlow(
   {
-    name: 'analyzeResumeFlow',
+    name: 'analyzeResume',
     inputSchema: AnalyzeResumeInputSchema,
     outputSchema: AnalyzeResumeOutputSchema,
   },

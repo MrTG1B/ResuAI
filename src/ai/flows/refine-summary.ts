@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to refine a user's professional summary.
@@ -44,7 +45,7 @@ Keep it to a single, powerful paragraph.
 
 const refineSummaryFlow = ai.defineFlow(
   {
-    name: 'refineSummaryFlow',
+    name: 'refineSummary',
     inputSchema: RefineSummaryInputSchema,
     outputSchema: RefineSummaryOutputSchema,
   },

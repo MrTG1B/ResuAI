@@ -57,7 +57,7 @@ const prompt = ai.definePrompt({
 
 const parseResumeFlow = ai.defineFlow(
   {
-    name: 'parseResumeFlow',
+    name: 'parseResume',
     inputSchema: ParseResumeInputSchema,
     outputSchema: ParseResumeOutputSchema,
   },
