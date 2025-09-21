@@ -151,14 +151,19 @@ function AptitudeTestPageContent() {
           {examState === 'idle' && (
             <Card className="shadow-2xl text-center">
               <CardHeader>
-                <CardTitle className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">Aptitude Test</CardTitle>
+                <div className='flex justify-center items-center mb-4'>
+                    <div className='bg-[#45B8AC]/10 p-4 rounded-full'>
+                        <BrainCircuit className="h-10 w-10 text-[#45B8AC]" />
+                    </div>
+                </div>
+                <CardTitle className="text-3xl font-bold tracking-tight sm:text-4xl font-heading text-primary">Aptitude Test</CardTitle>
                 <CardDescription className="mt-2 text-lg">
                   Prepare for your interviews with a timed aptitude test covering logical, quantitative, and verbal skills.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="mb-4">You will have <strong>{TOTAL_TIME / 60} minutes</strong> to complete the test. Are you ready?</p>
-                <Button size="lg" onClick={startExam}>Start Exam</Button>
+                <Button size="lg" onClick={startExam} style={{backgroundColor: '#45B8AC', color: 'white'}}>Start Exam</Button>
               </CardContent>
             </Card>
           )}
@@ -181,7 +186,11 @@ function AptitudeTestPageContent() {
                     <span>{Math.floor(timeLeft / 60)}:{('0' + (timeLeft % 60)).slice(-2)}</span>
                   </div>
                 </div>
-                 <Progress value={(currentQuestionIndex / examQuestions.length) * 100} className="mt-2 h-2" />
+                 <Progress 
+                    value={(currentQuestionIndex / examQuestions.length) * 100} 
+                    className="mt-2 h-2" 
+                    indicatorClassName="bg-gradient-to-r from-primary to-[#45B8AC]"
+                />
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6 min-h-[300px]">
@@ -236,7 +245,13 @@ function AptitudeTestPageContent() {
               <CardContent className="space-y-6">
                 <div className="flex justify-center items-center">
                     <div className="relative h-40 w-40">
-                        <svg className="w-full h-full" viewBox="0 0 36 36">
+                         <svg className="w-full h-full" viewBox="0 0 36 36">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style={{stopColor: 'hsl(var(--primary))'}} />
+                                <stop offset="100%" style={{stopColor: '#45B8AC'}} />
+                                </linearGradient>
+                            </defs>
                             <path
                                 className="text-muted"
                                 d="M18 2.0845
@@ -247,16 +262,15 @@ function AptitudeTestPageContent() {
                                 strokeWidth="3"
                             />
                             <path
-                                className="text-primary"
+                                stroke="url(#scoreGradient)"
                                 strokeDasharray={`${(score.correct / score.total) * 100}, 100`}
                                 d="M18 2.0845
                                 a 15.9155 15.9155 0 0 1 0 31.831
                                 a 15.9155 15.9155 0 0 1 0 -31.831"
                                 fill="none"
-                                stroke="currentColor"
                                 strokeWidth="3"
                                 strokeLinecap="round"
-                                transform="rotate(90 18 18)"
+                                transform="rotate(-90 18 18)"
                             />
                         </svg>
                          <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -268,14 +282,14 @@ function AptitudeTestPageContent() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-left">
-                    <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
-                        <CheckCircle className="h-8 w-8 text-green-500"/>
+                    <div className="flex items-center gap-3 p-4 bg-muted rounded-lg border-l-4" style={{borderColor: '#45B8AC'}}>
+                        <CheckCircle className="h-8 w-8 text-[#45B8AC]"/>
                         <div>
                             <p className="text-sm text-muted-foreground">Correct Answers</p>
                             <p className="text-2xl font-bold">{score.correct}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                    <div className="flex items-center gap-3 p-4 bg-muted rounded-lg border-l-4 border-destructive">
                         <XCircle className="h-8 w-8 text-destructive"/>
                          <div>
                             <p className="text-sm text-muted-foreground">Incorrect Answers</p>
@@ -284,7 +298,7 @@ function AptitudeTestPageContent() {
                     </div>
                 </div>
 
-                <Button size="lg" onClick={resetExam}>Take Another Test</Button>
+                <Button size="lg" onClick={resetExam} style={{backgroundColor: '#45B8AC', color: 'white'}}>Take Another Test</Button>
               </CardContent>
             </Card>
           )}
@@ -306,7 +320,3 @@ export default function AptitudeTestPage() {
         </Suspense>
     );
 }
-
-    
-
-    
