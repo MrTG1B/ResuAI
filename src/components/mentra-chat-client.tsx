@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -40,6 +39,7 @@ import {
   } from "@/components/ui/alert-dialog"
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 import { type AIAssistantChatOutput } from '@/ai/flows/ai-assistant-chat';
+import { AssistantAvatar } from './assistant-avatar';
 
 interface Attachment {
     name: string;
@@ -53,16 +53,6 @@ const getInitials = (name?: string | null) => {
     if (names.length === 1 && names[0].length > 1) return `${names[0][0]}${names[0][1]}`.toUpperCase();
     return (name[0] || '').toUpperCase();
 }
-
-const AssistantAvatar = () => (
-    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-6 w-6 text-primary-foreground" fill="currentColor">
-            <circle cx="12" cy="6" r="4" fillOpacity="0.9" style={{fill: '#f0f0f0'}}></circle>
-            <path d="M20.5,18.1C19.3,14.4,15.8,12,12,12s-7.3,2.4-8.5,6.1c-0.3,0.9-0.2,1.9,0.4,2.7C4.5,21.5,5.4,22,6.3,22h11.3 c1,0,1.9-0.5,2.5-1.3C20.7,19.9,20.8,19,20.5,18.1z" fillOpacity="0.7"></path>
-        </svg>
-    </div>
-);
-
 
 function MentraChatPage() {
   const router = useRouter();
@@ -405,7 +395,7 @@ function MentraChatPage() {
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-slate-700 text-slate-50' : 'bg-muted'}`}>
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                                 <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                     {message.content}
                                 </ReactMarkdown>
