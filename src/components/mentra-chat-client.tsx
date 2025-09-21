@@ -451,7 +451,7 @@ function MentraChatPage() {
                 </ScrollArea>
 
                 <div className="w-full px-4 sm:px-6 md:px-8 pb-4">
-                    <div className="max-w-4xl mx-auto space-y-2">
+                    <div className="max-w-2xl mx-auto space-y-2">
                         <div className="space-y-2">
                              {attachments.length > 0 && (
                                 <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
@@ -508,6 +508,7 @@ export default function MentraChatClient() {
     
 
     
+
 
 
 
