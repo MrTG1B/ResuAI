@@ -301,7 +301,7 @@ function MentraChatPage() {
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-white hover:text-white bg-[#3aa195] hover:bg-[#3aa195]/90 transition-all duration-300 transform hover:scale-105">
+                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-white hover:text-white bg-[#3aa195]/90 hover:bg-[#3aa195] transition-all duration-300 transform hover:scale-105">
                     <Plus className="h-4 w-4" />
                     <span className="group-data-[collapsible=icon]:hidden ml-2 text-sm">New Chat</span>
                 </Button>
@@ -445,27 +445,28 @@ function MentraChatPage() {
                     )}
                 </div>
             </ScrollArea>
-              <div className="w-full pt-4">
-                  <div className="relative rounded-lg border bg-card p-2 shadow-lg">
-                      {attachments.length > 0 && (
-                          <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
-                              {attachments.map((attachment, index) => (
-                                  <Badge key={index} variant="secondary" className="flex items-center gap-1.5">
-                                      <span className="truncate max-w-[150px]">{attachment.name}</span>
-                                      <button onClick={() => setAttachments(p => p.filter((_, i) => i !== index))} className="rounded-full hover:bg-muted-foreground/20"><X className="h-3 w-3" /></button>
-                                  </Badge>
-                              ))}
-                          </div>
-                      )}
-                      <div className="flex w-full items-start gap-2">
-                          <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
-                          <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-4 w-4" /></Button>
-                          <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 text-card-foreground bg-transparent" />
-                          <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10 w-10 p-0">
-                              {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                          </Button>
-                      </div>
-                  </div>
+              <div className="w-full pt-4 space-y-2">
+                <div className="relative rounded-full border bg-card p-2 shadow-lg">
+                    {attachments.length > 0 && (
+                        <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
+                            {attachments.map((attachment, index) => (
+                                <Badge key={index} variant="secondary" className="flex items-center gap-1.5">
+                                    <span className="truncate max-w-[150px]">{attachment.name}</span>
+                                    <button onClick={() => setAttachments(p => p.filter((_, i) => i !== index))} className="rounded-full hover:bg-muted-foreground/20"><X className="h-3 w-3" /></button>
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
+                    <div className="flex w-full items-center gap-2">
+                        <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
+                        <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
+                        <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 text-card-foreground bg-transparent" />
+                        <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10 w-10 p-0 rounded-full">
+                            {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        </Button>
+                    </div>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">Mentra is an AI and can make mistakes. Please check important information.</p>
               </div>
           </div>
       </SidebarInset>
