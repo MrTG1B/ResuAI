@@ -284,7 +284,7 @@ function MentraChatPage() {
         </CommandDialog>
 
       <Sidebar side="left" collapsible="icon">
-        <SidebarHeader className="border-b p-2 flex items-center justify-between flex-direction-row">
+        <SidebarHeader className="border-b p-2 flex flex-row items-center justify-between">
             <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
                 <Link href="/dashboard" className="group-data-[collapsible=icon]:opacity-0 transition-opacity">
                     <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} style={{ height: 'auto' }} />
@@ -447,3 +447,5 @@ export default function MentraChatClient() {
         </SidebarProvider>
     )
 }
+    
+    
