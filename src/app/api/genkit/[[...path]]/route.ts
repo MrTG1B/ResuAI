@@ -10,5 +10,4 @@ import { appRoute } from '@genkit-ai/next';
 import '@/ai/dev'; // Make sure to import your flows so they are registered.
 
 // Expose all registered flows via the appRoute helper.
-// Passing an options object (even empty) enables router mode.
-export const POST = appRoute({} as any);
+export const POST = appRoute();
