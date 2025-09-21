@@ -17,5 +17,6 @@ if (!apiKey) {
 // Initialize Genkit with a single, correctly configured plugin.
 // The API key must be passed inside the `clientOptions`.
 export const ai = genkit({
-  plugins: apiKey ? [googleAI({clientOptions: {apiKey}})] : [],
+  plugins: apiKey ? [googleAI({apiKey})] : [],
 });
+
