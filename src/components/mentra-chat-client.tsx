@@ -21,7 +21,7 @@ import { type ChatMessage } from '@/types/resume';
 import { type ChatSession } from '@/types/chat';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from './ui/badge';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, useSidebar } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
@@ -301,16 +301,16 @@ function MentraChatPage() {
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-white hover:text-white bg-[#3aa195]/90 hover:bg-[#3aa195] transition-all duration-300 transform hover:scale-105">
+                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-sm font-semibold text-white hover:text-white bg-[#3aa195]/90 hover:bg-[#3aa195] transition-all duration-300 transform hover:scale-105">
                     <Plus className="h-4 w-4" />
-                    <span className="group-data-[collapsible=icon]:hidden ml-2 text-sm">New Chat</span>
+                    <span className="group-data-[collapsible=icon]:hidden ml-2">New Chat</span>
                 </Button>
                 <Button onClick={() => setIsSearchOpen(true)} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
                     <Search className="h-4 w-4" />
                      <span className="group-data-[collapsible=icon]:hidden ml-2">Search chats</span>
                 </Button>
             </div>
-            <SidebarMenu>
+            <SidebarMenu className="group-data-[collapsible=icon]:hidden">
                 {isHistoryLoading ? (
                     Array.from({length: 5}).map((_, i) => <SidebarMenuItem key={i}><div className="h-8 w-full bg-muted rounded animate-pulse"/></SidebarMenuItem>)
                 ) : (
