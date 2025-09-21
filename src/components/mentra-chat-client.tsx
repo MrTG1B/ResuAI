@@ -300,7 +300,7 @@ function MentraChatPage() {
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2 text-white hover:text-white" style={{backgroundColor: '#45B8AC'}}>
+                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2 text-white hover:text-white hover:bg-[#45B8AC]/90 transition-all duration-200 transform hover:scale-105" style={{backgroundColor: '#45B8AC'}}>
                     <Plus className="h-4 w-4" />
                     <span className="group-data-[collapsible=icon]:hidden ml-2">New Chat</span>
                 </Button>
@@ -322,7 +322,7 @@ function MentraChatPage() {
                                 </div>
                             ) : (
                                 <Link href={`/mentra?id=${chat.id}`} className="flex-1 overflow-hidden">
-                                    <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate">
+                                    <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200" style={chatId === chat.id ? { backgroundColor: '#45B8AC', color: 'white' } : {}}>
                                         {chat.title}
                                     </SidebarMenuButton>
                                 </Link>
