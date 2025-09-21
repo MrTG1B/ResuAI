@@ -7,13 +7,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth, db, collection, query, orderBy, getDocs, doc, getDoc, deleteDoc, updateDoc, setDoc, serverTimestamp } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, Search, Bot } from 'lucide-react';
+import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, Search, Bot, LayoutDashboard, User as UserIcon, MessageSquare, Info, FileText, LogOut } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
@@ -26,6 +26,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -252,6 +254,12 @@ function MentraChatPage() {
     fetchChatHistory(currentUser.uid);
     setDeletingChatId(null);
   };
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    await signOut(auth);
+    router.push('/');
+  };
   
   if (isPageLoading || !currentUser) {
     return (
@@ -383,8 +391,39 @@ function MentraChatPage() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56" align="end" forceMount>
-                        <DropdownMenuItem onClick={() => router.push('/dashboard')}>Dashboard</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
+                        <DropdownMenuLabel className="font-normal">
+                            <div className="flex flex-col space-y-1">
+                                <p className="text-sm font-medium leading-none">{currentUser.displayName}</p>
+                                <p className="text-xs leading-none text-muted-foreground">{currentUser.email}</p>
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => router.push('/dashboard')} className="cursor-pointer">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Dashboard</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/profile')} className="cursor-pointer">
+                            <UserIcon className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/feedback')} className="cursor-pointer">
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            <span>Feedback</span>
+                        </DropdownMenuItem>
+                         <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => router.push('/about')} className="cursor-pointer">
+                            <Info className="mr-2 h-4 w-4" />
+                            <span>About Us</span>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => router.push('/terms')} className="cursor-pointer">
+                            <FileText className="mr-2 h-4 w-4" />
+                            <span>Terms &amp; Conditions</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                  </DropdownMenu>
             </div>
@@ -448,4 +487,6 @@ export default function MentraChatClient() {
     )
 }
     
+    
+
     
