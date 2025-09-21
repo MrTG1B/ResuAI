@@ -296,7 +296,7 @@ function MentraChatPage() {
         <SidebarHeader className="border-b p-2 flex flex-row items-center justify-between">
              <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
                 <Link href="/dashboard" className="group-data-[collapsible=icon]:opacity-0 transition-opacity">
-                    <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} style={{ height: 'auto' }} />
+                    <Image src="/logo.png" alt="ResuAI Logo" width={70} height={18} style={{ height: 'auto' }} />
                 </Link>
                 <Link href="/dashboard" className="absolute inset-0 opacity-0 group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:group-hover/logo-area:opacity-0 transition-opacity flex items-center justify-center">
                     <Image src="/logo.png" alt="ResuAI Logo" width={24} height={24} style={{ height: 'auto' }} />
@@ -309,7 +309,7 @@ function MentraChatPage() {
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-white hover:text-white hover:bg-[#3aa195] transition-all duration-300 transform hover:scale-105" style={{backgroundColor: '#45B8AC'}}>
+                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-white hover:text-white hover:bg-[#3aa195]/90 transition-all duration-300 transform hover:scale-105" style={{backgroundColor: '#3aa195'}}>
                     <Plus className="h-4 w-4" />
                     <span className="group-data-[collapsible=icon]:hidden ml-2 text-sm">New Chat</span>
                 </Button>
