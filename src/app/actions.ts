@@ -9,9 +9,11 @@ import { atsAnalyzerFlow, type AtsAnalyzerOutput } from "@/ai/flows/job-match-an
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
+import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
 import { interviewPrep as interviewPrepFlow, type InterviewPrepInput } from "@/ai/flows/interview-prep";
+import { generateAptitudeExam as generateAptitudeExamFlow } from "@/ai/flows/generate-aptitude-exam";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
@@ -357,5 +359,29 @@ export async function interviewPrepAction(userId: string, input: InterviewPrepAc
     } catch (error: any) {
         console.error("Error in interview prep action:", error);
         return { success: false, error: "The AI coach is unavailable. Please try again later." };
+    }
+}
+
+export async function generateAptitudeExamAction() {
+    try {
+      const result = await generateAptitudeExamFlow({
+        logicalReasoningCount: 5,
+        quantitativeAnalysisCount: 5,
+        verbalAbilityCount: 5,
+      });
+      return { success: true, data: result };
+    } catch (error: any) {
+      console.error('Error generating aptitude exam:', error);
+      return { success: false, error: error.message || 'Failed to generate exam questions.' };
+    }
+}
+
+export async function aiAssistantChatAction(input: AIAssistantChatInput) {
+    try {
+        const result = await aiAssistantChatFlow(input);
+        return { success: true, data: result };
+    } catch (error: any) {
+        console.error("Error in AI assistant chat action:", error);
+        return { success: false, error: "The AI assistant is unavailable. Please try again later." };
     }
 }

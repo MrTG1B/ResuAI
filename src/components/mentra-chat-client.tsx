@@ -44,6 +44,7 @@ import {
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 import { type AIAssistantChatOutput } from '@/ai/flows/ai-assistant-chat';
 import { AssistantAvatar } from './assistant-avatar';
+import { aiAssistantChatAction } from '@/app/actions';
 
 interface Attachment {
     name: string;
@@ -155,29 +156,20 @@ function MentraChatPage() {
     setIsResponding(true);
 
     try {
-        const response = await fetch('/api/genkit/flow/aiAssistantChat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              input: {
-                history: messages,
-                prompt: currentInput,
-                attachments: currentAttachments.map(a => ({
-                    dataUri: a.dataUri,
-                    mimeType: a.dataUri.substring(a.dataUri.indexOf(':') + 1, a.dataUri.indexOf(';'))
-                })),
-              }
-            })
+        const result = await aiAssistantChatAction({
+            history: messages,
+            prompt: currentInput,
+            attachments: currentAttachments.map(a => ({
+                dataUri: a.dataUri,
+                mimeType: a.dataUri.substring(a.dataUri.indexOf(':') + 1, a.dataUri.indexOf(';'))
+            })),
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'The AI assistant is currently unavailable.');
+        if (!result.success || !result.data) {
+            throw new Error(result.error || 'The AI assistant is currently unavailable.');
         }
-
-        const result = (await response.json()).output as AIAssistantChatOutput;
-
-        const assistantMessage: ChatMessage = { role: 'assistant', content: result.response };
+        
+        const assistantMessage: ChatMessage = { role: 'assistant', content: result.data.response };
         const finalMessages = [...currentMessageHistory, assistantMessage];
         setMessages(finalMessages);
 
@@ -491,3 +483,4 @@ export default function MentraChatClient() {
     
 
     
+
