@@ -6,7 +6,7 @@
  */
 
 import { appRoute } from '@genkit-ai/next';
-import { getFlow } from 'genkit';
+import { defineFlow, getFlow } from 'genkit/flow';
 import '@/ai/dev'; // Make sure to import your flows so they are registered.
 
 export async function POST(
@@ -36,7 +36,7 @@ export async function POST(
     }
     
     // Use the appRoute helper to handle the request for the specific flow.
-    return appRoute(flow)(request);
+    return appRoute({flow})(request);
 
   } catch (err: any) {
     console.error(`Error processing flow "${flowName}":`, err);
