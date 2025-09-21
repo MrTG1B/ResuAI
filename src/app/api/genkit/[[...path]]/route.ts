@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -9,4 +10,4 @@ import { appRoute } from '@genkit-ai/next';
 import '@/ai/dev'; // Make sure to import your flows so they are registered.
 
 // Expose all registered flows via the appRoute helper.
-export const POST = appRoute();
+export const POST = appRoute({});
