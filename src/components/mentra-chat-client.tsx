@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, Search } from 'lucide-react';
+import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, Search, Bot } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
@@ -299,8 +300,8 @@ function MentraChatPage() {
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
-                    <Edit className="h-4 w-4" />
+                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2 text-white hover:text-white" style={{backgroundColor: '#45B8AC'}}>
+                    <Plus className="h-4 w-4" />
                     <span className="group-data-[collapsible=icon]:hidden ml-2">New Chat</span>
                 </Button>
                 <Button onClick={() => setIsSearchOpen(true)} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
@@ -367,13 +368,13 @@ function MentraChatPage() {
         <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
             <div className="flex items-center gap-2">
                  <SidebarTrigger className="md:hidden" />
-                 <span className="font-semibold md:hidden">Mentra</span>
+                 <span className="font-semibold text-lg flex items-center gap-2"><Bot className="text-primary"/> Mentra</span>
             </div>
             <div className="flex items-center gap-2">
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
-                            <Avatar className="h-8 w-8">
+                        <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                            <Avatar className="h-9 w-9 border-2 border-primary/50">
                                 <AvatarImage unoptimized key={currentUser.photoURL} src={currentUser.photoURL || undefined} alt={currentUser.displayName || currentUser.email || 'User'} />
                                 <AvatarFallback className="text-sm font-semibold">
                                     {getInitials(currentUser.displayName)}
@@ -395,7 +396,7 @@ function MentraChatPage() {
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted/70'}`}>
                                 <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                     {message.content}
                                 </ReactMarkdown>
@@ -424,7 +425,7 @@ function MentraChatPage() {
                       )}
                       <div className="flex w-full items-start gap-2">
                           <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
-                          <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding}><Paperclip className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-4 w-4" /></Button>
                           <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 text-card-foreground bg-transparent" />
                           <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10 w-10 p-0">
                               {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
