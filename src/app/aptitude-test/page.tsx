@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -297,8 +298,12 @@ function AptitudeTestPageContent() {
                         </div>
                     </div>
                 </div>
-
-                <Button size="lg" onClick={resetExam} style={{backgroundColor: '#45B8AC', color: 'white'}}>Take Another Test</Button>
+                 <div className="flex justify-center gap-4">
+                    <Button asChild variant="outline" size="lg">
+                        <Link href="/dashboard">Go to Dashboard</Link>
+                    </Button>
+                    <Button size="lg" onClick={resetExam} style={{backgroundColor: '#45B8AC', color: 'white'}}>Take Another Test</Button>
+                </div>
               </CardContent>
             </Card>
           )}
