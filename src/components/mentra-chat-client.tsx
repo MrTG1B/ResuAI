@@ -301,7 +301,7 @@ function MentraChatPage() {
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-sm font-semibold text-white hover:text-white bg-[#3aa195] hover:bg-[#3aa195]/90 transition-all duration-300 transform hover:scale-105">
+                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-sm font-semibold text-white bg-[#3aa195] hover:bg-[#3aa195]/90 transition-all duration-300 transform hover:scale-105">
                     <Plus className="h-4 w-4" />
                     <span className="group-data-[collapsible=icon]:hidden ml-2">New Chat</span>
                 </Button>
@@ -427,13 +427,13 @@ function MentraChatPage() {
             </div>
         </header>
 
-        <div className="flex-grow w-full flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden">
-             <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
+        <div className="flex flex-col flex-1 overflow-hidden">
+             <ScrollArea className="flex-1 p-4 sm:p-6 md:p-8" ref={scrollAreaRef as any}>
                 <div className="space-y-6 pb-8">
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-white font-semibold' : 'bg-muted/70'}`}>
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-[#3aa195] text-white font-semibold' : 'bg-muted/70'}`}>
                                 <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                     {message.content}
                                 </ReactMarkdown>
@@ -448,7 +448,7 @@ function MentraChatPage() {
                     )}
                 </div>
             </ScrollArea>
-              <div className="w-full pt-4 space-y-2">
+              <div className="w-full p-4 sm:p-6 md:p-8 pt-2 space-y-2">
                 <div className="relative rounded-full border bg-card p-2 shadow-lg">
                     {attachments.length > 0 && (
                         <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
