@@ -11,7 +11,6 @@ import rehypeRaw from 'rehype-raw';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth, db, collection, query, orderBy, getDocs, doc, getDoc, deleteDoc, updateDoc, setDoc, serverTimestamp } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, Search, Bot, LayoutDashboard, User as UserIcon, MessageSquare, Info, FileText, LogOut } from 'lucide-react';
@@ -435,7 +434,7 @@ function MentraChatPage() {
                             <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 {message.role === 'assistant' && ( <AssistantAvatar /> )}
                                 <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-[#3aa195] text-white font-semibold' : 'bg-muted/70'}`}>
-                                    <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[gfm]}>
+                                    <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                         {message.content}
                                     </ReactMarkdown>
                                 </div>
