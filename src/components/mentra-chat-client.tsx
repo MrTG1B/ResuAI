@@ -319,32 +319,34 @@ function MentraChatPage() {
                             {editingChatId === chat.id ? (
                                 <div className="flex items-center gap-2 p-2">
                                     <Input value={editingTitle} onChange={e => setEditingTitle(e.target.value)} className="h-8"/>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleRenameChat}><Check className="h-4 w-4"/></Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={handleRenameChat}><Check className="h-4 w-4"/></Button>
                                 </div>
                             ) : (
-                                <Link href={`/mentra?id=${chat.id}`} className="flex-1 overflow-hidden">
-                                    <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200 hover:bg-muted/50" style={chatId === chat.id ? { backgroundColor: '#45B8AC' } : {}}>
-                                        {chat.title}
-                                    </SidebarMenuButton>
-                                </Link>
+                                <>
+                                    <Link href={`/mentra?id=${chat.id}`} className="flex-1 overflow-hidden">
+                                        <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200 hover:bg-muted/50" style={chatId === chat.id ? { backgroundColor: '#45B8AC' } : {}}>
+                                            {chat.title}
+                                        </SidebarMenuButton>
+                                    </Link>
+                                    <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuItem onClick={() => {setEditingChatId(chat.id); setEditingTitle(chat.title);}}>
+                                                    <Edit className="mr-2 h-4 w-4"/> Rename
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => setDeletingChatId(chat.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                                                    <Trash2 className="mr-2 h-4 w-4"/> Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                </>
                             )}
-                            <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                                        <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem onClick={() => {setEditingChatId(chat.id); setEditingTitle(chat.title);}}>
-                                        <Edit className="mr-2 h-4 w-4"/> Rename
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setDeletingChatId(chat.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                                        <Trash2 className="mr-2 h-4 w-4"/> Delete
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            </div>
                         </SidebarMenuItem>
                     ))
                 )}
@@ -428,7 +430,7 @@ function MentraChatPage() {
                     {messages.map((message, index) => (
                         <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-white font-semibold' : 'bg-muted/70'}`}>
+                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary/90 text-white font-semibold' : 'bg-muted/70'}`}>
                                 <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
                                     {message.content}
                                 </ReactMarkdown>
@@ -486,5 +488,7 @@ export default function MentraChatClient() {
 
 
 
+
+    
 
     
