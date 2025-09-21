@@ -427,49 +427,54 @@ function MentraChatPage() {
                     </DropdownMenu>
                 </div>
             </header>
+            
+            <div className="flex flex-col flex-1 justify-between overflow-hidden">
+                <ScrollArea className="flex-1 p-4 sm:p-6 md:p-8" ref={scrollAreaRef as any}>
+                    <div className="space-y-6 pb-8">
+                        {messages.map((message, index) => (
+                            <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                {message.role === 'assistant' && ( <AssistantAvatar /> )}
+                                <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-[#3aa195] text-white font-semibold' : 'bg-muted/70'}`}>
+                                    <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
+                                        {message.content}
+                                    </ReactMarkdown>
+                                </div>
+                            </div>
+                        ))}
+                        {isResponding && (
+                            <div className="flex items-start gap-4 justify-start">
+                                <AssistantAvatar />
+                                <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
 
-            <ScrollArea className="flex-1 p-4 sm:p-6 md:p-8" ref={scrollAreaRef as any}>
-                <div className="space-y-6 pb-8">
-                    {messages.map((message, index) => (
-                        <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            {message.role === 'assistant' && ( <AssistantAvatar /> )}
-                            <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-[#3aa195] text-white font-semibold' : 'bg-muted/70'}`}>
-                                <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
-                                    {message.content}
-                                </ReactMarkdown>
+                <div className="w-full px-4 sm:px-6 md:px-8 pb-4 space-y-2">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="relative rounded-full border bg-card p-2 shadow-lg">
+                            {attachments.length > 0 && (
+                                <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
+                                    {attachments.map((attachment, index) => (
+                                        <Badge key={index} variant="secondary" className="flex items-center gap-1.5">
+                                            <span className="truncate max-w-[150px]">{attachment.name}</span>
+                                            <button onClick={() => setAttachments(p => p.filter((_, i) => i !== index))} className="rounded-full hover:bg-muted-foreground/20"><X className="h-3 w-3" /></button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="flex w-full items-center gap-2">
+                                <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
+                                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
+                                <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 text-card-foreground bg-transparent" />
+                                <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10 w-10 p-0 rounded-full">
+                                    {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                </Button>
                             </div>
                         </div>
-                    ))}
-                    {isResponding && (
-                        <div className="flex items-start gap-4 justify-start">
-                            <AssistantAvatar />
-                            <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
-                        </div>
-                    )}
-                </div>
-            </ScrollArea>
-            <div className="w-full p-4 sm:p-6 md:p-8 pt-2 space-y-2">
-            <div className="relative rounded-full border bg-card p-2 shadow-lg">
-                {attachments.length > 0 && (
-                    <div className="flex flex-wrap gap-2 p-2 border-b mb-2">
-                        {attachments.map((attachment, index) => (
-                            <Badge key={index} variant="secondary" className="flex items-center gap-1.5">
-                                <span className="truncate max-w-[150px]">{attachment.name}</span>
-                                <button onClick={() => setAttachments(p => p.filter((_, i) => i !== index))} className="rounded-full hover:bg-muted-foreground/20"><X className="h-3 w-3" /></button>
-                            </Badge>
-                        ))}
+                        <p className="text-xs text-muted-foreground text-center">Mentra is an AI and can make mistakes. Please check important information.</p>
                     </div>
-                )}
-                <div className="flex w-full items-center gap-2">
-                    <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
-                    <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
-                    <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="resize-none w-full border-0 shadow-none focus-visible:ring-0 p-2 text-card-foreground bg-transparent" />
-                    <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10 w-10 p-0 rounded-full">
-                        {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    </Button>
                 </div>
-            </div>
-            <p className="text-xs text-muted-foreground text-center">Mentra is an AI and can make mistakes. Please check important information.</p>
             </div>
         </div>
       </SidebarInset>
