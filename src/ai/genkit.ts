@@ -1,3 +1,4 @@
+'use server';
 
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
@@ -14,8 +15,8 @@ if (!apiKey) {
   );
 }
 
-// Initialize Genkit with a single, correctly configured plugin.
-// The API key must be passed inside the `clientOptions`.
+// Initialize Genkit with the correctly configured Google AI plugin.
+// The API key must be passed to the googleAI() function directly.
 export const ai = genkit({
   plugins: apiKey ? [googleAI({apiKey})] : [],
 });
