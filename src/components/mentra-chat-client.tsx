@@ -296,10 +296,10 @@ function MentraChatPage() {
         <SidebarHeader className="border-b p-2 flex items-center justify-between flex-direction-row">
             <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
                 <Link href="/dashboard" className="group-data-[collapsible=icon]:opacity-0 transition-opacity">
-                    <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} />
+                    <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} style={{ height: 'auto' }} />
                 </Link>
                 <Link href="/dashboard" className="absolute inset-0 opacity-0 group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:group-hover/logo-area:opacity-0 transition-opacity flex items-center justify-center">
-                    <Image src="/logo.png" alt="ResuAI Logo" width={24} height={24} />
+                    <Image src="/logo.png" alt="ResuAI Logo" width={24} height={24} style={{ height: 'auto' }} />
                 </Link>
                 <div className="absolute inset-0 opacity-0 group-data-[collapsible=icon]:group-hover/logo-area:opacity-100 transition-opacity">
                     <SidebarTrigger className="h-8 w-8" />

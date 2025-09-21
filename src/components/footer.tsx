@@ -11,7 +11,7 @@ export function Footer() {
           {/* Company Info */}
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center mb-4">
-              <Image src="/logo.png" alt="ResuAI Logo" width={90} height={23} />
+              <Image src="/logo.png" alt="ResuAI Logo" width={90} height={23} style={{ height: 'auto' }} />
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs">
               AI-powered tools to build job-winning resumes, portfolios, and cover letters.

@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
   return (
     <div className="flex flex-col min-h-screen items-center justify-center p-4">
         <div className="absolute top-8">
-            <Image src="/logo.png" alt="ResuAI Logo" width={140} height={35} />
+            <Image src="/logo.png" alt="ResuAI Logo" width={140} height={35} style={{ height: 'auto' }} />
         </div>
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader>
