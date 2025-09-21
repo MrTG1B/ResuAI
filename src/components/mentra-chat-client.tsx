@@ -465,9 +465,9 @@ function MentraChatPage() {
                             )}
                             <div className="relative flex w-full items-center rounded-full border bg-card px-2 shadow-lg">
                                 <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
-                                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
-                                <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="flex-1 resize-none w-full border-0 shadow-none focus-visible:ring-0 py-2 px-1 text-card-foreground bg-transparent" />
-                                <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-10 w-10 p-0 rounded-full">
+                                <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
+                                <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}} placeholder="Ask Mentra anything..." disabled={isResponding} rows={1} className="flex-1 resize-none w-full border-0 shadow-none focus-visible:ring-0 py-1.5 px-1 text-card-foreground bg-transparent" />
+                                <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-8 w-8 p-0 rounded-full">
                                     {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                                 </Button>
                             </div>
@@ -501,3 +501,4 @@ export default function MentraChatClient() {
     
 
     
+
