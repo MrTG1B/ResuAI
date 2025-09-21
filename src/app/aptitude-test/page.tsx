@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Clock, CheckCircle, XCircle, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { type GenerateAptitudeExamOutput } from '@/ai/flows/generate-aptitude-exam';
+import { generateAptitudeExam, type GenerateAptitudeExamOutput } from '@/ai/flows/generate-aptitude-exam';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from '@/components/ui/progress';
@@ -89,32 +89,11 @@ function AptitudeTestPageContent() {
     if (!currentUser) return;
     setExamState('loading');
     try {
-      // Call the Genkit flow API endpoint directly
-      const response = await fetch('/api/genkit/flow/generateAptitudeExam', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          input: {
-            logicalReasoningCount: 5,
-            quantitativeAnalysisCount: 5,
-            verbalAbilityCount: 5
-          }
-        })
+      const examData = await generateAptitudeExam({
+        logicalReasoningCount: 5,
+        quantitativeAnalysisCount: 5,
+        verbalAbilityCount: 5
       });
-
-      if (!response.ok) {
-        let errorDetails = "Failed to generate exam.";
-        try {
-            const errorData = await response.json();
-            errorDetails = errorData.error?.message || errorData.error || errorDetails;
-        } catch (e) {
-            console.error("Could not parse error response as JSON:", await response.text());
-        }
-        throw new Error(errorDetails);
-      }
-      
-      const result = await response.json();
-      const examData = result.output as GenerateAptitudeExamOutput;
       
       const allQuestions = [
         ...examData.logicalReasoning,
@@ -129,7 +108,7 @@ function AptitudeTestPageContent() {
       setCurrentQuestionIndex(0);
 
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: error.message || "Failed to generate exam.", variant: 'destructive' });
       setExamState('idle');
     }
   };
@@ -325,3 +304,5 @@ export default function AptitudeTestPage() {
         </Suspense>
     );
 }
+
+    
