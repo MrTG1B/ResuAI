@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -293,7 +294,7 @@ function MentraChatPage() {
 
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="border-b p-2 flex flex-row items-center justify-between">
-            <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
+             <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
                 <Link href="/dashboard" className="group-data-[collapsible=icon]:opacity-0 transition-opacity">
                     <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} style={{ height: 'auto' }} />
                 </Link>
@@ -308,9 +309,9 @@ function MentraChatPage() {
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2 space-y-1">
-                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2 text-white hover:text-white hover:bg-[#45B8AC]/90 transition-all duration-200 transform hover:scale-105" style={{backgroundColor: '#45B8AC'}}>
+                 <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-white hover:text-white hover:bg-[#3aa195] transition-all duration-300 transform hover:scale-105" style={{backgroundColor: '#45B8AC'}}>
                     <Plus className="h-4 w-4" />
-                    <span className="group-data-[collapsible=icon]:hidden ml-2">New Chat</span>
+                    <span className="group-data-[collapsible=icon]:hidden ml-2 text-sm">New Chat</span>
                 </Button>
                 <Button onClick={() => setIsSearchOpen(true)} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
                     <Search className="h-4 w-4" />
@@ -330,7 +331,7 @@ function MentraChatPage() {
                                 </div>
                             ) : (
                                 <Link href={`/mentra?id=${chat.id}`} className="flex-1 overflow-hidden">
-                                    <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200" style={chatId === chat.id ? { backgroundColor: '#45B8AC', color: 'white' } : {}}>
+                                    <SidebarMenuButton isActive={chatId === chat.id} className="w-full justify-start text-left truncate transition-colors duration-200 hover:bg-muted/50" style={chatId === chat.id ? { backgroundColor: 'hsl(var(--muted))' } : {}}>
                                         {chat.title}
                                     </SidebarMenuButton>
                                 </Link>
