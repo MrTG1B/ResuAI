@@ -8,7 +8,7 @@ import { auth } from '@/lib/firebase';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Loader2, Clock, CheckCircle, XCircle, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { generateAptitudeExam, type GenerateAptitudeExamOutput } from '@/ai/flows/generate-aptitude-exam';
@@ -304,5 +304,7 @@ export default function AptitudeTestPage() {
         </Suspense>
     );
 }
+
+    
 
     
