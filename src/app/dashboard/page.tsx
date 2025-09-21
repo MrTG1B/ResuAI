@@ -281,7 +281,7 @@ export default function DashboardPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Progress value={profileCompletion} className="h-2" />
+                        <Progress value={profileCompletion} className="h-2" indicatorClassName="bg-gradient-to-r from-primary to-[#45B8AC]" />
                     </CardContent>
                     <CardFooter>
                         <Button asChild>
