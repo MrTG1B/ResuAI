@@ -14,11 +14,13 @@ import '@/ai/flows/refine-summary.ts';
 import '@/ai/flows/generate-cover-letter.ts';
 import '@/ai/flows/interview-prep.ts';
 import '@/ai/flows/generate-aptitude-exam.ts';
+import '@/ai/flows/generate-chat-title.ts';
 
     
 
     
 
     
+
 
 

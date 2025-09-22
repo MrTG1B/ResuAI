@@ -41,7 +41,7 @@ import {
     AlertDialogTitle,
   } from "@/components/ui/alert-dialog"
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
-import { aiAssistantChatAction } from '@/app/actions';
+import { aiAssistantChatAction, generateChatTitleAction } from '@/app/actions';
 import { AssistantAvatar } from './assistant-avatar';
 import { Input } from '@/components/ui/input';
 
@@ -184,7 +184,9 @@ function MentraChatPage() {
                 lastModified: serverTimestamp(),
             }, { merge: true });
         } else {
-            const title = finalMessages[1]?.content.substring(0, 40) + '...' || "New Chat";
+            const titleResult = await generateChatTitleAction({ messages: finalMessages.slice(1, 3) });
+            const title = titleResult.success ? titleResult.data?.title : "New Chat";
+            
             const newChatDocRef = doc(chatsCollectionRef);
             await setDoc(newChatDocRef, {
                 messages: finalMessages,
@@ -523,3 +525,4 @@ export default function MentraChatClient() {
     
 
     
+

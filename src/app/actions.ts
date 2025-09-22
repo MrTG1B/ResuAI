@@ -14,6 +14,7 @@ import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/a
 import { generateCoverLetter as generateCoverLetterFlow, type GenerateCoverLetterInput } from "@/ai/flows/generate-cover-letter";
 import { interviewPrep as interviewPrepFlow, type InterviewPrepInput } from "@/ai/flows/interview-prep";
 import { generateAptitudeExam as generateAptitudeExamFlow } from "@/ai/flows/generate-aptitude-exam";
+import { generateChatTitle as generateChatTitleFlow, type GenerateChatTitleInput } from "@/ai/flows/generate-chat-title";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
 import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
@@ -383,5 +384,15 @@ export async function aiAssistantChatAction(input: AIAssistantChatInput) {
     } catch (error: any) {
         console.error("Error in AI assistant chat action:", error);
         return { success: false, error: "The AI assistant is unavailable. Please try again later." };
+    }
+}
+
+export async function generateChatTitleAction(input: GenerateChatTitleInput) {
+    try {
+        const result = await generateChatTitleFlow(input);
+        return { success: true, data: result };
+    } catch (error: any) {
+        console.error("Error generating chat title:", error);
+        return { success: false, error: "Failed to generate chat title." };
     }
 }
