@@ -482,7 +482,7 @@ function MentraChatPage() {
                                     onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}}
                                     placeholder="Ask Mentra anything..."
                                     disabled={isResponding}
-                                    className="flex-1 w-full border-0 shadow-none focus-visible:ring-0 text-card-foreground bg-transparent resize-none py-1.5"
+                                    className="flex-1 w-full border-0 shadow-none focus-visible:ring-0 text-card-foreground bg-transparent resize-none py-2"
                                     style={{minHeight: '30px', maxHeight: '120px'}}
                                 />
                                 <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-8 w-8 p-0 rounded-full">
@@ -523,3 +523,4 @@ export default function MentraChatClient() {
     
 
     
+
