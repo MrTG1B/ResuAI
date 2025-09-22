@@ -84,6 +84,7 @@ function MentraChatPage() {
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fetchChatHistory = useCallback(async (userId: string) => {
     if (!db) return;
@@ -252,6 +253,12 @@ function MentraChatPage() {
     if (!auth) return;
     await signOut(auth);
     router.push('/');
+  };
+
+  const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const textarea = e.currentTarget;
+    textarea.style.height = 'auto'; // Reset height
+    textarea.style.height = `${textarea.scrollHeight}px`; // Set to scroll height
   };
   
   if (isPageLoading || !currentUser) {
@@ -463,16 +470,20 @@ function MentraChatPage() {
                                     ))}
                                 </div>
                             )}
-                             <div className="relative flex w-full items-center rounded-xl border bg-card px-2 shadow-lg h-12">
+                             <div className="relative flex w-full items-center rounded-xl border bg-card px-2 shadow-lg">
                                 <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
                                 <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
-                                <Input
+                                <Textarea
+                                    ref={textareaRef}
+                                    rows={1}
                                     value={input}
+                                    onInput={handleTextareaInput}
                                     onChange={e => setInput(e.target.value)}
                                     onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}}
                                     placeholder="Ask Mentra anything..."
                                     disabled={isResponding}
-                                    className="flex-1 w-full border-0 shadow-none focus-visible:ring-0 text-card-foreground bg-transparent resize-none py-3"
+                                    className="flex-1 w-full border-0 shadow-none focus-visible:ring-0 text-card-foreground bg-transparent resize-none py-1.5"
+                                    style={{minHeight: '30px', maxHeight: '120px'}}
                                 />
                                 <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-8 w-8 p-0 rounded-full">
                                     {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
