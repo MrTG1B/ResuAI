@@ -103,11 +103,18 @@ export default function ResumeEditorClient() {
         return null;
     }, [currentUser, toast, router]);
 
-    // Handle updates to editor state
-    const handleEditorStateUpdate = useCallback((newState: SavedEditorState) => {
-        setEditorState(newState);
-        saveStateToFirestore(newState, resumeId);
-    }, [saveStateToFirestore, resumeId]);
+    // Debounced auto-save effect
+    useEffect(() => {
+        if (!editorState || !resumeId) return; // Don't save if no state or not yet saved once
+
+        const handler = setTimeout(() => {
+            saveStateToFirestore(editorState, resumeId);
+        }, 1500); // Debounce for 1.5 seconds
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [editorState, resumeId, saveStateToFirestore]);
 
     const applyAtsSuggestions = useCallback(async (resumeDataUri: string, suggestions: string) => {
         setIsApplyingSuggestions(true);
@@ -230,8 +237,12 @@ export default function ResumeEditorClient() {
                         fileName: `${profileData.name || 'User'}'s Resume`.replace(/\.[^/.]+$/, ""),
                         initialPreviewUri: '',
                     };
-                    setEditorState(newState);
-                    saveStateToFirestore(newState, null);
+                    saveStateToFirestore(newState, null).then(newId => {
+                         if (newId) {
+                            setEditorState(newState);
+                            setResumeId(newId);
+                        }
+                    });
                 } else if (fromFlow === 'analysis') {
                     setFlow('analysis');
                     const suggestions = sessionStorage.getItem('resumeSuggestions');
@@ -442,7 +453,7 @@ export default function ResumeEditorClient() {
 
     const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (editorState) {
-            handleEditorStateUpdate({ ...editorState, fileName: e.target.value.replace(/\.[^/.]+$/, "") });
+            setEditorState({ ...editorState, fileName: e.target.value.replace(/\.[^/.]+$/, "") });
         }
     };
 
@@ -575,7 +586,7 @@ export default function ResumeEditorClient() {
                              {editorState ? (
                                 <ResumeChatPanel 
                                     editorState={editorState}
-                                    setEditorState={handleEditorStateUpdate}
+                                    setEditorState={setEditorState}
                                     isLoading={isAILoading}
                                     setIsLoading={setIsAILoading}
                                     userProfile={userProfile}
