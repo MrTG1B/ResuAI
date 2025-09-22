@@ -463,19 +463,18 @@ function MentraChatPage() {
                                     ))}
                                 </div>
                             )}
-                             <div className="relative flex w-full items-start rounded-xl border bg-card px-2 py-2 shadow-lg">
+                             <div className="relative flex w-full items-center rounded-xl border bg-card px-2 shadow-lg h-12">
                                 <input id="attachment-upload" type="file" className="hidden" onChange={handleFileUpload} ref={attachmentInputRef} disabled={isResponding} multiple />
-                                <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
-                                <Textarea
-                                    rows={1}
+                                <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => attachmentInputRef.current?.click()} aria-label="Attach file" disabled={isResponding} style={{color: '#45B8AC'}}><Paperclip className="h-5 w-5" /></Button>
+                                <Input
                                     value={input}
                                     onChange={e => setInput(e.target.value)}
                                     onKeyDown={e => {if (e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); if (!isResponding) handleSendMessage();}}}
                                     placeholder="Ask Mentra anything..."
                                     disabled={isResponding}
-                                    className="flex-1 w-full border-0 shadow-none focus-visible:ring-0 text-card-foreground bg-transparent resize-none min-h-[52px] max-h-[120px] py-3"
+                                    className="flex-1 w-full border-0 shadow-none focus-visible:ring-0 text-card-foreground bg-transparent resize-none py-3"
                                 />
-                                <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-9 w-9 p-0 rounded-full">
+                                <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-8 w-8 p-0 rounded-full">
                                     {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                                 </Button>
                             </div>
