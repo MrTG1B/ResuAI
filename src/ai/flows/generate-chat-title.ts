@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to generate a short, descriptive title for a chat session.
@@ -15,12 +16,12 @@ const ChatMessageSchema = z.object({
   content: z.string(),
 });
 
-export const GenerateChatTitleInputSchema = z.object({
+const GenerateChatTitleInputSchema = z.object({
   messages: z.array(ChatMessageSchema).describe("The first few messages of the conversation."),
 });
 export type GenerateChatTitleInput = z.infer<typeof GenerateChatTitleInputSchema>;
 
-export const GenerateChatTitleOutputSchema = z.object({
+const GenerateChatTitleOutputSchema = z.object({
   title: z.string().describe("A short, descriptive title for the chat session, no longer than 5-6 words."),
 });
 export type GenerateChatTitleOutput = z.infer<typeof GenerateChatTitleOutputSchema>;
