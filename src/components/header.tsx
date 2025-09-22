@@ -73,13 +73,17 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
   return (
     <header className="py-1 px-4 sm:px-6 lg:px-8 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center h-12">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-1">
           <Link href="/" className="flex items-center">
             <Image src="/logo.png" alt="ResuAI Logo" width={80} height={20} priority style={{ height: 'auto' }} />
           </Link>
-          {pageActions}
         </div>
-        <nav className="flex items-center gap-4">
+        
+        {pageActions && (
+            <div className="flex-grow flex justify-center">{pageActions}</div>
+        )}
+
+        <nav className="flex items-center gap-4 flex-1 justify-end">
             {loading ? (
                 <Skeleton className="h-9 w-24" />
             ) : user ? (

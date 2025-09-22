@@ -473,7 +473,7 @@ export default function ResumeEditorClient() {
     const canDownload = !!editorState?.htmlContent;
 
     const editorActions = (
-        <div className="flex items-center justify-end gap-2 flex-grow ml-auto">
+        <div className="flex items-center justify-end gap-2">
             <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting} style={{color: '#45B8AC', borderColor: '#45B8AC'}}>
                 {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Search className="mr-2 h-4 w-4"/>}
                 Analyze Resume
