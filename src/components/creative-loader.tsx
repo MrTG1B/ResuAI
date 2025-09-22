@@ -23,6 +23,13 @@ const icons = [
   ClipboardCheck,
 ];
 
+// Array of brand colors to cycle through
+const brandColors = [
+    'text-primary', // Orange-Yellow
+    'text-[#F71B3D]', // Red
+    'text-[#45B8AC]', // Teal
+];
+
 interface CreativeLoaderProps {
   texts?: string[];
   className?: string;
@@ -55,14 +62,19 @@ export function CreativeLoader({ texts = defaultTexts, className, children }: Cr
   return (
     <div className={cn("flex flex-col items-center justify-center", className)}>
       <div className="relative w-10 h-10 mb-3 flex items-center justify-center">
-        {icons.map((Icon, index) => (
-          <Icon
-            key={index}
-            className={`w-10 h-10 text-primary absolute transition-opacity duration-500 ease-in-out ${
-              index === currentIconIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-          />
-        ))}
+        {icons.map((Icon, index) => {
+          const colorClass = brandColors[index % brandColors.length];
+          return (
+            <Icon
+                key={index}
+                className={cn(
+                    'w-10 h-10 absolute transition-all duration-500 ease-in-out',
+                    colorClass,
+                    index === currentIconIndex ? 'opacity-100 transform scale-100 rotate-0' : 'opacity-0 transform scale-75 -rotate-12'
+                )}
+            />
+          )
+        })}
       </div>
       <p className="text-sm text-foreground mt-2 transition-opacity duration-500">{currentText}</p>
       {children}
