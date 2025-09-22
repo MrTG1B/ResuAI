@@ -306,7 +306,7 @@ function MentraChatPage() {
             </div>
             <SidebarTrigger className="h-8 w-8 group-data-[collapsible=icon]:hidden" />
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className='px-2'>
             <div className="p-2 space-y-1">
                  <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-sm font-semibold text-white bg-[#3aa195] hover:bg-[#3aa195]/90 transition-all duration-300 transform hover:scale-105">
                     <Plus className="h-4 w-4" />
