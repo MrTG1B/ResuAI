@@ -40,7 +40,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
   } from "@/components/ui/alert-dialog"
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 import { aiAssistantChatAction, generateChatTitleAction } from '@/app/actions';
 import { AssistantAvatar } from './assistant-avatar';
 import { Input } from '@/components/ui/input';
@@ -79,7 +78,7 @@ function MentraChatPage() {
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -262,6 +261,10 @@ function MentraChatPage() {
     textarea.style.height = 'auto'; // Reset height
     textarea.style.height = `${textarea.scrollHeight}px`; // Set to scroll height
   };
+
+  const filteredChatHistory = chatHistory.filter(chat => 
+    chat.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   
   if (isPageLoading || !currentUser) {
     return (
@@ -273,26 +276,6 @@ function MentraChatPage() {
 
   return (
     <div className="flex h-screen w-full bg-background text-foreground">
-        <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-            <CommandInput placeholder="Type to search chats..." />
-            <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup heading="Chats">
-                {chatHistory.map((chat) => (
-                    <CommandItem
-                        key={chat.id}
-                        onSelect={() => {
-                            router.push(`/mentra?id=${chat.id}`);
-                            setIsSearchOpen(false);
-                        }}
-                    >
-                        <span>{chat.title}</span>
-                    </CommandItem>
-                ))}
-                </CommandGroup>
-            </CommandList>
-        </CommandDialog>
-
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader className="p-2 flex flex-row items-center justify-between">
              <div className="relative group/logo-area flex items-center justify-center h-8 group-data-[collapsible=icon]:w-8">
@@ -309,24 +292,30 @@ function MentraChatPage() {
             <SidebarTrigger className="h-8 w-8 group-data-[collapsible=icon]:hidden" />
         </SidebarHeader>
         <SidebarContent className='px-2'>
-            <div className="p-2 space-y-1">
+            <div className="p-2 space-y-2">
                  <Button onClick={handleNewChat} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center h-9 px-3 group-data-[collapsible=icon]:p-2 text-sm font-semibold text-white bg-[#3aa195] hover:bg-[#3aa195]/90 transition-all duration-300 transform hover:scale-105">
                     <Plus className="h-4 w-4" />
                     <span className="group-data-[collapsible=icon]:hidden ml-2">New Chat</span>
                 </Button>
-                <Button onClick={() => setIsSearchOpen(true)} variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
-                    <Search className="h-4 w-4" />
-                     <span className="group-data-[collapsible=icon]:hidden ml-2">Search chats</span>
-                </Button>
+                <div className="relative group-data-[collapsible=icon]:hidden">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search chats..."
+                        className="pl-9 h-9"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
             </div>
-            <div className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider group-data-[collapsible=icon]:hidden mt-4">
+            <div className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider group-data-[collapsible=icon]:hidden mt-2">
                 Chats
             </div>
             <SidebarMenu className="group-data-[collapsible=icon]:hidden">
                 {isHistoryLoading ? (
                     Array.from({length: 5}).map((_, i) => <SidebarMenuItem key={i}><div className="h-8 w-full bg-muted rounded animate-pulse"/></SidebarMenuItem>)
-                ) : (
-                    chatHistory.map(chat => (
+                ) : filteredChatHistory.length > 0 ? (
+                    filteredChatHistory.map(chat => (
                         <SidebarMenuItem key={chat.id} className="group/item relative">
                             {editingChatId === chat.id ? (
                                 <div className="flex items-center gap-2 p-2">
@@ -361,6 +350,10 @@ function MentraChatPage() {
                             )}
                         </SidebarMenuItem>
                     ))
+                ) : (
+                    <div className="px-4 py-2 text-sm text-muted-foreground text-center">
+                        No results found.
+                    </div>
                 )}
             </SidebarMenu>
         </SidebarContent>
@@ -517,6 +510,8 @@ export default function MentraChatClient() {
 
 
 
+
+    
 
     
 
