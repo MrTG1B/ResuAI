@@ -17,7 +17,7 @@ const AIAssistantChatInputSchema = z.object({
       role: z.enum(['user', 'assistant']),
       content: z.string(),
     }))
-    .describe('The history of the conversation so far.'),
+    .describe('The history of the conversation so far, excluding the current prompt.'),
   prompt: z
     .string()
     .describe("The user's latest question or message."),
@@ -85,6 +85,12 @@ const aiAssistantChatFlow = ai.defineFlow(
     outputSchema: AIAssistantChatOutputSchema,
   },
   async (input) => {
+    // Combine the history with the current prompt for the model
+    const fullHistory = [
+        ...input.history,
+        { role: 'user' as const, content: input.prompt }
+    ];
+
     const {output} = await prompt(input, { history: input.history });
     return output!;
   }
