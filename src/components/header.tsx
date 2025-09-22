@@ -79,70 +79,72 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
           </Link>
         </div>
         
-        <div className="flex-1 flex justify-center">{pageActions}</div>
+        <div className="flex items-center gap-4">
+            {pageActions}
 
-        <nav className="flex items-center gap-4 justify-end">
-            {loading ? (
-                <Skeleton className="h-9 w-24" />
-            ) : user ? (
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage unoptimized key={avatarUrl} src={avatarUrl || undefined} alt={user.displayName || user.email || 'User'} />
-                                <AvatarFallback className="text-sm font-semibold">
-                                    {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
-                                </AvatarFallback>
-                            </Avatar>
+            <nav className="flex items-center gap-4">
+                {loading ? (
+                    <Skeleton className="h-9 w-24" />
+                ) : user ? (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage unoptimized key={avatarUrl} src={avatarUrl || undefined} alt={user.displayName || user.email || 'User'} />
+                                    <AvatarFallback className="text-sm font-semibold">
+                                        {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
+                                    </AvatarFallback>
+                                </Avatar>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="end" forceMount>
+                            <DropdownMenuLabel className="font-normal">
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-sm font-medium leading-none">{user.displayName}</p>
+                                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => router.push('/dashboard')} className="cursor-pointer">
+                                <LayoutDashboard className="mr-2 h-4 w-4" />
+                                <span>Dashboard</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/profile')} className="cursor-pointer">
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                <span>Profile</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/feedback')} className="cursor-pointer">
+                                <MessageSquare className="mr-2 h-4 w-4" />
+                                <span>Feedback</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => router.push('/about')} className="cursor-pointer">
+                                <Info className="mr-2 h-4 w-4" />
+                                <span>About Us</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/terms')} className="cursor-pointer">
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>Terms &amp; Conditions</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                                <LogOut className="mr-2 h-4 w-4" />
+                                <span>Log out</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ) : (
+                    <div className="hidden md:flex items-center gap-2">
+                        <Button variant="ghost" asChild size="sm">
+                            <Link href="/login">Login</Link>
                         </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
-                        <DropdownMenuLabel className="font-normal">
-                            <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium leading-none">{user.displayName}</p>
-                                <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                            </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push('/dashboard')} className="cursor-pointer">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            <span>Dashboard</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push('/profile')} className="cursor-pointer">
-                            <UserIcon className="mr-2 h-4 w-4" />
-                            <span>Profile</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push('/feedback')} className="cursor-pointer">
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            <span>Feedback</span>
-                        </DropdownMenuItem>
-                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push('/about')} className="cursor-pointer">
-                            <Info className="mr-2 h-4 w-4" />
-                            <span>About Us</span>
-                        </DropdownMenuItem>
-                         <DropdownMenuItem onClick={() => router.push('/terms')} className="cursor-pointer">
-                            <FileText className="mr-2 h-4 w-4" />
-                            <span>Terms &amp; Conditions</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                 </DropdownMenu>
-            ) : (
-                <div className="hidden md:flex items-center gap-2">
-                    <Button variant="ghost" asChild size="sm">
-                        <Link href="/login">Login</Link>
-                    </Button>
-                    <Button asChild size="sm">
-                        <Link href="/signup">Sign Up</Link>
-                    </Button>
-                </div>
-            )}
-        </nav>
+                        <Button asChild size="sm">
+                            <Link href="/signup">Sign Up</Link>
+                        </Button>
+                    </div>
+                )}
+            </nav>
+        </div>
       </div>
     </header>
   );
