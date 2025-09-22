@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, db, doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs } from '@/lib/firebase';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud, Download, Search, Briefcase } from 'lucide-react';
 import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -473,19 +473,18 @@ export default function ResumeEditorClient() {
     const canDownload = !!editorState?.htmlContent;
 
     const editorActions = (
-        <div className="flex items-center justify-end gap-2 flex-grow">
-            <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
-                {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Analyze Resume"}
+        <div className="flex items-center justify-end gap-2 flex-grow ml-auto">
+            <Button onClick={handleAnalyzeResume} variant="outline" size="sm" disabled={!editorState?.htmlContent || isGeneratingPdf || isParsing || isAnalyzing || isConverting} style={{color: '#45B8AC', borderColor: '#45B8AC'}}>
+                {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Search className="mr-2 h-4 w-4"/>}
+                Analyze Resume
             </Button>
-            <Button onClick={handleDownload} variant="outline" size="sm" disabled={!canDownload || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
-                {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Download PDF"}
+            <Button onClick={handleConvertToPortfolio} size="sm" variant="outline" disabled={!editorState || isConverting || isParsing || isAnalyzing || !editorState.initialPreviewUri} style={{color: '#45B8AC', borderColor: '#45B8AC'}}>
+                {isConverting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Briefcase className="mr-2 h-4 w-4"/>}
+                Create Portfolio
             </Button>
-            <Button onClick={handleConvertToPortfolio} size="sm" disabled={!editorState || isConverting || isParsing || isAnalyzing || !editorState.initialPreviewUri}>
-                {isConverting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                    "Create Portfolio"
-                )}
+            <Button onClick={handleDownload} size="sm" disabled={!canDownload || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
+                {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                Download PDF
             </Button>
         </div>
     );
