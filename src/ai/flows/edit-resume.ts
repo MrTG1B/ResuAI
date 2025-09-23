@@ -205,7 +205,7 @@ You **MUST** use this information.
 
 **CRITICAL RULES:**
 1.  **ATS-FRIENDLY DESIGN:** Your highest priority is to create a resume that can be easily parsed by Applicant Tracking Systems (ATS). This means:
-    *   **Layout:** Strongly prefer clean, single-column layouts. Avoid multi-column layouts unless absolutely necessary for space. **Never use HTML tables for layout.**
+    *   **Layout:** Strongly prefer clean, single-column layouts with a border around the page. Avoid multi-column layouts unless absolutely necessary for space. **Never use HTML tables for layout.**
     *   **Fonts:** Use standard, web-safe fonts like 'Arial', 'Helvetica', 'Times New Roman', or 'Georgia'.
     *   **Headings:** Use standard, clear headings like "Work Experience", "Education", "Skills", "Projects".
     *   **Simplicity:** Avoid complex graphical elements, icons (unless requested), or background images.

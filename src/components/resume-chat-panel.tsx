@@ -154,19 +154,19 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             <CardHeader className="py-3 px-6 border-b">
                 <CardTitle className="text-lg font-medium">AI Assistant</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-4">
-                <ScrollArea className="flex-grow pr-4 -mr-4" ref={scrollAreaRef as any}>
+            <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-0 bg-muted/30">
+                <ScrollArea className="flex-grow p-4" ref={scrollAreaRef as any}>
                     <div className="space-y-4">
                         {messages.length === 0 && (
                             <div className="flex items-end gap-2 justify-start">
-                                <div className="max-w-xs rounded-lg px-3 py-2 break-words bg-muted">
+                                <div className="max-w-xs rounded-lg px-3 py-2 break-words bg-muted/70">
                                     <p className="text-sm">Hello! I'm here to help you improve your resume. What changes would you like to make? You can also attach documents like certificates for context.</p>
                                 </div>
                             </div>
                         )}
                         {messages.map((message, index) => (
                             <div key={index} className={`flex items-end gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-xs rounded-lg px-3 py-2 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                <div className={`max-w-xs rounded-lg px-3 py-2 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted/70'}`}>
                                     {message.role === 'assistant' ? (
                                         <ReactMarkdown 
                                             className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0"
