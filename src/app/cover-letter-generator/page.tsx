@@ -25,8 +25,9 @@ import { useToast } from '@/hooks/use-toast';
 import { generateCoverLetterAction } from '@/app/actions';
 import { type PersonalInfo } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
-import { Loader2, Sparkles, Clipboard, RefreshCw, Save } from 'lucide-react';
+import { Loader2, Sparkles, Clipboard, RefreshCw } from 'lucide-react';
 import { CreativeLoader } from '@/components/creative-loader';
+import { BrandLoader } from '@/components/brand-loader';
 
 const coverLetterSchema = z.object({
   title: z.string().min(3, { message: 'Title must be at least 3 characters.' }),
@@ -158,7 +159,7 @@ function CoverLetterGeneratorPageContent() {
   if (isPageLoading || !currentUser) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <BrandLoader size="lg" />
       </div>
     );
   }
@@ -174,7 +175,7 @@ function CoverLetterGeneratorPageContent() {
           {/* Form Column */}
           <Card className="shadow-2xl">
             <CardHeader>
-              <CardTitle>AI Cover Letter Generator</CardTitle>
+              <CardTitle className="text-3xl font-bold tracking-tight font-heading">AI Cover Letter Generator</CardTitle>
               <CardDescription>Fill in the details below, and our AI will write a tailored cover letter for you based on your profile.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -261,7 +262,7 @@ function CoverLetterGeneratorPageContent() {
                     )}
                   />
                   <Button type="submit" className="w-full text-lg" size="lg" disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <ActionIcon className="mr-2 h-5 w-5" />}
+                    {isProcessing ? <BrandLoader size="sm" className="mr-2" /> : <ActionIcon className="mr-2 h-5 w-5" />}
                     {actionButtonText}
                   </Button>
                 </form>
@@ -272,7 +273,7 @@ function CoverLetterGeneratorPageContent() {
           {/* Result Column */}
           <Card className="shadow-2xl flex flex-col">
             <CardHeader>
-              <CardTitle>Your Generated Cover Letter</CardTitle>
+              <CardTitle className="text-2xl font-bold tracking-tight font-heading">Your Generated Cover Letter</CardTitle>
               <CardDescription>Review the generated letter below. You can copy it or regenerate it with new details.</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col">
@@ -311,7 +312,7 @@ export default function CoverLetterGeneratorPage() {
     return (
         <Suspense fallback={
             <div className="flex h-screen items-center justify-center">
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <BrandLoader size="lg" />
             </div>
         }>
             <CoverLetterGeneratorPageContent />

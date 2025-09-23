@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages, Smile, FileText } from "lucide-react";
+import { Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages, Smile, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { BrandLoader } from "@/components/brand-loader";
 
 
 const socialLinkSchema = z.object({
@@ -389,7 +390,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <BrandLoader size="lg" />
         <p className="mt-4 text-muted-foreground">Loading your profile...</p>
       </div>
     );
@@ -463,7 +464,7 @@ export default function ProfilePage() {
                                     className="rounded-full object-cover w-32 h-32 border-2 border-primary"
                                 />
                                 <label htmlFor="profile-picture-upload" className="absolute inset-0 bg-black/60 flex items-center justify-center text-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Camera className="h-8 w-8"/>}
+                                    {isUploading ? <BrandLoader size="md" /> : <Camera className="h-8 w-8"/>}
                                 </label>
                                 <Input id="profile-picture-upload" type="file" className="hidden" accept="image/*" onChange={handleProfilePictureUpload} disabled={isUploading} />
                             </div>
@@ -525,7 +526,7 @@ export default function ProfilePage() {
                         <div className="flex justify-between items-center">
                             <SectionTitle icon={UserCircle} text="About Me" color="secondary"/>
                             <Button type="button" variant="outline" size="sm" onClick={handleRefineSummary} disabled={isRefining} style={{borderColor: '#45B8AC', color: '#45B8AC'}}>
-                                {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                {isRefining ? <BrandLoader size="sm" className="mr-2"/> : <Sparkles className="mr-2 h-4 w-4" />}
                                 Refine with AI
                             </Button>
                         </div>
@@ -842,7 +843,7 @@ export default function ProfilePage() {
               
               <div className="flex justify-end pt-4 border-t">
                 <Button type="submit" disabled={isSaving || isAnalyzingCert || isUploading || isRefining}>
-                  {(isSaving || isUploading || isRefining) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {(isSaving || isUploading || isRefining) && <BrandLoader size="sm" className="mr-2" />}
                   Save Profile
                 </Button>
               </div>
@@ -973,7 +974,7 @@ export default function ProfilePage() {
                             className="relative mt-1 flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
                         >
                             {isAnalyzingCert ? (
-                                <Loader2 className="h-6 w-6 animate-spin text-[#45B8AC]" />
+                                <BrandLoader size="md" className="text-[#45B8AC]" />
                             ) : (
                                 <div className="flex flex-col items-center justify-center text-center">
                                     <UploadCloud className="w-6 h-6 mb-1 text-[#45B8AC]" />

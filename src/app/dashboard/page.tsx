@@ -10,7 +10,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit } from 'lucide-react';
+import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit } from 'lucide-react';
 import { type SavedEditorState } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
@@ -31,6 +31,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MentraIcon } from '@/components/mentra-icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BrandLoader } from '@/components/brand-loader';
 
 
 function ToolCard({ href, icon: Icon, title, description, actionText, color = 'primary' }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string, color?: 'primary' | 'secondary' }) {
@@ -235,7 +236,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <BrandLoader size="lg" />
         <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
       </div>
     );
@@ -376,7 +377,7 @@ export default function DashboardPage() {
                     <CardContent>
                         <TabsContent value="resumes" className="space-y-4">
                             {isResumeLoading ? (
-                                <div className="flex items-center justify-center min-h-[200px]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                                <div className="flex items-center justify-center min-h-[200px]"><BrandLoader /></div>
                             ) : resumes.length > 0 ? (
                                 <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                                     {resumes.map(r => (
@@ -399,7 +400,7 @@ export default function DashboardPage() {
                         </TabsContent>
                         <TabsContent value="portfolios" className="space-y-4">
                              {isPortfolioLoading ? (
-                                <div className="flex items-center justify-center min-h-[200px]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                                <div className="flex items-center justify-center min-h-[200px]"><BrandLoader /></div>
                             ) : portfolios.length > 0 ? (
                                 <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                                     {portfolios.map(p => (
@@ -422,7 +423,7 @@ export default function DashboardPage() {
                         </TabsContent>
                         <TabsContent value="coverletters" className="space-y-4">
                              {isCoverLetterLoading ? (
-                                <div className="flex items-center justify-center min-h-[200px]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                                <div className="flex items-center justify-center min-h-[200px]"><BrandLoader /></div>
                             ) : coverLetters.length > 0 ? (
                                <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                                     {coverLetters.map(cl => (

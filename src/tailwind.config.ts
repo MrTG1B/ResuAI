@@ -124,6 +124,9 @@ export default {
           '50%': { 'background-position': '100% 50%' },
           '100%': { 'background-position': '0% 50%' },
         },
+        'brand-spin': {
+          'to': { transform: 'rotate(360deg)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -133,6 +136,7 @@ export default {
         'wave': 'wave 4s ease infinite',
         'wobble': 'wobble 1s ease-in-out infinite',
         'gradient': 'gradient 3s ease infinite',
+        'brand-spin': 'brand-spin 1s linear infinite',
       },
     },
   },

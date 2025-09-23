@@ -13,7 +13,7 @@ import { auth, db, collection, query, orderBy, getDocs, doc, getDoc, deleteDoc, 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, Search, Bot, LayoutDashboard, User as UserIcon, MessageSquare, Info, FileText, LogOut } from 'lucide-react';
+import { Send, Paperclip, X, Plus, Trash2, Edit, Check, MoreVertical, Search, Bot, LayoutDashboard, User as UserIcon, MessageSquare, Info, FileText, LogOut } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from './pulsing-dots-loader';
 import { type ChatMessage } from '@/types/resume';
@@ -43,6 +43,7 @@ import {
 import { aiAssistantChatAction, generateChatTitleAction } from '@/app/actions';
 import { AssistantAvatar } from './assistant-avatar';
 import { Input } from '@/components/ui/input';
+import { BrandLoader } from './brand-loader';
 
 
 interface Attachment {
@@ -269,7 +270,7 @@ function MentraChatPage() {
   if (isPageLoading || !currentUser) {
     return (
         <div className="flex h-screen w-full items-center justify-center bg-background">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <BrandLoader size="lg" />
         </div>
     );
   }
@@ -481,7 +482,7 @@ function MentraChatPage() {
                                     style={{minHeight: '30px', maxHeight: '120px'}}
                                 />
                                 <Button onClick={handleSendMessage} disabled={isResponding || (!input.trim() && attachments.length === 0)} className="shrink-0 h-8 w-8 p-0 rounded-full">
-                                    {isResponding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                    {isResponding ? <BrandLoader size="sm" /> : <Send className="h-4 w-4" />}
                                 </Button>
                             </div>
                         </div>

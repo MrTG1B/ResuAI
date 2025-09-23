@@ -20,10 +20,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, Send, Bot } from 'lucide-react';
+import { Send, Bot } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { AssistantAvatar } from '@/components/assistant-avatar';
+import { BrandLoader } from '@/components/brand-loader';
 
 export default function InterviewPrepClient() {
     const router = useRouter();
@@ -136,7 +137,7 @@ export default function InterviewPrepClient() {
     if (isPageLoading) {
         return (
             <div className="flex h-screen items-center justify-center">
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <BrandLoader size="lg" />
             </div>
         );
     }
@@ -165,7 +166,7 @@ export default function InterviewPrepClient() {
                                         <Textarea id="job-description" value={jobDescription} onChange={e => setJobDescription(e.target.value)} placeholder="Paste the full job description here..." className="h-40 resize-none" required />
                                     </div>
                                     <Button type="submit" className="w-full text-lg" size="lg" disabled={isResponding}>
-                                        {isResponding ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Bot className="mr-2 h-5 w-5" />}
+                                        {isResponding ? <BrandLoader size="sm" className="mr-2" /> : <Bot className="mr-2 h-5 w-5" />}
                                         Start Mock Interview
                                     </Button>
                                 </form>

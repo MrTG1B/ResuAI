@@ -10,7 +10,8 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, UploadCloud, PenSquare, ArrowRight } from 'lucide-react';
+import { UploadCloud, PenSquare, ArrowRight } from 'lucide-react';
+import { BrandLoader } from '@/components/brand-loader';
 
 export default function ResumeBuilderPage() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function ResumeBuilderPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <BrandLoader size="lg" />
         <p className="mt-4 text-muted-foreground">Verifying your session...</p>
       </div>
     );

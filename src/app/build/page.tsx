@@ -9,8 +9,8 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ResumeForm } from "@/components/resume-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { BrandLoader } from '@/components/brand-loader';
 
 export default function BuildPage() {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function BuildPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <BrandLoader size="lg" />
         <p className="mt-4 text-muted-foreground">Verifying your session...</p>
       </div>
     );

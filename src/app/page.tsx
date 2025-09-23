@@ -9,8 +9,9 @@ import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { ArrowRight, Bot, PenSquare, Eye, Loader2, Star, Quote, FileText, LayoutTemplate, SearchCheck, NotebookPen } from 'lucide-react';
+import { ArrowRight, Bot, PenSquare, Eye, Star, Quote, FileText, LayoutTemplate, SearchCheck, NotebookPen } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { BrandLoader } from '@/components/brand-loader';
 
 export default function HomePage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <BrandLoader size="lg" />
         <p className="mt-4 text-muted-foreground">Loading...</p>
       </div>
     );

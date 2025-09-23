@@ -10,7 +10,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Loader2, Clock, CheckCircle, XCircle, BrainCircuit } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { generateAptitudeExam, type GenerateAptitudeExamOutput } from '@/ai/flows/generate-aptitude-exam';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { CreativeLoader } from '@/components/creative-loader';
+import { BrandLoader } from '@/components/brand-loader';
 
 type Question = GenerateAptitudeExamOutput['logicalReasoning'][0];
 type ExamQuestions = {
@@ -139,7 +140,7 @@ function AptitudeTestPageContent() {
   if (isPageLoading || !currentUser) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <BrandLoader size="lg" />
       </div>
     );
   }
@@ -318,7 +319,7 @@ export default function AptitudeTestPage() {
     return (
         <Suspense fallback={
             <div className="flex h-screen items-center justify-center">
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <BrandLoader size="lg" />
             </div>
         }>
             <AptitudeTestPageContent />

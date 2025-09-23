@@ -11,13 +11,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Loader2, UploadCloud, Bot, FileText } from 'lucide-react';
+import { UploadCloud, Bot, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { atsAnalyzeAction } from '@/app/actions';
 import { CreativeLoader } from '@/components/creative-loader';
 import { AtsResult } from '@/components/ats-result';
 import { type AtsAnalyzerOutput } from '@/ai/flows/job-match-analyzer';
+import { BrandLoader } from '@/components/brand-loader';
 
 const analysisTexts = [
     "Simulating ATS scan...",
@@ -143,7 +143,7 @@ export default function ResumeAnalyzerPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <BrandLoader size="lg" />
         <p className="mt-4 text-muted-foreground">Verifying your session...</p>
       </div>
     );
