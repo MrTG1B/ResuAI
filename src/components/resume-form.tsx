@@ -153,7 +153,12 @@ export function ResumeForm({ user }: { user: User }) {
         router.push(`/portfolio?id=${newDocRef.id}`);
 
       } catch (error: any) {
-        toast({ title: "Failed to build portfolio", description: error.message, variant: "destructive" });
+        console.error("Failed to build portfolio:", error);
+        toast({ 
+            title: "Failed to build portfolio", 
+            description: "An unexpected error occurred. Please try again later.", 
+            variant: "destructive" 
+        });
       } finally {
         setIsLoading(false);
       }
