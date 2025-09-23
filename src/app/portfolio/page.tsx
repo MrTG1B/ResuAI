@@ -18,6 +18,7 @@ import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Glo
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth, db, getDoc, setDoc, doc } from "@/lib/firebase";
 import { uploadImageAction } from "@/app/actions";
+import { BrandLoader } from "@/components/brand-loader";
 
 function PortfolioSkeleton() {
   return (
@@ -83,6 +84,7 @@ function PortfolioPageContent() {
   const [editablePortfolio, setEditablePortfolio] = useState<PortfolioData | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [isUploading, setIsUploading] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [notFound, setNotFound] = useState(false);
@@ -95,46 +97,52 @@ function PortfolioPageContent() {
   
   useEffect(() => {
     if (!db || !auth) {
+        toast({ title: "Configuration Error", description: "Firebase is not configured.", variant: "destructive" });
+        setIsPageLoading(false);
         setIsLoading(false);
         return;
     }
   
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      const portfolioId = searchParams.get('id');
+        if (user) {
+            setCurrentUser(user);
+            const portfolioId = searchParams.get('id');
+            
+            if (!portfolioId) {
+                setNotFound(true);
+                toast({ title: "Not Found", description: "Portfolio ID is missing.", variant: "destructive" });
+                setIsLoading(false);
+                setIsPageLoading(false);
+                return;
+            }
 
-      if (!user) {
-        toast({ title: "Not Found", description: "You must be logged in to view a portfolio.", variant: "destructive" });
-        router.push('/login');
-        return;
-      }
-      
-      if (!portfolioId) {
-        setNotFound(true);
-        toast({ title: "Not Found", description: "Portfolio ID is missing.", variant: "destructive" });
-        setIsLoading(false);
-        return;
-      }
+            try {
+                // For now, we assume if you are logged in, you can try to view it.
+                // Firestore rules will determine if you are the owner.
+                setIsOwner(true); 
 
-      setIsOwner(true); // Assuming if they got here with a user and ID, they are the owner for now.
+                const portfolioDocRef = doc(db, `users/${user.uid}/portfolios`, portfolioId);
+                const portfolioDoc = await getDoc(portfolioDocRef);
 
-      try {
-        const portfolioDocRef = doc(db, `users/${user.uid}/portfolios`, portfolioId);
-        const portfolioDoc = await getDoc(portfolioDocRef);
-
-        if (portfolioDoc.exists()) {
-          const data = { id: portfolioDoc.id, ...portfolioDoc.data() } as PortfolioData;
-          setPortfolio(data);
-          setEditablePortfolio(JSON.parse(JSON.stringify(data))); // Deep copy for editing
+                if (portfolioDoc.exists()) {
+                    const data = { id: portfolioDoc.id, ...portfolioDoc.data() } as PortfolioData;
+                    setPortfolio(data);
+                    setEditablePortfolio(JSON.parse(JSON.stringify(data))); // Deep copy for editing
+                } else {
+                    setNotFound(true);
+                    toast({ title: "Not Found", description: "This portfolio does not exist or you do not have permission to view it.", variant: "destructive" });
+                }
+            } catch (error) {
+                toast({ title: "Error", description: "Failed to fetch portfolio data. You may not have permission to view this.", variant: "destructive" });
+                setNotFound(true);
+            } finally {
+                setIsLoading(false);
+            }
         } else {
-          setNotFound(true);
-          toast({ title: "Not Found", description: "This portfolio does not exist.", variant: "destructive" });
+            toast({ title: "Authentication Required", description: "You must be logged in to view a portfolio.", variant: "destructive" });
+            router.push('/login');
         }
-      } catch (error) {
-        toast({ title: "Error", description: "Failed to fetch portfolio data.", variant: "destructive" });
-      } finally {
-        setIsLoading(false);
-      }
+        setIsPageLoading(false);
     });
 
     return () => unsubscribe();
@@ -304,6 +312,14 @@ function PortfolioPageContent() {
     return <Globe className={className} />;
   };
   
+  if (isPageLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <BrandLoader size="lg" />
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-muted/40">
@@ -323,8 +339,8 @@ function PortfolioPageContent() {
             <main className="flex-grow flex items-center justify-center text-center p-4">
                 <div>
                     <h1 className="text-4xl font-bold font-heading">Portfolio Not Found</h1>
-                    <p className="text-muted-foreground mt-2">The portfolio you are looking for does not exist or has been moved.</p>
-                    <Button onClick={() => router.push('/dashboard')} className="mt-6">Go Home</Button>
+                    <p className="text-muted-foreground mt-2">The portfolio you are looking for does not exist or you do not have permission to view it.</p>
+                    <Button onClick={() => router.push('/dashboard')} className="mt-6">Go to Dashboard</Button>
                 </div>
             </main>
             <Footer />
@@ -333,7 +349,15 @@ function PortfolioPageContent() {
   }
 
   if (!portfolio || !editablePortfolio) {
-    return null;
+    return (
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow flex items-center justify-center text-center p-4">
+                 <BrandLoader size="lg" />
+            </main>
+            <Footer />
+        </div>
+    );
   }
   
   const { personalInfo, summary, experience, education, skills, projects, certifications, colorPalette } = isEditMode ? editablePortfolio : portfolio;
