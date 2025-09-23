@@ -436,7 +436,7 @@ export default function ProfilePage() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <Tabs defaultValue="personal" className="w-full" orientation="horizontal">
-                <TabsList className="grid w-full grid-cols-5 md:grid-cols-9">
+                <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
                   <TabsTrigger value="personal">Personal</TabsTrigger>
                   <TabsTrigger value="skills">Skills</TabsTrigger>
                   <TabsTrigger value="languages">Languages</TabsTrigger>
@@ -891,7 +891,7 @@ export default function ProfilePage() {
               </div>
             )}
             {editingSection === 'education' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="degree">Degree</Label>
                   <Input id="degree" value={dialogData.degree || ''} onChange={(e) => setDialogData({ ...dialogData, degree: e.target.value })} />
@@ -1016,7 +1016,7 @@ export default function ProfilePage() {
               </div>
             )}
              {editingSection === 'socials' && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                         <Label htmlFor="platform">Platform</Label>
                         <Input id="platform" value={dialogData.platform || ''} onChange={(e) => setDialogData({ ...dialogData, platform: e.target.value })} placeholder="e.g., GitHub"/>
@@ -1034,7 +1034,7 @@ export default function ProfilePage() {
                 </div>
             )}
             {editingSection === 'languages' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="language">Language</Label>
                   <Input id="language" value={dialogData.language || ''} onChange={(e) => setDialogData({ ...dialogData, language: e.target.value })} placeholder="e.g., English"/>

@@ -77,12 +77,12 @@ export default function HomePage() {
         <section className="parallax-bg py-20 lg:py-32 bg-transparent">
           <div className="container mx-auto px-4">
             <div 
-              className="text-center mb-16"
+              className="text-center mb-12 md:mb-16"
             >
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Simple, Powerful, and Fast</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our AI streamlines the entire process, from analyzing your experience to designing a beautiful final product.</p>
             </div>
-            <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div 
                 className="p-8 rounded-lg border bg-card/80 backdrop-blur-sm shadow-2xl animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 hover:shadow-primary/20"
               >
@@ -131,7 +131,7 @@ export default function HomePage() {
         {/* Toolkit Section */}
         <section className="py-20 lg:py-32 bg-background">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
+            <div className="text-center mb-12 md:mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Your AI-Powered Career Toolkit</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Everything you need to analyze, edit, and showcase your professional story.</p>
             </div>
@@ -195,7 +195,7 @@ export default function HomePage() {
         {/* Testimonials Section */}
         <section className="parallax-bg py-20 lg:py-32 bg-transparent">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
+            <div className="text-center mb-12 md:mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Why Professionals Love ResuAI</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Don't just take our word for it. Here's what our users are saying.</p>
             </div>

@@ -600,7 +600,7 @@ function PortfolioPageContent() {
 
 export default function PortfolioPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<PortfolioSkeleton />}>
             <PortfolioPageContent />
         </Suspense>
     )
