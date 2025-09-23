@@ -92,7 +92,7 @@ export function ResumeForm({ user }: { user: User }) {
           certifications: userProfile.certifications?.length ? userProfile.certifications : portfolioDraft.certifications,
           languages: userProfile.languages?.length ? userProfile.languages : portfolioDraft.languages,
           interests: userProfile.interests?.length ? userProfile.interests : portfolioDraft.interests,
-          publications: userProfile.publications?.length ? userProfile.publications : portfolioDraft.publications,
+          publications: userProfile.publications?.length ? userProfile.publications : (portfolioDraft.publications || []),
           title: `Portfolio from ${new Date().toLocaleDateString()}`,
           createdAt: serverTimestamp(),
           colorPalette: colorPalette,
@@ -146,6 +146,9 @@ export function ResumeForm({ user }: { user: User }) {
         } else {
             finalPortfolioData.personalInfo = { name: '', title: '', email: '', phone: '', location: '', socials: [], profilePictureUrl: avatarUrl };
         }
+        
+        // Log the final data object that will be saved to Firestore
+        console.log("Data to be saved to Firestore:", JSON.stringify(finalPortfolioData, null, 2));
 
         // 4. Save final portfolio to Firestore from the client
         const newDocRef = await addDoc(portfolioCollectionRef, finalPortfolioData);
