@@ -1,13 +1,13 @@
 
 "use server";
 
-import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput } from "@/ai/flows/resume-analysis";
-import { generateAvatar as generateAvatarFlow } from "@/ai/flows/generate-avatar";
+import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput, type AnalyzeResumeOutput } from "@/ai/flows/resume-analysis";
+import { generateAvatar as generateAvatarFlow, GenerateAvatarInput } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
-import { atsAnalyzerFlow, type AtsAnalyzerOutput } from "@/ai/flows/job-match-analyzer";
+import { atsAnalyzerFlow } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
-import { generateProjectImage as generateProjectImageFlow } from "@/ai/flows/generate-project-image";
+import { generateProjectImage as generateProjectImageFlow, GenerateProjectImageInput } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
 import { aiAssistantChat as aiAssistantChatFlow, type AIAssistantChatInput } from "@/ai/flows/ai-assistant-chat";
 import { refineSummary as refineSummaryFlow, type RefineSummaryInput } from "@/ai/flows/refine-summary";
@@ -23,147 +23,38 @@ import { uploadImage, deleteImage } from "@/services/image-upload-service";
 import { type CoverLetter } from "@/types/cover-letter";
 
 
-async function maybeAutoFillProfile(userId: string, resumeDataUri: string) {
-    if (!db) return;
-    try {
-        const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
-        const profileSnap = await getDoc(profileDocRef);
-        const profileData = profileSnap.exists() ? profileSnap.data() : {};
-        
-        // Only auto-fill if the profile has never been filled from a resume before.
-        if (profileData.profileFilledFromResume) {
-            return;
-        }
-
-        // Analyze resume to get structured data for profile
-        const analysisResult = await analyzeResumeFlow({ resumeDataUri });
-        const { portfolioDraft } = analysisResult;
-        
-        // Structure the extracted data, ensuring arrays are not undefined
-        const extractedProfileData = {
-            name: portfolioDraft.personalInfo?.name,
-            title: portfolioDraft.personalInfo?.title,
-            email: portfolioDraft.personalInfo?.email,
-            phone: portfolioDraft.personalInfo?.phone,
-            location: portfolioDraft.personalInfo?.location,
-            summary: portfolioDraft.summary || portfolioDraft.personalInfo?.summary,
-            socials: portfolioDraft.personalInfo?.socials || [],
-            skills: portfolioDraft.skills || [],
-            experience: portfolioDraft.experience || [],
-            education: portfolioDraft.education || [],
-            projects: portfolioDraft.projects || [],
-            certifications: portfolioDraft.certifications || [],
-            languages: portfolioDraft.languages || [],
-            interests: portfolioDraft.interests || [],
-            publications: [], // publications is not in the resume analysis output
-        };
-
-        // Merge with existing data, giving precedence to what's already in the profile
-        const finalProfileData = {
-            ...extractedProfileData,
-            ...profileData,
-            profileFilledFromResume: true, // Set flag to prevent future auto-fills
-        };
-
-        await setDoc(profileDocRef, finalProfileData, { merge: true });
-        
-    } catch (error) {
-        console.error("Error during profile auto-fill:", error);
-        // Do not block the main action if this fails, but log the error.
-    }
-}
-
-
-export async function analyzeResumeAction(userId: string, input: AnalyzeResumeInput) {
+// This action is now only responsible for AI analysis and does not interact with the database.
+export async function analyzeResumeAction(input: AnalyzeResumeInput): Promise<{ success: boolean; data?: AnalyzeResumeOutput; error?: string }> {
   try {
-    if (!db) throw new Error("Firestore is not initialized.");
-
-    await maybeAutoFillProfile(userId, input.resumeDataUri);
-    
-    const portfolioCollectionRef = collection(db, 'users', userId, 'portfolios');
-    const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
-    const profileSnap = await getDoc(profileDocRef);
-    const userProfile = profileSnap.exists() ? profileSnap.data() : {};
-
     const analysisResult = await analyzeResumeFlow(input);
-    const portfolioDraftFromAI: Partial<PortfolioData> = analysisResult.portfolioDraft;
-
-    const finalPortfolioData: Partial<PortfolioData> = {
-        ...portfolioDraftFromAI,
-        personalInfo: { ...portfolioDraftFromAI.personalInfo, ...userProfile },
-        summary: userProfile.summary || portfolioDraftFromAI.summary || portfolioDraftFromAI.personalInfo?.summary,
-        experience: userProfile.experience && userProfile.experience.length > 0 ? userProfile.experience : portfolioDraftFromAI.experience,
-        education: userProfile.education && userProfile.education.length > 0 ? userProfile.education : portfolioDraftFromAI.education,
-        skills: userProfile.skills && userProfile.skills.length > 0 ? userProfile.skills : portfolioDraftFromAI.skills,
-        projects: userProfile.projects && userProfile.projects.length > 0 ? userProfile.projects : portfolioDraftFromAI.projects,
-        certifications: userProfile.certifications && userProfile.certifications.length > 0 ? userProfile.certifications : portfolioDraftFromAI.certifications,
-        languages: userProfile.languages && userProfile.languages.length > 0 ? userProfile.languages : portfolioDraftFromAI.languages,
-        interests: userProfile.interests && userProfile.interests.length > 0 ? userProfile.interests : portfolioDraftFromAI.interests,
-        publications: userProfile.publications && userProfile.publications.length > 0 ? userProfile.publications : portfolioDraftFromAI.publications,
-    };
-    
-    finalPortfolioData.title = `Portfolio from ${new Date().toLocaleDateString()}`;
-    finalPortfolioData.createdAt = serverTimestamp();
-    finalPortfolioData.colorPalette = analysisResult.colorPalette;
-
-    let avatarPromise;
-    if (userProfile.profilePictureUrl) {
-      avatarPromise = Promise.resolve(userProfile.profilePictureUrl);
-    } else {
-      avatarPromise = generateAvatarFlow({ prompt: analysisResult.avatarPrompt })
-        .then(res => uploadImage(res.imageDataUri))
-        .then(async (uploadResult) => {
-            await setDoc(profileDocRef, { 
-                profilePictureUrl: uploadResult.url,
-                profilePictureDeleteUrl: uploadResult.deleteUrl
-            }, { merge: true });
-            return uploadResult.url;
-        })
-        .catch(err => {
-            console.error("Avatar generation/upload failed:", err);
-            return 'https://placehold.co/128x128.png';
-        });
-    }
-
-    const projectImagePromises = (finalPortfolioData.projects || []).map(async (project: Project) => {
-        try {
-            if (!project.previewImage) {
-                const imageResult = await generateProjectImageFlow({ description: project.description });
-                project.previewImage = (await uploadImage(imageResult.imageDataUri)).url;
-            }
-        } catch (e) {
-            console.warn(`Failed to generate/upload image for project: ${project.name}`, e);
-            if (!project.previewImage) {
-                project.previewImage = 'https://placehold.co/800x450.png';
-            }
-        }
-        return project;
-    });
-
-    const [avatarUrl, updatedProjects] = await Promise.all([
-        avatarPromise,
-        Promise.all(projectImagePromises),
-    ]);
-
-    finalPortfolioData.projects = updatedProjects;
-    
-    if (finalPortfolioData.personalInfo) {
-      finalPortfolioData.personalInfo.profilePictureUrl = avatarUrl;
-    } else {
-        finalPortfolioData.personalInfo = {
-            name: '', title: '', email: '', phone: '', location: '', socials: [],
-            profilePictureUrl: avatarUrl,
-        }
-    }
-
-    const newDocRef = await addDoc(portfolioCollectionRef, finalPortfolioData);
-    
-    return { success: true, data: { ...finalPortfolioData, id: newDocRef.id } };
+    return { success: true, data: analysisResult };
   } catch (error) {
-    console.error("Error analyzing resume:", error);
-    return { success: false, error: "Failed to analyze resume. Please check the file format and try again." };
+    console.error("Error in analyzeResumeAction (AI Flow):", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during AI analysis.";
+    return { success: false, error: errorMessage };
   }
 }
+
+export async function generateAvatarAction(input: GenerateAvatarInput) {
+    try {
+        const result = await generateAvatarFlow(input);
+        return { success: true, data: result };
+    } catch(error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        return { success: false, error: `Failed to generate avatar: ${errorMessage}` };
+    }
+}
+
+export async function generateProjectImageAction(input: GenerateProjectImageInput) {
+    try {
+        const result = await generateProjectImageFlow(input);
+        return { success: true, data: result };
+    } catch(error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        return { success: false, error: `Failed to generate project image: ${errorMessage}` };
+    }
+}
+
 
 export async function uploadImageAction(dataUri: string): Promise<{ success: boolean; data?: { url: string; deleteUrl: string }; error?: string }> {
     try {
@@ -189,8 +80,33 @@ export async function deleteImageAction(deleteUrl: string): Promise<{ success: b
 
 export async function parseResumeAction(userId: string, input: ParseResumeInput) {
   try {
-    await maybeAutoFillProfile(userId, input.resumeDataUri);
-    
+    // This helper is safe because it only reads and merges with client-provided data before a write
+    const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
+    const profileSnap = await getDoc(profileDocRef);
+    if (!profileSnap.exists() || !profileSnap.data().profileFilledFromResume) {
+        const analysisResult = await analyzeResumeFlow({ resumeDataUri: input.resumeDataUri });
+        const { portfolioDraft } = analysisResult;
+        const extractedProfileData = {
+            name: portfolioDraft.personalInfo?.name,
+            title: portfolioDraft.personalInfo?.title,
+            email: portfolioDraft.personalInfo?.email,
+            phone: portfolioDraft.personalInfo?.phone,
+            location: portfolioDraft.personalInfo?.location,
+            summary: portfolioDraft.summary || portfolioDraft.personalInfo?.summary,
+            socials: portfolioDraft.personalInfo?.socials || [],
+            skills: portfolioDraft.skills || [],
+            experience: portfolioDraft.experience || [],
+            education: portfolioDraft.education || [],
+            projects: portfolioDraft.projects || [],
+            certifications: portfolioDraft.certifications || [],
+            languages: portfolioDraft.languages || [],
+            interests: portfolioDraft.interests || [],
+            publications: [],
+            profileFilledFromResume: true,
+        };
+        await setDoc(profileDocRef, extractedProfileData, { merge: true });
+    }
+
     const result = await parseResumeFlow(input);
     const parsedData: ParsedResume = {
       htmlContent: result.htmlContent,
