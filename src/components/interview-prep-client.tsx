@@ -20,11 +20,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Send, Bot, UploadCloud, FileText } from 'lucide-react';
+import { Send, Bot, UploadCloud, FileText, MessageCircleQuestion } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { AssistantAvatar } from '@/components/assistant-avatar';
 import { BrandLoader } from '@/components/brand-loader';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function InterviewPrepClient() {
     const router = useRouter();
@@ -36,6 +37,7 @@ export default function InterviewPrepClient() {
 
     const [jobTitle, setJobTitle] = useState('');
     const [jobDescription, setJobDescription] = useState('');
+    const [interviewType, setInterviewType] = useState<'HR' | 'Technical' | ''>('');
     const [resumeFile, setResumeFile] = useState<File | null>(null);
     const [resumeFileName, setResumeFileName] = useState('');
     const [hasStarted, setHasStarted] = useState(false);
@@ -84,25 +86,37 @@ export default function InterviewPrepClient() {
 
     const handleStartInterview = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentUser || !jobTitle.trim() || !jobDescription.trim()) {
-            toast({ title: 'Missing Information', description: 'Please fill out the job title and description.', variant: 'destructive' });
+        if (!currentUser) {
+            toast({ title: 'Not Authenticated', description: 'Please log in to start an interview.', variant: 'destructive' });
+            return;
+        }
+        if (!jobTitle.trim() || !jobDescription.trim() || !interviewType) {
+            toast({ title: 'Missing Information', description: 'Please fill out all required fields.', variant: 'destructive' });
+            return;
+        }
+        if (!resumeFile && !userProfile) {
+             toast({ title: 'Resume/Profile Needed', description: 'Please upload a resume or complete your profile.', variant: 'destructive' });
             return;
         }
 
-        let resumeDataForAI: any = userProfile; // Default to profile
+        let userCvText = '';
 
-        if (resumeFile) {
-            // If a file is uploaded, use it.
-            // In a real app, you would parse this or send it to the AI.
-            // For now, we'll just indicate it's been received.
-            toast({ title: 'Resume Uploaded', description: 'The AI will use your uploaded resume for the interview.' });
-            // Here, we'd ideally convert the file to a format the AI can use (like text or structured data)
-            // For this flow, we'll continue using the userProfile from firestore, but the prompt will be improved to use it more effectively.
-        } else if (!userProfile) {
-            toast({ title: 'Profile Not Found', description: 'Please complete your profile or upload a resume.', variant: 'destructive' });
-            return;
+        if(resumeFile){
+            try {
+                const arrayBuffer = await resumeFile.arrayBuffer();
+                // This is a placeholder for actual PDF parsing.
+                // For a real implementation, a library like pdf.js would be used here on the client
+                // or a parsing service on the server. We will just send an indicator for now.
+                userCvText = `(User uploaded a PDF named ${resumeFile.name}. The content is not extracted in this demo, please use the profile data.)`;
+                toast({ title: 'Resume Uploaded', description: 'The AI will use your resume for the interview.' });
+            } catch (error) {
+                toast({ title: 'File Error', description: 'Could not read the uploaded resume.', variant: 'destructive' });
+                return;
+            }
+        } else if (userProfile) {
+            userCvText = JSON.stringify(userProfile);
         }
-        
+
         setHasStarted(true);
         setIsResponding(true);
 
@@ -110,6 +124,8 @@ export default function InterviewPrepClient() {
             const result = await interviewPrepAction(currentUser.uid, {
                 jobTitle,
                 jobDescription,
+                interviewType: interviewType as 'HR' | 'Technical',
+                userCv: userCvText,
                 history: [],
                 prompt: "Let's start the interview.",
             });
@@ -142,6 +158,8 @@ export default function InterviewPrepClient() {
             const result = await interviewPrepAction(currentUser.uid, {
                 jobTitle,
                 jobDescription,
+                interviewType: interviewType as 'HR' | 'Technical',
+                userCv: JSON.stringify(userProfile),
                 history: messages,
                 prompt: currentInput,
             });
@@ -176,6 +194,11 @@ export default function InterviewPrepClient() {
                     {!hasStarted ? (
                         <Card className="shadow-2xl">
                             <CardHeader className="text-center">
+                                <div className="flex justify-center items-center mb-4">
+                                  <div className="bg-[#45B8AC]/10 p-4 rounded-full">
+                                    <MessageCircleQuestion className="h-10 w-10 text-[#45B8AC]" />
+                                  </div>
+                                </div>
                                 <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">AI Interview Practice</h1>
                                 <CardDescription className="mt-2 text-lg">
                                     Get ready for your next big interview. Provide the job details, and our AI coach will run you through a mock interview.
@@ -184,29 +207,41 @@ export default function InterviewPrepClient() {
                             <CardContent>
                                 <form onSubmit={handleStartInterview} className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                      <div>
-                                          <Label htmlFor="job-title" className="text-base">Job Title</Label>
+                                      <div className='space-y-2'>
+                                          <Label htmlFor="job-title" className="text-base">Job Title *</Label>
                                           <Input id="job-title" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="e.g., Senior Software Engineer" required />
                                       </div>
-                                      <div>
-                                          <Label htmlFor="resume-upload" className="text-base">Your Resume (Optional)</Label>
-                                           <label
-                                              htmlFor="resume-upload-input"
-                                              className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors px-3"
-                                          >
-                                              <UploadCloud className="w-5 h-5 mr-2 text-muted-foreground" />
-                                              <p className="text-sm text-muted-foreground truncate">
-                                                {resumeFileName || "Upload PDF (uses profile if empty)"}
-                                              </p>
-                                              <Input id="resume-upload-input" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf"/>
-                                          </label>
+                                      <div className='space-y-2'>
+                                          <Label htmlFor="interview-type" className="text-base">Interview Type *</Label>
+                                          <Select onValueChange={(value) => setInterviewType(value as any)} value={interviewType}>
+                                            <SelectTrigger id="interview-type">
+                                              <SelectValue placeholder="Select interview type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="HR">HR Interview</SelectItem>
+                                              <SelectItem value="Technical">Technical Interview</SelectItem>
+                                            </SelectContent>
+                                          </Select>
                                       </div>
                                     </div>
-                                    <div>
-                                        <Label htmlFor="job-description" className="text-base">Job Description</Label>
+                                    <div className='space-y-2'>
+                                        <Label htmlFor="resume-upload" className="text-base">Your Resume (CV) *</Label>
+                                        <label
+                                            htmlFor="resume-upload-input"
+                                            className="relative flex items-center justify-center w-full h-12 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors px-3"
+                                        >
+                                            <UploadCloud className="w-6 h-6 mr-2 text-muted-foreground" />
+                                            <p className="text-sm text-muted-foreground truncate">
+                                            {resumeFileName || "Upload PDF resume (required)"}
+                                            </p>
+                                            <Input id="resume-upload-input" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" required/>
+                                        </label>
+                                    </div>
+                                    <div className='space-y-2'>
+                                        <Label htmlFor="job-description" className="text-base">Job Description *</Label>
                                         <Textarea id="job-description" value={jobDescription} onChange={e => setJobDescription(e.target.value)} placeholder="Paste the full job description here..." className="h-40 resize-none" required />
                                     </div>
-                                    <Button type="submit" className="w-full text-lg" size="lg" disabled={isResponding}>
+                                    <Button type="submit" className="w-full text-lg" size="lg" disabled={isResponding} style={{backgroundColor: '#45B8AC', color: 'white'}}>
                                         {isResponding ? <BrandLoader size="sm" className="mr-2" /> : <Bot className="mr-2 h-5 w-5" />}
                                         Start Mock Interview
                                     </Button>
@@ -217,7 +252,9 @@ export default function InterviewPrepClient() {
                         <Card className="shadow-2xl flex flex-col h-[75vh] md:h-[80vh]">
                             <CardHeader className="border-b">
                                 <CardTitle>Interview Prep: <span className="text-primary">{jobTitle}</span></CardTitle>
-                                <CardDescription>Practice session in progress. Type your answers below.</CardDescription>
+                                <CardDescription>
+                                    {interviewType} interview practice session in progress. Type your answers below.
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow p-4 overflow-hidden">
                                 <ScrollArea className="h-full pr-4 -mr-4" ref={scrollAreaRef as any}>

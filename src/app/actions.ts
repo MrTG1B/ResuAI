@@ -331,33 +331,25 @@ export async function generateCoverLetterAction(userId: string, input: GenerateC
 interface InterviewPrepActionInput {
     jobTitle: string;
     jobDescription: string;
+    interviewType: 'HR' | 'Technical';
+    userCv: string;
     history: any[];
     prompt: string;
 }
 
 export async function interviewPrepAction(userId: string, input: InterviewPrepActionInput): Promise<{ success: boolean; data?: { response: string }; error?: string }> {
-    const { jobTitle, jobDescription, history, prompt } = input;
-    
     if (!db) {
         return { success: false, error: "Database service is not available." };
     }
 
     try {
-        const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
-        const profileSnap = await getDoc(profileDocRef);
-        const userProfile = profileSnap.exists() ? profileSnap.data() : {};
-        
-        // If a resume was uploaded for the interview, parse it and use that data instead of the saved profile.
-        // This is a simplified example. In a real app, you might pass the resume file/text directly to the AI flow.
-        // For now, we will rely on the comprehensive userProfile from Firestore,
-        // and the AI prompt has been improved to use this data more effectively.
-
         const result = await interviewPrepFlow({
-            jobTitle,
-            jobDescription,
-            userProfile,
-            history,
-            prompt,
+            jobTitle: input.jobTitle,
+            jobDescription: input.jobDescription,
+            interviewType: input.interviewType,
+            userCv: input.userCv,
+            history: input.history,
+            prompt: input.prompt,
         });
 
         return { success: true, data: { response: result.response } };

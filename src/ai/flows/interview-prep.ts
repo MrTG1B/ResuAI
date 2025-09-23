@@ -16,7 +16,7 @@ const InterviewPrepInputSchema = z.object({
   jobTitle: z.string().describe("The job title for the interview."),
   jobDescription: z.string().describe('The full job description for the role.'),
   interviewType: z.enum(['HR', 'Technical']).describe("The type of interview the user wants to practice."),
-  userCv: z.string().describe("The user's resume/CV text content. This is the primary source of truth for the user's skills and experience."),
+  userCv: z.string().describe("The user's resume/CV text content or structured data (as a JSON string). This is the primary source of truth for the user's skills and experience."),
   history: z.array(z.object({
       role: z.enum(['user', 'assistant']),
       content: z.string(),
@@ -95,3 +95,4 @@ const interviewPrepFlow = ai.defineFlow(
     return output!;
   }
 );
+
