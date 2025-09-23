@@ -3,19 +3,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UploadCloud, PenSquare } from "lucide-react";
+import { UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeResumeAction } from "@/app/actions";
-import { useDynamicText } from "@/hooks/use-dynamic-text";
 import { type User } from "firebase/auth";
+import { CreativeLoader } from "./creative-loader";
 
 const analysisTexts = [
-  "Analyzing...",
-  "Extracting skills...",
-  "Identifying keywords...",
-  "Building your profile...",
+  "Analyzing resume...",
+  "Extracting skills & experience...",
+  "Generating a professional design...",
+  "Building your portfolio...",
   "Finalizing...",
 ];
 
@@ -26,7 +26,6 @@ export function ResumeForm({ user }: { user: User }) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const dynamicAnalysisText = useDynamicText(analysisTexts);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -98,6 +97,14 @@ export function ResumeForm({ user }: { user: User }) {
     };
   };
 
+  if (isLoading) {
+    return (
+        <div className="flex flex-col items-center justify-center p-8 h-80">
+           <CreativeLoader texts={analysisTexts} />
+        </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
       <div className="relative">
@@ -117,14 +124,7 @@ export function ResumeForm({ user }: { user: User }) {
         </label>
       </div>
       <Button type="submit" className="w-full text-lg" size="lg" disabled={isLoading}>
-        {isLoading ? (
-          <>
-            <PenSquare className="mr-2 h-5 w-5 animate-spin" />
-            {dynamicAnalysisText}
-          </>
-        ) : (
-          "Build My Portfolio"
-        )}
+          Build My Portfolio
       </Button>
     </form>
   );
