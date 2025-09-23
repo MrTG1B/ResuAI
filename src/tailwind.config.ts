@@ -109,33 +109,33 @@ export default {
             transform: 'translateY(0)',
           },
         },
-        'wave': {
-            '0%': { backgroundPosition: '0% 50%' },
-            '50%': { backgroundPosition: '100% 50%' },
-            '100%': { backgroundPosition: '0% 50%' },
+        wave: {
+          '0%': {backgroundPosition: '0% 50%'},
+          '50%': {backgroundPosition: '100% 50%'},
+          '100%': {backgroundPosition: '0% 50%'},
         },
-        'wobble': {
-            '0%, 100%': { transform: 'rotate(0deg)' },
-            '25%': { transform: 'rotate(-3deg)' },
-            '75%': { transform: 'rotate(3deg)' },
+        wobble: {
+          '0%, 100%': {transform: 'rotate(0deg)'},
+          '25%': {transform: 'rotate(-3deg)'},
+          '75%': {transform: 'rotate(3deg)'},
         },
-        'gradient': {
-          '0%': { 'background-position': '0% 50%' },
-          '50%': { 'background-position': '100% 50%' },
-          '100%': { 'background-position': '0% 50%' },
+        gradient: {
+          '0%': {'background-position': '0% 50%'},
+          '50%': {'background-position': '100% 50%'},
+          '100%': {'background-position': '0% 50%'},
         },
         'brand-spin': {
-          'to': { transform: 'rotate(360deg)' },
-        }
+          to: {transform: 'rotate(360deg)'},
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in-down': 'fade-in-down 0.5s ease-out forwards',
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
-        'wave': 'wave 4s ease infinite',
-        'wobble': 'wobble 1s ease-in-out infinite',
-        'gradient': 'gradient 3s ease infinite',
+        wave: 'wave 4s ease infinite',
+        wobble: 'wobble 1s ease-in-out infinite',
+        gradient: 'gradient 3s ease infinite',
         'brand-spin': 'brand-spin 1s linear infinite',
       },
     },
