@@ -9,24 +9,18 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeResumeForPortfolioAction, generateAvatarAction, generateProjectImageAction, uploadImageAction } from "@/app/actions";
 import { type User } from "firebase/auth";
-import { CreativeLoader } from "./creative-loader";
 import { db, collection, addDoc, serverTimestamp, getDoc, doc, setDoc } from "@/lib/firebase";
 import type { PortfolioData, Project } from "@/types/portfolio";
 
 
-const analysisTexts = [
-  "Analyzing resume...",
-  "Extracting skills & experience...",
-  "Generating a professional design...",
-  "Building your portfolio...",
-  "Finalizing...",
-];
+interface ResumeFormProps {
+    user: User;
+    setIsProcessing: (isProcessing: boolean) => void;
+}
 
-
-export function ResumeForm({ user }: { user: User }) {
+export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -57,7 +51,7 @@ export function ResumeForm({ user }: { user: User }) {
       return;
     }
 
-    setIsLoading(true);
+    setIsProcessing(true);
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -93,7 +87,7 @@ export function ResumeForm({ user }: { user: User }) {
           languages: userProfile.languages?.length ? userProfile.languages : portfolioDraft.languages,
           interests: userProfile.interests?.length ? userProfile.interests : portfolioDraft.interests,
           publications: userProfile.publications?.length ? userProfile.publications : (portfolioDraft.publications || []),
-          title: `Portfolio from ${new Date().toLocaleDateString()}`,
+          title: `Portfolio for ${portfolioDraft.personalInfo?.name || user.displayName || 'User'}`,
           createdAt: serverTimestamp(),
           colorPalette: colorPalette,
         };
@@ -104,7 +98,10 @@ export function ResumeForm({ user }: { user: User }) {
             avatarPromise = Promise.resolve(userProfile.profilePictureUrl);
         } else {
             avatarPromise = generateAvatarAction({ prompt: avatarPrompt })
-                .then(res => uploadImageAction(res.data.imageDataUri))
+                .then(res => {
+                    if(!res.success || !res.data) throw new Error("Avatar generation failed");
+                    return uploadImageAction(res.data.imageDataUri);
+                })
                 .then(async (uploadResult) => {
                     if(!uploadResult.success || !uploadResult.data) throw new Error("Avatar upload failed");
                     await setDoc(profileDocRef, { 
@@ -123,6 +120,7 @@ export function ResumeForm({ user }: { user: User }) {
             if (!project.previewImage) {
                 try {
                     const imageResult = await generateProjectImageAction({ description: project.description });
+                     if(!imageResult.success || !imageResult.data) throw new Error(`Image generation failed for project: ${project.name}`);
                     const uploadResult = await uploadImageAction(imageResult.data.imageDataUri);
                     if(uploadResult.success && uploadResult.data) {
                       project.previewImage = uploadResult.data.url;
@@ -147,8 +145,7 @@ export function ResumeForm({ user }: { user: User }) {
             finalPortfolioData.personalInfo = { name: '', title: '', email: '', phone: '', location: '', socials: [], profilePictureUrl: avatarUrl };
         }
         
-        // Log the final data object that will be saved to Firestore
-        console.log("Data to be saved to Firestore:", JSON.stringify(finalPortfolioData, null, 2));
+        console.log("Final data to be saved to Firestore:", JSON.stringify(finalPortfolioData, null, 2));
 
         // 4. Save final portfolio to Firestore from the client
         const newDocRef = await addDoc(portfolioCollectionRef, finalPortfolioData);
@@ -163,22 +160,14 @@ export function ResumeForm({ user }: { user: User }) {
             variant: "destructive" 
         });
       } finally {
-        setIsLoading(false);
+        setIsProcessing(false);
       }
     };
     reader.onerror = () => {
-      setIsLoading(false);
+      setIsProcessing(false);
       toast({ title: "File Read Error", description: "There was an error reading your file.", variant: "destructive" });
     };
   };
-
-  if (isLoading) {
-    return (
-        <div className="flex flex-col items-center justify-center p-8 h-80">
-           <CreativeLoader texts={analysisTexts} />
-        </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -198,7 +187,7 @@ export function ResumeForm({ user }: { user: User }) {
           <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" />
         </label>
       </div>
-      <Button type="submit" className="w-full text-lg" size="lg" disabled={isLoading}>
+      <Button type="submit" className="w-full text-lg" size="lg">
           <Bot className="mr-2 h-5 w-5"/>
           Build My Portfolio
       </Button>

@@ -11,12 +11,24 @@ import { ResumeForm } from "@/components/resume-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from '@/hooks/use-toast';
 import { BrandLoader } from '@/components/brand-loader';
+import { CreativeLoader } from "@/components/creative-loader";
+
+
+const analysisTexts = [
+  "Analyzing resume...",
+  "Extracting skills & experience...",
+  "Generating a professional design...",
+  "Building your portfolio...",
+  "Finalizing...",
+];
+
 
 export default function BuildPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (!auth) {
@@ -35,17 +47,29 @@ export default function BuildPage() {
       } else {
         router.push('/login');
       }
-      setIsLoading(false);
+      setIsAuthLoading(false);
     });
 
     return () => unsubscribe();
   }, [router, toast]);
 
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
         <BrandLoader size="lg" />
         <p className="mt-4 text-muted-foreground">Verifying your session...</p>
+      </div>
+    );
+  }
+
+  if (isProcessing) {
+    return (
+      <div className="flex flex-col h-screen bg-muted/20">
+        <Header />
+        <main className="flex-grow flex flex-col items-center justify-center h-full text-center">
+          <CreativeLoader texts={analysisTexts} />
+        </main>
+        <Footer />
       </div>
     );
   }
@@ -69,7 +93,7 @@ export default function BuildPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResumeForm user={currentUser} />
+              <ResumeForm user={currentUser} setIsProcessing={setIsProcessing} />
             </CardContent>
           </Card>
         </div>
