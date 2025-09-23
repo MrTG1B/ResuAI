@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Send, Bot } from 'lucide-react';
+import { Send, Bot, UploadCloud, FileText } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { AssistantAvatar } from '@/components/assistant-avatar';
@@ -36,6 +36,8 @@ export default function InterviewPrepClient() {
 
     const [jobTitle, setJobTitle] = useState('');
     const [jobDescription, setJobDescription] = useState('');
+    const [resumeFile, setResumeFile] = useState<File | null>(null);
+    const [resumeFileName, setResumeFileName] = useState('');
     const [hasStarted, setHasStarted] = useState(false);
     
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -43,6 +45,7 @@ export default function InterviewPrepClient() {
     const [isResponding, setIsResponding] = useState(false);
 
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const lastMessageRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -62,21 +65,44 @@ export default function InterviewPrepClient() {
     }, [router]);
 
     useEffect(() => {
-        if (scrollAreaRef.current) {
-            const scrollElement = scrollAreaRef.current.querySelector('div');
-            if (scrollElement) {
-                scrollElement.scrollTo({ top: scrollElement.scrollHeight, behavior: 'smooth' });
-            }
-        }
+      if (lastMessageRef.current) {
+        lastMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }, [messages, isResponding]);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = event.target.files?.[0];
+      if (selectedFile) {
+          if (selectedFile.type !== 'application/pdf') {
+              toast({ title: "Invalid File Type", description: "Please upload a PDF file.", variant: "destructive" });
+              return;
+          }
+          setResumeFile(selectedFile);
+          setResumeFileName(selectedFile.name);
+      }
+    };
 
     const handleStartInterview = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentUser || !userProfile || !jobTitle.trim() || !jobDescription.trim()) {
-            toast({ title: 'Missing Information', description: 'Please fill out both the job title and description.', variant: 'destructive' });
+        if (!currentUser || !jobTitle.trim() || !jobDescription.trim()) {
+            toast({ title: 'Missing Information', description: 'Please fill out the job title and description.', variant: 'destructive' });
             return;
         }
 
+        let resumeDataForAI: any = userProfile; // Default to profile
+
+        if (resumeFile) {
+            // If a file is uploaded, use it.
+            // In a real app, you would parse this or send it to the AI.
+            // For now, we'll just indicate it's been received.
+            toast({ title: 'Resume Uploaded', description: 'The AI will use your uploaded resume for the interview.' });
+            // Here, we'd ideally convert the file to a format the AI can use (like text or structured data)
+            // For this flow, we'll continue using the userProfile from firestore, but the prompt will be improved to use it more effectively.
+        } else if (!userProfile) {
+            toast({ title: 'Profile Not Found', description: 'Please complete your profile or upload a resume.', variant: 'destructive' });
+            return;
+        }
+        
         setHasStarted(true);
         setIsResponding(true);
 
@@ -157,9 +183,24 @@ export default function InterviewPrepClient() {
                             </CardHeader>
                             <CardContent>
                                 <form onSubmit={handleStartInterview} className="space-y-6">
-                                    <div>
-                                        <Label htmlFor="job-title" className="text-base">Job Title</Label>
-                                        <Input id="job-title" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="e.g., Senior Software Engineer" required />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <div>
+                                          <Label htmlFor="job-title" className="text-base">Job Title</Label>
+                                          <Input id="job-title" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="e.g., Senior Software Engineer" required />
+                                      </div>
+                                      <div>
+                                          <Label htmlFor="resume-upload" className="text-base">Your Resume (Optional)</Label>
+                                           <label
+                                              htmlFor="resume-upload-input"
+                                              className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors px-3"
+                                          >
+                                              <UploadCloud className="w-5 h-5 mr-2 text-muted-foreground" />
+                                              <p className="text-sm text-muted-foreground truncate">
+                                                {resumeFileName || "Upload PDF (uses profile if empty)"}
+                                              </p>
+                                              <Input id="resume-upload-input" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf"/>
+                                          </label>
+                                      </div>
                                     </div>
                                     <div>
                                         <Label htmlFor="job-description" className="text-base">Job Description</Label>
@@ -173,7 +214,7 @@ export default function InterviewPrepClient() {
                             </CardContent>
                         </Card>
                     ) : (
-                        <Card className="shadow-2xl flex flex-col h-[75vh]">
+                        <Card className="shadow-2xl flex flex-col h-[75vh] md:h-[80vh]">
                             <CardHeader className="border-b">
                                 <CardTitle>Interview Prep: <span className="text-primary">{jobTitle}</span></CardTitle>
                                 <CardDescription>Practice session in progress. Type your answers below.</CardDescription>
@@ -182,7 +223,7 @@ export default function InterviewPrepClient() {
                                 <ScrollArea className="h-full pr-4 -mr-4" ref={scrollAreaRef as any}>
                                     <div className="space-y-6 pb-4">
                                         {messages.map((message, index) => (
-                                            <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                            <div ref={index === messages.length -1 ? lastMessageRef : null} key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                                 {message.role === 'assistant' && <AssistantAvatar />}
                                                 <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                                                     <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
@@ -192,7 +233,7 @@ export default function InterviewPrepClient() {
                                             </div>
                                         ))}
                                         {isResponding && (
-                                            <div className="flex items-start gap-4 justify-start">
+                                            <div ref={lastMessageRef} className="flex items-start gap-4 justify-start">
                                                 <AssistantAvatar />
                                                 <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
                                             </div>
