@@ -24,7 +24,7 @@ export type AnalyzeResumeInput = z.infer<typeof AnalyzeResumeInputSchema>;
 // Define detailed schemas for structured extraction
 const SocialLinkSchema = z.object({
     platform: z.string().describe("The social media platform (e.g., 'GitHub', 'LinkedIn')."),
-    url: z.string().url().describe("The full URL to the user's profile."),
+    url: z.string().describe("The full URL to the user's profile."),
 });
 
 const LanguageSchema = z.object({
@@ -37,7 +37,7 @@ const PersonalInfoSchema = z.object({
     title: z.string().describe("The user's professional title (e.g., 'Software Engineer').").optional(),
     email: z.string().email().describe("The user's email address.").optional(),
     phone: z.string().describe("The user's phone number.").optional(),
-    website: z.string().url().describe("The user's personal website or portfolio URL.").optional(),
+    website: z.string().describe("The user's personal website or portfolio URL.").optional(),
     location: z.string().describe("The user's location (e.g., 'San Francisco, CA').").optional(),
     summary: z.string().describe("A professional summary or 'About Me' section from the resume.").optional(),
     socials: z.array(SocialLinkSchema).describe("A list of social media links.").optional(),
@@ -62,7 +62,7 @@ const ProjectSchema = z.object({
     name: z.string().describe("The name of the project."),
     description: z.string().describe("A brief description of the project."),
     technologies: z.array(z.string()).describe("A list of technologies used in the project.").optional(),
-    url: z.string().url().describe("A URL to the project if available.").optional(),
+    url: z.string().describe("A URL to the project if available.").optional(),
     previewImage: z.string().describe("Leave this field as an empty string. It will be populated later.").default(""),
 });
 
@@ -70,7 +70,7 @@ const CertificationSchema = z.object({
     name: z.string().describe("The name of the certification."),
     issuingOrganization: z.string().describe("The organization that issued the certification."),
     date: z.string().describe("The date the certification was obtained.").optional(),
-    credentialUrl: z.string().url().describe("A URL to the credential if available.").optional(),
+    credentialUrl: z.string().describe("A URL to the credential if available.").optional(),
 });
 
 const PortfolioDraftSchema = z.object({
