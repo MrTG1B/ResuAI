@@ -24,12 +24,12 @@ import { type CoverLetter } from "@/types/cover-letter";
 
 
 // This action is now only responsible for AI analysis and does not interact with the database.
-export async function analyzeResumeAction(input: AnalyzeResumeInput): Promise<{ success: boolean; data?: AnalyzeResumeOutput; error?: string }> {
+export async function analyzeResumeForPortfolioAction(input: AnalyzeResumeInput): Promise<{ success: boolean; data?: AnalyzeResumeOutput; error?: string }> {
   try {
     const analysisResult = await analyzeResumeFlow(input);
     return { success: true, data: analysisResult };
   } catch (error) {
-    console.error("Error in analyzeResumeAction (AI Flow):", error);
+    console.error("Error in analyzeResumeForPortfolioAction (AI Flow):", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during AI analysis.";
     return { success: false, error: errorMessage };
   }
@@ -78,35 +78,21 @@ export async function deleteImageAction(deleteUrl: string): Promise<{ success: b
     }
 }
 
-export async function parseResumeAction(userId: string, input: ParseResumeInput) {
+// This action is for AI analysis ONLY. No database writes.
+export async function analyzeResumeForProfileFill(input: AnalyzeResumeInput): Promise<{ success: boolean; data?: AnalyzeResumeOutput['portfolioDraft']; error?: string }> {
   try {
-    // This helper is safe because it only reads and merges with client-provided data before a write
-    const profileDocRef = doc(db, 'users', userId, 'profile', 'data');
-    const profileSnap = await getDoc(profileDocRef);
-    if (!profileSnap.exists() || !profileSnap.data().profileFilledFromResume) {
-        const analysisResult = await analyzeResumeFlow({ resumeDataUri: input.resumeDataUri });
-        const { portfolioDraft } = analysisResult;
-        const extractedProfileData = {
-            name: portfolioDraft.personalInfo?.name,
-            title: portfolioDraft.personalInfo?.title,
-            email: portfolioDraft.personalInfo?.email,
-            phone: portfolioDraft.personalInfo?.phone,
-            location: portfolioDraft.personalInfo?.location,
-            summary: portfolioDraft.summary || portfolioDraft.personalInfo?.summary,
-            socials: portfolioDraft.personalInfo?.socials || [],
-            skills: portfolioDraft.skills || [],
-            experience: portfolioDraft.experience || [],
-            education: portfolioDraft.education || [],
-            projects: portfolioDraft.projects || [],
-            certifications: portfolioDraft.certifications || [],
-            languages: portfolioDraft.languages || [],
-            interests: portfolioDraft.interests || [],
-            publications: [],
-            profileFilledFromResume: true,
-        };
-        await setDoc(profileDocRef, extractedProfileData, { merge: true });
-    }
+    const analysisResult = await analyzeResumeFlow(input);
+    return { success: true, data: analysisResult.portfolioDraft };
+  } catch (error) {
+    console.error("Error in analyzeResumeForProfileFill (AI Flow):", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during profile analysis.";
+    return { success: false, error: errorMessage };
+  }
+}
 
+
+export async function parseResumeAction(input: ParseResumeInput) {
+  try {
     const result = await parseResumeFlow(input);
     const parsedData: ParsedResume = {
       htmlContent: result.htmlContent,

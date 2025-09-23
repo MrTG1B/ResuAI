@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
-import { parseResumeAction, editResumeAction, analyzeResumeAction } from '@/app/actions';
+import { parseResumeAction, editResumeAction, analyzeResumeForProfileFill, analyzeResumeForPortfolioAction } from '@/app/actions';
 import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
@@ -122,7 +122,7 @@ export default function ResumeEditorClient() {
         try {
             if (!currentUser) throw new Error("User not authenticated.");
             
-            const parseResult = await parseResumeAction(currentUser.uid, { resumeDataUri });
+            const parseResult = await parseResumeAction({ resumeDataUri });
             if (!parseResult.success || !parseResult.data) {
                 throw new Error(parseResult.error || "Failed to parse resume for editing.");
             }
@@ -209,7 +209,7 @@ export default function ResumeEditorClient() {
                         .join(' | ');
 
                     const initialHtml = `
-                      <div style="font-family: 'Roboto', sans-serif; color: #333;">
+                      <div style="font-family: 'Roboto', sans-serif; color: #333; border: 1px solid #ddd; padding: 20mm;">
                         <header style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
                           <h1 style="font-size: 2.5em; margin: 0; color: #1a1a1a;">${profileData.name || '<!-- YOUR NAME HERE -->'}</h1>
                           <p style="font-size: 1.2em; margin: 5px 0 0;">${profileData.title || '<!-- YOUR TITLE HERE -->'}</p>
@@ -300,7 +300,39 @@ export default function ResumeEditorClient() {
         reader.onload = async () => {
             try {
                 const uploadedResumeDataUri = reader.result as string;
-                const result = await parseResumeAction(currentUser.uid, { resumeDataUri: uploadedResumeDataUri });
+
+                 // First, auto-fill profile if needed, but on the client side
+                const profileDocRef = doc(db, 'users', currentUser.uid, 'profile', 'data');
+                const profileSnap = await getDoc(profileDocRef);
+                if (!profileSnap.exists() || !profileSnap.data().profileFilledFromResume) {
+                    const analysisResult = await analyzeResumeForProfileFill({ resumeDataUri: uploadedResumeDataUri });
+                    if (analysisResult.success && analysisResult.data) {
+                        const portfolioDraft = analysisResult.data;
+                        const extractedProfileData = {
+                            name: portfolioDraft.personalInfo?.name,
+                            title: portfolioDraft.personalInfo?.title,
+                            email: portfolioDraft.personalInfo?.email,
+                            phone: portfolioDraft.personalInfo?.phone,
+                            location: portfolioDraft.personalInfo?.location,
+                            summary: portfolioDraft.summary || portfolioDraft.personalInfo?.summary,
+                            socials: portfolioDraft.personalInfo?.socials || [],
+                            skills: portfolioDraft.skills || [],
+                            experience: portfolioDraft.experience || [],
+                            education: portfolioDraft.education || [],
+                            projects: portfolioDraft.projects || [],
+                            certifications: portfolioDraft.certifications || [],
+                            languages: portfolioDraft.languages || [],
+                            interests: portfolioDraft.interests || [],
+                            publications: [],
+                            profileFilledFromResume: true, // Flag to prevent re-filling
+                        };
+                        await setDoc(profileDocRef, extractedProfileData, { merge: true });
+                        setUserProfile(prev => ({ ...prev, ...extractedProfileData })); // Update local profile state
+                    }
+                }
+
+                // Then, parse the resume for the editor
+                const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
     
                 if (result.success && result.data) {
                     const finalState: SavedEditorState = {
@@ -395,17 +427,28 @@ export default function ResumeEditorClient() {
       try {
         const analysisInput = { resumeDataUri: editorState.initialPreviewUri || '' };
         if (!analysisInput.resumeDataUri) {
-          throw new Error("No resume file has been uploaded to create a portfolio from.");
+            // As a fallback, render the current HTML to a data URI
+            const encodedHtml = btoa(unescape(encodeURIComponent(editorState.htmlContent || '')));
+            analysisInput.resumeDataUri = `data:text/html;base64,${encodedHtml}`;
         }
         
-        const result = await analyzeResumeAction(currentUser.uid, analysisInput);
+        const result = await analyzeResumeForPortfolioAction(analysisInput);
     
-        if (result.success && result.data?.id) {
+        if (result.success && result.data) {
+          const portfolioData = result.data;
+          // You would typically save this to the database and then redirect
+          // For now, let's assume the action does that and returns an ID
+          // This part needs implementation based on how you save portfolios
+           const newPortfolioDoc = await addDoc(collection(db, `users/${currentUser.uid}/portfolios`), {
+                ...portfolioData,
+                createdAt: serverTimestamp(),
+           });
+
           toast({
             title: "Portfolio Created!",
             description: "Redirecting you to your new portfolio page.",
           });
-          router.push(`/portfolio?id=${result.data.id}`);
+          router.push(`/portfolio?id=${newPortfolioDoc.id}`);
         } else {
           throw new Error(result.error || "Failed to create portfolio.");
         }
@@ -489,7 +532,7 @@ export default function ResumeEditorClient() {
                 {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Search className="mr-2 h-4 w-4"/>}
                 Analyze Resume
             </Button>
-            <Button onClick={handleConvertToPortfolio} size="sm" variant="outline" disabled={!editorState || isConverting || isParsing || isAnalyzing || !editorState.initialPreviewUri} style={{color: '#45B8AC', borderColor: '#45B8AC'}}>
+            <Button onClick={handleConvertToPortfolio} size="sm" variant="outline" disabled={!editorState || isConverting || isParsing || isAnalyzing} style={{color: '#45B8AC', borderColor: '#45B8AC'}}>
                 {isConverting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Briefcase className="mr-2 h-4 w-4"/>}
                 Create Portfolio
             </Button>

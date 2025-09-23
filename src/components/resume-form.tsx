@@ -7,7 +7,7 @@ import { UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { analyzeResumeAction, generateAvatarAction, generateProjectImageAction, uploadImageAction } from "@/app/actions";
+import { analyzeResumeForPortfolioAction, generateAvatarAction, generateProjectImageAction, uploadImageAction } from "@/app/actions";
 import { type User } from "firebase/auth";
 import { CreativeLoader } from "./creative-loader";
 import { db, collection, addDoc, serverTimestamp, getDoc, doc, setDoc } from "@/lib/firebase";
@@ -66,7 +66,7 @@ export function ResumeForm({ user }: { user: User }) {
         const resumeDataUri = reader.result as string;
         
         // 1. Get AI analysis from server action (no DB writes here)
-        const analysisResult = await analyzeResumeAction({ resumeDataUri });
+        const analysisResult = await analyzeResumeForPortfolioAction({ resumeDataUri });
         if (!analysisResult.success || !analysisResult.data) {
           throw new Error(analysisResult.error || "AI analysis failed.");
         }
