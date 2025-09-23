@@ -85,6 +85,7 @@ function MentraChatPage() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
   const fetchChatHistory = useCallback(async (userId: string) => {
     if (!db) return;
@@ -133,11 +134,8 @@ function MentraChatPage() {
   }, [searchParams, currentUser, router, toast]);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-        const scrollElement = scrollAreaRef.current.querySelector('div');
-        if (scrollElement) {
-            scrollElement.scrollTo({ top: scrollElement.scrollHeight, behavior: 'smooth' });
-        }
+    if (lastMessageRef.current) {
+        lastMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [messages, isResponding]);
   
@@ -432,10 +430,14 @@ function MentraChatPage() {
             </header>
             
             <div className="flex flex-col flex-1 justify-between overflow-hidden">
-                <ScrollArea className="flex-1 p-4 sm:p-6 md:p-8" ref={scrollAreaRef as any}>
+                <ScrollArea className="flex-1 p-4 sm:p-6 md:p-8" ref={scrollAreaRef}>
                     <div className="space-y-6 pb-8">
                         {messages.map((message, index) => (
-                            <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div 
+                                key={index} 
+                                ref={index === messages.length - 1 ? lastMessageRef : null}
+                                className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                            >
                                 {message.role === 'assistant' && ( <AssistantAvatar /> )}
                                 <div className={`max-w-xl rounded-lg px-4 py-2.5 break-words ${message.role === 'user' ? 'bg-[#3aa195] text-white font-semibold' : 'bg-muted/70'}`}>
                                     <ReactMarkdown className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-0" rehypePlugins={[rehypeRaw]} remarkPlugins={[remarkGfm]}>
@@ -445,7 +447,7 @@ function MentraChatPage() {
                             </div>
                         ))}
                         {isResponding && (
-                            <div className="flex items-start gap-4 justify-start">
+                            <div ref={lastMessageRef} className="flex items-start gap-4 justify-start">
                                 <AssistantAvatar />
                                 <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center"><PulsingDotsLoader /></div>
                             </div>
