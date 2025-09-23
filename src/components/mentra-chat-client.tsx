@@ -495,7 +495,7 @@ function MentraChatPage() {
         </div>
       </SidebarInset>
     </div>
-    )
+  );
 }
 
 
