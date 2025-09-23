@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UploadCloud } from "lucide-react";
+import { UploadCloud, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -185,7 +185,7 @@ export function ResumeForm({ user }: { user: User }) {
       <div className="relative">
         <label
           htmlFor="resume-upload"
-          className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
+          className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-background/30 hover:bg-background/50 border-primary/30 hover:border-primary transition-colors duration-300"
         >
           <div className="flex flex-col items-center justify-center pt-5 pb-6">
             <UploadCloud className="w-10 h-10 mb-3 text-primary" />
@@ -199,6 +199,7 @@ export function ResumeForm({ user }: { user: User }) {
         </label>
       </div>
       <Button type="submit" className="w-full text-lg" size="lg" disabled={isLoading}>
+          <Bot className="mr-2 h-5 w-5"/>
           Build My Portfolio
       </Button>
     </form>

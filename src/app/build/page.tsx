@@ -55,11 +55,11 @@ export default function BuildPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen parallax-bg">
       <Header />
-      <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8 animate-fade-in-down">
         <div className="w-full max-w-2xl">
-          <Card className="shadow-2xl">
+          <Card className="shadow-2xl bg-card/80 backdrop-blur-lg border-primary/20">
             <CardHeader className="text-center">
               <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
                 Create Your AI-Powered Portfolio
