@@ -2,40 +2,43 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Deny all access by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Allow users to read/write their own data
+    match /users/{userId}/{documents=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
     
-    // NOTE: Replace 'REPLACE_WITH_ADMIN_UID' with the actual UID of your admin user 
-    // from the Firebase Authentication console. This user corresponds to the 
-    // tirthankardasgupta2004@gmail.com account.
-    function isAdmin() {
-      return request.auth != null && request.auth.uid == 'REPLACE_WITH_ADMIN_UID';
-    }
-
-    // Rules for the 'users' collection
-    match /users/{userId} {
-      // Admin can read any user document.
-      // A user can read, update, and delete their own document.
-      allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
-      allow update, delete: if request.auth != null && request.auth.uid == userId;
-      
-      // Any authenticated user can create their own user document.
-      allow create: if request.auth != null;
-
-      // Rules for all subcollections within a user document (e.g., resumes, portfolios)
-      match /{subcollection}/{docId} {
-        // Admin can read any document in any user's subcollection.
-        // A user can read and write to their own subcollections.
-        allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
-        allow write: if request.auth != null && request.auth.uid == userId;
-      }
-    }
-
-    // Rules for the 'feedback' collection
+    // Allow anyone to submit to the feedback collection
     match /feedback/{feedbackId} {
-      // Admin can read, write, and delete any feedback.
-      allow read, write, delete: if isAdmin();
-      
-      // Any authenticated user can create feedback.
-      allow create: if request.auth != null;
+      allow create: if true;
+      allow read, update, delete: if false;
     }
+
+    // Allow admins to read all feedback
+    // Note: This is a simplified rule. For production, you would typically
+    // have a 'roles' collection to check if request.auth.uid is an admin.
+    // For this demo, we are allowing any authenticated user to read all feedback.
+    // THIS IS NOT SECURE FOR PRODUCTION.
+    match /feedback/{feedbackId} {
+      allow read: if request.auth != null;
+    }
+
+    // Allow admin to read all user data (for dashboard)
+    // THIS IS NOT SECURE FOR PRODUCTION.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+    }
+     match /users/{userId}/{subcollection}/{docId} {
+      allow read: if request.auth != null;
+    }
+     match /users/{userId}/profile/data {
+      allow read: if request.auth != null;
+    }
+
   }
 }
