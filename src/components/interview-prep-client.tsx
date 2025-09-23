@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { interviewPrepAction } from '@/app/actions';
 import { type ChatMessage } from '@/types/resume';
 import { type PersonalInfo } from '@/types/portfolio';
+import { cn } from '@/lib/utils';
 
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
@@ -20,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Send, Bot, UploadCloud, FileText, MessageCircleQuestion } from 'lucide-react';
+import { Send, Bot, UploadCloud, FileText, MessageCircleQuestion, Users, Terminal, Briefcase } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PulsingDotsLoader } from '@/components/pulsing-dots-loader';
 import { AssistantAvatar } from '@/components/assistant-avatar';
@@ -91,11 +92,11 @@ export default function InterviewPrepClient() {
             return;
         }
         if (!jobTitle.trim() || !jobDescription.trim() || !interviewType) {
-            toast({ title: 'Missing Information', description: 'Please fill out all required fields.', variant: 'destructive' });
+            toast({ title: 'Missing Information', description: 'Please fill out all required fields and select an interview type.', variant: 'destructive' });
             return;
         }
-        if (!resumeFile && !userProfile) {
-             toast({ title: 'Resume/Profile Needed', description: 'Please upload a resume or complete your profile.', variant: 'destructive' });
+        if (!resumeFile) {
+             toast({ title: 'Resume Needed', description: 'Please upload your resume.', variant: 'destructive' });
             return;
         }
 
@@ -107,14 +108,12 @@ export default function InterviewPrepClient() {
                 // This is a placeholder for actual PDF parsing.
                 // For a real implementation, a library like pdf.js would be used here on the client
                 // or a parsing service on the server. We will just send an indicator for now.
-                userCvText = `(User uploaded a PDF named ${resumeFile.name}. The content is not extracted in this demo, please use the profile data.)`;
+                userCvText = `(User uploaded a PDF named ${resumeFile.name}. The AI should ask questions based on this file.)`;
                 toast({ title: 'Resume Uploaded', description: 'The AI will use your resume for the interview.' });
             } catch (error) {
                 toast({ title: 'File Error', description: 'Could not read the uploaded resume.', variant: 'destructive' });
                 return;
             }
-        } else if (userProfile) {
-            userCvText = JSON.stringify(userProfile);
         }
 
         setHasStarted(true);
@@ -205,42 +204,57 @@ export default function InterviewPrepClient() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <form onSubmit={handleStartInterview} className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                      <div className='space-y-2'>
-                                          <Label htmlFor="job-title" className="text-base">Job Title *</Label>
-                                          <Input id="job-title" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="e.g., Senior Software Engineer" required />
-                                      </div>
-                                      <div className='space-y-2'>
-                                          <Label htmlFor="interview-type" className="text-base">Interview Type *</Label>
-                                          <Select onValueChange={(value) => setInterviewType(value as any)} value={interviewType}>
-                                            <SelectTrigger id="interview-type">
-                                              <SelectValue placeholder="Select interview type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="HR">HR Interview</SelectItem>
-                                              <SelectItem value="Technical">Technical Interview</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                      </div>
+                                <form onSubmit={handleStartInterview} className="space-y-8">
+                                    
+                                    <div className="space-y-2 text-center">
+                                        <Label className="text-lg font-semibold">1. Choose Interview Type</Label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                            <Card 
+                                                className={cn("p-6 text-center cursor-pointer transition-all duration-200", interviewType === 'HR' ? 'border-primary ring-2 ring-primary bg-primary/5' : 'hover:bg-muted/50')}
+                                                onClick={() => setInterviewType('HR')}
+                                            >
+                                                <Users className="h-10 w-10 mx-auto text-primary mb-2" />
+                                                <h3 className="font-semibold text-lg">HR Interview</h3>
+                                                <p className="text-sm text-muted-foreground">Focus on behavioral and situational questions.</p>
+                                            </Card>
+                                            <Card 
+                                                className={cn("p-6 text-center cursor-pointer transition-all duration-200", interviewType === 'Technical' ? 'border-primary ring-2 ring-primary bg-primary/5' : 'hover:bg-muted/50')}
+                                                onClick={() => setInterviewType('Technical')}
+                                            >
+                                                <Terminal className="h-10 w-10 mx-auto text-primary mb-2" />
+                                                <h3 className="font-semibold text-lg">Technical Interview</h3>
+                                                <p className="text-sm text-muted-foreground">Focus on skills, knowledge, and problem-solving.</p>
+                                            </Card>
+                                        </div>
                                     </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor="resume-upload" className="text-base">Your Resume (CV) *</Label>
-                                        <label
-                                            htmlFor="resume-upload-input"
-                                            className="relative flex items-center justify-center w-full h-12 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors px-3"
-                                        >
-                                            <UploadCloud className="w-6 h-6 mr-2 text-muted-foreground" />
-                                            <p className="text-sm text-muted-foreground truncate">
-                                            {resumeFileName || "Upload PDF resume (required)"}
-                                            </p>
-                                            <Input id="resume-upload-input" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" required/>
-                                        </label>
+                                    
+                                    <div className="space-y-6">
+                                        <div className='space-y-2'>
+                                            <Label htmlFor="job-title" className="text-lg font-semibold flex items-center gap-2 justify-center"><Briefcase className="h-5 w-5" /> 2. Job & Resume Details</Label>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="job-title">Job Title *</Label>
+                                            <Input id="job-title" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="e.g., Senior Software Engineer" required />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="resume-upload">Your Resume (CV) *</Label>
+                                            <label
+                                                htmlFor="resume-upload-input"
+                                                className="relative flex items-center justify-center w-full h-12 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors px-3"
+                                            >
+                                                <UploadCloud className="w-6 h-6 mr-2 text-muted-foreground" />
+                                                <p className="text-sm text-muted-foreground truncate">
+                                                {resumeFileName || "Upload PDF resume (required)"}
+                                                </p>
+                                                <Input id="resume-upload-input" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" required/>
+                                            </label>
+                                        </div>
+                                        <div className='space-y-2'>
+                                            <Label htmlFor="job-description">Job Description *</Label>
+                                            <Textarea id="job-description" value={jobDescription} onChange={e => setJobDescription(e.target.value)} placeholder="Paste the full job description here..." className="h-40 resize-none" required />
+                                        </div>
                                     </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor="job-description" className="text-base">Job Description *</Label>
-                                        <Textarea id="job-description" value={jobDescription} onChange={e => setJobDescription(e.target.value)} placeholder="Paste the full job description here..." className="h-40 resize-none" required />
-                                    </div>
+
                                     <Button type="submit" className="w-full text-lg" size="lg" disabled={isResponding} style={{backgroundColor: '#45B8AC', color: 'white'}}>
                                         {isResponding ? <BrandLoader size="sm" className="mr-2" /> : <Bot className="mr-2 h-5 w-5" />}
                                         Start Mock Interview
