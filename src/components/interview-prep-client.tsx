@@ -208,9 +208,15 @@ export default function InterviewPrepClient() {
                                     
                                     <div className="space-y-2 text-center">
                                         <Label className="text-lg font-semibold">1. Choose Interview Type</Label>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                                             <Card 
-                                                className={cn("p-6 text-center cursor-pointer transition-all duration-200", interviewType === 'HR' ? 'border-primary ring-2 ring-primary bg-primary/5' : 'hover:bg-muted/50')}
+                                                className={cn(
+                                                    "p-6 text-center cursor-pointer transition-all duration-300 transform",
+                                                    "hover:-translate-y-2 hover:shadow-lg",
+                                                    interviewType === 'HR' 
+                                                        ? 'border-primary ring-2 ring-primary bg-primary/5 shadow-primary/20' 
+                                                        : 'hover:bg-muted/50 hover:shadow-primary/20'
+                                                )}
                                                 onClick={() => setInterviewType('HR')}
                                             >
                                                 <Users className="h-10 w-10 mx-auto text-primary mb-2" />
@@ -218,10 +224,16 @@ export default function InterviewPrepClient() {
                                                 <p className="text-sm text-muted-foreground">Focus on behavioral and situational questions.</p>
                                             </Card>
                                             <Card 
-                                                className={cn("p-6 text-center cursor-pointer transition-all duration-200", interviewType === 'Technical' ? 'border-primary ring-2 ring-primary bg-primary/5' : 'hover:bg-muted/50')}
+                                                className={cn(
+                                                    "p-6 text-center cursor-pointer transition-all duration-300 transform",
+                                                    "hover:-translate-y-2 hover:shadow-lg",
+                                                    interviewType === 'Technical' 
+                                                        ? 'border-[#45B8AC] ring-2 ring-[#45B8AC] bg-[#45B8AC]/5 shadow-[#45B8AC]/20' 
+                                                        : 'hover:bg-muted/50 hover:shadow-[#45B8AC]/20'
+                                                )}
                                                 onClick={() => setInterviewType('Technical')}
                                             >
-                                                <Terminal className="h-10 w-10 mx-auto text-primary mb-2" />
+                                                <Terminal className="h-10 w-10 mx-auto text-[#45B8AC] mb-2" />
                                                 <h3 className="font-semibold text-lg">Technical Interview</h3>
                                                 <p className="text-sm text-muted-foreground">Focus on skills, knowledge, and problem-solving.</p>
                                             </Card>
