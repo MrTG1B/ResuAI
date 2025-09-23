@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, UploadCloud, Bot } from 'lucide-react';
+import { Loader2, UploadCloud, Bot, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { atsAnalyzeAction } from '@/app/actions';
 import { CreativeLoader } from '@/components/creative-loader';
@@ -157,7 +157,7 @@ export default function ResumeAnalyzerPage() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
-        <div className="w-full max-w-4xl mx-auto space-y-8">
+        <div className="w-full max-w-5xl mx-auto space-y-8">
             {isAnalyzing ? (
                 <Card className="shadow-2xl">
                     <CardContent className="p-8 h-96 flex items-center justify-center">
@@ -178,38 +178,48 @@ export default function ResumeAnalyzerPage() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="resume-upload" className="text-lg font-semibold">Your Resume</Label>
-                                    <label
-                                        htmlFor="resume-upload"
-                                        className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/75 transition-colors"
-                                    >
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                                            <UploadCloud className="w-8 h-8 mb-2 text-primary" />
-                                            <p className="text-sm text-foreground">
-                                            <span className="font-semibold">Click to upload</span>
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
-                                            {resumeFileName && <p className="mt-2 text-xs font-medium text-primary truncate max-w-full px-2">{resumeFileName}</p>}
-                                        </div>
-                                        <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" disabled={isAnalyzing}/>
-                                    </label>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="job-description" className="text-lg font-semibold">Job Description</Label>
-                                    <Textarea
-                                        id="job-description"
-                                        placeholder="Paste the full job description here..."
-                                        className="h-40 resize-none"
-                                        value={jobDescription}
-                                        onChange={(e) => setJobDescription(e.target.value)}
-                                        disabled={isAnalyzing}
-                                        required
-                                    />
-                                </div>
+                            <div className="grid md:grid-cols-2 gap-6 items-stretch">
+                                <Card className="bg-muted/30">
+                                    <CardHeader className="flex flex-row items-center gap-2 space-y-0">
+                                        <FileText className="h-5 w-5 text-[#45B8AC]" />
+                                        <CardTitle className="text-lg">Your Resume</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <label
+                                            htmlFor="resume-upload"
+                                            className="relative flex flex-col items-center justify-center w-full h-full min-h-[160px] border-2 border-dashed rounded-lg cursor-pointer bg-background/30 hover:bg-background/70 transition-colors"
+                                        >
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                                                <UploadCloud className="w-8 h-8 mb-2 text-[#45B8AC]" />
+                                                <p className="text-sm text-foreground">
+                                                <span className="font-semibold">Click to upload</span>
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">PDF only (MAX. 5MB)</p>
+                                                {resumeFileName && <p className="mt-2 text-xs font-medium text-primary truncate max-w-full px-2">{resumeFileName}</p>}
+                                            </div>
+                                            <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" disabled={isAnalyzing}/>
+                                        </label>
+                                    </CardContent>
+                                </Card>
+                                <Card className="bg-muted/30 flex flex-col">
+                                     <CardHeader className="flex flex-row items-center gap-2 space-y-0">
+                                        <FileText className="h-5 w-5 text-[#45B8AC]" />
+                                        <CardTitle className="text-lg">Job Description</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="flex-grow">
+                                        <Textarea
+                                            id="job-description"
+                                            placeholder="Paste the full job description here..."
+                                            className="h-full min-h-[160px] resize-none bg-background/30"
+                                            value={jobDescription}
+                                            onChange={(e) => setJobDescription(e.target.value)}
+                                            disabled={isAnalyzing}
+                                            required
+                                        />
+                                    </CardContent>
+                                </Card>
                             </div>
-                            <Button type="submit" className="w-full text-lg" size="lg" disabled={isAnalyzing}>
+                            <Button type="submit" className="w-full text-lg" size="lg" disabled={isAnalyzing} style={{backgroundColor: '#45B8AC', color: 'white'}}>
                                 <Bot className="mr-2 h-5 w-5" />
                                 Scan My Resume
                             </Button>
@@ -223,5 +233,3 @@ export default function ResumeAnalyzerPage() {
     </div>
   );
 }
-
-    
