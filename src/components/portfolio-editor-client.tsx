@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, db, getDoc, doc } from '@/lib/firebase';
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; }) => (
@@ -263,7 +264,7 @@ function PortfolioEditorClient() {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex items-start justify-center h-full pt-2">
+                    <div className="flex items-center justify-center h-full">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
