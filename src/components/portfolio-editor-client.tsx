@@ -11,9 +11,11 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench } from 'lucide-react';
+import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { Slider } from '@/components/ui/slider';
+
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.ElementType; label: string; hoverColor: string }) => (
     <TooltipProvider>
@@ -44,6 +46,8 @@ function PortfolioEditorClient() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [zoom, setZoom] = useState(37);
+
 
   useEffect(() => {
     const portfolioId = params.id as string;
@@ -125,10 +129,34 @@ function PortfolioEditorClient() {
             </nav>
 
             {/* Main Canvas */}
-            <main className="flex-1 p-4 overflow-auto">
-              <div className='flex h-full items-center justify-center bg-background rounded-lg border'>
+            <main className="flex-1 p-4 flex flex-col overflow-auto">
+              <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border'>
                   <p className='text-muted-foreground'>Portfolio Canvas Area</p>
               </div>
+                <footer className="w-full flex-shrink-0 mt-4 p-2 rounded-lg bg-background border flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" className="text-muted-foreground">
+                            <BookOpen className="h-4 w-4 mr-1"/> Notes
+                        </Button>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center gap-4 max-w-xs">
+                        <Slider
+                            value={[zoom]}
+                            onValueChange={(value) => setZoom(value[0])}
+                            max={100}
+                            step={1}
+                            className="w-full"
+                        />
+                         <span className="text-muted-foreground w-12 text-center">{zoom}%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                         <Button variant="ghost" size="sm" className="text-muted-foreground">
+                            <Grid className="h-4 w-4 mr-1"/> Pages: 1 / 1
+                        </Button>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><Maximize className="h-4 w-4"/></Button>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><HelpCircle className="h-4 w-4"/></Button>
+                    </div>
+                </footer>
             </main>
 
             {/* Right AI Panel */}
