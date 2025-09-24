@@ -79,7 +79,7 @@ export default function BuildPage() {
       <Header />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8 animate-fade-in-down">
         <div className="w-full max-w-2xl">
-          <Card className="shadow-2xl overflow-hidden border-t-4 border-primary transition-transform duration-300 hover:scale-105" style={{
+          <Card className="shadow-2xl overflow-hidden" style={{
               borderImageSlice: 1,
               borderImageSource: 'linear-gradient(to left, hsl(var(--primary)), #45B8AC)'
             }}>
