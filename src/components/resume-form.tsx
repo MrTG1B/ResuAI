@@ -195,7 +195,7 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
       </div>
       <Button
         type="submit"
-        className="w-full text-lg bg-[#F71B3D] hover:bg-[#F71B3D]/90"
+        className="w-full text-lg"
         size="lg"
       >
           <Bot className="mr-2 h-5 w-5"/>
