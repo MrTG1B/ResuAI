@@ -136,7 +136,7 @@ function PortfolioEditorClient() {
             </nav>
 
             {/* Main Canvas */}
-            <main className={cn("flex-1 p-4 flex flex-col overflow-auto relative transition-all duration-300", isAiPanelOpen ? 'pr-[400px]' : 'pr-4')}>
+            <main className="flex-1 p-4 flex flex-col overflow-auto relative">
               <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border'>
                   <p className='text-muted-foreground'>Portfolio Canvas Area</p>
               </div>
@@ -167,7 +167,7 @@ function PortfolioEditorClient() {
                 </footer>
             </main>
              {/* Right AI Panel */}
-            <aside className={cn("absolute right-0 top-14 bottom-0 bg-background border-l transition-all duration-300 ease-in-out", isAiPanelOpen ? 'w-[400px]' : 'w-16')}>
+            <aside className={cn("flex-shrink-0 bg-background border-l transition-all duration-300 ease-in-out", isAiPanelOpen ? 'w-[400px]' : 'w-16')}>
                 <div className="h-full flex flex-col">
                     <div className={cn("flex-shrink-0 h-14 flex items-center border-b", isAiPanelOpen ? "justify-between pl-4 pr-2" : "justify-center")}>
                         <div className={cn("flex items-center gap-2 transition-opacity", !isAiPanelOpen && "opacity-0")}>
