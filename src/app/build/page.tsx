@@ -64,12 +64,8 @@ export default function BuildPage() {
 
   if (isProcessing) {
     return (
-      <div className="flex flex-col h-screen bg-muted/20">
-        <Header />
-        <main className="flex-grow flex flex-col items-center justify-center h-full text-center">
-          <CreativeLoader texts={analysisTexts} />
-        </main>
-        <Footer />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <CreativeLoader texts={analysisTexts} />
       </div>
     );
   }
