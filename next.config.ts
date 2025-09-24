@@ -22,7 +22,16 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['i.ibb.co', 'placehold.co'],
+    remotePatterns: [
+        {
+            protocol: 'https',
+            hostname: 'i.ibb.co',
+        },
+        {
+            protocol: 'https',
+            hostname: 'placehold.co',
+        },
+    ]
   },
 };
 
