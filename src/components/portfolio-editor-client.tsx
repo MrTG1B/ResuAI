@@ -198,28 +198,29 @@ function PortfolioEditorClient() {
       <div className="h-screen w-full flex flex-col bg-muted/40 overflow-hidden">
         <Header pageActions={editorActions} />
         <div className="flex flex-1 overflow-hidden relative">
-            {/* Left Toolbar */}
-            <nav 
-                className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1 z-20"
-                onMouseLeave={handleMouseLeave}
-            >
-                {tools.map(tool => (
-                    <EditorToolbarButton key={tool.name} icon={tool.icon} label={tool.name} hoverColor={tool.hover} 
-                        onMouseEnter={() => setActiveToolPanel(tool.name)} 
-                    />
-                ))}
-            </nav>
+            
+            <div className="relative" onMouseLeave={handleMouseLeave}>
+                {/* Left Toolbar */}
+                <nav 
+                    className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1 z-20 h-full"
+                >
+                    {tools.map(tool => (
+                        <EditorToolbarButton key={tool.name} icon={tool.icon} label={tool.name} hoverColor={tool.hover} 
+                            onMouseEnter={() => setActiveToolPanel(tool.name)} 
+                        />
+                    ))}
+                </nav>
 
-            <div
-              ref={toolPanelContainerRef}
-              className={cn(
-                  "absolute top-2 bottom-2 left-20 transition-all duration-300 ease-in-out z-10",
-                  activeToolPanel ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
-              )}
-              onMouseLeave={handleMouseLeave}
-            >
-                <div className="bg-card border shadow-lg rounded-lg h-full w-[350px] flex flex-col">
-                    {activeToolPanel && toolPanelContent[activeToolPanel]}
+                <div
+                  ref={toolPanelContainerRef}
+                  className={cn(
+                      "absolute top-2 bottom-2 left-20 transition-all duration-300 ease-in-out z-10",
+                      activeToolPanel ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
+                  )}
+                >
+                    <div className="bg-card border shadow-lg rounded-lg h-full w-[350px] flex flex-col">
+                        {activeToolPanel && toolPanelContent[activeToolPanel]}
+                    </div>
                 </div>
             </div>
 
