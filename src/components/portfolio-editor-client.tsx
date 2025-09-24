@@ -213,7 +213,7 @@ function PortfolioEditorClient() {
             <div
               ref={toolPanelContainerRef}
               className={cn(
-                  "absolute top-2 bottom-2 left-24 transition-all duration-300 ease-in-out z-10",
+                  "absolute top-2 bottom-2 left-20 transition-all duration-300 ease-in-out z-10",
                   activeToolPanel ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
               )}
               onMouseLeave={handleMouseLeave}
