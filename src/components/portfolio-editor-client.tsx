@@ -214,13 +214,14 @@ function PortfolioEditorClient() {
                 <div
                   ref={toolPanelContainerRef}
                   className={cn(
-                      "absolute top-2 left-20 transition-all duration-300 ease-in-out transform-origin-left",
+                      "absolute top-2 left-20 z-30 transition-all duration-300 ease-in-out transform-origin-left",
+                      "max-h-[calc(100vh-80px)]",
                       activeToolPanel
                         ? 'translate-x-0 opacity-100 scale-100'
                         : '-translate-x-8 opacity-0 scale-95 pointer-events-none'
                   )}
                 >
-                    <div className="bg-card border shadow-lg rounded-lg w-[350px] flex flex-col max-h-[calc(100vh-80px)]">
+                    <div className="bg-card border shadow-lg rounded-lg w-[350px] flex flex-col h-full">
                         {activeToolPanel && toolPanelContent[activeToolPanel]}
                     </div>
                 </div>
