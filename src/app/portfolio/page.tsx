@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useCallback } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/header";
@@ -13,9 +13,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2, Palette, Eye } from "lucide-react";
+import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2, Palette, Eye, CheckCircle } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth, db, getDoc, setDoc, doc } from "@/lib/firebase";
+import { auth, db, getDoc, setDoc, doc, serverTimestamp } from "@/lib/firebase";
 import { uploadImageAction } from "@/app/actions";
 import { BrandLoader } from "@/components/brand-loader";
 
@@ -78,6 +78,8 @@ function PortfolioSkeleton() {
   );
 }
 
+type SaveStatus = 'idle' | 'saving' | 'saved';
+
 function PortfolioPageContent() {
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
   const [editablePortfolio, setEditablePortfolio] = useState<PortfolioData | null>(null);
@@ -88,12 +90,45 @@ function PortfolioPageContent() {
   const [isOwner, setIsOwner] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   
+  const autoSaveChanges = useCallback(async (data: PortfolioData) => {
+    if (!currentUser || !data.id || !db) return;
+    setSaveStatus('saving');
+    try {
+        const { id, ...dataToSave } = data;
+        await setDoc(doc(db, "users", currentUser.uid, "portfolios", id), {
+            ...dataToSave,
+            lastModified: serverTimestamp()
+        }, { merge: true });
+        setSaveStatus('saved');
+    } catch (error) {
+        console.error("Auto-save failed:", error);
+        setSaveStatus('idle'); // Or an 'error' state
+        toast({ title: "Auto-save failed", description: "Could not save changes automatically.", variant: "destructive" });
+    }
+  }, [currentUser, toast]);
+
+  useEffect(() => {
+    if (!isEditMode || !editablePortfolio || saveStatus === 'saving') return;
+    
+    const handler = setTimeout(() => {
+        if(JSON.stringify(editablePortfolio) !== JSON.stringify(portfolio)) {
+            autoSaveChanges(editablePortfolio);
+        }
+    }, 2000); // 2-second debounce
+
+    return () => {
+        clearTimeout(handler);
+    };
+  }, [editablePortfolio, isEditMode, autoSaveChanges, portfolio, saveStatus]);
+
+
   useEffect(() => {
     if (!db || !auth) {
         toast({ title: "Configuration Error", description: "Firebase is not configured.", variant: "destructive" });
@@ -156,8 +191,7 @@ function PortfolioPageContent() {
     if (!currentUser || !editablePortfolio || !editablePortfolio.id) return;
 
     try {
-        const { id, ...dataToSave } = editablePortfolio;
-        await setDoc(doc(db, "users", currentUser.uid, "portfolios", id), dataToSave, { merge: true });
+        await autoSaveChanges(editablePortfolio);
         setPortfolio(editablePortfolio);
         setIsEditMode(false);
         toast({ title: "Portfolio Saved", description: "Your changes have been saved." });
@@ -165,15 +199,20 @@ function PortfolioPageContent() {
         toast({ title: "Error", description: "Failed to save portfolio.", variant: "destructive" });
     }
   };
+
+  const handleFieldChange = (updateFn: (prev: PortfolioData) => PortfolioData) => {
+    setEditablePortfolio(prev => {
+        if (!prev) return prev;
+        setSaveStatus('idle'); // Reset save status on new change
+        return updateFn(prev);
+    });
+  };
   
   const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
-    setEditablePortfolio(prev => {
-        if (!prev || !prev.personalInfo) return prev;
-        return {
-            ...prev,
-            personalInfo: { ...prev.personalInfo, [field]: value }
-        };
-    });
+    handleFieldChange(prev => ({
+        ...prev,
+        personalInfo: { ...(prev.personalInfo as PersonalInfo), [field]: value }
+    }));
   };
 
   const handleImageUpload = async (
@@ -211,32 +250,33 @@ function PortfolioPageContent() {
     const file = e.target.files?.[0];
     if (file) {
       handleImageUpload(file, 'profile', (url) => {
-        setEditablePortfolio(prev => {
-          if (!prev || !prev.personalInfo) return prev;
-          return { ...prev, personalInfo: { ...prev.personalInfo, profilePictureUrl: url } };
-        });
+        handleFieldChange(prev => ({
+          ...prev,
+          personalInfo: { ...(prev.personalInfo as PersonalInfo), profilePictureUrl: url }
+        }));
       });
     }
   };
 
   const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditablePortfolio(prev => prev ? ({ ...prev, summary: e.target.value }) : null);
+    const value = e.target.value;
+    handleFieldChange(prev => ({ ...prev, summary: value }));
   };
 
   const handleSkillsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditablePortfolio(prev => prev ? ({ ...prev, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }) : null);
+    const value = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+    handleFieldChange(prev => ({ ...prev, skills: value }));
   };
   
   const handleProjectChange = (index: number, field: keyof Project, value: string) => {
-    setEditablePortfolio(prev => {
-      if (!prev || !prev.projects) return prev;
-      const newProjects = JSON.parse(JSON.stringify(prev.projects));
-      if (field === 'technologies') {
-        newProjects[index] = { ...newProjects[index], [field]: value.split(',').map(t => t.trim()).filter(Boolean) };
-      } else {
-        newProjects[index] = { ...newProjects[index], [field]: value };
-      }
-      return { ...prev, projects: newProjects };
+    handleFieldChange(prev => {
+        const newProjects = JSON.parse(JSON.stringify(prev.projects || []));
+        const technologies = (field === 'technologies') ? value.split(',').map(t => t.trim()).filter(Boolean) : newProjects[index].technologies;
+        newProjects[index] = { 
+            ...newProjects[index], 
+            [field]: field === 'technologies' ? technologies : value 
+        };
+        return { ...prev, projects: newProjects };
     });
   };
 
@@ -244,9 +284,8 @@ function PortfolioPageContent() {
     const file = e.target.files?.[0];
     if (file) {
       handleImageUpload(file, `project-${index}`, (url) => {
-        setEditablePortfolio(prev => {
-          if (!prev || !prev.projects) return prev;
-          const newProjects = JSON.parse(JSON.stringify(prev.projects));
+        handleFieldChange(prev => {
+          const newProjects = JSON.parse(JSON.stringify(prev.projects || []));
           newProjects[index] = { ...newProjects[index], previewImage: url };
           return { ...prev, projects: newProjects };
         });
@@ -255,38 +294,31 @@ function PortfolioPageContent() {
   };
   
   const handleSocialChange = (index: number, field: keyof SocialLink, value: string) => {
-    setEditablePortfolio(prev => {
-      if (!prev || !prev.personalInfo || !prev.personalInfo.socials) return prev;
-      const newSocials = JSON.parse(JSON.stringify(prev.personalInfo.socials));
-      newSocials[index] = { ...newSocials[index], [field]: value };
-      return { ...prev, personalInfo: { ...prev.personalInfo, socials: newSocials } };
+    handleFieldChange(prev => {
+        const newSocials = JSON.parse(JSON.stringify(prev.personalInfo?.socials || []));
+        newSocials[index] = { ...newSocials[index], [field]: value };
+        return { ...prev, personalInfo: { ...(prev.personalInfo as PersonalInfo), socials: newSocials } };
     });
   };
 
   const handleAddSocial = () => {
-    setEditablePortfolio(prev => {
-      if (!prev || !prev.personalInfo) return prev;
-      const newSocials = [...(prev.personalInfo.socials || []), { platform: '', url: '' }];
-      return { ...prev, personalInfo: { ...prev.personalInfo, socials: newSocials } };
+    handleFieldChange(prev => {
+      const newSocials = [...(prev.personalInfo?.socials || []), { platform: '', url: '' }];
+      return { ...prev, personalInfo: { ...(prev.personalInfo as PersonalInfo), socials: newSocials } };
     });
   };
 
   const handleRemoveSocial = (index: number) => {
-    setEditablePortfolio(prev => {
-      if (!prev || !prev.personalInfo || !prev.personalInfo.socials) return prev;
-      const newSocials = prev.personalInfo.socials.filter((_, i) => i !== index);
-      return { ...prev, personalInfo: { ...prev.personalInfo, socials: newSocials } };
+    handleFieldChange(prev => {
+      const newSocials = prev.personalInfo?.socials?.filter((_, i) => i !== index) || [];
+      return { ...prev, personalInfo: { ...(prev.personalInfo as PersonalInfo), socials: newSocials } };
     });
   };
 
   const handleColorChange = (field: keyof ColorPalette, value: string) => {
-    setEditablePortfolio(prev => {
-        if (!prev) return prev;
+    handleFieldChange(prev => {
         const newPalette = { ...(prev.colorPalette || {}), [field]: value };
-        return {
-            ...prev,
-            colorPalette: newPalette as ColorPalette,
-        };
+        return { ...prev, colorPalette: newPalette as ColorPalette };
     });
   };
 
@@ -372,23 +404,43 @@ function PortfolioPageContent() {
     '--p-secondary': colorPalette.secondary,
     '--p-accent': colorPalette.accent,
   } as React.CSSProperties : {};
+  
+  const SaveStatusIndicator = () => {
+    let content;
+    switch (saveStatus) {
+        case 'saving':
+            content = <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>;
+            break;
+        case 'saved':
+            content = <><CheckCircle className="h-4 w-4" /> Saved</>;
+            break;
+        default:
+            return null;
+    }
+    return (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {content}
+        </div>
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--p-bg, hsl(var(--muted)/0.4))' }}>
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-5xl" style={portfolioStyles}>
         {isOwner && (
-            <div className="flex justify-end mb-4 gap-2">
-                {!isEditMode ? (
+             <div className="flex justify-end mb-4 gap-2 items-center">
+                {isEditMode ? (
+                  <>
+                    <SaveStatusIndicator />
+                    <Button onClick={handleCancel} variant="outline">Cancel</Button>
+                    <Button onClick={handleSaveChanges} disabled={!!isUploading || saveStatus === 'saving'}><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
+                  </>
+                ) : (
                   <>
                     <Button onClick={copyToClipboard} variant="outline"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
                     <Button onClick={handleView} variant="outline"><Eye className="mr-2 h-4 w-4" /> View</Button>
                     <Button onClick={() => setIsEditMode(true)}><Edit className="mr-2 h-4 w-4" /> Edit Portfolio</Button>
-                  </>
-                ) : (
-                  <>
-                    <Button onClick={handleCancel} variant="outline">Cancel</Button>
-                    <Button onClick={handleSaveChanges} disabled={!!isUploading}><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
                   </>
                 )}
             </div>
@@ -632,3 +684,5 @@ export default function PortfolioPage() {
         </Suspense>
     )
 }
+
+    
