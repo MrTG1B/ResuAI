@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.ElementType; label: string; hoverColor: string }) => (
@@ -136,7 +137,7 @@ function PortfolioEditorClient() {
             </nav>
 
             {/* Main Canvas */}
-             <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+             <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden relative">
               <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border overflow-auto'>
                   <p className='text-muted-foreground'>Portfolio Canvas Area</p>
               </div>
@@ -165,25 +166,29 @@ function PortfolioEditorClient() {
                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><HelpCircle className="h-4 w-4"/></Button>
                     </div>
                 </footer>
-            </main>
-             {/* Right AI Panel */}
-            <aside className={cn("flex-shrink-0 bg-background border-l transition-all duration-300 ease-in-out", isAiPanelOpen ? 'w-[400px]' : 'w-16')}>
-                <div className="h-full flex flex-col">
-                     <div className={cn("flex-shrink-0 h-14 flex items-center border-b", isAiPanelOpen ? "justify-between pl-4 pr-2" : "justify-center")}>
-                        <div className={cn("flex items-center gap-2 transition-opacity", !isAiPanelOpen && "opacity-0")}>
-                           <Sparkles className="h-5 w-5 text-primary" />
-                           <h3 className="font-semibold">AI Assistant</h3>
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(!isAiPanelOpen)} className="h-9 w-9">
-                            {isAiPanelOpen ? <PanelRightClose /> : <Sparkles />}
-                        </Button>
-                    </div>
 
-                    <div className={cn("flex-1 p-4 overflow-y-auto transition-opacity", !isAiPanelOpen && "opacity-0 hidden")}>
-                       <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
-                    </div>
-                </div>
-            </aside>
+                {/* Floating AI Button */}
+                 <Sheet open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}>
+                    <SheetTrigger asChild>
+                        <Button className="absolute bottom-24 right-8 h-14 w-14 rounded-2xl bg-background border-2 border-primary/20 shadow-2xl shadow-primary/30 text-primary transition-all duration-300 transform hover:scale-110 hover:shadow-primary/40 focus:ring-4 focus:ring-primary/50">
+                             <div className="relative h-8 w-8">
+                                <Sparkles className="absolute inset-0 m-auto h-8 w-8 transition-opacity duration-300" />
+                            </div>
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent className="w-[400px] sm:w-[540px] p-0 flex flex-col">
+                         <SheetHeader className="p-4 border-b">
+                            <SheetTitle className="flex items-center gap-2">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                                AI Assistant
+                            </SheetTitle>
+                        </SheetHeader>
+                        <div className="flex-1 p-4 overflow-y-auto">
+                            <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+            </main>
         </div>
       </div>
   );
