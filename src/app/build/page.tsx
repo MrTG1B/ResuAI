@@ -79,10 +79,7 @@ export default function BuildPage() {
       <Header />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8 animate-fade-in-down">
         <div className="w-full max-w-2xl">
-          <Card className="shadow-2xl overflow-hidden" style={{
-              borderImageSlice: 1,
-              borderImageSource: 'linear-gradient(to left, hsl(var(--primary)), #45B8AC)'
-            }}>
+          <Card className="shadow-2xl overflow-hidden">
             <CardHeader className="text-center">
               <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
                 Create Your AI-Powered Portfolio
