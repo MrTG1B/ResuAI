@@ -13,7 +13,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -303,7 +302,6 @@ function CoverLetterGeneratorPageContent() {
           </Card>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
@@ -321,3 +319,4 @@ export default function CoverLetterGeneratorPage() {
 }
 
     
+

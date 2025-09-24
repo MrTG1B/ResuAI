@@ -13,7 +13,6 @@ import { analyzeCertificateAction, uploadImageAction, deleteImageAction, refineS
 import Image from "next/image";
 
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -851,7 +850,6 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </main>
-      <Footer />
 
       {/* DIALOG FOR EDITING/ADDING */}
       <Dialog open={!!editingSection} onOpenChange={(isOpen) => !isOpen && closeDialog()}>

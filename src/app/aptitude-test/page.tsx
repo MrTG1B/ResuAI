@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Clock, CheckCircle, XCircle, BrainCircuit } from 'lucide-react';
@@ -310,7 +309,6 @@ function AptitudeTestPageContent() {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

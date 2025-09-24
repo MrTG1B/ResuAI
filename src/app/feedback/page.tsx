@@ -9,7 +9,6 @@ import * as z from 'zod';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, db, collection, addDoc, serverTimestamp } from '@/lib/firebase';
 import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -130,7 +129,6 @@ export default function FeedbackPage() {
           </CardContent>
         </Card>
       </main>
-      <Footer />
     </div>
   );
 }

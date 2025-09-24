@@ -417,7 +417,7 @@ function MentraChatPage() {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => router.push('/terms')} className="cursor-pointer">
                                 <FileText className="mr-2 h-4 w-4" />
-                                <span>Terms &amp; Conditions</span>
+                                <span>Terms & Conditions</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
@@ -523,3 +523,4 @@ export default function MentraChatClient() {
     
 
     
+

@@ -5,7 +5,6 @@ import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { type PortfolioData, PersonalInfo, Project, SocialLink, type ColorPalette } from "@/types/portfolio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -322,12 +321,11 @@ function PortfolioPageContent() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-muted/40">
+      <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-5xl">
           <PortfolioSkeleton />
         </main>
-        <Footer />
       </div>
     );
   }
@@ -343,7 +341,6 @@ function PortfolioPageContent() {
                     <Button onClick={() => router.push('/dashboard')} className="mt-6">Go to Dashboard</Button>
                 </div>
             </main>
-            <Footer />
         </div>
     )
   }
@@ -355,7 +352,6 @@ function PortfolioPageContent() {
             <main className="flex-grow flex items-center justify-center text-center p-4">
                  <BrandLoader size="lg" />
             </main>
-            <Footer />
         </div>
     );
   }
@@ -616,7 +612,6 @@ function PortfolioPageContent() {
             </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

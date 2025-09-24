@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { UploadCloud, PenSquare, ArrowRight } from 'lucide-react';
@@ -114,7 +113,6 @@ export default function ResumeBuilderPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
