@@ -302,7 +302,7 @@ export async function getPublicPortfolioAction(portfolioId: string): Promise<{ s
     }
     try {
         const portfoliosRef = collectionGroup(db, 'portfolios');
-        const q = query(portfoliosRef, where('__name__', '==', `*/portfolios/${portfolioId}`));
+        const q = query(portfoliosRef, where('__name__', '==', portfolioId));
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
@@ -319,5 +319,7 @@ export async function getPublicPortfolioAction(portfolioId: string): Promise<{ s
         return { success: false, error: `Failed to fetch portfolio: ${errorMessage}` };
     }
 }
+
+    
 
     
