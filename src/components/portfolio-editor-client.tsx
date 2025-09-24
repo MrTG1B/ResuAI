@@ -15,6 +15,7 @@ import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wr
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.ElementType; label: string; hoverColor: string }) => (
@@ -23,10 +24,12 @@ const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.El
             <TooltipTrigger asChild>
                 <Button 
                     variant="ghost" 
-                    className={cn("flex flex-col items-center justify-center h-16 w-full rounded-md p-1 text-muted-foreground", hoverColor)}
+                    className={cn("w-full h-16 rounded-md p-1 text-muted-foreground justify-center", hoverColor)}
                 >
-                    <Icon className="h-6 w-6" />
-                    <span className="text-xs mt-1">{label}</span>
+                    <div className="flex flex-col items-center gap-1">
+                        <Icon className="h-6 w-6" />
+                        <span className="text-xs">{label}</span>
+                    </div>
                 </Button>
             </TooltipTrigger>
             <TooltipContent side="right">
@@ -129,10 +132,32 @@ function PortfolioEditorClient() {
             </nav>
 
             {/* Main Canvas */}
-            <main className="flex-1 p-4 flex flex-col overflow-auto">
+            <main className="flex-1 p-4 flex flex-col overflow-auto relative">
               <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border'>
                   <p className='text-muted-foreground'>Portfolio Canvas Area</p>
               </div>
+
+                <Sheet>
+                    <SheetTrigger asChild>
+                         <Button
+                            variant="default"
+                            className="absolute bottom-10 right-10 h-14 w-14 rounded-full shadow-2xl animate-fade-in-up bg-primary hover:bg-primary/90"
+                        >
+                            <Bot className="h-7 w-7" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent className="w-[400px] sm:w-[540px] p-0 flex flex-col">
+                        <SheetHeader className="p-4 border-b">
+                            <SheetTitle className="flex items-center gap-2 text-lg font-semibold tracking-tight font-heading">
+                                <Bot className="h-5 w-5 text-primary"/> AI Assistant
+                            </SheetTitle>
+                        </SheetHeader>
+                        <div className="flex-grow p-4">
+                             <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+               
                 <footer className="w-full flex-shrink-0 mt-4 p-2 rounded-lg bg-background border flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm" className="text-muted-foreground">
@@ -159,15 +184,6 @@ function PortfolioEditorClient() {
                 </footer>
             </main>
 
-            {/* Right AI Panel */}
-            <aside className="w-80 flex-col border-l bg-background hidden lg:flex">
-                <div className="p-4 border-b">
-                    <h2 className="text-lg font-semibold tracking-tight font-heading flex items-center gap-2"><Bot className="h-5 w-5 text-primary"/> AI Assistant</h2>
-                </div>
-                <div className="p-4">
-                    <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
-                </div>
-            </aside>
         </div>
       </div>
   );
