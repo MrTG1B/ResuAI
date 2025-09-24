@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -10,8 +11,25 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Image as ImageIcon, Type, Bot } from 'lucide-react';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
+import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, FolderKanban, UploadCloud, Wrench, Star } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+const EditorToolbarButton = ({ icon: Icon, label }: { icon: React.ElementType, label: string }) => (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Button variant="ghost" className="flex flex-col items-center justify-center h-16 w-full rounded-none p-1 text-muted-foreground hover:bg-primary/10 hover:text-primary">
+                    <Icon className="h-6 w-6" />
+                    <span className="text-xs mt-1">{label}</span>
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+                <p>{label}</p>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
+);
+
 
 function PortfolioEditorClient() {
   const router = useRouter();
@@ -83,9 +101,6 @@ function PortfolioEditorClient() {
   
   const editorActions = (
     <div className="flex items-center gap-2">
-      <div className="hidden md:block">
-        <SidebarTrigger />
-      </div>
       <Button onClick={() => router.push(`/portfolio?id=${params.id}`)} variant="outline">
         Exit Editor
       </Button>
@@ -93,52 +108,38 @@ function PortfolioEditorClient() {
   );
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full bg-muted/40">
-        <Sidebar side="left" collapsible="icon">
-          <SidebarHeader>
-            <h2 className="text-lg font-semibold tracking-tight font-heading group-data-[collapsible=icon]:hidden">Elements</h2>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Shapes" className="w-full justify-start group-data-[collapsible=icon]:justify-center">
-                  <Shapes /> <span className="group-data-[collapsible=icon]:hidden">Shapes</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Text" className="w-full justify-start group-data-[collapsible=icon]:justify-center">
-                  <Type /> <span className="group-data-[collapsible=icon]:hidden">Text</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Images" className="w-full justify-start group-data-[collapsible=icon]:justify-center">
-                  <ImageIcon /> <span className="group-data-[collapsible=icon]:hidden">Images</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
-        </Sidebar>
+      <div className="h-screen w-full flex flex-col bg-muted/40">
+        <Header pageActions={editorActions} />
+        <div className="flex flex-1 overflow-hidden">
+            {/* Left Toolbar */}
+            <nav className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center py-4 space-y-2 overflow-y-auto">
+                <EditorToolbarButton icon={LayoutDashboard} label="Design" />
+                <EditorToolbarButton icon={Shapes} label="Elements" />
+                <EditorToolbarButton icon={Type} label="Text" />
+                <EditorToolbarButton icon={Star} label="Brand" />
+                <EditorToolbarButton icon={UploadCloud} label="Uploads" />
+                <EditorToolbarButton icon={Wrench} label="Tools" />
+                <EditorToolbarButton icon={FolderKanban} label="Projects" />
+            </nav>
 
-        <SidebarInset className='h-screen flex flex-col'>
-          <Header pageActions={editorActions} />
-          <main className="flex-1 p-4 overflow-auto">
+            {/* Main Canvas */}
+            <main className="flex-1 p-4 overflow-auto">
               <div className='flex h-full items-center justify-center bg-background rounded-lg border'>
                   <p className='text-muted-foreground'>Portfolio Canvas Area</p>
               </div>
-          </main>
-        </SidebarInset>
+            </main>
 
-        <aside className="w-80 flex-col border-l bg-background hidden lg:flex">
-           <div className="p-4 border-b">
-            <h2 className="text-lg font-semibold tracking-tight font-heading flex items-center gap-2"><Bot className="h-5 w-5 text-primary"/> AI Assistant</h2>
-          </div>
-          <div className="p-4">
-             <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
-          </div>
-        </aside>
+            {/* Right AI Panel */}
+            <aside className="w-80 flex-col border-l bg-background hidden lg:flex">
+                <div className="p-4 border-b">
+                    <h2 className="text-lg font-semibold tracking-tight font-heading flex items-center gap-2"><Bot className="h-5 w-5 text-primary"/> AI Assistant</h2>
+                </div>
+                <div className="p-4">
+                    <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
+                </div>
+            </aside>
+        </div>
       </div>
-    </SidebarProvider>
   );
 }
 
