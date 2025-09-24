@@ -23,14 +23,14 @@ const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.El
     <TooltipProvider>
         <Tooltip>
             <TooltipTrigger asChild>
-                <Button 
-                    variant="ghost" 
+                <Button
+                    variant="ghost"
                     className={cn(
-                        "w-full h-16 rounded-md p-1 text-muted-foreground justify-center group relative",
-                      )}
+                        "w-full h-16 rounded-md p-1 text-muted-foreground justify-center transition-colors duration-200",
+                        hoverColor
+                    )}
                 >
-                     <div className={cn("absolute inset-0 transition-colors duration-200 opacity-0 rounded-md", hoverColor, "group-hover:opacity-100")}></div>
-                     <div className="flex flex-col items-center gap-1 relative">
+                     <div className="flex flex-col items-center gap-1">
                         <Icon className="h-6 w-6" />
                         <span className="text-xs">{label}</span>
                     </div>
