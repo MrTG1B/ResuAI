@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2, Palette } from "lucide-react";
+import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2, Palette, Eye } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth, db, getDoc, setDoc, doc } from "@/lib/firebase";
 import { uploadImageAction } from "@/app/actions";
@@ -300,6 +300,13 @@ function PortfolioPageContent() {
     }
   };
 
+   const handleView = () => {
+    if (typeof window !== 'undefined' && portfolio?.id) {
+      const viewUrl = `${window.location.origin}/portfolio?id=${portfolio.id}`;
+      window.open(viewUrl, '_blank');
+    }
+  };
+
   const SocialIcon = ({ platform, className }: { platform: string, className?: string }) => {
     const lowerCasePlatform = platform.toLowerCase();
     if (lowerCasePlatform.includes('github')) {
@@ -375,6 +382,7 @@ function PortfolioPageContent() {
                 {!isEditMode ? (
                   <>
                     <Button onClick={copyToClipboard} variant="outline"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
+                    <Button onClick={handleView} variant="outline"><Eye className="mr-2 h-4 w-4" /> View</Button>
                     <Button onClick={() => setIsEditMode(true)}><Edit className="mr-2 h-4 w-4" /> Edit Portfolio</Button>
                   </>
                 ) : (
