@@ -63,7 +63,7 @@ export default function BuildPage() {
 
   if (isProcessing) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-screen w-full items-center justify-center bg-background">
         <CreativeLoader texts={analysisTexts} />
       </div>
     );
@@ -78,8 +78,7 @@ export default function BuildPage() {
       <Header />
       <main className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8 animate-fade-in-down">
         <div className="w-full max-w-2xl">
-          <Card className="shadow-2xl overflow-hidden bg-card/90 backdrop-blur-sm">
-             <div className="h-1.5 bg-gradient-to-r from-primary via-[#F71B3D] to-[#45B8AC]" />
+          <Card className="shadow-2xl overflow-hidden bg-card/90 backdrop-blur-sm border-0">
             <CardHeader className="text-center">
               <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">
                 Create Your AI-Powered Portfolio
@@ -97,3 +96,4 @@ export default function BuildPage() {
     </div>
   );
 }
+
