@@ -89,6 +89,7 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
           publications: userProfile.publications?.length ? userProfile.publications : (portfolioDraft.publications || []),
           title: `Portfolio for ${portfolioDraft.personalInfo?.name || user.displayName || 'User'}`,
           createdAt: serverTimestamp(),
+          lastModified: serverTimestamp(),
           colorPalette: colorPalette,
         };
         console.log("Step 2 Success: Data merged.");
@@ -161,7 +162,7 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
         console.error(">>> PORTFOLIO BUILD FAILED <<<", error);
         toast({ 
             title: "Failed to build portfolio", 
-            description: "An unexpected error occurred. Please check the console for more details.",
+            description: `An unexpected error occurred: ${error.message}. Please check the console for more details.`,
             variant: "destructive" 
         });
       } finally {
@@ -194,7 +195,7 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
       </div>
       <Button
         type="submit"
-        className="w-full text-lg"
+        className="w-full text-lg bg-[#F71B3D] hover:bg-[#F71B3D]/90"
         size="lg"
       >
           <Bot className="mr-2 h-5 w-5"/>
