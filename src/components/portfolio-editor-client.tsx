@@ -129,10 +129,10 @@ function PortfolioEditorClient() {
         <div className="flex flex-1 overflow-hidden">
             {/* Left Toolbar */}
             <nav className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1">
-                <EditorToolbarButton icon={LayoutDashboard} label="Design" hoverColor="hover:bg-primary/10" />
-                <EditorToolbarButton icon={Shapes} label="Elements" hoverColor="hover:bg-[#45B8AC]/10" />
-                <EditorToolbarButton icon={Type} label="Text" hoverColor="hover:bg-[#F71B3D]/10" />
-                <EditorToolbarButton icon={UploadCloud} label="Uploads" hoverColor="hover:bg-primary/10" />
+                <EditorToolbarButton icon={LayoutDashboard} label="Design" hoverColor="hover:bg-primary/20" />
+                <EditorToolbarButton icon={Shapes} label="Elements" hoverColor="hover:bg-[#45B8AC]/20" />
+                <EditorToolbarButton icon={Type} label="Text" hoverColor="hover:bg-[#F71B3D]/20" />
+                <EditorToolbarButton icon={UploadCloud} label="Uploads" hoverColor="hover:bg-primary/20" />
             </nav>
 
             {/* Main Canvas */}
