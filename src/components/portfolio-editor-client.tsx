@@ -133,7 +133,6 @@ function PortfolioEditorClient() {
                 <EditorToolbarButton icon={Shapes} label="Elements" hoverColor="hover:bg-[#45B8AC]/10" />
                 <EditorToolbarButton icon={Type} label="Text" hoverColor="hover:bg-[#F71B3D]/10" />
                 <EditorToolbarButton icon={UploadCloud} label="Uploads" hoverColor="hover:bg-primary/10" />
-                <EditorToolbarButton icon={FolderKanban} label="Projects" hoverColor="hover:bg-[#45B8AC]/10" />
             </nav>
 
             {/* Main Canvas */}
@@ -189,7 +188,7 @@ function PortfolioEditorClient() {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex items-start justify-center h-full pt-2">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
