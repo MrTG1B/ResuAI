@@ -11,7 +11,7 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles, FolderKanban } from 'lucide-react';
+import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles, FolderKanban, Search, SlidersHorizontal } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
@@ -19,7 +19,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 
-const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.ElementType; label: string; hoverColor: string }) => (
+const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; }) => (
     <TooltipProvider>
         <Tooltip>
             <TooltipTrigger asChild>
@@ -29,6 +29,7 @@ const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.El
                         "w-full h-16 rounded-md p-1 text-muted-foreground justify-center transition-colors duration-200",
                         hoverColor
                     )}
+                    onMouseEnter={onMouseEnter}
                 >
                      <div className="flex flex-col items-center gap-1">
                         <Icon className="h-6 w-6" />
@@ -55,6 +56,8 @@ function PortfolioEditorClient() {
   const [notFound, setNotFound] = useState(false);
   const [zoom, setZoom] = useState(37);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
+  const [activeToolPanel, setActiveToolPanel] = useState<string | null>(null);
+  const toolPanelRef = useRef<HTMLDivElement>(null);
 
 
   useEffect(() => {
@@ -122,18 +125,90 @@ function PortfolioEditorClient() {
       </Button>
     </div>
   );
+  
+  const tools = [
+      { name: 'Design', icon: LayoutDashboard, hover: 'hover:bg-primary/20' },
+      { name: 'Elements', icon: Shapes, hover: 'hover:bg-[#45B8AC]/20' },
+      { name: 'Text', icon: Type, hover: 'hover:bg-[#F71B3D]/20' },
+      { name: 'Uploads', icon: UploadCloud, hover: 'hover:bg-primary/20' },
+      { name: 'Projects', icon: FolderKanban, hover: 'hover:bg-[#45B8AC]/20' },
+  ];
+
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    // Check if the mouse is leaving to a completely unrelated element
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setActiveToolPanel(null);
+    }
+  };
 
   return (
       <div className="h-screen w-full flex flex-col bg-muted/40 overflow-hidden">
         <Header pageActions={editorActions} />
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden" onMouseLeave={handleMouseLeave}>
             {/* Left Toolbar */}
-            <nav className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1">
-                <EditorToolbarButton icon={LayoutDashboard} label="Design" hoverColor="hover:bg-primary/20" />
-                <EditorToolbarButton icon={Shapes} label="Elements" hoverColor="hover:bg-[#45B8AC]/20" />
-                <EditorToolbarButton icon={Type} label="Text" hoverColor="hover:bg-[#F71B3D]/20" />
-                <EditorToolbarButton icon={UploadCloud} label="Uploads" hoverColor="hover:bg-primary/20" />
+            <nav className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1 z-20">
+                {tools.map(tool => (
+                    <EditorToolbarButton key={tool.name} icon={tool.icon} label={tool.name} hoverColor={tool.hover} onMouseEnter={() => setActiveToolPanel(tool.name)} />
+                ))}
             </nav>
+
+             {/* Dynamic Tool Panel */}
+            <div
+                ref={toolPanelRef}
+                className={cn(
+                    "bg-card border-r shadow-lg transition-transform duration-300 ease-in-out z-10",
+                    activeToolPanel ? 'translate-x-0' : '-translate-x-full',
+                    "absolute left-20 h-full w-[350px] top-0 bottom-0"
+                )}
+            >
+                <div className="flex flex-col h-full">
+                    <div className="p-4 border-b">
+                         <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input placeholder="Use 4+ words to describe..." className="pl-10 h-10" />
+                            <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                                <SlidersHorizontal className="h-4 w-4" />
+                            </Button>
+                        </div>
+                         <div className="mt-4 flex justify-around border-b">
+                            <Button variant="link" className="text-foreground font-semibold border-b-2 border-primary rounded-none pb-2">Templates</Button>
+                            <Button variant="link" className="text-muted-foreground">Layouts</Button>
+                            <Button variant="link" className="text-muted-foreground">Styles</Button>
+                        </div>
+                    </div>
+                    <div className="p-4 flex-1 overflow-y-auto space-y-6">
+                        <div>
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="font-semibold text-sm">Recently used</h3>
+                                <Button variant="link" size="sm" className="text-muted-foreground">See all</Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-muted h-24 rounded-md"></div>
+                                <div className="bg-muted h-24 rounded-md"></div>
+                            </div>
+                        </div>
+                         <div>
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="font-semibold text-sm">Premium Templates for You</h3>
+                                <Button variant="link" size="sm" className="text-muted-foreground">See all</Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-muted h-24 rounded-md"></div>
+                                <div className="bg-muted h-24 rounded-md"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-sm mb-2">All results</h3>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-muted h-24 rounded-md"></div>
+                                <div className="bg-muted h-24 rounded-md"></div>
+                                <div className="bg-muted h-24 rounded-md"></div>
+                                <div className="bg-muted h-24 rounded-md"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* Main Canvas */}
              <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden relative">
