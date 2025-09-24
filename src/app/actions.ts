@@ -302,14 +302,14 @@ export async function getPublicPortfolioAction(portfolioId: string): Promise<{ s
     }
     try {
         const portfoliosRef = collectionGroup(db, 'portfolios');
-        const q = query(portfoliosRef, where('__name__', '==', portfolioId));
-        const snapshot = await getDocs(q);
+        const snapshot = await getDocs(portfoliosRef);
+        
+        const portfolioDoc = snapshot.docs.find(doc => doc.id === portfolioId);
 
-        if (snapshot.empty) {
+        if (!portfolioDoc) {
             return { success: false, error: "Portfolio not found." };
         }
 
-        const portfolioDoc = snapshot.docs[0];
         const portfolioData = { id: portfolioDoc.id, ...portfolioDoc.data() } as PortfolioData;
         
         return { success: true, data: portfolioData };
@@ -319,6 +319,8 @@ export async function getPublicPortfolioAction(portfolioId: string): Promise<{ s
         return { success: false, error: `Failed to fetch portfolio: ${errorMessage}` };
     }
 }
+
+    
 
     
 
