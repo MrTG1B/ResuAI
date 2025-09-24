@@ -191,7 +191,7 @@ function PortfolioEditorClient() {
             <p className="text-sm text-muted-foreground">Your profile projects are available here to drag and drop.</p>
         </div>
     ),
-  }
+  };
 
 
   return (
