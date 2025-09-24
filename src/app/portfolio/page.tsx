@@ -323,18 +323,16 @@ function PortfolioPageContent() {
   };
 
   const copyToClipboard = () => {
-    if (typeof window !== 'undefined' && currentUser && portfolio?.id) {
-      // Note: This creates a public share link, but we don't have public rules for this yet.
-      // For now, it only works for the logged-in user.
-      const shareUrl = `${window.location.origin}/portfolio?id=${portfolio.id}`;
+    if (typeof window !== 'undefined' && portfolio?.id) {
+      const shareUrl = `${window.location.origin}/public/portfolio/${portfolio.id}`;
       navigator.clipboard.writeText(shareUrl);
-      toast({ title: "Link Copied", description: "Portfolio URL copied to clipboard!" });
+      toast({ title: "Link Copied", description: "Public portfolio URL copied to clipboard!" });
     }
   };
 
    const handleView = () => {
     if (typeof window !== 'undefined' && portfolio?.id) {
-      const viewUrl = `${window.location.origin}/portfolio?id=${portfolio.id}`;
+      const viewUrl = `${window.location.origin}/public/portfolio/${portfolio.id}`;
       window.open(viewUrl, '_blank');
     }
   };

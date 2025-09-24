@@ -17,7 +17,7 @@ import { generateAptitudeExam as generateAptitudeExamFlow } from "@/ai/flows/gen
 import { generateChatTitle as generateChatTitleFlow, type GenerateChatTitleInput } from "@/ai/flows/generate-chat-title";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
-import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp, collectionGroup, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
 import { type CoverLetter } from "@/types/cover-letter";
@@ -295,3 +295,29 @@ export async function generateChatTitleAction(input: GenerateChatTitleInput) {
         return { success: false, error: "Failed to generate chat title." };
     }
 }
+
+export async function getPublicPortfolioAction(portfolioId: string): Promise<{ success: boolean; data?: PortfolioData; error?: string }> {
+    if (!db) {
+        return { success: false, error: "Database service is not available." };
+    }
+    try {
+        const portfoliosRef = collectionGroup(db, 'portfolios');
+        const q = query(portfoliosRef, where('__name__', '==', `*/portfolios/${portfolioId}`));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+            return { success: false, error: "Portfolio not found." };
+        }
+
+        const portfolioDoc = snapshot.docs[0];
+        const portfolioData = { id: portfolioDoc.id, ...portfolioDoc.data() } as PortfolioData;
+        
+        return { success: true, data: portfolioData };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        console.error("Error fetching public portfolio:", errorMessage);
+        return { success: false, error: `Failed to fetch portfolio: ${errorMessage}` };
+    }
+}
+
+    
