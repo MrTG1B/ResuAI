@@ -116,10 +116,8 @@ function PortfolioEditorClient() {
                 <EditorToolbarButton icon={LayoutDashboard} label="Design" />
                 <EditorToolbarButton icon={Shapes} label="Elements" />
                 <EditorToolbarButton icon={Type} label="Text" />
-                <EditorToolbarButton icon={Star} label="Brand" />
                 <EditorToolbarButton icon={UploadCloud} label="Uploads" />
                 <EditorToolbarButton icon={Wrench} label="Tools" />
-                <EditorToolbarButton icon={FolderKanban} label="Projects" />
             </nav>
 
             {/* Main Canvas */}
