@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2, Palette, Eye, CheckCircle } from "lucide-react";
+import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2, Palette, Eye, CheckCircle, Share2, PenSquare, ExternalLink } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth, db, getDoc, setDoc, doc, serverTimestamp, getDocs, collectionGroup } from "@/lib/firebase";
 import { uploadImageAction, getPublicPortfolioAction } from "@/app/actions";
@@ -427,9 +427,15 @@ function PortfolioPageContent() {
         </>
       ) : (
         <>
-          <Button onClick={copyToClipboard} variant="ghost" size="sm" className="text-muted-foreground hover:bg-accent hover:text-accent-foreground"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
-          <Button onClick={handleView} variant="ghost" size="sm" className="text-muted-foreground hover:bg-accent hover:text-accent-foreground"><Eye className="mr-2 h-4 w-4" /> View</Button>
-          <Button onClick={() => setIsEditMode(true)} size="sm" style={{backgroundColor: '#45B8AC', color: 'white'}} className="hover:opacity-90"><Edit className="mr-2 h-4 w-4" /> Edit</Button>
+            <Button onClick={copyToClipboard} variant="outline" size="sm" className="text-muted-foreground hover:bg-accent hover:text-accent-foreground border-foreground/20">
+                <Share2 className="mr-2 h-4 w-4" /> Share
+            </Button>
+            <Button onClick={handleView} variant="outline" size="sm" className="text-muted-foreground hover:bg-accent hover:text-accent-foreground border-foreground/20">
+                <ExternalLink className="mr-2 h-4 w-4" /> View
+            </Button>
+            <Button onClick={() => setIsEditMode(true)} size="sm" style={{backgroundColor: '#45B8AC', color: 'white'}} className="hover:opacity-90 shadow-lg shadow-[#45B8AC]/20 transition-all transform hover:-translate-y-px">
+                <PenSquare className="mr-2 h-4 w-4" /> Edit Portfolio
+            </Button>
         </>
       )}
     </div>
