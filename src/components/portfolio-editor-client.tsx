@@ -11,7 +11,7 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles } from 'lucide-react';
+import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles, FolderKanban } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
@@ -124,7 +124,7 @@ function PortfolioEditorClient() {
   );
 
   return (
-      <div className="h-screen w-full flex flex-col bg-muted/40">
+      <div className="h-screen w-full flex flex-col bg-muted/40 overflow-hidden">
         <Header pageActions={editorActions} />
         <div className="flex flex-1 overflow-hidden">
             {/* Left Toolbar */}
@@ -133,7 +133,7 @@ function PortfolioEditorClient() {
                 <EditorToolbarButton icon={Shapes} label="Elements" hoverColor="hover:bg-[#45B8AC]/10" />
                 <EditorToolbarButton icon={Type} label="Text" hoverColor="hover:bg-[#F71B3D]/10" />
                 <EditorToolbarButton icon={UploadCloud} label="Uploads" hoverColor="hover:bg-primary/10" />
-                <EditorToolbarButton icon={Wrench} label="Tools" hoverColor="hover:bg-[#45B8AC]/10" />
+                <EditorToolbarButton icon={FolderKanban} label="Projects" hoverColor="hover:bg-[#45B8AC]/10" />
             </nav>
 
             {/* Main Canvas */}
@@ -166,29 +166,45 @@ function PortfolioEditorClient() {
                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><HelpCircle className="h-4 w-4"/></Button>
                     </div>
                 </footer>
+            </main>
 
-                {/* Floating AI Button */}
-                 <Sheet open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}>
-                    <SheetTrigger asChild>
-                        <Button className="absolute bottom-24 right-8 h-14 w-14 rounded-2xl bg-background border-2 border-primary/20 shadow-2xl shadow-primary/30 text-primary transition-all duration-300 transform hover:scale-110 hover:shadow-primary/40 focus:ring-4 focus:ring-primary/50">
-                             <div className="relative h-8 w-8">
-                                <Sparkles className="absolute inset-0 m-auto h-8 w-8 transition-opacity duration-300" />
-                            </div>
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-[400px] sm:w-[540px] p-0 flex flex-col">
-                         <SheetHeader className="p-4 border-b">
-                            <SheetTitle className="flex items-center gap-2">
+            {/* Right AI Panel */}
+            <aside className={cn(
+                "flex-shrink-0 bg-background border-l transition-all duration-300 ease-in-out",
+                isAiPanelOpen ? 'w-[350px]' : 'w-16'
+            )}>
+                {isAiPanelOpen ? (
+                     <div className="flex flex-col h-full">
+                        <div className="flex items-center justify-between p-3 border-b h-14">
+                             <h3 className="font-semibold flex items-center gap-2">
                                 <Sparkles className="h-5 w-5 text-primary" />
                                 AI Assistant
-                            </SheetTitle>
-                        </SheetHeader>
+                            </h3>
+                             <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(false)} className="h-8 w-8">
+                                <PanelRightClose className="h-5 w-5" />
+                            </Button>
+                        </div>
                         <div className="flex-1 p-4 overflow-y-auto">
                             <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
                         </div>
-                    </SheetContent>
-                </Sheet>
-            </main>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center h-full">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(true)} className="h-12 w-12 rounded-lg">
+                                        <Sparkles className="h-6 w-6 text-primary" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="left">
+                                    <p>AI Assistant</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                )}
+            </aside>
         </div>
       </div>
   );
