@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, Suspense, useCallback } from "react";
@@ -426,9 +427,9 @@ function PortfolioPageContent() {
         </>
       ) : (
         <>
-          <Button onClick={copyToClipboard} variant="outline" size="sm"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
-          <Button onClick={handleView} variant="outline" size="sm"><Eye className="mr-2 h-4 w-4" /> View</Button>
-          <Button onClick={() => setIsEditMode(true)} size="sm"><Edit className="mr-2 h-4 w-4" /> Edit Portfolio</Button>
+          <Button onClick={copyToClipboard} variant="ghost" size="sm" className="text-muted-foreground hover:bg-accent hover:text-accent-foreground"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
+          <Button onClick={handleView} variant="ghost" size="sm" className="text-muted-foreground hover:bg-accent hover:text-accent-foreground"><Eye className="mr-2 h-4 w-4" /> View</Button>
+          <Button onClick={() => setIsEditMode(true)} size="sm" style={{backgroundColor: '#45B8AC', color: 'white'}} className="hover:opacity-90"><Edit className="mr-2 h-4 w-4" /> Edit</Button>
         </>
       )}
     </div>
