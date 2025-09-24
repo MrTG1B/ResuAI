@@ -16,7 +16,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.ElementType; label: string; hoverColor: string }) => (
@@ -26,12 +25,10 @@ const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.El
                 <Button 
                     variant="ghost" 
                     className={cn(
-                        "w-full h-16 rounded-md p-1 text-muted-foreground justify-center",
-                        "data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-                        "relative"
+                        "w-full h-16 rounded-md p-1 text-muted-foreground justify-center group relative",
                       )}
                 >
-                     <div className={cn("absolute inset-0 transition-colors duration-200 opacity-0", hoverColor, "group-hover:opacity-100")}></div>
+                     <div className={cn("absolute inset-0 transition-colors duration-200 opacity-0 rounded-md", hoverColor, "group-hover:opacity-100")}></div>
                      <div className="flex flex-col items-center gap-1 relative">
                         <Icon className="h-6 w-6" />
                         <span className="text-xs">{label}</span>
@@ -130,7 +127,7 @@ function PortfolioEditorClient() {
         <Header pageActions={editorActions} />
         <div className="flex flex-1 overflow-hidden">
             {/* Left Toolbar */}
-            <nav className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-2 overflow-y-auto">
+            <nav className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1">
                 <EditorToolbarButton icon={LayoutDashboard} label="Design" hoverColor="hover:bg-primary/10" />
                 <EditorToolbarButton icon={Shapes} label="Elements" hoverColor="hover:bg-[#45B8AC]/10" />
                 <EditorToolbarButton icon={Type} label="Text" hoverColor="hover:bg-[#F71B3D]/10" />
@@ -139,7 +136,7 @@ function PortfolioEditorClient() {
             </nav>
 
             {/* Main Canvas */}
-            <main className="flex-1 p-4 flex flex-col overflow-auto relative">
+            <main className={cn("flex-1 p-4 flex flex-col overflow-auto relative transition-all duration-300", isAiPanelOpen ? 'pr-[400px]' : 'pr-4')}>
               <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border'>
                   <p className='text-muted-foreground'>Portfolio Canvas Area</p>
               </div>
@@ -168,28 +165,25 @@ function PortfolioEditorClient() {
                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><HelpCircle className="h-4 w-4"/></Button>
                     </div>
                 </footer>
-                <Sheet open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen}>
-                    <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon" className="absolute bottom-20 right-6 h-12 w-12 bg-card text-card-foreground rounded-lg shadow-2xl hover:bg-card/90 transition-all group">
-                             <div className="absolute inset-0 bg-primary/20 blur-lg transition-all group-hover:bg-primary/30"></div>
-                             <div className="absolute inset-0.5 rounded-md bg-card"></div>
-                             <div className="relative h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
-                                 <div className="h-3 w-3 rounded-full bg-primary animate-pulse"></div>
-                             </div>
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent side="right" className="w-[400px] sm:max-w-[400px] p-0 flex flex-col">
-                         <Card className="h-full flex flex-col border-0 rounded-none">
-                            <CardHeader className="p-4 border-b">
-                                <CardTitle className="flex items-center gap-2 text-lg"><Bot className="h-5 w-5 text-primary"/> AI Assistant</CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-1 p-4">
-                                <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
-                            </CardContent>
-                        </Card>
-                    </SheetContent>
-                </Sheet>
             </main>
+             {/* Right AI Panel */}
+            <aside className={cn("absolute right-0 top-14 bottom-0 bg-background border-l transition-all duration-300 ease-in-out", isAiPanelOpen ? 'w-[400px]' : 'w-16')}>
+                <div className="h-full flex flex-col">
+                    <div className={cn("flex-shrink-0 h-14 flex items-center border-b", isAiPanelOpen ? "justify-between pl-4 pr-2" : "justify-center")}>
+                        <div className={cn("flex items-center gap-2 transition-opacity", !isAiPanelOpen && "opacity-0")}>
+                           <Bot className="h-5 w-5 text-primary" />
+                           <h3 className="font-semibold">AI Assistant</h3>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(!isAiPanelOpen)} className="h-9 w-9">
+                            {isAiPanelOpen ? <PanelRightClose /> : <Bot />}
+                        </Button>
+                    </div>
+
+                    <div className={cn("flex-1 p-4 overflow-y-auto transition-opacity", !isAiPanelOpen && "opacity-0 hidden")}>
+                       <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
+                    </div>
+                </div>
+            </aside>
         </div>
       </div>
   );
