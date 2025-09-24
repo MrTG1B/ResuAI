@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, db, getDoc, doc } from '@/lib/firebase';
@@ -20,7 +20,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Input } from '@/components/ui/input';
 
 
-const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; }) => (
+const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter, onMouseLeave }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; onMouseLeave: () => void; }) => (
     <TooltipProvider>
         <Tooltip>
             <TooltipTrigger asChild>
@@ -31,6 +31,7 @@ const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { 
                         hoverColor
                     )}
                     onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
                 >
                      <div className="flex flex-col items-center gap-1">
                         <Icon className="h-6 w-6" />
@@ -58,7 +59,7 @@ function PortfolioEditorClient() {
   const [zoom, setZoom] = useState(37);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [activeToolPanel, setActiveToolPanel] = useState<string | null>(null);
-  const toolPanelRef = useRef<HTMLDivElement>(null);
+  const toolPanelContainerRef = useRef<HTMLDivElement>(null);
 
 
   useEffect(() => {
@@ -136,77 +137,78 @@ function PortfolioEditorClient() {
   ];
 
   const handleMouseLeave = (e: React.MouseEvent) => {
-    // Check if the mouse is leaving to an element outside of the current target.
-    // If relatedTarget is null (mouse left the window), we should also hide the panel.
-    if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget as Node)) {
-      setActiveToolPanel(null);
+    if (e.relatedTarget && toolPanelContainerRef.current && !toolPanelContainerRef.current.contains(e.relatedTarget as Node)) {
+        setActiveToolPanel(null);
+    } else if (!e.relatedTarget) {
+        setActiveToolPanel(null);
     }
   };
+
+  const toolPanelContent: Record<string, React.ReactNode> = {
+    'Design': (
+        <div className="p-4">
+            <h3 className="font-semibold mb-2">Design Tools</h3>
+            <p className="text-sm text-muted-foreground">Placeholder for design options like templates, layouts, and styles.</p>
+        </div>
+    ),
+    'Elements': (
+        <div className="p-4">
+            <h3 className="font-semibold mb-2">Elements</h3>
+            <p className="text-sm text-muted-foreground">Placeholder for shapes, lines, and other graphical elements.</p>
+        </div>
+    ),
+    'Text': (
+        <div className="p-4">
+            <h3 className="font-semibold mb-2">Text Tools</h3>
+            <p className="text-sm text-muted-foreground">Placeholder for adding headings, paragraphs, and other text blocks.</p>
+        </div>
+    ),
+    'Uploads': (
+        <div className="p-4">
+            <h3 className="font-semibold mb-2">Uploads</h3>
+            <p className="text-sm text-muted-foreground">Placeholder for user image and asset uploads.</p>
+        </div>
+    ),
+    'Projects': (
+        <div className="p-4">
+            <h3 className="font-semibold mb-2">Projects</h3>
+            <p className="text-sm text-muted-foreground">Placeholder for managing and adding portfolio projects.</p>
+        </div>
+    ),
+  }
 
   return (
       <div className="h-screen w-full flex flex-col bg-muted/40 overflow-hidden">
         <Header pageActions={editorActions} />
-        <div className="flex flex-1 overflow-hidden" onMouseLeave={handleMouseLeave}>
+        <div className="flex flex-1 overflow-hidden relative">
             {/* Left Toolbar */}
-            <nav className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1 z-20">
+            <nav 
+                className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1 z-20"
+                onMouseLeave={handleMouseLeave}
+            >
                 {tools.map(tool => (
-                    <EditorToolbarButton key={tool.name} icon={tool.icon} label={tool.name} hoverColor={tool.hover} onMouseEnter={() => setActiveToolPanel(tool.name)} />
+                    <EditorToolbarButton key={tool.name} icon={tool.icon} label={tool.name} hoverColor={tool.hover} 
+                        onMouseEnter={() => setActiveToolPanel(tool.name)} 
+                        onMouseLeave={() => { /* Handled by parent container */ }} 
+                    />
                 ))}
             </nav>
 
-             {/* Dynamic Tool Panel */}
             <div
-                ref={toolPanelRef}
-                className={cn(
-                    "bg-card border-r shadow-lg transition-transform duration-300 ease-in-out z-10",
-                    activeToolPanel ? 'translate-x-0' : '-translate-x-full',
-                    "absolute left-20 h-full w-[350px] top-0 bottom-0"
-                )}
+              ref={toolPanelContainerRef}
+              className={cn(
+                  "absolute top-0 bottom-0 left-20 h-full transition-all duration-300 ease-in-out z-10",
+                  activeToolPanel ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
+              )}
+              onMouseLeave={handleMouseLeave}
             >
-                <div className="flex flex-col h-full">
-                    <div className="p-4 border-b">
-                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Use 4+ words to describe..." className="pl-10 h-10" />
-                            <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
-                                <SlidersHorizontal className="h-4 w-4" />
-                            </Button>
+                <div className="bg-card border-r shadow-lg h-full w-[350px]">
+                    <div className="flex flex-col h-full">
+                         <div className="p-4 border-b">
+                            <h2 className="text-lg font-semibold">{activeToolPanel}</h2>
                         </div>
-                         <div className="mt-4 flex justify-around border-b">
-                            <Button variant="link" className="text-foreground font-semibold border-b-2 border-primary rounded-none pb-2">Templates</Button>
-                            <Button variant="link" className="text-muted-foreground">Layouts</Button>
-                            <Button variant="link" className="text-muted-foreground">Styles</Button>
-                        </div>
-                    </div>
-                    <div className="p-4 flex-1 overflow-y-auto space-y-6">
-                        <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-semibold text-sm">Recently used</h3>
-                                <Button variant="link" size="sm" className="text-muted-foreground">See all</Button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="bg-muted h-24 rounded-md"></div>
-                                <div className="bg-muted h-24 rounded-md"></div>
-                            </div>
-                        </div>
-                         <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-semibold text-sm">Premium Templates for You</h3>
-                                <Button variant="link" size="sm" className="text-muted-foreground">See all</Button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="bg-muted h-24 rounded-md"></div>
-                                <div className="bg-muted h-24 rounded-md"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-sm mb-2">All results</h3>
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="bg-muted h-24 rounded-md"></div>
-                                <div className="bg-muted h-24 rounded-md"></div>
-                                <div className="bg-muted h-24 rounded-md"></div>
-                                <div className="bg-muted h-24 rounded-md"></div>
-                            </div>
+                        <div className="p-4 flex-1 overflow-y-auto">
+                            {activeToolPanel && toolPanelContent[activeToolPanel]}
                         </div>
                     </div>
                 </div>
@@ -249,37 +251,37 @@ function PortfolioEditorClient() {
                 "flex-shrink-0 bg-background border-l transition-all duration-300 ease-in-out",
                 isAiPanelOpen ? 'w-[350px]' : 'w-16'
             )}>
-                {isAiPanelOpen ? (
-                     <div className="flex flex-col h-full">
-                        <div className="flex items-center justify-between p-3 border-b h-14">
-                             <h3 className="font-semibold flex items-center gap-2">
-                                <Sparkles className="h-5 w-5 text-primary" />
-                                AI Assistant
-                            </h3>
-                             <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(false)} className="h-8 w-8">
-                                <PanelRightClose className="h-5 w-5" />
-                            </Button>
-                        </div>
-                        <div className="flex-1 p-4 overflow-y-auto">
+                <div className="flex flex-col h-full">
+                     <div className="flex items-center justify-center p-2 h-16 border-b">
+                         {isAiPanelOpen ? (
+                             <div className="flex items-center justify-between w-full">
+                                <h3 className="font-semibold flex items-center gap-2 px-2">
+                                    <Sparkles className="h-5 w-5 text-primary" />
+                                    AI Assistant
+                                </h3>
+                                <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(false)} className="h-8 w-8">
+                                    <PanelRightClose className="h-5 w-5" />
+                                </Button>
+                             </div>
+                         ) : (
+                             <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(true)} className="h-12 w-12 rounded-lg">
+                                            <Sparkles className="h-6 w-6 text-primary" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left"><p>AI Assistant</p></TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                         )}
+                     </div>
+                     {isAiPanelOpen && (
+                         <div className="flex-1 p-4 overflow-y-auto">
                             <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="p-2 pt-4">
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(true)} className="h-12 w-12 rounded-lg">
-                                        <Sparkles className="h-6 w-6 text-primary" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="left">
-                                    <p>AI Assistant</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
-                )}
+                         </div>
+                     )}
+                </div>
             </aside>
         </div>
       </div>
