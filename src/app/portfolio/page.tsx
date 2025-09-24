@@ -15,8 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, ClipboardCopy, Award, Edit, Save, Trash2, Camera, Github, Linkedin, Loader2, Palette, Eye, CheckCircle } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth, db, getDoc, setDoc, doc, serverTimestamp } from "@/lib/firebase";
-import { uploadImageAction } from "@/app/actions";
+import { auth, db, getDoc, setDoc, doc, serverTimestamp, getDocs, collectionGroup } from "@/lib/firebase";
+import { uploadImageAction, getPublicPortfolioAction } from "@/app/actions";
 import { BrandLoader } from "@/components/brand-loader";
 
 function PortfolioSkeleton() {
@@ -138,49 +138,43 @@ function PortfolioPageContent() {
     }
   
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            setCurrentUser(user);
-            const portfolioId = searchParams.get('id');
-            
-            if (!portfolioId) {
-                setNotFound(true);
-                toast({ title: "Not Found", description: "Portfolio ID is missing.", variant: "destructive" });
-                setIsLoading(false);
-                setIsPageLoading(false);
-                return;
-            }
-
-            try {
-                // For now, we assume if you are logged in, you can try to view it.
-                // Firestore rules will determine if you are the owner.
-                setIsOwner(true); 
-
-                const portfolioDocRef = doc(db, `users/${user.uid}/portfolios`, portfolioId);
-                const portfolioDoc = await getDoc(portfolioDocRef);
-
-                if (portfolioDoc.exists()) {
-                    const data = { id: portfolioDoc.id, ...portfolioDoc.data() } as PortfolioData;
-                    setPortfolio(data);
-                    setEditablePortfolio(JSON.parse(JSON.stringify(data))); // Deep copy for editing
-                } else {
-                    setNotFound(true);
-                    toast({ title: "Not Found", description: "This portfolio does not exist or you do not have permission to view it.", variant: "destructive" });
-                }
-            } catch (error) {
-                toast({ title: "Error", description: "Failed to fetch portfolio data. You may not have permission to view this.", variant: "destructive" });
-                setNotFound(true);
-            } finally {
-                setIsLoading(false);
-            }
-        } else {
-            toast({ title: "Authentication Required", description: "You must be logged in to view a portfolio.", variant: "destructive" });
-            router.push('/login');
+        setCurrentUser(user); // Set user regardless of whether they are logged in or not to handle public view
+        
+        const portfolioId = searchParams.get('id');
+        if (!portfolioId) {
+            setNotFound(true);
+            setIsLoading(false);
+            setIsPageLoading(false);
+            return;
         }
-        setIsPageLoading(false);
+
+        try {
+            const result = await getPublicPortfolioAction(portfolioId);
+            if (result.success && result.data) {
+                const data = result.data;
+                setPortfolio(data);
+                setEditablePortfolio(JSON.parse(JSON.stringify(data))); // Deep copy for editing
+                // Check if the logged-in user is the owner
+                if (user) {
+                    const portfolioDocRef = doc(db, `users/${user.uid}/portfolios`, portfolioId);
+                    const ownerDoc = await getDoc(portfolioDocRef);
+                    setIsOwner(ownerDoc.exists());
+                }
+            } else {
+                setNotFound(true);
+                toast({ title: "Not Found", description: "This portfolio does not exist.", variant: "destructive" });
+            }
+        } catch (error: any) {
+            toast({ title: "Error", description: "Failed to fetch portfolio data. You may not have permission to view this.", variant: "destructive" });
+            setNotFound(true);
+        } finally {
+            setIsLoading(false);
+            setIsPageLoading(false);
+        }
     });
 
     return () => unsubscribe();
-  }, [router, searchParams, toast]);
+}, [router, searchParams, toast]);
 
   const handleCancel = () => {
     setEditablePortfolio(portfolio);
@@ -421,29 +415,29 @@ function PortfolioPageContent() {
         </div>
     );
   };
+  
+  const pageActions = isOwner ? (
+    <div className="flex items-center gap-2">
+      {isEditMode ? (
+        <>
+          <SaveStatusIndicator />
+          <Button onClick={handleCancel} variant="outline" size="sm">Cancel</Button>
+          <Button onClick={handleSaveChanges} disabled={!!isUploading || saveStatus === 'saving'} size="sm"><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
+        </>
+      ) : (
+        <>
+          <Button onClick={copyToClipboard} variant="outline" size="sm"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
+          <Button onClick={handleView} variant="outline" size="sm"><Eye className="mr-2 h-4 w-4" /> View</Button>
+          <Button onClick={() => setIsEditMode(true)} size="sm"><Edit className="mr-2 h-4 w-4" /> Edit Portfolio</Button>
+        </>
+      )}
+    </div>
+  ) : null;
 
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--p-bg, hsl(var(--muted)/0.4))' }}>
-      <Header />
+      <Header pageActions={pageActions} />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-5xl" style={portfolioStyles}>
-        {isOwner && (
-             <div className="flex justify-end mb-4 gap-2 items-center">
-                {isEditMode ? (
-                  <>
-                    <SaveStatusIndicator />
-                    <Button onClick={handleCancel} variant="outline">Cancel</Button>
-                    <Button onClick={handleSaveChanges} disabled={!!isUploading || saveStatus === 'saving'}><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
-                  </>
-                ) : (
-                  <>
-                    <Button onClick={copyToClipboard} variant="outline"><ClipboardCopy className="mr-2 h-4 w-4" /> Share</Button>
-                    <Button onClick={handleView} variant="outline"><Eye className="mr-2 h-4 w-4" /> View</Button>
-                    <Button onClick={() => setIsEditMode(true)}><Edit className="mr-2 h-4 w-4" /> Edit Portfolio</Button>
-                  </>
-                )}
-            </div>
-        )}
-
         <div className="rounded-xl shadow-2xl overflow-hidden" style={{ backgroundColor: 'var(--p-secondary, hsl(var(--card)))', color: 'var(--p-fg, hsl(var(--foreground)))' }}>
             {/* Profile Header */}
             <div className="p-6 md:p-8 md:flex md:items-center md:gap-8 border-b" style={{ borderColor: 'var(--p-primary, hsl(var(--border)))' }}>
@@ -682,5 +676,3 @@ export default function PortfolioPage() {
         </Suspense>
     )
 }
-
-    

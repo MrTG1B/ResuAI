@@ -80,7 +80,7 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-2">
             {pageActions}
           </div>
 
