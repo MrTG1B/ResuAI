@@ -24,7 +24,11 @@ const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.El
             <TooltipTrigger asChild>
                 <Button 
                     variant="ghost" 
-                    className={cn("w-full h-16 rounded-md p-1 text-muted-foreground justify-center", hoverColor)}
+                    className={cn(
+                        "w-full h-16 rounded-md p-1 text-muted-foreground justify-center",
+                        "data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+                        hoverColor
+                      )}
                 >
                     <div className="flex flex-col items-center gap-1">
                         <Icon className="h-6 w-6" />
