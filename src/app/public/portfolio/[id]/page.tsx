@@ -1,70 +1,73 @@
 
 "use client";
 
-import { useEffect, useState, Suspense, useCallback } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
-import { Header } from "@/components/header";
+import { useParams } from "next/navigation";
 import { type PortfolioData, PersonalInfo, Project, SocialLink, type ColorPalette } from "@/types/portfolio";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, Github, Linkedin, Award } from "lucide-react";
+import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, Award, Github, Linkedin } from "lucide-react";
 import { getPublicPortfolioAction } from "@/app/actions";
 import { BrandLoader } from "@/components/brand-loader";
+import { Button } from "@/components/ui/button";
 
 function PortfolioSkeleton() {
   return (
-    <div className="bg-card rounded-xl shadow-2xl overflow-hidden">
-        <div className="p-8 md:flex md:items-center md:gap-8 border-b">
-            <Skeleton className="h-32 w-32 rounded-full flex-shrink-0 mx-auto md:mx-0" />
-            <div className="flex-1 space-y-3 mt-6 md:mt-0 text-center md:text-left">
-                <Skeleton className="h-8 w-3/4 mx-auto md:mx-0" />
-                <Skeleton className="h-6 w-1/2 mx-auto md:mx-0" />
-                <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2 mt-4">
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-5 w-40" />
-                    <Skeleton className="h-5 w-24" />
-                </div>
-            </div>
-        </div>
-        <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-10">
-                <div>
-                    <Skeleton className="h-7 w-1/4 mb-4" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full mt-2" />
-                    <Skeleton className="h-4 w-3/4 mt-2" />
-                </div>
-                <div>
-                    <Skeleton className="h-7 w-1/4 mb-4" />
-                    <div className="space-y-6">
-                        <Skeleton className="h-24 w-full" />
-                        <Skeleton className="h-24 w-full" />
+    <div className="flex h-screen items-center justify-center">
+        <div className="w-full max-w-5xl p-4">
+            <div className="bg-card rounded-xl shadow-2xl overflow-hidden">
+                <div className="p-8 md:flex md:items-center md:gap-8 border-b">
+                    <Skeleton className="h-32 w-32 rounded-full flex-shrink-0 mx-auto md:mx-0" />
+                    <div className="flex-1 space-y-3 mt-6 md:mt-0 text-center md:text-left">
+                        <Skeleton className="h-8 w-3/4 mx-auto md:mx-0" />
+                        <Skeleton className="h-6 w-1/2 mx-auto md:mx-0" />
+                        <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2 mt-4">
+                            <Skeleton className="h-5 w-32" />
+                            <Skeleton className="h-5 w-40" />
+                            <Skeleton className="h-5 w-24" />
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className="lg:col-span-1 space-y-10">
-                <div>
-                    <Skeleton className="h-7 w-1/3 mb-4" />
-                    <div className="flex flex-wrap gap-2">
-                        <Skeleton className="h-8 w-20" />
-                        <Skeleton className="h-8 w-24" />
-                        <Skeleton className="h-8 w-16" />
-                        <Skeleton className="h-8 w-28" />
+                <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-10">
+                        <div>
+                            <Skeleton className="h-7 w-1/4 mb-4" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full mt-2" />
+                            <Skeleton className="h-4 w-3/4 mt-2" />
+                        </div>
+                        <div>
+                            <Skeleton className="h-7 w-1/4 mb-4" />
+                            <div className="space-y-6">
+                                <Skeleton className="h-24 w-full" />
+                                <Skeleton className="h-24 w-full" />
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <Skeleton className="h-7 w-1/3 mb-4" />
-                    <div className="space-y-4">
-                        <Skeleton className="h-16 w-full" />
-                    </div>
-                </div>
-                 <div>
-                    <Skeleton className="h-7 w-1/3 mb-4" />
-                    <div className="space-y-4">
-                        <Skeleton className="h-16 w-full" />
+                    <div className="lg:col-span-1 space-y-10">
+                        <div>
+                            <Skeleton className="h-7 w-1/3 mb-4" />
+                            <div className="flex flex-wrap gap-2">
+                                <Skeleton className="h-8 w-20" />
+                                <Skeleton className="h-8 w-24" />
+                                <Skeleton className="h-8 w-16" />
+                                <Skeleton className="h-8 w-28" />
+                            </div>
+                        </div>
+                        <div>
+                            <Skeleton className="h-7 w-1/3 mb-4" />
+                            <div className="space-y-4">
+                                <Skeleton className="h-16 w-full" />
+                            </div>
+                        </div>
+                        <div>
+                            <Skeleton className="h-7 w-1/3 mb-4" />
+                            <div className="space-y-4">
+                                <Skeleton className="h-16 w-full" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -77,34 +80,32 @@ function PublicPortfolioPageContent() {
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const router = useRouter();
-  const params = useParams();
   const { toast } = useToast();
+  const params = useParams();
 
   useEffect(() => {
-    const portfolioId = params.id as string;
-    if (!portfolioId) {
-      setNotFound(true);
-      setIsLoading(false);
-      return;
-    }
-
     const fetchPortfolio = async () => {
-      setIsLoading(true);
-      const result = await getPublicPortfolioAction(portfolioId);
-      if (result.success && result.data) {
-        setPortfolio(result.data);
-      } else {
+      const portfolioId = params.id as string;
+      if (!portfolioId) {
         setNotFound(true);
-        toast({
-          title: "Portfolio Not Found",
-          description: result.error || "The portfolio you are looking for does not exist.",
-          variant: "destructive",
-        });
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+      try {
+        const result = await getPublicPortfolioAction(portfolioId);
+        if (result.success && result.data) {
+          setPortfolio(result.data);
+        } else {
+          setNotFound(true);
+          toast({ title: "Not Found", description: result.error || "This portfolio does not exist.", variant: "destructive" });
+        }
+      } catch (error: any) {
+        toast({ title: "Error", description: "Failed to fetch portfolio data.", variant: "destructive" });
+        setNotFound(true);
+      } finally {
+        setIsLoading(false);
+      }
     };
-
     fetchPortfolio();
   }, [params.id, toast]);
 
@@ -118,35 +119,27 @@ function PublicPortfolioPageContent() {
     }
     return <Globe className={className} />;
   };
-
+  
   if (isLoading) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-5xl">
-          <PortfolioSkeleton />
-        </main>
-      </div>
-    );
+    return <PortfolioSkeleton />;
   }
 
   if (notFound || !portfolio) {
     return (
-        <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow flex items-center justify-center text-center p-4">
-                <div>
-                    <h1 className="text-4xl font-bold font-heading">Portfolio Not Found</h1>
-                    <p className="text-muted-foreground mt-2">The portfolio you are looking for does not exist or may have been removed.</p>
-                    <Button onClick={() => router.push('/dashboard')} className="mt-6">Go to Dashboard</Button>
-                </div>
-            </main>
+        <div className="flex flex-col min-h-screen items-center justify-center text-center p-4">
+            <div>
+                <h1 className="text-4xl font-bold font-heading">Portfolio Not Found</h1>
+                <p className="text-muted-foreground mt-2">The portfolio you are looking for does not exist or is private.</p>
+                <Button asChild className="mt-6">
+                  <a href="/">Go to Homepage</a>
+                </Button>
+            </div>
         </div>
     )
   }
-
-  const { personalInfo, summary, experience, education, skills, projects, certifications, colorPalette } = portfolio;
   
+  const { personalInfo, summary, experience, education, skills, projects, certifications, colorPalette } = portfolio;
+
   const portfolioStyles = colorPalette ? {
     '--p-bg': colorPalette.background,
     '--p-fg': colorPalette.foreground,
@@ -154,12 +147,13 @@ function PublicPortfolioPageContent() {
     '--p-secondary': colorPalette.secondary,
     '--p-accent': colorPalette.accent,
   } as React.CSSProperties : {};
+  
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--p-bg, hsl(var(--muted)/0.4))' }}>
-      <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-5xl" style={portfolioStyles}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--p-bg, hsl(var(--muted)/0.4))' }}>
+      <main className="container mx-auto px-4 py-8 md:py-12 max-w-5xl" style={portfolioStyles}>
         <div className="rounded-xl shadow-2xl overflow-hidden" style={{ backgroundColor: 'var(--p-secondary, hsl(var(--card)))', color: 'var(--p-fg, hsl(var(--foreground)))' }}>
+            {/* Profile Header */}
             <div className="p-6 md:p-8 md:flex md:items-center md:gap-8 border-b" style={{ borderColor: 'var(--p-primary, hsl(var(--border)))' }}>
                 <div className="flex-shrink-0 mx-auto md:mx-0">
                     <div className="relative h-24 w-24 md:h-32 md:w-32 group">
@@ -184,6 +178,7 @@ function PublicPortfolioPageContent() {
                         {personalInfo?.website && <a href={personalInfo.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2" style={{ color: 'var(--p-fg, hsl(var(--foreground)))' }}><Globe className="h-4 w-4" style={{color: 'var(--p-primary, hsl(var(--primary)))'}}/>{personalInfo.website}</a>}
                         {personalInfo?.location && <span className="flex items-center gap-2"><MapPin className="h-4 w-4" style={{color: 'var(--p-primary, hsl(var(--primary)))'}}/>{personalInfo.location}</span>}
                     </div>
+
                     {personalInfo?.socials && personalInfo.socials.length > 0 && (
                           <div className="mt-4 flex flex-wrap justify-center md:justify-start items-center gap-4">
                             {personalInfo.socials.map((social, index) => (
@@ -192,16 +187,18 @@ function PublicPortfolioPageContent() {
                               </a>
                             ))}
                           </div>
-                    )}
+                        )
+                    }
                 </div>
             </div>
 
+            {/* Main Content Area */}
             <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-12">
                 <div className="lg:col-span-2 space-y-12">
                     {summary && (
                         <section>
                             <h2 className="text-2xl font-bold flex items-center gap-3 mb-4 font-heading"><BookUser style={{ color: 'var(--p-primary, hsl(var(--primary)))' }}/> Professional Summary</h2>
-                            <p className="whitespace-pre-line leading-relaxed" style={{ color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.9 }}>{summary}</p>
+                              <p className="whitespace-pre-line leading-relaxed" style={{ color: 'var(--p-fg, hsl(var(--muted-foreground)))', opacity: 0.9 }}>{summary}</p>
                         </section>
                     )}
                     
@@ -250,6 +247,7 @@ function PublicPortfolioPageContent() {
                         </section>
                     )}
                 </div>
+                {/* Right Column */}
                 <div className="lg:col-span-1 space-y-12">
                     {skills && skills.length > 0 && (
                         <section>
@@ -296,6 +294,7 @@ function PublicPortfolioPageContent() {
     </div>
   );
 }
+
 
 export default function PublicPortfolioPage() {
     return (
