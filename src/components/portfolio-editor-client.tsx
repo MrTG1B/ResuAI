@@ -11,11 +11,11 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen } from 'lucide-react';
+import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.ElementType; label: string; hoverColor: string }) => (
@@ -50,6 +50,7 @@ function PortfolioEditorClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [zoom, setZoom] = useState(37);
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
 
 
   useEffect(() => {
@@ -136,27 +137,6 @@ function PortfolioEditorClient() {
               <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border'>
                   <p className='text-muted-foreground'>Portfolio Canvas Area</p>
               </div>
-
-                <Sheet>
-                    <SheetTrigger asChild>
-                         <Button
-                            variant="default"
-                            className="absolute bottom-10 right-10 h-14 w-14 rounded-full shadow-2xl animate-fade-in-up bg-primary hover:bg-primary/90"
-                        >
-                            <Bot className="h-7 w-7" />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-[400px] sm:w-[540px] p-0 flex flex-col">
-                        <SheetHeader className="p-4 border-b">
-                            <SheetTitle className="flex items-center gap-2 text-lg font-semibold tracking-tight font-heading">
-                                <Bot className="h-5 w-5 text-primary"/> AI Assistant
-                            </SheetTitle>
-                        </SheetHeader>
-                        <div className="flex-grow p-4">
-                             <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
-                        </div>
-                    </SheetContent>
-                </Sheet>
                
                 <footer className="w-full flex-shrink-0 mt-4 p-2 rounded-lg bg-background border flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
@@ -183,6 +163,22 @@ function PortfolioEditorClient() {
                     </div>
                 </footer>
             </main>
+
+            {/* Right AI Panel */}
+            <aside className={cn(
+                "transition-all duration-300 ease-in-out bg-background border-l flex flex-col",
+                isAiPanelOpen ? 'w-[400px]' : 'w-14'
+            )}>
+                <div className="flex-shrink-0 h-14 flex items-center p-2 border-b">
+                     <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(!isAiPanelOpen)} className="h-10 w-10">
+                        {isAiPanelOpen ? <PanelRightClose className="h-5 w-5"/> : <Bot className="h-5 w-5 text-primary" />}
+                    </Button>
+                    <h2 className={cn("text-lg font-semibold ml-2 transition-opacity", isAiPanelOpen ? 'opacity-100' : 'opacity-0')}>AI Assistant</h2>
+                </div>
+                <div className={cn("flex-grow p-4 overflow-y-auto transition-opacity", isAiPanelOpen ? 'opacity-100' : 'opacity-0 pointer-events-auto', !isAiPanelOpen && 'opacity-0 pointer-events-none')}>
+                   <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
+                </div>
+            </aside>
 
         </div>
       </div>
