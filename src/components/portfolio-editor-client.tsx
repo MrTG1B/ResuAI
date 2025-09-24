@@ -13,12 +13,16 @@ import { type PortfolioData } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
 import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, FolderKanban, UploadCloud, Wrench, Star } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
-const EditorToolbarButton = ({ icon: Icon, label }: { icon: React.ElementType, label: string }) => (
+const EditorToolbarButton = ({ icon: Icon, label, hoverColor }: { icon: React.ElementType; label: string; hoverColor: string }) => (
     <TooltipProvider>
         <Tooltip>
             <TooltipTrigger asChild>
-                <Button variant="ghost" className="flex flex-col items-center justify-center h-16 w-full rounded-none p-1 text-muted-foreground hover:bg-primary/10 hover:text-primary">
+                <Button 
+                    variant="ghost" 
+                    className={cn("flex flex-col items-center justify-center h-16 w-full rounded-none p-1 text-muted-foreground", hoverColor)}
+                >
                     <Icon className="h-6 w-6" />
                     <span className="text-xs mt-1">{label}</span>
                 </Button>
@@ -113,11 +117,11 @@ function PortfolioEditorClient() {
         <div className="flex flex-1 overflow-hidden">
             {/* Left Toolbar */}
             <nav className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center py-4 space-y-2 overflow-y-auto">
-                <EditorToolbarButton icon={LayoutDashboard} label="Design" />
-                <EditorToolbarButton icon={Shapes} label="Elements" />
-                <EditorToolbarButton icon={Type} label="Text" />
-                <EditorToolbarButton icon={UploadCloud} label="Uploads" />
-                <EditorToolbarButton icon={Wrench} label="Tools" />
+                <EditorToolbarButton icon={LayoutDashboard} label="Design" hoverColor="hover:bg-primary/10 hover:text-primary" />
+                <EditorToolbarButton icon={Shapes} label="Elements" hoverColor="hover:bg-[#45B8AC]/10 hover:text-[#45B8AC]" />
+                <EditorToolbarButton icon={Type} label="Text" hoverColor="hover:bg-[#F71B3D]/10 hover:text-[#F71B3D]" />
+                <EditorToolbarButton icon={UploadCloud} label="Uploads" hoverColor="hover:bg-primary/10 hover:text-primary" />
+                <EditorToolbarButton icon={Wrench} label="Tools" hoverColor="hover:bg-[#45B8AC]/10 hover:text-[#45B8AC]" />
             </nav>
 
             {/* Main Canvas */}
