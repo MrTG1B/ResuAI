@@ -11,7 +11,7 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
@@ -136,12 +136,12 @@ function PortfolioEditorClient() {
             </nav>
 
             {/* Main Canvas */}
-            <main className="flex-1 p-4 flex flex-col overflow-auto relative">
-              <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border'>
+             <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+              <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border overflow-auto'>
                   <p className='text-muted-foreground'>Portfolio Canvas Area</p>
               </div>
                
-                <footer className="w-full flex-shrink-0 mt-4 p-2 rounded-lg bg-background border flex items-center justify-between text-sm">
+                <footer className="w-full flex-shrink-0 p-2 rounded-lg bg-background border flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm" className="text-muted-foreground">
                             <BookOpen className="h-4 w-4 mr-1"/> Notes
@@ -169,13 +169,13 @@ function PortfolioEditorClient() {
              {/* Right AI Panel */}
             <aside className={cn("flex-shrink-0 bg-background border-l transition-all duration-300 ease-in-out", isAiPanelOpen ? 'w-[400px]' : 'w-16')}>
                 <div className="h-full flex flex-col">
-                    <div className={cn("flex-shrink-0 h-14 flex items-center border-b", isAiPanelOpen ? "justify-between pl-4 pr-2" : "justify-center")}>
+                     <div className={cn("flex-shrink-0 h-14 flex items-center border-b", isAiPanelOpen ? "justify-between pl-4 pr-2" : "justify-center")}>
                         <div className={cn("flex items-center gap-2 transition-opacity", !isAiPanelOpen && "opacity-0")}>
-                           <Bot className="h-5 w-5 text-primary" />
+                           <Sparkles className="h-5 w-5 text-primary" />
                            <h3 className="font-semibold">AI Assistant</h3>
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(!isAiPanelOpen)} className="h-9 w-9">
-                            {isAiPanelOpen ? <PanelRightClose /> : <Bot />}
+                            {isAiPanelOpen ? <PanelRightClose /> : <Sparkles />}
                         </Button>
                     </div>
 
