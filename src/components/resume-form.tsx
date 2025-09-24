@@ -59,15 +59,18 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
       try {
         const resumeDataUri = reader.result as string;
         
+        console.log("Step 1: Starting AI analysis...");
         // 1. Get AI analysis from server action (no DB writes here)
         const analysisResult = await analyzeResumeForPortfolioAction({ resumeDataUri });
         if (!analysisResult.success || !analysisResult.data) {
           throw new Error(analysisResult.error || "AI analysis failed.");
         }
+        console.log("Step 1 Success: AI analysis complete.", analysisResult.data);
         
         const { portfolioDraft, avatarPrompt, colorPalette } = analysisResult.data;
 
         // 2. Handle DB operations on the client-side
+        console.log("Step 2: Merging AI data with user profile...");
         const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
         const portfolioCollectionRef = collection(db, 'users', user.uid, 'portfolios');
         
@@ -91,8 +94,10 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
           createdAt: serverTimestamp(),
           colorPalette: colorPalette,
         };
+        console.log("Step 2 Success: Data merged.");
 
         // 3. Generate and upload images on the client side
+        console.log("Step 3: Generating and uploading images...");
         let avatarPromise;
         if (userProfile.profilePictureUrl) {
             avatarPromise = Promise.resolve(userProfile.profilePictureUrl);
@@ -137,6 +142,8 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
             avatarPromise,
             Promise.all(projectImagePromises),
         ]);
+        console.log("Step 3 Success: All images processed.");
+
 
         finalPortfolioData.projects = updatedProjects;
         if (finalPortfolioData.personalInfo) {
@@ -145,18 +152,19 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
             finalPortfolioData.personalInfo = { name: '', title: '', email: '', phone: '', location: '', socials: [], profilePictureUrl: avatarUrl };
         }
         
-        console.log("Final data to be saved to Firestore:", JSON.stringify(finalPortfolioData, null, 2));
+        console.log("Step 4: Saving final data to Firestore...", JSON.stringify(finalPortfolioData, null, 2));
 
         // 4. Save final portfolio to Firestore from the client
         const newDocRef = await addDoc(portfolioCollectionRef, finalPortfolioData);
+        console.log("Step 4 Success: Portfolio saved with ID:", newDocRef.id);
         
         router.push(`/portfolio?id=${newDocRef.id}`);
 
       } catch (error: any) {
-        console.error("Failed to build portfolio:", error);
+        console.error(">>> PORTFOLIO BUILD FAILED <<<", error);
         toast({ 
             title: "Failed to build portfolio", 
-            description: "An unexpected error occurred. Please try again later.", 
+            description: "An unexpected error occurred. Please check the console for more details.",
             variant: "destructive" 
         });
       } finally {
@@ -187,7 +195,12 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
           <Input id="resume-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept=".pdf" />
         </label>
       </div>
-      <Button type="submit" className="w-full text-lg" size="lg">
+      <Button
+        type="submit"
+        className="w-full text-lg"
+        size="lg"
+        style={{ backgroundColor: '#F71B3D', color: 'white' }}
+      >
           <Bot className="mr-2 h-5 w-5"/>
           Build My Portfolio
       </Button>
