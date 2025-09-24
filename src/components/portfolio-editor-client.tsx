@@ -136,8 +136,9 @@ function PortfolioEditorClient() {
   ];
 
   const handleMouseLeave = (e: React.MouseEvent) => {
-    // Check if the mouse is leaving to a completely unrelated element
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+    // Check if the mouse is leaving to an element outside of the current target.
+    // If relatedTarget is null (mouse left the window), we should also hide the panel.
+    if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget as Node)) {
       setActiveToolPanel(null);
     }
   };
@@ -264,7 +265,7 @@ function PortfolioEditorClient() {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="p-2 pt-4">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
