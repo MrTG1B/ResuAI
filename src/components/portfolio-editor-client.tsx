@@ -197,7 +197,7 @@ function PortfolioEditorClient() {
   return (
       <div className="h-screen w-full flex flex-col bg-muted/40 overflow-hidden">
         <Header pageActions={editorActions} />
-        <div className="flex flex-1 overflow-hidden relative">
+        <div className="flex flex-1 overflow-hidden">
             
             <div className="relative" onMouseLeave={handleMouseLeave}>
                 {/* Left Toolbar */}
@@ -220,7 +220,7 @@ function PortfolioEditorClient() {
                         : '-translate-x-8 opacity-0 scale-95 pointer-events-none'
                   )}
                 >
-                    <div className="bg-card border shadow-lg rounded-lg h-auto w-[350px] flex flex-col max-h-[calc(100vh-80px)]">
+                    <div className="bg-card border shadow-lg rounded-lg w-[350px] flex flex-col max-h-[calc(100vh-80px)]">
                         {activeToolPanel && toolPanelContent[activeToolPanel]}
                     </div>
                 </div>
