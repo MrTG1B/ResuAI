@@ -169,6 +169,8 @@ function PortfolioEditorClient() {
                     <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 1</div>
                     <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 2</div>
                     <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 3</div>
+                    <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 4</div>
+                    <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 5</div>
                 </div>
             </ScrollArea>
         </div>
