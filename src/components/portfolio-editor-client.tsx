@@ -11,7 +11,7 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData, type TemplateId } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Type, UploadCloud, LayoutDashboard, FolderKanban, Maximize, HelpCircle, BookOpen, Plus, Minus, Search, Save } from 'lucide-react';
+import { Shapes, Type, UploadCloud, LayoutDashboard, FolderKanban, Maximize, HelpCircle, BookOpen, Plus, Minus, Search, Save, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -60,22 +60,28 @@ function PortfolioEditorClient() {
   const toolPanelContainerRef = useRef<HTMLDivElement>(null);
 
 
-  const savePortfolio = useCallback(async (data: Partial<PortfolioData>) => {
-    if (!currentUser || !params.id) return;
+  const savePortfolio = useCallback(async (dataToSave?: Partial<PortfolioData>): Promise<boolean> => {
+    if (!currentUser || !params.id) return false;
+    
+    const finalData = dataToSave || portfolio;
+    if (!finalData) return false;
+
     setIsSaving(true);
     try {
         const portfolioRef = doc(db, 'users', currentUser.uid, 'portfolios', params.id as string);
-        await updateDoc(portfolioRef, data);
+        await updateDoc(portfolioRef, finalData);
         toast({
             title: "Portfolio Saved",
             description: "Your changes have been successfully saved.",
         });
+        return true;
     } catch(e) {
         toast({ title: 'Error saving', description: 'Could not save your changes.', variant: 'destructive'})
+        return false;
     } finally {
         setIsSaving(false);
     }
-  }, [currentUser, params.id, toast]);
+  }, [currentUser, params.id, toast, portfolio]);
 
   useEffect(() => {
     const portfolioId = params.id as string;
@@ -132,7 +138,21 @@ function PortfolioEditorClient() {
         setPortfolio(updatedPortfolio);
         savePortfolio({ templateId });
     }
-  }
+  };
+
+  const handleExit = async () => {
+    const saved = await savePortfolio();
+    if (saved) {
+      router.push(`/portfolio?id=${params.id}`);
+    }
+  };
+
+  const handlePreview = async () => {
+    const saved = await savePortfolio();
+    if (saved && typeof window !== 'undefined') {
+        window.open(`/public/portfolio/${params.id}`, '_blank');
+    }
+  };
 
 
   if (isLoading) {
@@ -162,10 +182,13 @@ function PortfolioEditorClient() {
   
   const editorActions = (
     <div className="flex items-center gap-2">
-        <Button onClick={() => router.push(`/portfolio?id=${params.id}`)} variant="outline">
+        <Button onClick={handlePreview} variant="outline" size="sm" disabled={isSaving}>
+            <ExternalLink className="mr-2 h-4 w-4" /> Preview
+        </Button>
+        <Button onClick={handleExit} variant="outline" size="sm" disabled={isSaving}>
             Exit Editor
         </Button>
-        <Button onClick={() => portfolio && savePortfolio(portfolio)} disabled={isSaving}>
+        <Button onClick={() => savePortfolio()} disabled={isSaving}>
             {isSaving ? <BrandLoader size="sm" className="mr-2" /> : <Save className="mr-2 h-4 w-4" />}
             Save
         </Button>
@@ -321,5 +344,3 @@ function PortfolioEditorClient() {
 }
 
 export default PortfolioEditorClient;
-
-    

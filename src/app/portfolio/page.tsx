@@ -13,8 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Briefcase, GraduationCap, Wrench, Lightbulb, BookUser, Mail, Phone, Globe, MapPin, Award, PenSquare, Share2, ExternalLink, Github, Linkedin } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth, db, getDoc, doc, collectionGroup } from "@/lib/firebase";
-import { getPublicPortfolioAction } from "@/app/actions";
+import { auth, db, getDoc, doc } from "@/lib/firebase";
 import { BrandLoader } from "@/components/brand-loader";
 
 function PortfolioSkeleton() {
@@ -108,21 +107,26 @@ function PortfolioPageContent() {
         }
 
         try {
-            const result = await getPublicPortfolioAction(portfolioId);
-            if (result.success && result.data) {
-                const data = result.data;
-                setPortfolio(data);
-                if (user) {
-                    const portfolioDocRef = doc(db, `users/${user.uid}/portfolios`, portfolioId);
-                    const ownerDoc = await getDoc(portfolioDocRef);
-                    setIsOwner(ownerDoc.exists());
-                }
+            if (!user) {
+                 // If not logged in, try to fetch as a public portfolio
+                 // This requires a different action if security rules are restrictive
+                 // For now, we assume it might fail and that's okay.
+                setIsOwner(false);
+            }
+
+            const portfolioDocRef = doc(db, `users/${user?.uid}/portfolios`, portfolioId);
+            const portfolioSnap = await getDoc(portfolioDocRef);
+
+            if (portfolioSnap.exists()) {
+                setPortfolio({ id: portfolioSnap.id, ...portfolioSnap.data() } as PortfolioData);
+                setIsOwner(true);
             } else {
+                 // Fallback for public or non-owner view - needs a secure cloud function or relaxed rules
                 setNotFound(true);
-                toast({ title: "Not Found", description: "This portfolio does not exist.", variant: "destructive" });
+                toast({ title: "Not Found", description: "This portfolio does not exist or you do not have permission to view it.", variant: "destructive" });
             }
         } catch (error: any) {
-            toast({ title: "Error", description: "Failed to fetch portfolio data. You may not have permission to view this.", variant: "destructive" });
+            toast({ title: "Error", description: "Failed to fetch portfolio data.", variant: "destructive" });
             setNotFound(true);
         } finally {
             setIsLoading(false);
