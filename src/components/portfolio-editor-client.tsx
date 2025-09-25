@@ -5,18 +5,16 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, getDoc, doc, setDoc, updateDoc } from '@/lib/firebase';
+import { auth, db, getDoc, doc, updateDoc } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData, type TemplateId } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles, FolderKanban, Search, SlidersHorizontal, PanelLeft, Star, Palette, TextQuote, Columns, Plus, Minus } from 'lucide-react';
+import { Shapes, Type, UploadCloud, LayoutDashboard, FolderKanban, Maximize, HelpCircle, BookOpen, Plus, Minus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -69,7 +67,6 @@ function PortfolioEditorClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [zoom, setZoom] = useState(70);
-  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [activeToolPanel, setActiveToolPanel] = useState<string | null>(null);
   const toolPanelContainerRef = useRef<HTMLDivElement>(null);
 
@@ -191,7 +188,7 @@ function PortfolioEditorClient() {
   const toolPanelContent: Record<string, React.ReactNode> = {
     'Design': (
         <div className="flex flex-col h-full">
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4 flex-shrink-0">
                 <Input placeholder="Search templates..." className="bg-muted/50" />
             </div>
              <Separator />
@@ -215,7 +212,7 @@ function PortfolioEditorClient() {
              <div className="grid grid-cols-3 gap-2">
                  <div className="h-16 bg-muted rounded-md flex items-center justify-center cursor-pointer hover:ring-2 ring-primary"><div className="w-8 h-8 bg-muted-foreground/50 rounded-sm"></div></div>
                  <div className="h-16 bg-muted rounded-md flex items-center justify-center cursor-pointer hover:ring-2 ring-primary"><div className="w-8 h-8 bg-muted-foreground/50 rounded-full"></div></div>
-                 <div className="h-16 bg-muted rounded-md flex items-center justify-center cursor-pointer hover:ring-2 ring-primary"><Star className="h-8 w-8 text-muted-foreground/50"/></div>
+                 <div className="h-16 bg-muted rounded-md flex items-center justify-center cursor-pointer hover:ring-2 ring-primary"><div className="w-8 h-8 text-muted-foreground/50">...</div></div>
              </div>
         </div>
     ),
@@ -228,7 +225,7 @@ function PortfolioEditorClient() {
     ),
     'Uploads': (
          <div className="p-4 space-y-4">
-            <Button variant="primary" className="w-full bg-[#45B8AC] hover:bg-[#45B8AC]/90">Upload files</Button>
+            <Button className="w-full bg-[#45B8AC] hover:bg-[#45B8AC]/90">Upload files</Button>
             <Input placeholder="Search uploads..." className="bg-muted/50"/>
             <p className="text-xs text-muted-foreground text-center">Your uploaded assets will appear here.</p>
         </div>
@@ -262,7 +259,7 @@ function PortfolioEditorClient() {
                   ref={toolPanelContainerRef}
                   className={cn(
                       "absolute top-2 left-20 z-30 transition-all duration-300 ease-in-out transform-origin-left",
-                      "max-h-[calc(100vh-80px)]",
+                      "h-[calc(100vh-80px)]",
                       activeToolPanel
                         ? 'translate-x-0 opacity-100 scale-100'
                         : '-translate-x-8 opacity-0 scale-95 pointer-events-none'
@@ -278,8 +275,8 @@ function PortfolioEditorClient() {
              <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden relative">
                  <div className='flex-grow h-full bg-background rounded-lg border overflow-auto'>
                     <div 
-                        className="transition-transform duration-300 origin-top"
-                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top' }}
+                        className="transition-transform duration-300"
+                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
                     >
                         {portfolio ? (
                             <PortfolioLivePreview portfolioData={portfolio} />
