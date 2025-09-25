@@ -11,7 +11,7 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData, type TemplateId } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Type, UploadCloud, LayoutDashboard, FolderKanban, Maximize, HelpCircle, BookOpen, Plus, Minus, Search } from 'lucide-react';
+import { Shapes, Type, UploadCloud, LayoutDashboard, FolderKanban, Maximize, HelpCircle, BookOpen, Plus, Minus, Search, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -66,6 +66,10 @@ function PortfolioEditorClient() {
     try {
         const portfolioRef = doc(db, 'users', currentUser.uid, 'portfolios', params.id as string);
         await updateDoc(portfolioRef, data);
+        toast({
+            title: "Portfolio Saved",
+            description: "Your changes have been successfully saved.",
+        });
     } catch(e) {
         toast({ title: 'Error saving', description: 'Could not save your changes.', variant: 'destructive'})
     } finally {
@@ -158,9 +162,13 @@ function PortfolioEditorClient() {
   
   const editorActions = (
     <div className="flex items-center gap-2">
-      <Button onClick={() => router.push(`/portfolio?id=${params.id}`)} variant="outline">
-        Exit Editor
-      </Button>
+        <Button onClick={() => router.push(`/portfolio?id=${params.id}`)} variant="outline">
+            Exit Editor
+        </Button>
+        <Button onClick={() => portfolio && savePortfolio(portfolio)} disabled={isSaving}>
+            {isSaving ? <BrandLoader size="sm" className="mr-2" /> : <Save className="mr-2 h-4 w-4" />}
+            Save
+        </Button>
     </div>
   );
   
@@ -313,3 +321,5 @@ function PortfolioEditorClient() {
 }
 
 export default PortfolioEditorClient;
+
+    
