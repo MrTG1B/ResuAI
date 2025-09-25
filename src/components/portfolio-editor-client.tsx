@@ -20,6 +20,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { PortfolioLivePreview } from '@/components/portfolio-live-preview';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; }) => (
@@ -57,7 +58,7 @@ function PortfolioEditorClient() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [zoom, setZoom] = useState(37);
+  const [zoom, setZoom] = useState(60);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [activeToolPanel, setActiveToolPanel] = useState<string | null>(null);
   const toolPanelContainerRef = useRef<HTMLDivElement>(null);
@@ -229,9 +230,20 @@ function PortfolioEditorClient() {
 
             {/* Main Canvas */}
              <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden relative">
-              <div className='flex-grow h-full flex items-center justify-center bg-background rounded-lg border overflow-auto'>
-                  <p className='text-muted-foreground'>Portfolio Canvas Area</p>
-              </div>
+                 <div className='flex-grow h-full bg-background rounded-lg border overflow-auto'>
+                    <div 
+                        className="transition-transform duration-300 origin-top-left"
+                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+                    >
+                        {portfolio ? (
+                            <div className="mx-auto" style={{ width: '1024px' }}>
+                                <PortfolioLivePreview portfolioData={portfolio} />
+                            </div>
+                        ) : (
+                            <p className='text-muted-foreground text-center p-12'>Loading preview...</p>
+                        )}
+                    </div>
+                 </div>
                
                 <footer className="w-full flex-shrink-0 p-2 rounded-lg bg-background border flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
@@ -244,6 +256,7 @@ function PortfolioEditorClient() {
                             value={[zoom]}
                             onValueChange={(value) => setZoom(value[0])}
                             max={100}
+                            min={20}
                             step={1}
                             className="w-full"
                         />
