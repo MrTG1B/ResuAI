@@ -21,13 +21,10 @@ import { PortfolioLivePreview } from '@/components/portfolio-live-preview';
 import { TemplatePreview } from './template-preview';
 
 
-const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; }) => (
+const EditorToolbarButton = ({ icon: Icon, label, onMouseEnter }: { icon: React.ElementType; label: string; onMouseEnter: () => void; }) => (
     <Button
         variant="ghost"
-        className={cn(
-            "w-full h-16 rounded-md p-1 text-muted-foreground justify-center transition-colors duration-200",
-            hoverColor
-        )}
+        className="w-full h-16 rounded-md p-1 text-muted-foreground justify-center transition-colors duration-200 hover:bg-primary/20"
         onMouseEnter={onMouseEnter}
     >
             <div className="flex flex-col items-center gap-1">
@@ -108,11 +105,13 @@ function PortfolioEditorClient() {
   }, [params.id, router, toast]);
 
   const handleMouseLeave = (e: React.MouseEvent) => {
-    if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget as Node)) {
-        setActiveToolPanel(null);
-    } else if (!e.relatedTarget) {
-        setActiveToolPanel(null);
+    const relatedTarget = e.relatedTarget as Node | null;
+    if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
+      // The mouse is still inside a child element, do nothing.
+      return;
     }
+    // The mouse has left the container and its children.
+    setActiveToolPanel(null);
   };
 
   const toggleFullScreen = () => {
@@ -168,11 +167,11 @@ function PortfolioEditorClient() {
   );
   
   const tools = [
-      { name: 'Design', icon: LayoutDashboard, hover: 'hover:bg-primary/20' },
-      { name: 'Elements', icon: Shapes, hover: 'hover:bg-[#45B8AC]/20' },
-      { name: 'Text', icon: Type, hover: 'hover:bg-[#F71B3D]/20' },
-      { name: 'Uploads', icon: UploadCloud, hover: 'hover:bg-primary/20' },
-      { name: 'Projects', icon: FolderKanban, hover: 'hover:bg-[#45B8AC]/20' },
+      { name: 'Design', icon: LayoutDashboard },
+      { name: 'Elements', icon: Shapes },
+      { name: 'Text', icon: Type },
+      { name: 'Uploads', icon: UploadCloud },
+      { name: 'Projects', icon: FolderKanban },
   ];
 
   const toolPanelContent: Record<string, React.ReactNode> = {
@@ -244,7 +243,7 @@ function PortfolioEditorClient() {
                     className="w-20 flex-shrink-0 border-r bg-background flex flex-col items-center p-2 space-y-1 z-20 h-full"
                 >
                     {tools.map(tool => (
-                        <EditorToolbarButton key={tool.name} icon={tool.icon} label={tool.name} hoverColor={tool.hover} 
+                        <EditorToolbarButton key={tool.name} icon={tool.icon} label={tool.name}
                             onMouseEnter={() => setActiveToolPanel(tool.name)} 
                         />
                     ))}
