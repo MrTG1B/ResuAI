@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PortfolioLivePreview } from '@/components/portfolio-live-preview';
-import Image from 'next/image';
+import { TemplatePreview } from './template-preview';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; }) => (
@@ -47,12 +47,12 @@ const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { 
     </TooltipProvider>
 );
 
-const templatePreviews = [
-    { id: 'classic', name: 'Classic', image: '/previews/classic.png' },
-    { id: 'modern', name: 'Modern', image: '/previews/modern.png' },
-    { id: 'minimal', name: 'Minimal', image: '/previews/minimal.png' },
-    { id: 'creative', name: 'Creative', image: '/previews/creative.png' },
-    { id: 'corporate', name: 'Corporate', image: '/previews/corporate.png' },
+const templatePreviews: { id: TemplateId, name: string }[] = [
+    { id: 'classic', name: 'Classic' },
+    { id: 'modern', name: 'Modern' },
+    { id: 'minimal', name: 'Minimal' },
+    { id: 'creative', name: 'Creative' },
+    { id: 'corporate', name: 'Corporate' },
 ];
 
 
@@ -196,8 +196,13 @@ function PortfolioEditorClient() {
                 <div className="p-4 grid grid-cols-2 gap-4">
                     {templatePreviews.map(template => (
                         <div key={template.id} className="space-y-1 cursor-pointer" onClick={() => handleTemplateSelect(template.id as TemplateId)}>
-                             <div className={cn("aspect-[3/4] bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground overflow-hidden border-2", portfolio?.templateId === template.id ? 'border-primary' : 'border-transparent')}>
-                                <Image src={template.image} alt={template.name} width={150} height={200} className="object-cover h-full w-full"/>
+                            <div
+                                className={cn(
+                                "aspect-[3/4] bg-background rounded-md flex items-center justify-center text-xs text-muted-foreground overflow-hidden border-2",
+                                portfolio?.templateId === template.id ? 'border-primary ring-2 ring-primary ring-offset-2 ring-offset-background' : 'border-muted'
+                                )}
+                            >
+                               {portfolio && <TemplatePreview portfolioData={portfolio} templateId={template.id} />}
                             </div>
                             <p className="text-sm font-medium text-center">{template.name}</p>
                         </div>
