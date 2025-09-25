@@ -2,14 +2,14 @@
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, db, getDoc, doc } from '@/lib/firebase';
+import { auth, db, getDoc, doc, setDoc, updateDoc } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
-import { type PortfolioData } from '@/types/portfolio';
+import { type PortfolioData, type TemplateId } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
 import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles, FolderKanban, Search, SlidersHorizontal, PanelLeft, Star, Palette, TextQuote, Columns, Plus, Minus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PortfolioLivePreview } from '@/components/portfolio-live-preview';
+import Image from 'next/image';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; }) => (
@@ -48,6 +49,14 @@ const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { 
     </TooltipProvider>
 );
 
+const templatePreviews = [
+    { id: 'classic', name: 'Classic', image: '/previews/classic.png' },
+    { id: 'modern', name: 'Modern', image: '/previews/modern.png' },
+    { id: 'minimal', name: 'Minimal', image: '/previews/minimal.png' },
+    { id: 'creative', name: 'Creative', image: '/previews/creative.png' },
+    { id: 'corporate', name: 'Corporate', image: '/previews/corporate.png' },
+];
+
 
 function PortfolioEditorClient() {
   const router = useRouter();
@@ -57,12 +66,26 @@ function PortfolioEditorClient() {
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [zoom, setZoom] = useState(70);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [activeToolPanel, setActiveToolPanel] = useState<string | null>(null);
   const toolPanelContainerRef = useRef<HTMLDivElement>(null);
 
+
+  const savePortfolio = useCallback(async (data: Partial<PortfolioData>) => {
+    if (!currentUser || !params.id) return;
+    setIsSaving(true);
+    try {
+        const portfolioRef = doc(db, 'users', currentUser.uid, 'portfolios', params.id as string);
+        await updateDoc(portfolioRef, data);
+    } catch(e) {
+        toast({ title: 'Error saving', description: 'Could not save your changes.', variant: 'destructive'})
+    } finally {
+        setIsSaving(false);
+    }
+  }, [currentUser, params.id, toast]);
 
   useEffect(() => {
     const portfolioId = params.id as string;
@@ -115,6 +138,14 @@ function PortfolioEditorClient() {
     }
   };
 
+  const handleTemplateSelect = (templateId: TemplateId) => {
+    if (portfolio) {
+        const updatedPortfolio = { ...portfolio, templateId };
+        setPortfolio(updatedPortfolio);
+        savePortfolio({ templateId });
+    }
+  }
+
 
   if (isLoading) {
     return (
@@ -165,12 +196,15 @@ function PortfolioEditorClient() {
             </div>
              <Separator />
             <ScrollArea className="flex-1">
-                <div className="p-4 grid grid-cols-2 gap-2">
-                    <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 1</div>
-                    <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 2</div>
-                    <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 3</div>
-                    <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 4</div>
-                    <div className="aspect-w-3 aspect-h-4 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground cursor-pointer hover:ring-2 ring-primary">Template 5</div>
+                <div className="p-4 grid grid-cols-2 gap-4">
+                    {templatePreviews.map(template => (
+                        <div key={template.id} className="space-y-1 cursor-pointer" onClick={() => handleTemplateSelect(template.id as TemplateId)}>
+                             <div className={cn("aspect-[3/4] bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground overflow-hidden border-2", portfolio?.templateId === template.id ? 'border-primary' : 'border-transparent')}>
+                                <Image src={template.image} alt={template.name} width={150} height={200} className="object-cover h-full w-full"/>
+                            </div>
+                            <p className="text-sm font-medium text-center">{template.name}</p>
+                        </div>
+                    ))}
                 </div>
             </ScrollArea>
         </div>
