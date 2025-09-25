@@ -36,7 +36,7 @@ export function TemplatePreview({ portfolioData, templateId }: TemplatePreviewPr
   };
 
   return (
-    <div className="w-full h-full transform origin-top-left" style={{ scale: '0.15' }}>
+    <div className="w-full h-full transform origin-top-left" style={{ scale: '0.25' }}>
         {renderTemplate()}
     </div>
   );
