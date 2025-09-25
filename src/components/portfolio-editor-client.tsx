@@ -11,7 +11,7 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData, type TemplateId } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Type, UploadCloud, LayoutDashboard, FolderKanban, Maximize, HelpCircle, BookOpen, Plus, Minus } from 'lucide-react';
+import { Shapes, Type, UploadCloud, LayoutDashboard, FolderKanban, Maximize, HelpCircle, BookOpen, Plus, Minus, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -103,15 +103,11 @@ function PortfolioEditorClient() {
 
     return () => unsubscribe();
   }, [params.id, router, toast]);
-
+  
   const handleMouseLeave = (e: React.MouseEvent) => {
-    const relatedTarget = e.relatedTarget as Node | null;
-    if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
-      // The mouse is still inside a child element, do nothing.
-      return;
+    if (!toolPanelContainerRef.current?.contains(e.relatedTarget as Node) && !(e.currentTarget as Node).contains(e.relatedTarget as Node) ) {
+        setActiveToolPanel(null);
     }
-    // The mouse has left the container and its children.
-    setActiveToolPanel(null);
   };
 
   const toggleFullScreen = () => {
@@ -178,22 +174,26 @@ function PortfolioEditorClient() {
     'Design': (
         <div className="flex flex-col h-full">
             <div className="p-4 space-y-4 flex-shrink-0">
-                <Input placeholder="Search templates..." className="bg-muted/50" />
+                 <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Search templates..." className="bg-muted/50 pl-9 border-border focus:bg-background" />
+                </div>
             </div>
              <Separator />
             <ScrollArea className="flex-1">
-                <div className="p-4 grid grid-cols-2 gap-4">
+                <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-6">
                     {templatePreviews.map(template => (
-                        <div key={template.id} className="space-y-1 cursor-pointer" onClick={() => handleTemplateSelect(template.id as TemplateId)}>
+                        <div key={template.id} className="space-y-2 cursor-pointer group" onClick={() => handleTemplateSelect(template.id as TemplateId)}>
                             <div
                                 className={cn(
-                                "aspect-[3/4] bg-background rounded-md flex items-center justify-center text-xs text-muted-foreground overflow-hidden border-2",
-                                portfolio?.templateId === template.id ? 'border-primary ring-2 ring-primary ring-offset-2 ring-offset-background' : 'border-muted'
+                                "aspect-[3/4] bg-background rounded-md flex items-center justify-center text-xs text-muted-foreground overflow-hidden border-2 relative transition-all duration-300 transform group-hover:scale-105",
+                                portfolio?.templateId === template.id ? 'border-primary ring-2 ring-primary ring-offset-2 ring-offset-background' : 'border-muted group-hover:border-primary/50'
                                 )}
                             >
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent transition-opacity duration-300 opacity-0 group-hover:opacity-100"></div>
                                {portfolio && <TemplatePreview portfolioData={portfolio} templateId={template.id} />}
                             </div>
-                            <p className="text-sm font-medium text-center">{template.name}</p>
+                            <p className="text-sm font-medium text-center transition-colors group-hover:text-primary">{template.name}</p>
                         </div>
                     ))}
                 </div>

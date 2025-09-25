@@ -36,8 +36,8 @@ export function TemplatePreview({ portfolioData, templateId }: TemplatePreviewPr
   };
 
   return (
-    <div className="w-full h-full transform origin-top-left overflow-hidden">
-        <div style={{ transform: 'scale(0.25)', transformOrigin: 'top left' }}>
+    <div className="w-full h-full transform origin-top-left overflow-hidden absolute inset-0">
+        <div style={{ transform: 'scale(0.3)', transformOrigin: 'top left' }}>
          {renderTemplate()}
         </div>
     </div>
