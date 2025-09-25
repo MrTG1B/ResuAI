@@ -58,7 +58,7 @@ function PortfolioEditorClient() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [zoom, setZoom] = useState(60);
+  const [zoom, setZoom] = useState(100);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [activeToolPanel, setActiveToolPanel] = useState<string | null>(null);
   const toolPanelContainerRef = useRef<HTMLDivElement>(null);
@@ -232,13 +232,11 @@ function PortfolioEditorClient() {
              <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden relative">
                  <div className='flex-grow h-full bg-background rounded-lg border overflow-auto'>
                     <div 
-                        className="transition-transform duration-300 origin-top-left"
-                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+                        className="transition-transform duration-300 origin-top"
+                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top' }}
                     >
                         {portfolio ? (
-                            <div className="mx-auto" style={{ width: '1024px' }}>
-                                <PortfolioLivePreview portfolioData={portfolio} />
-                            </div>
+                            <PortfolioLivePreview portfolioData={portfolio} />
                         ) : (
                             <p className='text-muted-foreground text-center p-12'>Loading preview...</p>
                         )}
