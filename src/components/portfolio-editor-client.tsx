@@ -11,7 +11,7 @@ import { Header } from '@/components/header';
 import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
-import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles, FolderKanban, Search, SlidersHorizontal, PanelLeft, Star, Palette, TextQuote, Columns } from 'lucide-react';
+import { Shapes, Image as ImageIcon, Type, Bot, LayoutDashboard, UploadCloud, Wrench, Grid, Maximize, HelpCircle, BookOpen, PanelRightClose, Sparkles, FolderKanban, Search, SlidersHorizontal, PanelLeft, Star, Palette, TextQuote, Columns, Plus, Minus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
@@ -58,7 +58,7 @@ function PortfolioEditorClient() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [zoom, setZoom] = useState(100);
+  const [zoom, setZoom] = useState(70);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [activeToolPanel, setActiveToolPanel] = useState<string | null>(null);
   const toolPanelContainerRef = useRef<HTMLDivElement>(null);
@@ -255,11 +255,12 @@ function PortfolioEditorClient() {
                
                 <footer className="w-full flex-shrink-0 p-2 rounded-lg bg-background border flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-muted-foreground">
+                         <Button variant="ghost" size="sm" className="text-muted-foreground">
                             <BookOpen className="h-4 w-4 mr-1"/> Notes
                         </Button>
                     </div>
-                    <div className="flex-1 flex items-center justify-center gap-4 max-w-xs">
+                    <div className="flex-1 flex items-center justify-center gap-2 max-w-sm">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.max(20, z - 10))}><Minus className="h-4 w-4"/></Button>
                         <Slider
                             value={[zoom]}
                             onValueChange={(value) => setZoom(value[0])}
@@ -268,6 +269,7 @@ function PortfolioEditorClient() {
                             step={1}
                             className="w-full"
                         />
+                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.min(100, z + 10))}><Plus className="h-4 w-4"/></Button>
                          <span className="text-muted-foreground w-12 text-center">{zoom}%</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -276,44 +278,6 @@ function PortfolioEditorClient() {
                     </div>
                 </footer>
             </main>
-
-            {/* Right AI Panel */}
-            <aside className={cn(
-                "flex-shrink-0 bg-background border-l transition-all duration-300 ease-in-out",
-                isAiPanelOpen ? 'w-[350px]' : 'w-16'
-            )}>
-                <div className="flex flex-col h-full">
-                     <div className="flex items-start justify-center p-2 h-16 border-b">
-                         {isAiPanelOpen ? (
-                             <div className="flex items-center justify-between w-full p-2">
-                                <h3 className="font-semibold flex items-center gap-2">
-                                    <Sparkles className="h-5 w-5 text-primary" />
-                                    AI Assistant
-                                </h3>
-                                <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(false)} className="h-8 w-8">
-                                    <PanelRightClose className="h-5 w-5" />
-                                </Button>
-                             </div>
-                         ) : (
-                             <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon" onClick={() => setIsAiPanelOpen(true)} className="h-12 w-12 rounded-lg mt-1">
-                                            <Sparkles className="h-6 w-6 text-primary" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="left"><p>AI Assistant</p></TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                         )}
-                     </div>
-                     {isAiPanelOpen && (
-                         <div className="flex-1 p-4 overflow-y-auto">
-                            <p className="text-sm text-muted-foreground">AI chat panel placeholder.</p>
-                         </div>
-                     )}
-                </div>
-            </aside>
         </div>
       </div>
   );
