@@ -16,6 +16,9 @@ import { CreativeLoader } from '@/components/creative-loader';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { type PersonalInfo } from '@/types/portfolio';
+import { parseResume as parseResumeAction } from "@/ai/flows/parse-resume";
+import { editResume as editResumeAction } from "@/ai/flows/edit-resume";
+import { analyzeResume as analyzeResumeForPortfolioAction } from "@/ai/flows/resume-analysis";
 
 
 const parsingTexts = [
@@ -298,37 +301,7 @@ export default function ResumeEditorClient() {
         reader.onload = async () => {
             try {
                 const uploadedResumeDataUri = reader.result as string;
-
-                 // First, auto-fill profile if needed, but on the client side
-                const profileDocRef = doc(db, 'users', currentUser.uid, 'profile', 'data');
-                const profileSnap = await getDoc(profileDocRef);
-                if (!profileSnap.exists() || !profileSnap.data().profileFilledFromResume) {
-                    const analysisResult = await analyzeResumeForProfileFill({ resumeDataUri: uploadedResumeDataUri });
-                    if (analysisResult.success && analysisResult.data) {
-                        const portfolioDraft = analysisResult.data;
-                        const extractedProfileData = {
-                            name: portfolioDraft.personalInfo?.name,
-                            title: portfolioDraft.personalInfo?.title,
-                            email: portfolioDraft.personalInfo?.email,
-                            phone: portfolioDraft.personalInfo?.phone,
-                            location: portfolioDraft.personalInfo?.location,
-                            summary: portfolioDraft.summary || portfolioDraft.personalInfo?.summary,
-                            socials: portfolioDraft.personalInfo?.socials || [],
-                            skills: portfolioDraft.skills || [],
-                            experience: portfolioDraft.experience || [],
-                            education: portfolioDraft.education || [],
-                            projects: portfolioDraft.projects || [],
-                            certifications: portfolioDraft.certifications || [],
-                            languages: portfolioDraft.languages || [],
-                            interests: portfolioDraft.interests || [],
-                            publications: [],
-                            profileFilledFromResume: true, // Flag to prevent re-filling
-                        };
-                        await setDoc(profileDocRef, extractedProfileData, { merge: true });
-                        setUserProfile(prev => ({ ...prev, ...extractedProfileData })); // Update local profile state
-                    }
-                }
-
+                
                 // Then, parse the resume for the editor
                 const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
     
