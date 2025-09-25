@@ -74,7 +74,7 @@ export interface ColorPalette {
   foreground: string;
 }
 
-export type TemplateId = 'classic' | 'modern' | 'minimal' | 'creative' | 'corporate';
+export type TemplateId = 'classic' | 'modern' | 'minimal' | 'creative' | 'corporate' | 'geist' | 'orion';
 
 export interface PortfolioData {
   id?: string;

@@ -40,6 +40,8 @@ const templatePreviews: { id: TemplateId, name: string }[] = [
     { id: 'minimal', name: 'Minimal' },
     { id: 'creative', name: 'Creative' },
     { id: 'corporate', name: 'Corporate' },
+    { id: 'geist', name: 'Geist' },
+    { id: 'orion', name: 'Orion' },
 ];
 
 
@@ -105,7 +107,7 @@ function PortfolioEditorClient() {
   }, [params.id, router, toast]);
   
   const handleMouseLeave = (e: React.MouseEvent) => {
-    if (!toolPanelContainerRef.current?.contains(e.relatedTarget as Node) && !(e.currentTarget as Node).contains(e.relatedTarget as Node) ) {
+    if (toolPanelContainerRef.current && !toolPanelContainerRef.current.contains(e.relatedTarget as Node)) {
         setActiveToolPanel(null);
     }
   };

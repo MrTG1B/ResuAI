@@ -7,6 +7,8 @@ import { TemplateModern } from "./portfolio-templates/template-modern";
 import { TemplateMinimal } from "./portfolio-templates/template-minimal";
 import { TemplateCreative } from "./portfolio-templates/template-creative";
 import { TemplateCorporate } from "./portfolio-templates/template-corporate";
+import { TemplateGeist } from "./portfolio-templates/template-geist";
+import { TemplateOrion } from "./portfolio-templates/template-orion";
 
 interface PortfolioLivePreviewProps {
     portfolioData: PortfolioData;
@@ -27,6 +29,10 @@ export function PortfolioLivePreview({ portfolioData }: PortfolioLivePreviewProp
                 return <TemplateCreative portfolioData={portfolioData} />;
             case 'corporate':
                 return <TemplateCorporate portfolioData={portfolioData} />;
+            case 'geist':
+                return <TemplateGeist portfolioData={portfolioData} />;
+            case 'orion':
+                return <TemplateOrion portfolioData={portfolioData} />;
             default:
                 return <TemplateClassic portfolioData={portfolioData} />;
         }
