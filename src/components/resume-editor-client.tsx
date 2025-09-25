@@ -10,8 +10,6 @@ import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ResumeChatPanel } from '@/components/resume-chat-panel';
-import { parseResumeAction, editResumeAction, analyzeResumeForProfileFill, analyzeResumeForPortfolioAction } from '@/app/actions';
 import { type SavedEditorState } from '@/types/resume';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreativeLoader } from '@/components/creative-loader';
@@ -606,7 +604,7 @@ export default function ResumeEditorClient() {
                                                 <div className="p-4 flex justify-center items-start">
                                                     <div
                                                         ref={livePreviewRef}
-                                                        className={cn("bg-white text-black shadow-lg transition-all duration-300 transform scale-[0.9] sm:scale-100 origin-top", isAILoading && "blur-sm")}
+                                                        className={cn("bg-white text-black shadow-lg transition-all duration-300 transform scale-100", isAILoading && "blur-sm")}
                                                         style={{
                                                             width: '210mm',
                                                             minHeight: '297mm',

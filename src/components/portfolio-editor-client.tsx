@@ -273,10 +273,10 @@ function PortfolioEditorClient() {
 
             {/* Main Canvas */}
              <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden relative">
-                 <div className='flex-grow h-full bg-background rounded-lg border overflow-auto'>
+                 <div className='flex-grow h-full bg-background rounded-lg border overflow-auto p-4 flex justify-center items-start'>
                     <div 
                         className="transition-transform duration-300"
-                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
+                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
                     >
                         {portfolio ? (
                             <PortfolioLivePreview portfolioData={portfolio} />
