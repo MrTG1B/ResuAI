@@ -12,7 +12,6 @@ import { BrandLoader } from '@/components/brand-loader';
 import { type PortfolioData, type TemplateId } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
 import { Shapes, Type, UploadCloud, LayoutDashboard, FolderKanban, Maximize, HelpCircle, BookOpen, Plus, Minus } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -23,28 +22,19 @@ import { TemplatePreview } from './template-preview';
 
 
 const EditorToolbarButton = ({ icon: Icon, label, hoverColor, onMouseEnter }: { icon: React.ElementType; label: string; hoverColor: string; onMouseEnter: () => void; }) => (
-    <TooltipProvider>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <Button
-                    variant="ghost"
-                    className={cn(
-                        "w-full h-16 rounded-md p-1 text-muted-foreground justify-center transition-colors duration-200",
-                        hoverColor
-                    )}
-                    onMouseEnter={onMouseEnter}
-                >
-                     <div className="flex flex-col items-center gap-1">
-                        <Icon className="h-6 w-6" />
-                        <span className="text-xs">{label}</span>
-                    </div>
-                </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-                <p>{label}</p>
-            </TooltipContent>
-        </Tooltip>
-    </TooltipProvider>
+    <Button
+        variant="ghost"
+        className={cn(
+            "w-full h-16 rounded-md p-1 text-muted-foreground justify-center transition-colors duration-200",
+            hoverColor
+        )}
+        onMouseEnter={onMouseEnter}
+    >
+            <div className="flex flex-col items-center gap-1">
+            <Icon className="h-6 w-6" />
+            <span className="text-xs">{label}</span>
+        </div>
+    </Button>
 );
 
 const templatePreviews: { id: TemplateId, name: string }[] = [
