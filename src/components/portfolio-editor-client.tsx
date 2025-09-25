@@ -105,6 +105,16 @@ function PortfolioEditorClient() {
     }
   };
 
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -261,10 +271,7 @@ function PortfolioEditorClient() {
                          <span className="text-muted-foreground w-12 text-center">{zoom}%</span>
                     </div>
                     <div className="flex items-center gap-2">
-                         <Button variant="ghost" size="sm" className="text-muted-foreground">
-                            <Grid className="h-4 w-4 mr-1"/> Pages: 1 / 1
-                        </Button>
-                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><Maximize className="h-4 w-4"/></Button>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={toggleFullScreen}><Maximize className="h-4 w-4"/></Button>
                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><HelpCircle className="h-4 w-4"/></Button>
                     </div>
                 </footer>
