@@ -9,6 +9,8 @@ export interface CoverLetter {
   companyName: string;
   hiringManager?: string;
   tone: 'Professional' | 'Enthusiastic' | 'Formal' | 'Creative';
-  createdAt: Timestamp;
-  lastModified: Timestamp;
+  createdAt: Timestamp | string;
+  lastModified: Timestamp | string;
 }
+
+    
