@@ -25,7 +25,7 @@ export function TemplateGeist({ portfolioData }: TemplateProps) {
 
     return (
         <div className="w-full font-sans" style={portfolioStyles}>
-            <div className="max-w-4xl mx-auto p-12" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
+            <div className="p-12" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
                 {/* Header */}
                 <header className="flex flex-col md:flex-row items-center justify-between pb-8">
                     <div>

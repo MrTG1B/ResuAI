@@ -24,7 +24,7 @@ export function TemplateClassic({ portfolioData }: TemplateProps) {
 
     return (
         <div className="w-full font-sans" style={{ backgroundColor: 'var(--p-bg, #ffffff)', color: 'var(--p-fg, #111827)', ...portfolioStyles }}>
-            <div className="max-w-5xl mx-auto p-8" style={{ backgroundColor: 'var(--p-secondary, #f9fafb)' }}>
+            <div className="p-8" style={{ backgroundColor: 'var(--p-secondary, #f9fafb)' }}>
                 {/* Profile Header */}
                 <header className="md:flex md:items-center md:gap-8 pb-8 border-b" style={{ borderColor: 'var(--p-primary, #e5e7eb)' }}>
                     {personalInfo?.profilePictureUrl && (

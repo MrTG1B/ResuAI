@@ -23,7 +23,7 @@ export function TemplateMinimal({ portfolioData }: TemplateProps) {
 
     return (
         <div className="w-full font-serif" style={portfolioStyles}>
-            <div className="max-w-4xl mx-auto p-12" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
+            <div className="p-12" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
                 {/* Header */}
                 <header className="text-center pb-8 border-b" style={{ borderColor: 'var(--p-primary)' }}>
                     <h1 className="text-5xl font-bold tracking-wider font-heading uppercase" style={{ color: 'var(--p-primary)' }}>{personalInfo?.name}</h1>

@@ -25,7 +25,7 @@ export function TemplateOrion({ portfolioData }: TemplateProps) {
 
     return (
         <div className="w-full font-sans" style={portfolioStyles}>
-            <div className="max-w-5xl mx-auto flex" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
+            <div className="flex" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
                 {/* Left Fixed Rail */}
                 <aside className="w-1/3 p-8" style={{ backgroundColor: 'var(--p-secondary)' }}>
                     <div className="sticky top-8">

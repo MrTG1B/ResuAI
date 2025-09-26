@@ -25,7 +25,7 @@ export function TemplateModern({ portfolioData }: TemplateProps) {
 
     return (
         <div className="w-full font-sans" style={portfolioStyles}>
-            <div className="grid grid-cols-12 max-w-5xl mx-auto" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
+            <div className="grid grid-cols-12" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
                 {/* Left Rail */}
                 <aside className="col-span-4 p-8" style={{ backgroundColor: 'var(--p-secondary)' }}>
                     {personalInfo?.profilePictureUrl && (

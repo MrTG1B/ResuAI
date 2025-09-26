@@ -25,7 +25,7 @@ export function TemplateCreative({ portfolioData }: TemplateProps) {
 
     return (
         <div className="w-full font-sans" style={portfolioStyles}>
-            <div className="max-w-5xl mx-auto" style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
+            <div style={{ backgroundColor: 'var(--p-bg)', color: 'var(--p-fg)' }}>
                 {/* Header */}
                 <header className="p-8 relative overflow-hidden text-center">
                     <div className="absolute inset-0 bg-gradient-to-r from-[var(--p-primary)] to-[var(--p-accent)] opacity-20 blur-3xl"></div>

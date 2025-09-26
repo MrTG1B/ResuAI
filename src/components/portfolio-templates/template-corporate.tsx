@@ -24,7 +24,7 @@ export function TemplateCorporate({ portfolioData }: TemplateProps) {
 
     return (
         <div className="w-full font-sans" style={portfolioStyles}>
-            <div className="max-w-5xl mx-auto" style={{ backgroundColor: 'var(--p-bg)' }}>
+            <div style={{ backgroundColor: 'var(--p-bg)' }}>
                 {/* Header */}
                 <header className="p-8 text-white" style={{ backgroundColor: 'var(--p-primary)' }}>
                     <div className="flex flex-col md:flex-row items-center gap-8">
