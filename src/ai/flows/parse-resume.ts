@@ -52,8 +52,8 @@ const prompt = ai.definePrompt({
   4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate font sizes, colors, weights (bold), styles (italic), and alignment.
   5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`,
   prompt: (input: ParseResumeInput) => [
-      { text: "Convert the attached document to HTML following the system instructions." },
-      { media: { url: input.resumeDataUri } }
+      { media: { url: input.resumeDataUri } },
+      { text: "Convert the attached document to HTML following the system instructions." }
   ]
 });
 
@@ -68,6 +68,7 @@ const parseResumeFlow = ai.defineFlow(
     return output!;
   }
 );
+
 
 
 
