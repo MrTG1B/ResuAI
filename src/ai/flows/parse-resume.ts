@@ -35,7 +35,7 @@ export async function parseResume(input: ParseResumeInput): Promise<ParseResumeO
 
 const prompt = ai.definePrompt({
   name: 'parseResumePrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: ParseResumeInputSchema},
   output: {schema: ParseResumeOutputSchema},
   system: `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes.
@@ -45,7 +45,7 @@ const prompt = ai.definePrompt({
   **CRITICAL RULES:**
   1.  **ATS-FRIENDLY FIRST:** Your primary goal is to create a resume that can be easily parsed by Applicant Tracking Systems (ATS). This means:
       *   **Single-Column Layout:** The final resume **MUST** be in a single-column layout. If the original has multiple columns, you must intelligently merge them into a single, logical flow.
-      *   **Standard Fonts:** Use common, readable, web-safe fonts like 'Arial', 'Helvetica', 'Times New Roman', or 'Georgia'.
+      *   **Standard Fonts:** Use common, readable, web-safe fonts like 'Arial', 'Helvetica', 'Times New Roman', 'Georgia'.
       *   **No Tables for Layout:** **NEVER** use HTML tables for layout purposes. Use divs, headings, and paragraphs.
   2.  **Single-Page Layout:** The final resume **MUST** be designed to fit on a single page. If the original document is longer than one page, you must use your design skills to make it fit. Do this by adjusting font sizes (while keeping them readable), using space-efficient layouts (like two-column designs), or professionally condensing content.
   3.  **High-Fidelity Conversion:** Preserve the structure, layout, and all text formatting as accurately as possible within the single-page, single-column constraint.
