@@ -310,7 +310,16 @@ export async function getPublicPortfolioAction(portfolioId: string): Promise<{ s
             return { success: false, error: "Portfolio not found." };
         }
 
-        const portfolioData = { id: portfolioDoc.id, ...portfolioDoc.data() } as PortfolioData;
+        const data = portfolioDoc.data();
+        
+        // Sanitize Firestore Timestamps
+        for (const key in data) {
+            if (data[key] instanceof Timestamp) {
+                data[key] = data[key].toDate().toISOString();
+            }
+        }
+        
+        const portfolioData = { id: portfolioDoc.id, ...data } as PortfolioData;
         
         return { success: true, data: portfolioData };
     } catch (error) {
