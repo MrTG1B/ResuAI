@@ -399,9 +399,9 @@ export default function DashboardPage() {
                                             <div className="flex items-center gap-4 overflow-hidden flex-grow cursor-pointer" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
                                                 <div className="w-16 h-20 rounded-md border bg-white flex-shrink-0 overflow-hidden relative">
                                                     {showOriginalPdf ? (
-                                                        <iframe src={`${r.initialPreviewUri}#toolbar=0&navpanes=0`} className="w-full h-full border-none absolute" style={{ transform: 'scale(0.1) translate(-220%, -220%)', transformOrigin: 'top left' }} title="Original Resume Preview" />
+                                                        <iframe src={`${r.initialPreviewUri}#toolbar=0&navpanes=0`} className="w-full h-full border-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ transform: 'scale(0.1)', width: '1000%', height: '1000%', transformOrigin: 'center center' }} title="Original Resume Preview" />
                                                     ) : (
-                                                        <div className="absolute top-0 left-0" style={{ transform: 'scale(0.075) translate(-45%, -45%)', transformOrigin: 'top left' }} dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} />
+                                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ transform: 'scale(0.08) translate(-50%, -50%)', transformOrigin: 'top left' }} dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} />
                                                     )}
                                                 </div>
                                                 <div className="overflow-hidden">
