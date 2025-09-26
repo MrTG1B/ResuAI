@@ -391,11 +391,18 @@ export default function DashboardPage() {
                                 <div className="flex items-center justify-center min-h-[200px]"><BrandLoader /></div>
                             ) : resumes.length > 0 ? (
                                 <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                                    {resumes.map(r => (
+                                    {resumes.map(r => {
+                                        const hasBeenEdited = (r.chatHistory?.length || 0) > 0;
+                                        const showOriginalPdf = r.initialPreviewUri && !hasBeenEdited;
+                                        return (
                                         <li key={r.id} className="group relative flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
                                             <div className="flex items-center gap-4 overflow-hidden flex-grow cursor-pointer" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
                                                 <div className="w-16 h-20 rounded-md border bg-white flex-shrink-0 overflow-hidden relative">
-                                                    <div className="absolute inset-0" style={{ transform: 'scale(0.08) translateX(-470px) translateY(-540px)' }} dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} />
+                                                    {showOriginalPdf ? (
+                                                        <iframe src={`${r.initialPreviewUri}#toolbar=0&navpanes=0`} className="w-full h-full border-none" title="Original Resume Preview" style={{ transform: 'scale(0.2)', transformOrigin: 'top left', width: '500%', height: '500%' }} />
+                                                    ) : (
+                                                        <div className="absolute inset-0" style={{ transform: 'scale(0.08) translate(-50%, -50%)', top: '50%', left: '50%' }} dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} />
+                                                    )}
                                                 </div>
                                                 <div className="overflow-hidden">
                                                     <p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p>
@@ -411,7 +418,7 @@ export default function DashboardPage() {
                                                 <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700"/></Button></TooltipTrigger><TooltipContent><p>Delete Resume</p></TooltipContent></Tooltip></TooltipProvider>
                                             </div>
                                         </li>
-                                    ))}
+                                    )})}
                                 </ul>
                             ) : (
                                 <div className="text-center p-8 bg-muted/50 rounded-lg"><CardTitle className="text-lg">No Saved Resumes</CardTitle><CardDescription className="mt-2 mb-4">You haven't started editing a resume yet.</CardDescription></div>
