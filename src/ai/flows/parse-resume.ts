@@ -35,10 +35,11 @@ export async function parseResume(input: ParseResumeInput): Promise<ParseResumeO
 
 const prompt = ai.definePrompt({
   name: 'parseResumePrompt',
-  model: 'googleai/gemini-1.5-pro-latest',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: ParseResumeInputSchema},
   output: {schema: ParseResumeOutputSchema},
-  system: `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes.
+  config: {
+    systemInstruction: `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes.
 
   Your task is to extract the content from the provided document and convert it into a single block of clean, semantic HTML that fits on a standard A4 page (content area approx 184.6mm x 271.6mm).
 
@@ -51,9 +52,11 @@ const prompt = ai.definePrompt({
   3.  **High-Fidelity Conversion:** Preserve the structure, layout, and all text formatting as accurately as possible within the single-page, single-column constraint.
   4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate font sizes, colors, weights (bold), styles (italic), and alignment.
   5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`,
-  prompt: `Here is the resume content:
-{{media url=resumeDataUri}}
-  `,
+  },
+  prompt: [
+    {media: {url: '{{{resumeDataUri}}}'}},
+    {text: "Please convert the provided document into a single block of ATS-friendly HTML with inline styles."}
+  ],
 });
 
 const parseResumeFlow = ai.defineFlow(
@@ -67,8 +70,3 @@ const parseResumeFlow = ai.defineFlow(
     return output!;
   }
 );
-
-
-
-
-
