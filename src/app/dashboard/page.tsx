@@ -32,6 +32,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MentraIcon } from '@/components/mentra-icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrandLoader } from '@/components/brand-loader';
+import { TemplatePreview } from '@/components/template-preview';
 
 
 function ToolCard({ href, icon: Icon, title, description, actionText, color = 'primary' }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string, color?: 'primary' | 'secondary' }) {
@@ -404,14 +405,26 @@ export default function DashboardPage() {
                             ) : portfolios.length > 0 ? (
                                 <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                                     {portfolios.map(p => (
-                                        <li key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
-                                            <div className='flex items-center gap-3 overflow-hidden flex-grow cursor-pointer' onClick={() => router.push(`/portfolio?id=${p.id}`)}>
-                                                <Image src={p.personalInfo?.profilePictureUrl || 'https://placehold.co/40x40.png'} alt="avatar" width={40} height={40} className="rounded-full object-cover flex-shrink-0" />
-                                                <div className="overflow-hidden"><p className="font-semibold text-sm truncate group-hover:underline">{p.title || "Untitled Portfolio"}</p><p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p></div>
+                                        <li key={p.id} className="group relative flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
+                                            <div className='flex items-center gap-4 overflow-hidden flex-grow cursor-pointer' onClick={() => router.push(`/portfolio/edit/${p.id}`)}>
+                                                <div className="h-10 w-16 rounded-md border bg-white flex-shrink-0 overflow-hidden relative">
+                                                    <TemplatePreview portfolioData={p} templateId={p.templateId || 'classic'} />
+                                                </div>
+                                                <div className="overflow-hidden">
+                                                    <p className="font-semibold text-sm truncate group-hover:underline">{p.title || "Untitled Portfolio"}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
-                                                <Button variant="ghost" size="sm" asChild><Link href={`/portfolio?id=${p.id}`}><Eye className="mr-2 h-4 w-4"/>View</Link></Button>
-                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/></Button></TooltipTrigger><TooltipContent><p>Delete Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
+                                            <div className="flex items-center flex-shrink-0 ml-4 space-x-1">
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" asChild>
+                                                        <Link href={`/public/portfolio/${p.id}`} target="_blank" onClick={(e) => e.stopPropagation()}>
+                                                            <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary"/>
+                                                        </Link>
+                                                    </Button>
+                                                </TooltipTrigger><TooltipContent><p>View Public Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => router.push(`/portfolio/edit/${p.id}`)}><Edit className="h-4 w-4 text-muted-foreground group-hover:text-primary"/></Button></TooltipTrigger><TooltipContent><p>Edit Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700"/></Button></TooltipTrigger><TooltipContent><p>Delete Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
                                             </div>
                                         </li>
                                     ))}
