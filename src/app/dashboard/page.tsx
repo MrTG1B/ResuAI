@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -436,11 +437,11 @@ export default function DashboardPage() {
                                             <div className="flex items-center flex-shrink-0 ml-4 space-x-2">
                                                 <TooltipProvider><Tooltip><TooltipTrigger asChild>
                                                     <Button size="icon" className="h-8 w-8 bg-[#45B8AC]/20 hover:bg-[#45B8AC]/30" asChild>
-                                                        <Link href={`/public/portfolio/${p.id}`} target="_blank" onClick={(e) => e.stopPropagation()}>
+                                                        <Link href={`/portfolio?id=${p.id}`}>
                                                             <Eye className="h-4 w-4 text-[#45B8AC]"/>
                                                         </Link>
                                                     </Button>
-                                                </TooltipTrigger><TooltipContent><p>View Public Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
+                                                </TooltipTrigger><TooltipContent><p>View Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
                                                 <TooltipProvider><Tooltip><TooltipTrigger asChild>
                                                     <Button size="icon" className="h-8 w-8 bg-primary/20 hover:bg-primary/30" onClick={() => router.push(`/portfolio/edit/${p.id}`)}>
                                                         <Edit className="h-4 w-4 text-primary"/>
@@ -509,6 +510,8 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
 
     
 
