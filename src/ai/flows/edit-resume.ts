@@ -117,7 +117,7 @@ export async function editResumeFlow(
 
 const prompt = ai.definePrompt({
   name: 'editResumePrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: EditResumeInputSchema},
   output: {schema: EditResumeOutputSchema},
   system: `You are an expert resume editor and designer with a specialty in creating ATS-friendly resumes.

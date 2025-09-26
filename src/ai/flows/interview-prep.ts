@@ -43,7 +43,7 @@ export async function interviewPrep(input: InterviewPrepInput): Promise<Intervie
 }
 
 const prompt = ai.definePrompt({
-  model:'googleai/gemini-1.5-flash-latest',
+  model:'googleai/gemini-1.5-flash',
   name: 'interviewPrepPrompt',
   input: {schema: InterviewPrepInputSchema},
   output: {schema: InterviewPrepOutputSchema},

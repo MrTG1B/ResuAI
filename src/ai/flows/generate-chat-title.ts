@@ -32,7 +32,7 @@ export async function generateChatTitle(input: GenerateChatTitleInput): Promise<
 
 const prompt = ai.definePrompt({
   name: 'generateChatTitlePrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: GenerateChatTitleInputSchema},
   output: {schema: GenerateChatTitleOutputSchema},
   system: `You are an AI expert at summarizing conversations. Your task is to generate a short, descriptive title (5-6 words max) for a new chat session based on the initial messages. The title should be unique and accurately reflect the main topic of the conversation.

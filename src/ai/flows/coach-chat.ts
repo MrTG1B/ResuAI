@@ -50,7 +50,7 @@ export async function coachChat(input: CoachChatInput): Promise<CoachChatOutput>
 
 const prompt = ai.definePrompt({
   name: 'coachChatPrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: CoachChatInputSchema},
   output: {schema: CoachChatOutputSchema},
   system: `You are an expert AI career coach. You have already provided an initial analysis of a user's resume against a job description. The user now has a follow-up question or comment.
