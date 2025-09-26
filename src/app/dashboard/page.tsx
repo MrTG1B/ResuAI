@@ -382,14 +382,23 @@ export default function DashboardPage() {
                             ) : resumes.length > 0 ? (
                                 <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                                     {resumes.map(r => (
-                                        <li key={r.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
-                                            <div className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
-                                                <div className="w-12 h-16 rounded border bg-white flex justify-center items-start overflow-hidden flex-shrink-0"><div className="text-black shadow-sm scale-[0.1] origin-top" style={{ width: '210mm', minHeight: '297mm', padding: '10mm' }} dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} /></div>
-                                                <div className="overflow-hidden"><p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p><p className="text-xs text-muted-foreground truncate">Last modified: {r.lastModified ? new Date(r.lastModified.seconds * 1000).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p></div>
+                                        <li key={r.id} className="group relative flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
+                                            <div className="flex items-center gap-4 overflow-hidden flex-grow cursor-pointer" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
+                                                <div className="w-12 h-16 rounded border bg-white flex-shrink-0 overflow-hidden relative">
+                                                    <div className="absolute inset-0 transform scale-[0.15] origin-top-left" dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} />
+                                                </div>
+                                                <div className="overflow-hidden">
+                                                    <p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">Last modified: {r.lastModified ? new Date(r.lastModified.seconds * 1000).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
-                                                <Button variant="ghost" size="sm" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}><Edit className="mr-2 h-4 w-4"/>Edit</Button>
-                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/></Button></TooltipTrigger><TooltipContent><p>Delete Resume</p></TooltipContent></Tooltip></TooltipProvider>
+                                            <div className="flex items-center flex-shrink-0 ml-4 space-x-2">
+                                                 <TooltipProvider><Tooltip><TooltipTrigger asChild>
+                                                    <Button size="icon" className="h-8 w-8 bg-primary/20 hover:bg-primary/30" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
+                                                        <Edit className="h-4 w-4 text-primary"/>
+                                                    </Button>
+                                                </TooltipTrigger><TooltipContent><p>Edit Resume</p></TooltipContent></Tooltip></TooltipProvider>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteTarget({ type: 'resume', id: r.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700"/></Button></TooltipTrigger><TooltipContent><p>Delete Resume</p></TooltipContent></Tooltip></TooltipProvider>
                                             </div>
                                         </li>
                                     ))}
@@ -444,14 +453,18 @@ export default function DashboardPage() {
                             ) : coverLetters.length > 0 ? (
                                <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                                     {coverLetters.map(cl => (
-                                        <li key={cl.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group">
+                                        <li key={cl.id} className="group relative flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
                                             <div className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow" onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}>
                                                 <div className="flex-shrink-0 bg-primary/10 p-3 rounded-full"><NotebookPen className="h-5 w-5 text-primary" /></div>
                                                 <div className="overflow-hidden"><p className="font-semibold text-sm truncate group-hover:underline">{cl.title || "Untitled Cover Letter"}</p><p className="text-xs text-muted-foreground truncate">For: {cl.companyName} | Last modified: {cl.lastModified ? new Date(cl.lastModified.seconds * 1000).toLocaleDateString() : 'N/A'}</p></div>
                                             </div>
                                             <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
-                                                <Button variant="ghost" size="sm" onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}><Edit className="mr-2 h-4 w-4"/>Edit</Button>
-                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'coverletter', id: cl.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" strokeWidth={2.5}/></Button></TooltipTrigger><TooltipContent><p>Delete Cover Letter</p></TooltipContent></Tooltip></TooltipProvider>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild>
+                                                    <Button size="icon" className="h-8 w-8 bg-primary/20 hover:bg-primary/30" onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}>
+                                                        <Edit className="h-4 w-4 text-primary"/>
+                                                    </Button>
+                                                </TooltipTrigger><TooltipContent><p>Edit Cover Letter</p></TooltipContent></Tooltip></TooltipProvider>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteTarget({ type: 'coverletter', id: cl.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700"/></Button></TooltipTrigger><TooltipContent><p>Delete Cover Letter</p></TooltipContent></Tooltip></TooltipProvider>
                                             </div>
                                         </li>
                                     ))}
