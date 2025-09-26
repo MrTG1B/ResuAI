@@ -436,15 +436,15 @@ export default function ProfilePage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <Tabs defaultValue="personal" className="w-full" orientation="horizontal">
                 <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
-                  <TabsTrigger value="personal">Personal</TabsTrigger>
-                  <TabsTrigger value="skills">Skills</TabsTrigger>
-                  <TabsTrigger value="languages">Languages</TabsTrigger>
-                  <TabsTrigger value="interests">Interests</TabsTrigger>
-                  <TabsTrigger value="experience">Experience</TabsTrigger>
-                  <TabsTrigger value="education">Education</TabsTrigger>
-                  <TabsTrigger value="projects">Projects</TabsTrigger>
-                  <TabsTrigger value="certifications">Certs</TabsTrigger>
-                  <TabsTrigger value="publications">Pubs</TabsTrigger>
+                  <TabsTrigger value="personal" className="brand-color-1 data-[state=active]:bg-[--brand-color] data-[state=active]:text-primary-foreground">Personal</TabsTrigger>
+                  <TabsTrigger value="skills" className="brand-color-2 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Skills</TabsTrigger>
+                  <TabsTrigger value="languages" className="brand-color-3 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Languages</TabsTrigger>
+                  <TabsTrigger value="interests" className="brand-color-1 data-[state=active]:bg-[--brand-color] data-[state=active]:text-primary-foreground">Interests</TabsTrigger>
+                  <TabsTrigger value="experience" className="brand-color-2 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Experience</TabsTrigger>
+                  <TabsTrigger value="education" className="brand-color-3 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Education</TabsTrigger>
+                  <TabsTrigger value="projects" className="brand-color-1 data-[state=active]:bg-[--brand-color] data-[state=active]:text-primary-foreground">Projects</TabsTrigger>
+                  <TabsTrigger value="certifications" className="brand-color-2 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Certs</TabsTrigger>
+                  <TabsTrigger value="publications" className="brand-color-3 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Pubs</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="personal" className="space-y-6 pt-4">

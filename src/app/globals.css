@@ -156,6 +156,16 @@ body {
         filter: blur(16px); 
         opacity: 1;
     }
+
+     .brand-color-1 {
+      --brand-color: hsl(var(--primary));
+    }
+    .brand-color-2 {
+      --brand-color: #45B8AC;
+    }
+    .brand-color-3 {
+      --brand-color: #F71B3D;
+    }
 }
 
 @layer components {
