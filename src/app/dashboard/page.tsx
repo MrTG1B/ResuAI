@@ -394,8 +394,8 @@ export default function DashboardPage() {
                                     {resumes.map(r => (
                                         <li key={r.id} className="group relative flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
                                             <div className="flex items-center gap-4 overflow-hidden flex-grow cursor-pointer" onClick={() => router.push(`/resume-builder/editor?id=${r.id}`)}>
-                                                <div className="w-12 h-16 rounded border bg-white flex-shrink-0 overflow-hidden relative">
-                                                    <div className="absolute inset-0 transform scale-[0.07] origin-top-left" dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} />
+                                                <div className="w-16 h-20 rounded-md border bg-white flex-shrink-0 overflow-hidden relative">
+                                                    <div className="absolute inset-0 transform scale-[0.08] origin-top-left" style={{ width: '820px', height: '1160px' }} dangerouslySetInnerHTML={{ __html: r.htmlContent || '' }} />
                                                 </div>
                                                 <div className="overflow-hidden">
                                                     <p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p>
