@@ -415,16 +415,20 @@ export default function DashboardPage() {
                                                     <p className="text-xs text-muted-foreground truncate">{p.personalInfo?.title || 'No title'}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center flex-shrink-0 ml-4 space-x-1">
+                                            <div className="flex items-center flex-shrink-0 ml-4 space-x-2">
                                                 <TooltipProvider><Tooltip><TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" asChild>
+                                                    <Button size="icon" className="h-8 w-8 bg-[#45B8AC]/20 hover:bg-[#45B8AC]/30" asChild>
                                                         <Link href={`/public/portfolio/${p.id}`} target="_blank" onClick={(e) => e.stopPropagation()}>
-                                                            <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary"/>
+                                                            <Eye className="h-4 w-4 text-[#45B8AC]"/>
                                                         </Link>
                                                     </Button>
                                                 </TooltipTrigger><TooltipContent><p>View Public Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
-                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => router.push(`/portfolio/edit/${p.id}`)}><Edit className="h-4 w-4 text-muted-foreground group-hover:text-primary"/></Button></TooltipTrigger><TooltipContent><p>Edit Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
-                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700"/></Button></TooltipTrigger><TooltipContent><p>Delete Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild>
+                                                    <Button size="icon" className="h-8 w-8 bg-primary/20 hover:bg-primary/30" onClick={() => router.push(`/portfolio/edit/${p.id}`)}>
+                                                        <Edit className="h-4 w-4 text-primary"/>
+                                                    </Button>
+                                                </TooltipTrigger><TooltipContent><p>Edit Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteTarget({ type: 'portfolio', id: p.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700"/></Button></TooltipTrigger><TooltipContent><p>Delete Portfolio</p></TooltipContent></Tooltip></TooltipProvider>
                                             </div>
                                         </li>
                                     ))}
@@ -483,3 +487,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
