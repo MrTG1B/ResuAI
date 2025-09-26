@@ -58,7 +58,7 @@ export async function generateCoverLetter(input: GenerateCoverLetterInput): Prom
 
 const prompt = ai.definePrompt({
   name: 'generateCoverLetterPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: GenerateCoverLetterInputSchema},
   output: {schema: GenerateCoverLetterOutputSchema},
   system: `You are an expert career coach and professional writer specializing in crafting compelling cover letters that get results.

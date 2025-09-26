@@ -48,7 +48,7 @@ export async function aiAssistantChat(input: AIAssistantChatInput): Promise<AIAs
 }
 
 const prompt = ai.definePrompt({
-  model:'googleai/gemini-1.5-flash',
+  model:'googleai/gemini-2.5-flash',
   name: 'aiAssistantChatPrompt',
   input: {schema: AIAssistantChatInputSchema},
   output: {schema: AIAssistantChatOutputSchema},

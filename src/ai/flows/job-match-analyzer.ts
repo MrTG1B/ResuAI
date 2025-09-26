@@ -42,7 +42,7 @@ export async function atsAnalyzerFlow(
 
 const atsAnalyzerPrompt = ai.definePrompt({
   name: 'atsAnalyzerPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: AtsAnalyzerInputSchema},
   output: {schema: AtsAnalyzerOutputSchema},
   system: `You are an expert ATS (Applicant Tracking System) simulation. Your task is to analyze a user's resume against a provided job description and give them a detailed report on its machine-readability and keyword optimization.

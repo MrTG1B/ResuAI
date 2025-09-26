@@ -35,7 +35,7 @@ export async function parseResume(input: ParseResumeInput): Promise<ParseResumeO
 
 const prompt = ai.definePrompt({
   name: 'parseResumePrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: ParseResumeInputSchema},
   output: {schema: ParseResumeOutputSchema},
   system: `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes.
