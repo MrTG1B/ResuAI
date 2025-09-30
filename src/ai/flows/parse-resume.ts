@@ -7,6 +7,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {Part} from 'genkit/content';
 
 const ParseResumeInputSchema = z.object({
   resumeDataUri: z
@@ -65,12 +66,10 @@ const parseResumeFlow = ai.defineFlow(
       model: 'googleai/gemini-1.5-pro-latest',
       system: systemPrompt,
       prompt: [
-        {
-          inlineData: {
-            mimeType: mimeType,
-            data: base64,
-          },
-        },
+        Part.fromData({
+          data: base64,
+          mimeType: mimeType,
+        }),
         {
           text: 'Please convert the provided document into a single block of ATS-friendly HTML with inline styles.',
         },
