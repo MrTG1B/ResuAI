@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Parses a resume file and extracts its content as HTML.
@@ -86,7 +87,7 @@ const parseResumeFlow = ai.defineFlow(
       },
     });
 
-    const output = llmResponse.output();
+    const output = llmResponse.output;
     if (!output) {
       throw new Error('AI failed to generate a response.');
     }
