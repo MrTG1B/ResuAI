@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -21,6 +20,12 @@ const ParseResumeInputSchema = z.object({
 });
 export type ParseResumeInput = z.infer<typeof ParseResumeInputSchema>;
 
+// Extend the input schema for the prompt to include the extracted parts.
+const PromptInputSchema = ParseResumeInputSchema.extend({
+    mimeType: z.string(),
+    base64Data: z.string(),
+});
+
 const ParseResumeOutputSchema = z.object({
   htmlContent: z
     .string()
@@ -35,8 +40,8 @@ export async function parseResume(input: ParseResumeInput): Promise<ParseResumeO
 
 const prompt = ai.definePrompt({
   name: 'parseResumePrompt',
-  model: 'googleai/gemini-1.5-pro-latest',
-  input: {schema: ParseResumeInputSchema},
+  model: 'googleai/gemini-2.5-flash',
+  input: {schema: PromptInputSchema},
   output: {schema: ParseResumeOutputSchema},
   system: `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes.
 
@@ -52,10 +57,23 @@ const prompt = ai.definePrompt({
   4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate font sizes, colors, weights (bold), styles (italic), and alignment.
   5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`,
   prompt: [
-    {media: {url: '{{{resumeDataUri}}}', contentType: 'application/pdf'}},
-    {text: "Please convert the provided document into a single block of ATS-friendly HTML with inline styles."}
+    { inlineData: { mimeType: '{{{mimeType}}}', data: '{{{base64Data}}}' } },
+    { text: "Please convert the provided document into a single block of ATS-friendly HTML with inline styles." }
   ],
 });
+
+/**
+ * Strips the "data:<mimetype>;base64," prefix from a data URI.
+ * @param dataUri The full data URI.
+ * @returns An object containing the mimeType and the raw base64 data.
+ */
+function stripDataUriPrefix(dataUri: string): { mimeType: string; base64: string } {
+    const match = dataUri.match(/^data:(.*?);base64,(.*)$/);
+    if (!match) {
+        throw new Error('Invalid Data URI format. Expected "data:<mimetype>;base64,<data>".');
+    }
+    return { mimeType: match[1], base64: match[2] };
+}
 
 const parseResumeFlow = ai.defineFlow(
   {
@@ -64,8 +82,12 @@ const parseResumeFlow = ai.defineFlow(
     outputSchema: ParseResumeOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const { mimeType, base64 } = stripDataUriPrefix(input.resumeDataUri);
+    const {output} = await prompt({
+        ...input,
+        mimeType: mimeType,
+        base64Data: base64,
+    });
     return output!;
   }
 );
-
