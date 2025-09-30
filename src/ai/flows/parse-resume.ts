@@ -1,31 +1,19 @@
-
 'use server';
-
 /**
  * @fileOverview Parses a resume file and extracts its content as HTML.
- *
- * - parseResume - A function that handles parsing the resume.
- * - ParseResumeInput - The input type for the parseResume function.
- * - ParseResumeOutput - The return type for the parseResume function.
  */
-
 import {ai} from '@/ai/genkit';
-import { Part, z } from 'genkit';
+// ✅ Import 'Part' and 'z' from the core 'genkit' library
+import {Part, z} from 'genkit';
 
 const ParseResumeInputSchema = z.object({
   resumeDataUri: z
     .string()
     .describe(
-      "The resume file as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "The resume file as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
     ),
 });
 export type ParseResumeInput = z.infer<typeof ParseResumeInputSchema>;
-
-// Extend the input schema for the prompt to include the extracted parts.
-const PromptInputSchema = ParseResumeInputSchema.extend({
-    mimeType: z.string(),
-    base64Data: z.string(),
-});
 
 const ParseResumeOutputSchema = z.object({
   htmlContent: z
@@ -34,17 +22,14 @@ const ParseResumeOutputSchema = z.object({
 });
 export type ParseResumeOutput = z.infer<typeof ParseResumeOutputSchema>;
 
-
-export async function parseResume(input: ParseResumeInput): Promise<ParseResumeOutput> {
+export async function parseResume(
+  input: ParseResumeInput
+): Promise<ParseResumeOutput> {
   return parseResumeFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'parseResumePrompt',
-  model: 'googleai/gemini-2.5-flash',
-  input: {schema: PromptInputSchema},
-  output: {schema: ParseResumeOutputSchema},
-  system: `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes.
+// Keep the system prompt defined separately for clarity
+const systemPrompt = `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes.
 
   Your task is to extract the content from the provided document and convert it into a single block of clean, semantic HTML that fits on a standard A4 page (content area approx 184.6mm x 271.6mm).
 
@@ -56,27 +41,22 @@ const prompt = ai.definePrompt({
   2.  **Single-Page Layout:** The final resume **MUST** be designed to fit on a single page. If the original document is longer than one page, you must use your design skills to make it fit. Do this by adjusting font sizes (while keeping them readable), using space-efficient layouts, or professionally condensing content.
   3.  **High-Fidelity Conversion:** Preserve the structure, layout, and all text formatting as accurately as possible within the single-page, single-column constraint.
   4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate font sizes, colors, weights (bold), styles (italic), and alignment.
-  5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`,
-  prompt: (input) => [
-    Part.fromData({
-      data: input.base64Data,
-      mimeType: input.mimeType,
-    }),
-    { text: "Please convert the provided document into a single block of ATS-friendly HTML with inline styles." },
-  ],
-});
+  5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`;
 
 /**
  * Strips the "data:<mimetype>;base64," prefix from a data URI.
- * @param dataUri The full data URI.
- * @returns An object containing the mimeType and the raw base64 data.
  */
-function stripDataUriPrefix(dataUri: string): { mimeType: string; base64: string } {
-    const match = dataUri.match(/^data:(.*?);base64,(.*)$/);
-    if (!match) {
-        throw new Error('Invalid Data URI format. Expected "data:<mimetype>;base64,<data>".');
-    }
-    return { mimeType: match[1], base64: match[2] };
+function stripDataUriPrefix(dataUri: string): {
+  mimeType: string;
+  base64: string;
+} {
+  const match = dataUri.match(/^data:(.*?);base64,(.*)$/);
+  if (!match) {
+    throw new Error(
+      'Invalid Data URI format. Expected "data:<mimetype>;base64,<data>".'
+    );
+  }
+  return {mimeType: match[1], base64: match[2]};
 }
 
 const parseResumeFlow = ai.defineFlow(
@@ -86,12 +66,30 @@ const parseResumeFlow = ai.defineFlow(
     outputSchema: ParseResumeOutputSchema,
   },
   async input => {
-    const { mimeType, base64 } = stripDataUriPrefix(input.resumeDataUri);
-    const {output} = await prompt({
-        ...input,
-        mimeType: mimeType,
-        base64Data: base64,
+    const {mimeType, base64} = stripDataUriPrefix(input.resumeDataUri);
+
+    // ✅ Build and run the prompt directly inside the flow
+    const llmResponse = await ai.generate({
+      model: 'googleai/gemini-1.5-pro-latest',
+      system: systemPrompt,
+      prompt: [
+        Part.fromData({
+          data: base64,
+          mimeType: mimeType,
+        }),
+        {
+          text: 'Please convert the provided document into a single block of ATS-friendly HTML with inline styles.',
+        },
+      ],
+      output: {
+        schema: ParseResumeOutputSchema,
+      },
     });
-    return output!;
+
+    const output = llmResponse.output();
+    if (!output) {
+      throw new Error('AI failed to generate a response.');
+    }
+    return output;
   }
 );
