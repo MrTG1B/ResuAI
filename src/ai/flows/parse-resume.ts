@@ -4,8 +4,9 @@
  * @fileOverview Parses a resume file and extracts its content as HTML.
  */
 import {ai} from '@/ai/genkit';
-// ✅ Import 'Part' and 'z' from the core 'genkit' library
-import {Part, z} from 'genkit';
+// ✅ Import 'Part' from the correct sub-module 'genkit/content'
+import {z} from 'genkit';
+import {Part} from 'genkit/content';
 
 const ParseResumeInputSchema = z.object({
   resumeDataUri: z
