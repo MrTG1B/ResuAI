@@ -4,9 +4,7 @@
  * @fileOverview Parses a resume file and extracts its content as HTML.
  */
 import {ai} from '@/ai/genkit';
-// ✅ Import 'Part' from the correct sub-module 'genkit/content'
 import {z} from 'genkit';
-import {Part} from 'genkit/content';
 
 const ParseResumeInputSchema = z.object({
   resumeDataUri: z
@@ -30,7 +28,6 @@ export async function parseResume(
   return parseResumeFlow(input);
 }
 
-// Keep the system prompt defined separately for clarity
 const systemPrompt = `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes.
 
   Your task is to extract the content from the provided document and convert it into a single block of clean, semantic HTML that fits on a standard A4 page (content area approx 184.6mm x 271.6mm).
@@ -70,15 +67,16 @@ const parseResumeFlow = ai.defineFlow(
   async input => {
     const {mimeType, base64} = stripDataUriPrefix(input.resumeDataUri);
 
-    // ✅ Build and run the prompt directly inside the flow
     const llmResponse = await ai.generate({
       model: 'googleai/gemini-1.5-pro-latest',
       system: systemPrompt,
       prompt: [
-        Part.fromData({
-          data: base64,
-          mimeType: mimeType,
-        }),
+        {
+          inlineData: {
+            mimeType: mimeType,
+            data: base64,
+          },
+        },
         {
           text: 'Please convert the provided document into a single block of ATS-friendly HTML with inline styles.',
         },
