@@ -17,9 +17,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
 import { cn } from '@/lib/utils';
 import { type PersonalInfo } from '@/types/portfolio';
-import { parseResume as parseResumeAction } from "@/ai/flows/parse-resume";
+import { parseResumeAction } from "@/ai/flows/parse-resume";
 import { editResumeFlow as editResumeAction } from "@/ai/flows/edit-resume";
-import { analyzeResume as analyzeResumeForPortfolioAction } from "@/ai/flows/resume-analysis";
+import { analyzeResumeForPortfolioAction } from "@/ai/flows/resume-analysis";
 
 
 const parsingTexts = [
