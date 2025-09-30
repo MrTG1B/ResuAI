@@ -59,7 +59,7 @@ const prompt = ai.definePrompt({
   5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`,
   prompt: (input) => [
     {
-      inlineData: {
+      document: {
         mimeType: input.mimeType,
         data: input.base64Data,
       },
