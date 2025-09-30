@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -56,9 +57,14 @@ const prompt = ai.definePrompt({
   3.  **High-Fidelity Conversion:** Preserve the structure, layout, and all text formatting as accurately as possible within the single-page, single-column constraint.
   4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate font sizes, colors, weights (bold), styles (italic), and alignment.
   5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`,
-  prompt: [
-    { inlineData: { mimeType: '{{{mimeType}}}', data: '{{{base64Data}}}' } },
-    { text: "Please convert the provided document into a single block of ATS-friendly HTML with inline styles." }
+  prompt: (input) => [
+    {
+      inlineData: {
+        mimeType: input.mimeType,
+        data: input.base64Data,
+      },
+    },
+    { text: "Please convert the provided document into a single block of ATS-friendly HTML with inline styles." },
   ],
 });
 
