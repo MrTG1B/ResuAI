@@ -52,7 +52,7 @@ const prompt = ai.definePrompt({
   4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate font sizes, colors, weights (bold), styles (italic), and alignment.
   5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`,
   prompt: [
-    {media: {url: '{{{resumeDataUri}}}'}},
+    {media: {url: '{{{resumeDataUri}}}', contentType: 'application/pdf'}},
     {text: "Please convert the provided document into a single block of ATS-friendly HTML with inline styles."}
   ],
 });
@@ -68,3 +68,4 @@ const parseResumeFlow = ai.defineFlow(
     return output!;
   }
 );
+
