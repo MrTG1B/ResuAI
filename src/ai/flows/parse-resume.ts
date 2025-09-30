@@ -64,7 +64,7 @@ const parseResumeFlow = ai.defineFlow(
     inputSchema: ParseResumeInputSchema,
     outputSchema: ParseResumeOutputSchema,
   },
-  async input => {
+  async (input) => {
     const {mimeType, base64} = stripDataUriPrefix(input.resumeDataUri);
 
     const llmResponse = await ai.generate({
