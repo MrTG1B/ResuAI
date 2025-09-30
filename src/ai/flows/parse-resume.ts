@@ -7,7 +7,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {Part} from 'genkit/content';
 
 const ParseResumeInputSchema = z.object({
   resumeDataUri: z
@@ -40,18 +39,18 @@ const systemPrompt = `You are an AI expert at parsing documents and converting t
 4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate formatting.
 5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML.`;
 
-function stripDataUriPrefix(dataUri: string): {
-  mimeType: string;
-  base64: string;
-} {
-  const match = dataUri.match(/^data:(.*?);base64,(.*)$/);
-  if (!match) {
-    throw new Error(
-      'Invalid Data URI format. Expected "data:<mimetype>;base64,<data>".'
-    );
-  }
-  return {mimeType: match[1], base64: match[2]};
-}
+const prompt = ai.definePrompt({
+    name: 'parseResumePrompt',
+    model: 'googleai/gemini-1.5-pro-latest',
+    system: systemPrompt,
+    input: { schema: ParseResumeInputSchema },
+    output: { schema: ParseResumeOutputSchema },
+    prompt: `{{media url=resumeDataUri}}
+
+Please convert the provided document into a single block of ATS-friendly HTML with inline styles.
+    `
+});
+
 
 const parseResumeFlow = ai.defineFlow(
   {
@@ -60,24 +59,7 @@ const parseResumeFlow = ai.defineFlow(
     outputSchema: ParseResumeOutputSchema,
   },
   async (input) => {
-    const {mimeType, base64} = stripDataUriPrefix(input.resumeDataUri);
-
-    const { output } = await ai.generate({
-      model: 'googleai/gemini-1.5-pro-latest',
-      system: systemPrompt,
-      prompt: [
-        Part.fromData({
-          data: base64,
-          mimeType: mimeType,
-        }),
-        {
-          text: 'Please convert the provided document into a single block of ATS-friendly HTML with inline styles.',
-        },
-      ],
-      output: {
-        schema: ParseResumeOutputSchema,
-      },
-    });
+    const { output } = await prompt(input);
 
     if (!output) {
       throw new Error('AI failed to generate a response.');
