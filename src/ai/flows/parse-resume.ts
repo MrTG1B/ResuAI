@@ -10,7 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { Part, z } from 'genkit';
 
 const ParseResumeInputSchema = z.object({
   resumeDataUri: z
@@ -58,12 +58,10 @@ const prompt = ai.definePrompt({
   4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate font sizes, colors, weights (bold), styles (italic), and alignment.
   5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML with inline CSS.`,
   prompt: (input) => [
-    {
-      document: {
-        mimeType: input.mimeType,
-        data: input.base64Data,
-      },
-    },
+    Part.fromData({
+      data: input.base64Data,
+      mimeType: input.mimeType,
+    }),
     { text: "Please convert the provided document into a single block of ATS-friendly HTML with inline styles." },
   ],
 });
