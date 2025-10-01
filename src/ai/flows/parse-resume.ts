@@ -41,7 +41,7 @@ const systemPrompt = `You are an AI expert at parsing documents and converting t
 
 const prompt = ai.definePrompt({
     name: 'parseResumePrompt',
-    model: 'googleai/gemini-1.5-pro-latest',
+    model: 'googleai/gemini-2.5-flash',
     system: systemPrompt,
     input: { schema: ParseResumeInputSchema },
     output: { schema: ParseResumeOutputSchema },
