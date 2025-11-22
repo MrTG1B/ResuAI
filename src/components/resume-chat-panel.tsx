@@ -73,14 +73,21 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
         setAttachments([]);
         setIsLoading(true);
         
+        // Add timeout wrapper
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout - please try again')), 30000); // 30 second timeout
+        });
+        
         try {
-            const result = await editResumeAction({
+            const resultPromise = editResumeAction({
                 htmlContent: editorState.htmlContent,
                 prompt: currentInput,
                 history: editorState.chatHistory,
                 userProfile: userProfile as any,
                 attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.mimeType }))
             });
+            
+            const result = await Promise.race([resultPromise, timeoutPromise]) as any;
             
             if (result.success && result.data) {
                 const finalMessages = [...newMessages, { role: 'assistant' as const, content: result.data.response }];
@@ -90,11 +97,28 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                     chatHistory: finalMessages,
                 });
             } else {
-                toast({ title: "Error", description: result.error, variant: "destructive" });
+                toast({ 
+                    title: "Request Failed", 
+                    description: result.error || "An unexpected error occurred", 
+                    variant: "destructive" 
+                });
                 setEditorState({ ...editorState, chatHistory: messages }); // revert on error
             }
         } catch (error: any) {
-            toast({ title: "Request Failed", description: "Could not communicate with the AI. Please try again.", variant: "destructive" });
+            console.error('Chat panel error:', error);
+            let errorMessage = "Could not communicate with the AI. Please try again.";
+            
+            if (error.message?.includes('timeout')) {
+                errorMessage = "Request timed out. Please try a shorter instruction or try again later.";
+            } else if (error.message?.includes('network')) {
+                errorMessage = "Network error. Please check your internet connection and try again.";
+            }
+            
+            toast({ 
+                title: "Request Failed", 
+                description: errorMessage, 
+                variant: "destructive" 
+            });
             setEditorState({ ...editorState, chatHistory: messages }); // revert on error
         } finally {
             setIsLoading(false);
@@ -200,8 +224,14 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                         ))}
                          {isLoading && (
                             <div className="flex items-end gap-2 justify-start">
-                                <div className="max-w-xs rounded-lg px-3 py-2 bg-muted flex items-center">
-                                    <PulsingDotsLoader />
+                                <div className="max-w-xs rounded-lg px-3 py-2 bg-muted">
+                                    <div className="flex items-center gap-2">
+                                        <PulsingDotsLoader />
+                                        <span className="text-sm text-muted-foreground">Processing your request...</span>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                        This may take a few moments
+                                    </div>
                                 </div>
                             </div>
                         )}

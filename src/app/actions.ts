@@ -133,10 +133,34 @@ export async function editResumeAction(input: EditResumeInput) {
     return { success: true, data: editedData };
   } catch (error: any) {
     console.error("Error editing resume:", error);
+    
+    // Handle specific error types with more helpful messages
     if (error.message && error.message.includes('Zod')) {
       return { success: false, error: "The AI's response could not be processed. This can happen with complex requests. Please try rephrasing your instruction to be more specific (e.g., 'Change my name to Jane Doe')." };
     }
-    return { success: false, error: "Failed to edit resume. The AI model might be busy, please try again." };
+    
+    if (error.message && (error.message.includes('quota') || error.message.includes('QUOTA_EXCEEDED'))) {
+      return { success: false, error: "The AI service has reached its usage limit. Please try again in a few minutes or contact support if this persists." };
+    }
+    
+    if (error.message && (error.message.includes('timeout') || error.message.includes('TIMEOUT'))) {
+      return { success: false, error: "The request took too long to process. Please try again with a shorter or simpler instruction." };
+    }
+    
+    if (error.message && (error.message.includes('network') || error.message.includes('NETWORK_ERROR') || error.message.includes('fetch'))) {
+      return { success: false, error: "Network connection issue. Please check your internet connection and try again." };
+    }
+    
+    if (error.message && error.message.includes('API_KEY')) {
+      return { success: false, error: "AI service configuration issue. Please contact support." };
+    }
+    
+    if (error.message && (error.message.includes('SAFETY') || error.message.includes('blocked'))) {
+      return { success: false, error: "Your request was blocked by safety filters. Please try rephrasing your instruction." };
+    }
+    
+    // Generic fallback with more helpful guidance
+    return { success: false, error: "Unable to process your request right now. This could be due to high demand or a temporary service issue. Please try again in a few moments, or try rephrasing your instruction." };
   }
 }
 

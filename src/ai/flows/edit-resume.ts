@@ -255,21 +255,54 @@ const _editResumeFlow = ai.defineFlow(
     // DEBUG: Log the full input being sent to the AI
     console.log('AI Input:', JSON.stringify(input, null, 2));
 
-    const {output} = await prompt(input);
+    // Retry logic with exponential backoff
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_BASE = 1000; // 1 second base delay
+    
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const {output} = await prompt(input);
 
-    if (!output) {
-      // Handle case where the entire output is null
-      return {
-        newHtmlContent: input.htmlContent,
-        response: "Sorry, I couldn't process that request. Could you please try rephrasing?",
-      };
+        if (!output) {
+          // Handle case where the entire output is null
+          return {
+            newHtmlContent: input.htmlContent,
+            response: "Sorry, I couldn't process that request. Could you please try rephrasing?",
+          };
+        }
+        
+        // Ensure the response field is never empty
+        if (!output.response) {
+          output.response = "I've updated your resume with your changes.";
+        }
+
+        return output;
+      } catch (error: any) {
+        console.error(`AI request attempt ${attempt} failed:`, error);
+        
+        // Don't retry on certain types of errors
+        if (error.message && (
+          error.message.includes('SAFETY') ||
+          error.message.includes('blocked') ||
+          error.message.includes('API_KEY') ||
+          error.message.includes('Zod')
+        )) {
+          throw error; // Rethrow immediately for non-retryable errors
+        }
+        
+        // If this is the last attempt, throw the error
+        if (attempt === MAX_RETRIES) {
+          throw error;
+        }
+        
+        // Wait before retrying (exponential backoff)
+        const delay = RETRY_DELAY_BASE * Math.pow(2, attempt - 1);
+        console.log(`Retrying in ${delay}ms... (attempt ${attempt + 1}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
     
-    // Ensure the response field is never empty
-    if (!output.response) {
-      output.response = "I've updated your resume with your changes.";
-    }
-
-    return output;
+    // This should never be reached, but just in case
+    throw new Error('Maximum retries exceeded');
   }
 );
