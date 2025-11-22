@@ -34,15 +34,19 @@ import { MentraIcon } from '@/components/mentra-icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrandLoader } from '@/components/brand-loader';
 import { TemplatePreview } from '@/components/template-preview';
+import { Badge } from '@/components/ui/badge';
 
 
-function ToolCard({ href, icon: Icon, title, description, actionText, color = 'primary' }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string, color?: 'primary' | 'secondary' }) {
+function ToolCard({ href, icon: Icon, title, description, actionText, color = 'primary', disabled = false }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string, color?: 'primary' | 'secondary', disabled?: boolean }) {
     const shadowColor = color === 'primary' ? 'hover:shadow-primary/25' : 'hover:shadow-[#45B8AC]/25';
     const iconColor = color === 'primary' ? 'text-primary' : 'text-[#45B8AC]';
     const bgColor = color === 'primary' ? 'bg-primary/10' : 'bg-[#45B8AC]/10';
 
     return (
-        <Card className={`shadow-lg hover:shadow-2xl ${shadowColor} transition-all duration-300 flex flex-col h-full`}>
+        <Card className={`shadow-lg ${disabled ? 'opacity-50 cursor-not-allowed' : `hover:shadow-2xl ${shadowColor}`} transition-all duration-300 flex flex-col h-full relative`}>
+            {disabled && (
+                <Badge variant="destructive" className="absolute top-3 right-3">Coming Soon</Badge>
+            )}
             <CardHeader>
                 <div className="flex justify-center items-center mb-4">
                     <div className={`p-4 rounded-full ${bgColor}`}>
@@ -55,8 +59,8 @@ function ToolCard({ href, icon: Icon, title, description, actionText, color = 'p
                 <p className="text-muted-foreground">{description}</p>
             </CardContent>
             <CardFooter>
-                 <Button asChild className="w-full">
-                    <Link href={href}>{actionText} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                 <Button asChild className="w-full" disabled={disabled}>
+                    <Link href={disabled ? '#' : href}>{actionText} <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
             </CardFooter>
         </Card>
@@ -327,6 +331,7 @@ export default function DashboardPage() {
                     description="Create from scratch or enhance your resume with AI-powered suggestions."
                     actionText="Open Editor"
                     color="primary"
+                    disabled={true}
                 />
                 <ToolCard 
                     href="/resume-analyzer"
@@ -367,6 +372,7 @@ export default function DashboardPage() {
                     description="Instantly transform your resume into a stunning portfolio website."
                     actionText="Create Portfolio"
                     color="secondary"
+                    disabled={true}
                 />
             </div>
             
