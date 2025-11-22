@@ -165,7 +165,8 @@ export default function InterviewPrepClient() {
             });
 
             if (result.success && result.data) {
-                setMessages(prev => [...prev, { role: 'assistant', content: result.data!.response }]);
+                const response = result.data.response;
+                setMessages(prev => [...prev, { role: 'assistant' as const, content: response }]);
             } else {
                 toast({ title: "Error", description: result.error, variant: "destructive" });
                 setMessages(messages);

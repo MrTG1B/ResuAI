@@ -124,7 +124,7 @@ export default function ResumeEditorClient() {
         try {
             if (!currentUser) throw new Error("User not authenticated.");
             
-            const parseResult = await parseResumeAction({ resumeDataUri }) as { success: boolean; data?: { htmlContent: string }; error?: string };
+            const parseResult = (await parseResumeAction({ resumeDataUri })) as unknown as { success: boolean; data?: { htmlContent: string }; error?: string };
             if (!parseResult.success || !parseResult.data) {
                 throw new Error(parseResult.error || "Failed to parse resume for editing.");
             }
@@ -133,19 +133,19 @@ export default function ResumeEditorClient() {
     
             const editPrompt = `Based on the following analysis and suggestions, please apply the necessary changes to my resume. Focus on improving ATS compatibility by adjusting keywords, formatting, and structure as recommended.\n\nANALYSIS:\n${suggestions}`;
             
-            const editResult = await editResumeAction({
+            const editResult = (await editResumeAction({
                 htmlContent: initialHtmlContent,
                 prompt: editPrompt,
                 history: [],
-                userProfile: userProfile
-            });
+                userProfile: userProfile as any
+            })) as unknown as { success: boolean; data?: { newHtmlContent: string; response: string }; error?: string };
     
             if (editResult.success && editResult.data) {
                 const finalState: SavedEditorState = {
                     htmlContent: editResult.data.newHtmlContent,
                     chatHistory: [
-                        { role: 'user', content: "Apply the ATS suggestions." },
-                        { role: 'assistant', content: editResult.data.response }
+                        { role: 'user' as const, content: "Apply the ATS suggestions." },
+                        { role: 'assistant' as const, content: editResult.data.response }
                     ],
                     fileName: (sessionStorage.getItem('resumeForAnalysisFileName') || "Edited Resume").replace(/\.[^/.]+$/, ""),
                     initialPreviewUri: resumeDataUri,

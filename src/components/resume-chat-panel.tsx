@@ -78,7 +78,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                 htmlContent: editorState.htmlContent,
                 prompt: currentInput,
                 history: editorState.chatHistory,
-                userProfile: userProfile ? { ...userProfile, profilePictureUrl: userProfile.profilePictureUrl || undefined } : undefined,
+                userProfile: userProfile as any,
                 attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.mimeType }))
             });
             
