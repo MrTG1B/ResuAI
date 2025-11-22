@@ -37,18 +37,42 @@
 <a href="https://resuu-ai.vercel.app"><b>🚀 Click here to try ResuAI Live</b></a>
 </div>
 
-
-
 ## 🚀 Key Features
 
-Our suite of AI-powered tools is designed to give you a competitive edge in the job market:
+Our suite of AI-powered tools is designed to give you a competitive edge in the job market.
 
-- **📄 AI Resume Editor**: Upload an existing resume or start from scratch. Our AI assistant helps you refine content, improve phrasing, and even redesign the entire layout with professional, ATS-friendly templates.
-- **🔍 AI Resume Analyzer**: Get instant, data-driven feedback. Our "AI Coach" analyzes your resume against any job description, scores its ATS-friendliness, and provides actionable steps to optimize it for success.
-- **🌐 AI Portfolio Generator**: Transform your resume into a beautiful, responsive portfolio website in seconds. Choose from multiple themes and generate a unique, shareable link to impress recruiters.
-- **✍️ AI Cover Letter Writer**: Generate personalized and professional cover letters tailored to any job description. Select a tone and let the AI craft a compelling letter based on your profile data.
-- **🧠 AI Interview Practice & Aptitude Tests**: Prepare for interviews with a mock session against an AI coach. Sharpen your skills with timed aptitude tests covering logical, quantitative, and verbal reasoning.
-- **👤 Centralized Professional Profile**: Maintain a single source of truth for your career information. Your profile data is used by all our AI tools to ensure consistency and accuracy.
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h4>📄 AI Resume Editor</h4>
+      <p>Refine content, improve phrasing, and redesign layouts with ATS-friendly templates, all guided by AI.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h4>🔍 AI Resume Analyzer</h4>
+      <p>Get instant, data-driven feedback on your resume against any job description for optimal ATS performance.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h4>🌐 AI Portfolio Generator</h4>
+      <p>Transform your resume into a beautiful, responsive portfolio website in seconds with unique, shareable links.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h4>✍️ AI Cover Letter Writer</h4>
+      <p>Generate personalized and professional cover letters tailored to any job, based on your unique profile data.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h4>🧠 AI Interview & Aptitude Tests</h4>
+      <p>Practice for interviews with a mock AI coach and sharpen your skills with timed aptitude tests.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h4>👤 Centralized Professional Profile</h4>
+      <p>Maintain a single source of truth for your career information, ensuring consistency across all AI tools.</p>
+    </td>
+  </tr>
+</table>
 
 ## 🛠️ Tech Stack
 
