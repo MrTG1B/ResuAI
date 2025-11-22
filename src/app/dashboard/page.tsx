@@ -331,7 +331,6 @@ export default function DashboardPage() {
                     description="Create from scratch or enhance your resume with AI-powered suggestions."
                     actionText="Open Editor"
                     color="primary"
-                    disabled={true}
                 />
                 <ToolCard 
                     href="/resume-analyzer"
@@ -372,7 +371,6 @@ export default function DashboardPage() {
                     description="Instantly transform your resume into a stunning portfolio website."
                     actionText="Create Portfolio"
                     color="secondary"
-                    disabled={true}
                 />
             </div>
             
@@ -412,7 +410,7 @@ export default function DashboardPage() {
                                                 </div>
                                                 <div className="overflow-hidden">
                                                     <p className="font-semibold text-sm truncate group-hover:underline">{r.fileName || "Untitled Resume"}</p>
-                                                    <p className="text-xs text-muted-foreground truncate">Last modified: {r.lastModified ? new Date(r.lastModified).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">Last modified: {r.lastModified ? (typeof r.lastModified === 'string' ? new Date(r.lastModified).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : r.lastModified.toDate().toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })) : 'N/A'}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center flex-shrink-0 ml-4 space-x-2">
@@ -479,7 +477,7 @@ export default function DashboardPage() {
                                         <li key={cl.id} className="group relative flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
                                             <div className="flex items-center gap-3 overflow-hidden cursor-pointer flex-grow" onClick={() => router.push(`/cover-letter-generator?id=${cl.id}`)}>
                                                 <div className="flex-shrink-0 bg-primary/10 p-3 rounded-full"><NotebookPen className="h-5 w-5 text-primary" /></div>
-                                                <div className="overflow-hidden"><p className="font-semibold text-sm truncate group-hover:underline">{cl.title || "Untitled Cover Letter"}</p><p className="text-xs text-muted-foreground truncate">For: {cl.companyName} | Last modified: {cl.lastModified ? new Date(cl.lastModified).toLocaleDateString() : 'N/A'}</p></div>
+                                                <div className="overflow-hidden"><p className="font-semibold text-sm truncate group-hover:underline">{cl.title || "Untitled Cover Letter"}</p><p className="text-xs text-muted-foreground truncate">For: {cl.companyName} | Last modified: {cl.lastModified ? (typeof cl.lastModified === 'string' ? new Date(cl.lastModified).toLocaleDateString() : cl.lastModified.toDate().toLocaleDateString()) : 'N/A'}</p></div>
                                             </div>
                                             <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
                                                 <TooltipProvider><Tooltip><TooltipTrigger asChild>

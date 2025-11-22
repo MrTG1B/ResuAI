@@ -43,8 +43,9 @@ async function getPortfolioData(id: string, userId?: string): Promise<PortfolioD
 }
 
 
-export default async function PortfolioPage({ searchParams }: { searchParams: { id: string }}) {
-    const portfolioId = searchParams.id;
+export default async function PortfolioPage({ searchParams }: { searchParams: Promise<{ id: string }> }) {
+    const params = await searchParams;
+    const portfolioId = params.id;
 
     if (!portfolioId) {
         notFound();
@@ -54,7 +55,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: { 
     // A robust solution would involve a session management library or checking auth tokens.
     // For this context, let's assume we can get the user ID if they are logged in.
     // This is a simplified check. A real app would use a more secure session check.
-    const user = auth.currentUser; // This is often null on server, so a better check is needed
+    const user = auth?.currentUser; // This is often null on server, so a better check is needed
     
     // A better approach in a real app would be to get the UID from a session cookie or server-side auth state.
     // Since we don't have a full auth session management here, we can't reliably get the UID on the server.

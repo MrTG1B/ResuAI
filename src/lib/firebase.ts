@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, serverTimestamp, addDoc, deleteDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { getFirestore, type Firestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, serverTimestamp, addDoc, deleteDoc, updateDoc, Timestamp } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,7 +14,7 @@ const firebaseConfig = {
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
-let db = null;
+let db: Firestore | null = null;
 
 // Initialize Firebase only if the configuration is provided
 // This prevents the app from crashing if Firebase credentials are not in .env

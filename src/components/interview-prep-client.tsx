@@ -50,10 +50,12 @@ export default function InterviewPrepClient() {
     const lastMessageRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        if (!auth || !db) return;
+        const dbInstance = db;
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setCurrentUser(user);
-                const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+                const profileDocRef = doc(dbInstance, 'users', user.uid, 'profile', 'data');
                 const docSnap = await getDoc(profileDocRef);
                 if (docSnap.exists()) {
                     setUserProfile(docSnap.data() as PersonalInfo);
@@ -163,7 +165,8 @@ export default function InterviewPrepClient() {
             });
 
             if (result.success && result.data) {
-                setMessages(prev => [...prev, { role: 'assistant', content: result.data.response }]);
+                const response = result.data.response;
+                setMessages(prev => [...prev, { role: 'assistant' as const, content: response }]);
             } else {
                 toast({ title: "Error", description: result.error, variant: "destructive" });
                 setMessages(messages);

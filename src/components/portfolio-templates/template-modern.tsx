@@ -98,7 +98,7 @@ const Section = ({ icon, title, children }: { icon: React.ElementType, title: st
 };
 
 const TimelineItem = ({ title, subtitle, date, items }: { title: string, subtitle: string, date: string, items: string[] }) => (
-    <div className="relative pl-8 before:absolute before:left-3 before:top-2 before:h-full before:w-px before:bg-gray-200 after:absolute after:left-[7px] after:top-2 after:h-2.5 after:w-2.5 after:rounded-full" style={{ '::after': { backgroundColor: 'var(--p-primary)'}}}>
+    <div className="relative pl-8 before:absolute before:left-3 before:top-2 before:h-full before:w-px before:bg-gray-200 after:absolute after:left-[7px] after:top-2 after:h-2.5 after:w-2.5 after:rounded-full after:bg-primary">
         <h3 className="font-semibold text-lg">{title}</h3>
         <p className="text-md font-medium" style={{ color: 'var(--p-primary)' }}>{subtitle}</p>
         <p className="text-xs opacity-70 mb-2">{date}</p>

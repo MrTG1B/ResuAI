@@ -53,7 +53,7 @@ export function TemplateCorporate({ portfolioData }: TemplateProps) {
                         {personalInfo?.location && <span className="flex items-center gap-2"><MapPin className="h-4 w-4" style={{ color: 'var(--p-primary)' }} />{personalInfo.location}</span>}
                         {personalInfo?.socials?.map((social, index) => (
                             <a key={index} href={social.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
-                                <SocialIcon platform={social.platform} className="h-4 w-4" style={{ color: 'var(--p-primary)' }} />
+                                <SocialIcon platform={social.platform} className="h-4 w-4" />
                                 {social.platform}
                             </a>
                         ))}

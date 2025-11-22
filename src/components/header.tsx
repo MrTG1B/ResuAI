@@ -92,7 +92,7 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage unoptimized key={avatarUrl} src={avatarUrl || undefined} alt={user.displayName || user.email || 'User'} />
+                                    <AvatarImage key={avatarUrl} src={avatarUrl || undefined} alt={user.displayName || user.email || 'User'} />
                                     <AvatarFallback className="text-sm font-semibold">
                                         {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
                                     </AvatarFallback>

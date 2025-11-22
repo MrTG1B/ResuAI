@@ -124,7 +124,7 @@ export default function ResumeEditorClient() {
         try {
             if (!currentUser) throw new Error("User not authenticated.");
             
-            const parseResult = await parseResumeAction({ resumeDataUri });
+            const parseResult = (await parseResumeAction({ resumeDataUri })) as unknown as { success: boolean; data?: { htmlContent: string }; error?: string };
             if (!parseResult.success || !parseResult.data) {
                 throw new Error(parseResult.error || "Failed to parse resume for editing.");
             }
@@ -133,19 +133,19 @@ export default function ResumeEditorClient() {
     
             const editPrompt = `Based on the following analysis and suggestions, please apply the necessary changes to my resume. Focus on improving ATS compatibility by adjusting keywords, formatting, and structure as recommended.\n\nANALYSIS:\n${suggestions}`;
             
-            const editResult = await editResumeAction({
+            const editResult = (await editResumeAction({
                 htmlContent: initialHtmlContent,
                 prompt: editPrompt,
                 history: [],
-                userProfile: userProfile
-            });
+                userProfile: userProfile as any
+            })) as unknown as { success: boolean; data?: { newHtmlContent: string; response: string }; error?: string };
     
             if (editResult.success && editResult.data) {
                 const finalState: SavedEditorState = {
                     htmlContent: editResult.data.newHtmlContent,
                     chatHistory: [
-                        { role: 'user', content: "Apply the ATS suggestions." },
-                        { role: 'assistant', content: editResult.data.response }
+                        { role: 'user' as const, content: "Apply the ATS suggestions." },
+                        { role: 'assistant' as const, content: editResult.data.response }
                     ],
                     fileName: (sessionStorage.getItem('resumeForAnalysisFileName') || "Edited Resume").replace(/\.[^/.]+$/, ""),
                     initialPreviewUri: resumeDataUri,
@@ -175,6 +175,8 @@ export default function ResumeEditorClient() {
 
     // Initial load effect
     useEffect(() => {
+        if (!auth || !db) return;
+        const dbInstance = db;
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setCurrentUser(user);
@@ -182,9 +184,9 @@ export default function ResumeEditorClient() {
                 const fromFlow = searchParams.get('from');
 
                  // Fetch user profile data
-                const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+                const profileDocRef = doc(dbInstance, 'users', user.uid, 'profile', 'data');
                 const docSnap = await getDoc(profileDocRef);
-                const profileData = docSnap.exists() ? (docSnap.data() as PersonalInfo) : {};
+                const profileData = docSnap.exists() ? (docSnap.data() as PersonalInfo) : {} as Partial<PersonalInfo>;
                 setUserProfile(profileData);
 
 
@@ -192,7 +194,7 @@ export default function ResumeEditorClient() {
                     setResumeId(idFromUrl);
                     setFlow('edit');
                     try {
-                        const resumeDoc = await getDoc(doc(db, "users", user.uid, "resumes", idFromUrl));
+                        const resumeDoc = await getDoc(doc(dbInstance, "users", user.uid, "resumes", idFromUrl));
                         if (resumeDoc.exists()) {
                             setEditorState(resumeDoc.data() as SavedEditorState);
                         } else {
@@ -271,7 +273,7 @@ export default function ResumeEditorClient() {
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file || !currentUser) return;
+        if (!file || !currentUser || !db) return;
         
         if (file.type !== 'application/pdf') {
             toast({
@@ -304,7 +306,7 @@ export default function ResumeEditorClient() {
                 const uploadedResumeDataUri = reader.result as string;
                 
                 // Then, parse the resume for the editor
-                const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
+                const result = (await parseResumeAction({ resumeDataUri: uploadedResumeDataUri })) as unknown as { success: boolean; data?: { htmlContent: string }; error?: string };
     
                 if (result.success && result.data) {
                     const finalState: SavedEditorState = {
@@ -385,7 +387,7 @@ export default function ResumeEditorClient() {
 
 
     const handleConvertToPortfolio = async () => {
-      if (!currentUser || !editorState) {
+      if (!currentUser || !editorState || !db) {
         toast({
           title: "Error",
           description: "Cannot create portfolio. Missing user or resume data.",
@@ -404,7 +406,7 @@ export default function ResumeEditorClient() {
             analysisInput.resumeDataUri = `data:text/html;base64,${encodedHtml}`;
         }
         
-        const result = await analyzeResumeForPortfolioAction(analysisInput);
+        const result = (await analyzeResumeForPortfolioAction(analysisInput)) as unknown as { success: boolean; data?: any; error?: string };
     
         if (result.success && result.data) {
           const portfolioData = result.data;

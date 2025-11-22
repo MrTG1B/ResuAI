@@ -70,11 +70,13 @@ function CoverLetterGeneratorPageContent() {
   });
 
   useEffect(() => {
+    if (!auth || !db) return;
+    const dbInstance = db;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
         
-        const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+        const profileDocRef = doc(dbInstance, 'users', user.uid, 'profile', 'data');
         const docSnap = await getDoc(profileDocRef);
         if (docSnap.exists()) {
           setUserProfile(docSnap.data() as PersonalInfo);
@@ -91,7 +93,7 @@ function CoverLetterGeneratorPageContent() {
         const idFromParams = searchParams.get('id');
         if (idFromParams) {
           setCoverLetterId(idFromParams);
-          const letterDocRef = doc(db, 'users', user.uid, 'coverletters', idFromParams);
+          const letterDocRef = doc(dbInstance, 'users', user.uid, 'coverletters', idFromParams);
           const letterDocSnap = await getDoc(letterDocRef);
           if (letterDocSnap.exists()) {
             const letterData = letterDocSnap.data() as CoverLetter;

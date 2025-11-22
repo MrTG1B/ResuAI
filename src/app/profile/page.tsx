@@ -176,16 +176,25 @@ export default function ProfilePage() {
   const { fields: projFields, append: appendProj, remove: removeProj } = useFieldArray({ control, name: "projects" });
   const { fields: certFields, append: appendCert, remove: removeCert } = useFieldArray({ control, name: "certifications" });
   const { fields: pubFields, append: appendPub, remove: removePub } = useFieldArray({ control, name: "publications" });
-  const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({ control, name: "skills" });
+  // Skills is an array of strings, so we manage it differently
+  const skills = watch("skills") || [];
+  const appendSkill = (skill: string) => setValue("skills", [...skills, skill]);
+  const removeSkill = (index: number) => setValue("skills", skills.filter((_, i) => i !== index));
+  
   const { fields: langFields, append: appendLang, remove: removeLang } = useFieldArray({ control, name: "languages" });
-  const { fields: interestFields, append: appendInterest, remove: removeInterest } = useFieldArray({ control, name: "interests" });
+  // Interests is an array of strings, so we manage it differently
+  const interests = watch("interests") || [];
+  const appendInterest = (interest: string) => setValue("interests", [...interests, interest]);
+  const removeInterest = (index: number) => setValue("interests", interests.filter((_, i) => i !== index));
 
 
   useEffect(() => {
+    if (!auth || !db) return;
+    const dbInstance = db;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+        const profileDocRef = doc(dbInstance, 'users', user.uid, 'profile', 'data');
         const docSnap = await getDoc(profileDocRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -211,7 +220,7 @@ export default function ProfilePage() {
   }, [router, reset]);
   
   const onSubmit = async (data: ProfileFormData) => {
-    if (!currentUser) return;
+    if (!currentUser || !db) return;
     setIsSaving(true);
     try {
       const profileDocRef = doc(db, 'users', currentUser.uid, 'profile', 'data');

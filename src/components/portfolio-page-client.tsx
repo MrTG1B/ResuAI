@@ -83,6 +83,7 @@ export default function PortfolioPageClient({ portfolioId }: { portfolioId: stri
         return;
     }
   
+    const dbInstance = db;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (!user) {
             router.push('/login');
@@ -90,7 +91,7 @@ export default function PortfolioPageClient({ portfolioId }: { portfolioId: stri
         }
 
         try {
-            const portfolioDocRef = doc(db, `users/${user.uid}/portfolios`, portfolioId);
+            const portfolioDocRef = doc(dbInstance, `users/${user.uid}/portfolios`, portfolioId);
             const portfolioSnap = await getDoc(portfolioDocRef);
 
             if (portfolioSnap.exists()) {
