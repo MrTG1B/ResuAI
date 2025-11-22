@@ -12,10 +12,6 @@ const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 const projectId = process.env.NEXT_PUBLIC_GOOGLE_CLOUD_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT;
 const location = process.env.NEXT_PUBLIC_VERTEX_AI_LOCATION || 'us-central1';
 
-// Determine which plugin to use based on configuration
-// If projectId is available, use Vertex AI (cloud agent), otherwise fall back to Google AI
-const useVertexAI = !!projectId;
-
 if (!apiKey && !projectId) {
   console.warn(
     'No Google AI API key or Google Cloud Project ID found. AI features will be disabled. ' +
@@ -26,7 +22,7 @@ if (!apiKey && !projectId) {
 // Initialize Genkit with the correctly configured plugin.
 // Prefer Vertex AI (cloud agent) when project ID is available, otherwise use Google AI.
 export const ai = genkit({
-  plugins: useVertexAI 
-    ? [vertexAI({projectId: projectId!, location})]
+  plugins: projectId 
+    ? [vertexAI({projectId, location})]
     : apiKey ? [googleAI({apiKey})] : [],
 });
