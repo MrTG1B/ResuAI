@@ -33,7 +33,7 @@ const EducationSchema = z.object({
 const ProjectSchema = z.object({
     name: z.string(),
     description: z.string().optional(),
-    technologies: z.string().optional(),
+    technologies: z.array(z.string()).optional(),
     url: z.string().optional(),
 });
 const CertificationSchema = z.object({

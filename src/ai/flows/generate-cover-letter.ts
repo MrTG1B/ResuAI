@@ -14,7 +14,7 @@ import {z} from 'genkit';
 const SocialLinkSchema = z.object({ platform: z.string(), url: z.string() });
 const ExperienceSchema = z.object({ role: z.string().optional(), company: z.string().optional(), location: z.string().optional(), dates: z.string().optional(), description: z.string().optional() });
 const EducationSchema = z.object({ degree: z.string(), school: z.string(), location: z.string().optional(), dates: z.string().optional() });
-const ProjectSchema = z.object({ name: z.string(), description: z.string().optional(), technologies: z.string().optional(), url: z.string().optional() });
+const ProjectSchema = z.object({ name: z.string(), description: z.string().optional(), technologies: z.array(z.string()).optional(), url: z.string().optional() });
 const CertificationSchema = z.object({ name: z.string(), issuingOrganization: z.string(), date: z.string().optional(), credentialUrl: z.string().optional() });
 const PublicationSchema = z.object({ title: z.string(), journal: z.string(), date: z.string().optional(), url: z.string().url().optional() });
 const LanguageSchema = z.object({ language: z.string(), proficiency: z.string() });
