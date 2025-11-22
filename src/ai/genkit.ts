@@ -1,20 +1,32 @@
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
+import {vertexAI} from '@genkit-ai/vertexai';
 import {config} from 'dotenv';
 
 config();
 
-// Use the dedicated Gemini API key.
+// Use the dedicated Gemini API key for Google AI.
 const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
-if (!apiKey) {
+// Use Vertex AI configuration for cloud-based execution
+const projectId = process.env.NEXT_PUBLIC_GOOGLE_CLOUD_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT;
+const location = process.env.NEXT_PUBLIC_VERTEX_AI_LOCATION || 'us-central1';
+
+// Determine which plugin to use based on configuration
+// If projectId is available, use Vertex AI (cloud agent), otherwise fall back to Google AI
+const useVertexAI = !!projectId;
+
+if (!apiKey && !projectId) {
   console.warn(
-    'No Google AI API key found. AI features will be disabled. Please set NEXT_PUBLIC_GEMINI_API_KEY.'
+    'No Google AI API key or Google Cloud Project ID found. AI features will be disabled. ' +
+    'Please set NEXT_PUBLIC_GEMINI_API_KEY for Google AI or NEXT_PUBLIC_GOOGLE_CLOUD_PROJECT_ID for Vertex AI.'
   );
 }
 
-// Initialize Genkit with the correctly configured Google AI plugin.
-// The API key must be passed to the googleAI() function directly.
+// Initialize Genkit with the correctly configured plugin.
+// Prefer Vertex AI (cloud agent) when project ID is available, otherwise use Google AI.
 export const ai = genkit({
-  plugins: apiKey ? [googleAI({apiKey})] : [],
+  plugins: useVertexAI 
+    ? [vertexAI({projectId: projectId!, location})]
+    : apiKey ? [googleAI({apiKey})] : [],
 });

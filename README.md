@@ -122,8 +122,13 @@ To get a local copy up and running, follow these simple steps.
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
     NEXT_PUBLIC_FIREBASE_APP_ID=
 
-    # Google AI (Gemini) API Key
+    # Google AI (Gemini) API Key - for direct Google AI usage
     NEXT_PUBLIC_GEMINI_API_KEY=
+
+    # Google Cloud Vertex AI Configuration - for cloud-based AI execution (optional)
+    # If set, Vertex AI will be used instead of Google AI for better cloud integration
+    NEXT_PUBLIC_GOOGLE_CLOUD_PROJECT_ID=
+    NEXT_PUBLIC_VERTEX_AI_LOCATION=us-central1
 
     # ImageBB API Key (for image uploads)
     NEXT_PUBLIC_IMGBB_API_KEY=
