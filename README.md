@@ -28,7 +28,15 @@
 
 <br />
 
-![Portfolio Hero Section](https://image.thum.io/get/width/1200/crop/630/https://resuu-ai.vercel.app/)
+![Portfolio Hero Section](https://image.thum.io/get/width/1200/crop/630/https://resuu-ai.vercel.app/dashboard)
+<div align="center">
+<a href="https://resuu-ai.vercel.app">
+<img src="https://www.google.com/search?q=https://placehold.co/1200x600/1a1a1a/ffffff%3Ftext%3DResuAI%2BDashboard%2BPreview%26font%3Droboto" alt="ResuAI Dashboard Preview" width="100%" style="border-radius: 10px;" />
+</a>
+<br />
+<br />
+<a href="https://resuu-ai.vercel.app"><b>🚀 Click here to try ResuAI Live</b></a>
+</div>
 
 
 
