@@ -16,7 +16,7 @@
   <p>
     <img src="https://img.shields.io/github/stars/MrTG1B/ResuAI?style=social" alt="GitHub Stars" />
     <img src="https://img.shields.io/github/forks/MrTG1B/ResuAI?style=social" alt="GitHub Forks" />
-    <img src="https://img.shields.io/github/license/MrTG1B/ResuAI?style=flat-square" alt="License" />
+    <img src="https://img.shields.io/github/license/MrTG1B/ResuAI?style=flat-square&logo=github&label=license" alt="License" />
   </p>
 </div>
 
