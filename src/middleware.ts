@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Get client IP
-  const ip = request.ip ?? request.headers.get('x-forwarded-for') ?? 'unknown';
+  const ip = (request as any).ip ?? request.headers.get('x-forwarded-for') ?? 'unknown';
   const now = Date.now();
   
   // Clean up old entries

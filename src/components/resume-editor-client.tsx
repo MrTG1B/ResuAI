@@ -74,7 +74,7 @@ export default function ResumeEditorClient() {
             const dataToSave = { ...stateToSave, lastModified: serverTimestamp() };
 
             if (docId) {
-                await setDoc(doc(dbInstance, "users", currentUser.uid, "resumes", docId), dataToSave, { merge: true });
+                await setDoc(doc(db, "users", currentUser.uid, "resumes", docId), dataToSave, { merge: true });
             } else {
                  const resumeCollectionRef = collection(db, "users", currentUser.uid, "resumes");
                  const resumeSnapshot = await getDocs(resumeCollectionRef);
@@ -186,7 +186,7 @@ export default function ResumeEditorClient() {
                  // Fetch user profile data
                 const profileDocRef = doc(dbInstance, 'users', user.uid, 'profile', 'data');
                 const docSnap = await getDoc(profileDocRef);
-                const profileData = docSnap.exists() ? (docSnap.data() as PersonalInfo) : {};
+                const profileData = docSnap.exists() ? (docSnap.data() as PersonalInfo) : {} as Partial<PersonalInfo>;
                 setUserProfile(profileData);
 
 
@@ -273,7 +273,7 @@ export default function ResumeEditorClient() {
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file || !currentUser) return;
+        if (!file || !currentUser || !db) return;
         
         if (file.type !== 'application/pdf') {
             toast({
@@ -306,7 +306,7 @@ export default function ResumeEditorClient() {
                 const uploadedResumeDataUri = reader.result as string;
                 
                 // Then, parse the resume for the editor
-                const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
+                const result = (await parseResumeAction({ resumeDataUri: uploadedResumeDataUri })) as unknown as { success: boolean; data?: { htmlContent: string }; error?: string };
     
                 if (result.success && result.data) {
                     const finalState: SavedEditorState = {
@@ -387,7 +387,7 @@ export default function ResumeEditorClient() {
 
 
     const handleConvertToPortfolio = async () => {
-      if (!currentUser || !editorState) {
+      if (!currentUser || !editorState || !db) {
         toast({
           title: "Error",
           description: "Cannot create portfolio. Missing user or resume data.",
@@ -406,7 +406,7 @@ export default function ResumeEditorClient() {
             analysisInput.resumeDataUri = `data:text/html;base64,${encodedHtml}`;
         }
         
-        const result = await analyzeResumeForPortfolioAction(analysisInput);
+        const result = (await analyzeResumeForPortfolioAction(analysisInput)) as unknown as { success: boolean; data?: any; error?: string };
     
         if (result.success && result.data) {
           const portfolioData = result.data;

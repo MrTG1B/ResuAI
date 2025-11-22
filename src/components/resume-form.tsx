@@ -53,6 +53,7 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
 
     setIsProcessing(true);
 
+    const dbInstance = db; // Capture for use in async callback
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async () => {
@@ -69,15 +70,15 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
         const { portfolioDraft, avatarPrompt, colorPalette } = analysisResult.data;
 
         console.log("Step 2: Merging AI data with user profile...");
-        const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
-        const portfolioCollectionRef = collection(db, 'users', user.uid, 'portfolios');
+        const profileDocRef = doc(dbInstance, 'users', user.uid, 'profile', 'data');
+        const portfolioCollectionRef = collection(dbInstance, 'users', user.uid, 'portfolios');
         
         const profileSnap = await getDoc(profileDocRef);
         const userProfile = profileSnap.exists() ? profileSnap.data() : {};
         
         const finalPortfolioData: Partial<PortfolioData> & { publications?: Publication[] } = {
           ...portfolioDraft,
-          personalInfo: { ...portfolioDraft.personalInfo, ...userProfile },
+          personalInfo: { ...portfolioDraft.personalInfo, ...userProfile } as any,
           summary: userProfile.summary || portfolioDraft.summary || portfolioDraft.personalInfo?.summary,
           experience: userProfile.experience?.length ? userProfile.experience : portfolioDraft.experience,
           education: userProfile.education?.length ? userProfile.education : portfolioDraft.education,
@@ -86,10 +87,10 @@ export function ResumeForm({ user, setIsProcessing }: ResumeFormProps) {
           certifications: userProfile.certifications?.length ? userProfile.certifications : portfolioDraft.certifications,
           languages: userProfile.languages?.length ? userProfile.languages : portfolioDraft.languages,
           interests: userProfile.interests?.length ? userProfile.interests : portfolioDraft.interests,
-          publications: userProfile.publications?.length ? userProfile.publications : (portfolioDraft.publications || []),
+          publications: userProfile.publications?.length ? userProfile.publications : ((portfolioDraft as any).publications || []),
           title: `Portfolio for ${portfolioDraft.personalInfo?.name || user.displayName || 'User'}`,
-          createdAt: serverTimestamp(),
-          lastModified: serverTimestamp(),
+          createdAt: serverTimestamp() as any,
+          lastModified: serverTimestamp() as any,
           colorPalette: colorPalette,
         };
         console.log("Step 2 Success: Data merged.");
