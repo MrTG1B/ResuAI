@@ -74,7 +74,7 @@ export default function ResumeEditorClient() {
             const dataToSave = { ...stateToSave, lastModified: serverTimestamp() };
 
             if (docId) {
-                await setDoc(doc(db, "users", currentUser.uid, "resumes", docId), dataToSave, { merge: true });
+                await setDoc(doc(dbInstance, "users", currentUser.uid, "resumes", docId), dataToSave, { merge: true });
             } else {
                  const resumeCollectionRef = collection(db, "users", currentUser.uid, "resumes");
                  const resumeSnapshot = await getDocs(resumeCollectionRef);
@@ -175,6 +175,8 @@ export default function ResumeEditorClient() {
 
     // Initial load effect
     useEffect(() => {
+        if (!auth || !db) return;
+        const dbInstance = db;
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setCurrentUser(user);
@@ -182,7 +184,7 @@ export default function ResumeEditorClient() {
                 const fromFlow = searchParams.get('from');
 
                  // Fetch user profile data
-                const profileDocRef = doc(db, 'users', user.uid, 'profile', 'data');
+                const profileDocRef = doc(dbInstance, 'users', user.uid, 'profile', 'data');
                 const docSnap = await getDoc(profileDocRef);
                 const profileData = docSnap.exists() ? (docSnap.data() as PersonalInfo) : {};
                 setUserProfile(profileData);
@@ -192,7 +194,7 @@ export default function ResumeEditorClient() {
                     setResumeId(idFromUrl);
                     setFlow('edit');
                     try {
-                        const resumeDoc = await getDoc(doc(db, "users", user.uid, "resumes", idFromUrl));
+                        const resumeDoc = await getDoc(doc(dbInstance, "users", user.uid, "resumes", idFromUrl));
                         if (resumeDoc.exists()) {
                             setEditorState(resumeDoc.data() as SavedEditorState);
                         } else {
