@@ -122,8 +122,15 @@ To get a local copy up and running, follow these simple steps.
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
     NEXT_PUBLIC_FIREBASE_APP_ID=
 
-    # Google AI (Gemini) API Key
+    # AI Configuration - Choose one:
+    
+    # Option 1: Google AI (Gemini) API Key (for development)
     NEXT_PUBLIC_GEMINI_API_KEY=
+    
+    # Option 2: Vertex AI Cloud Agent (for production)
+    # Requires GCP project setup and Application Default Credentials
+    # GCLOUD_PROJECT=your-gcp-project-id
+    # GCLOUD_LOCATION=us-central1
 
     # ImageBB API Key (for image uploads)
     NEXT_PUBLIC_IMGBB_API_KEY=
@@ -134,6 +141,24 @@ To get a local copy up and running, follow these simple steps.
     npm run dev
     ```
     Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 🤖 AI Configuration
+
+ResuAI supports two AI backend options:
+
+### Google AI (Development)
+Uses Google AI API with an API key. Best for development and testing.
+- Set `NEXT_PUBLIC_GEMINI_API_KEY` environment variable
+- Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+
+### Vertex AI Cloud Agent (Production)
+Uses Google Cloud Vertex AI with Application Default Credentials. Recommended for production deployments.
+- Set `GCLOUD_PROJECT` to your GCP project ID
+- Optionally set `GCLOUD_LOCATION` (defaults to `us-central1`)
+- Requires [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials)
+- Better enterprise SLAs, quotas, and security
+
+Both options can be configured simultaneously for gradual migration.
 
 ## 🤝 Contributing
 
