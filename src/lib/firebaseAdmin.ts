@@ -31,17 +31,14 @@ export const initializeFirebaseAdmin = () => {
         clientEmail,
         privateKey,
     });
-    
-    console.log("🛠 Firebase Admin init with:");
-    console.log("FIREBASE_PROJECT_ID:", projectId);
-    console.log("FIREBASE_CLIENT_EMAIL:", clientEmail);
-    console.log("FIREBASE_PRIVATE_KEY starts with:", privateKey?.slice(0, 30));
-    console.log("Type of credential:", typeof cred);
 
     admin.initializeApp({ credential: cred });
-    console.log("✅ Firebase Admin initialized.");
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log("✅ Firebase Admin initialized successfully.");
+    }
   } catch (error: any) {
-    console.error("🔥 Firebase Admin initialization error:", error.stack);
+    console.error("Firebase Admin initialization failed. Please check your credentials.");
     throw new Error("Could not initialize Firebase Admin SDK.");
   }
 };

@@ -39,6 +39,13 @@ next-env.d.ts
 
 .genkit/*
 .env*
+!.env.example
+
+# Sensitive files
+*.pem
+*.key
+service-account*.json
+firebase-adminsdk*.json
 
 # firebase
 firebase-debug.log

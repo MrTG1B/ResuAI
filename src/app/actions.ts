@@ -21,6 +21,7 @@ import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, s
 import { db } from "@/lib/firebase";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
 import { type CoverLetter } from "@/types/cover-letter";
+import { validatePortfolioData, isValidUrl } from "@/lib/security";
 
 
 // This action is now only responsible for AI analysis and does not interact with the database.
@@ -29,8 +30,10 @@ export async function analyzeResumeForPortfolioAction(input: AnalyzeResumeInput)
     const analysisResult = await analyzeResumeFlow(input);
     return { success: true, data: analysisResult };
   } catch (error) {
-    console.error("Error in analyzeResumeForPortfolioAction (AI Flow):", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during AI analysis.";
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error in analyzeResumeForPortfolioAction:", errorMessage);
+    }
     return { success: false, error: errorMessage };
   }
 }
@@ -58,22 +61,36 @@ export async function generateProjectImageAction(input: GenerateProjectImageInpu
 
 export async function uploadImageAction(dataUri: string): Promise<{ success: boolean; data?: { url: string; deleteUrl: string }; error?: string }> {
     try {
+        // Validate data URI format
+        if (!dataUri || !dataUri.startsWith('data:image/')) {
+            throw new Error('Invalid image data format');
+        }
+        
         const result = await uploadImage(dataUri);
         return { success: true, data: result };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-        console.error("Image upload action failed:", errorMessage);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Image upload action failed:", errorMessage);
+        }
         return { success: false, error: `Failed to upload image: ${errorMessage}` };
     }
 }
 
 export async function deleteImageAction(deleteUrl: string): Promise<{ success: boolean; error?: string }> {
     try {
+        // Validate URL format
+        if (!deleteUrl || !isValidUrl(deleteUrl)) {
+            throw new Error('Invalid delete URL');
+        }
+        
         await deleteImage(deleteUrl);
         return { success: true };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-        console.error("Image delete action failed:", errorMessage);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Image delete action failed:", errorMessage);
+        }
         return { success: false, error: `Failed to delete image: ${errorMessage}` };
     }
 }
@@ -84,8 +101,10 @@ export async function analyzeResumeForProfileFill(input: AnalyzeResumeInput): Pr
     const analysisResult = await analyzeResumeFlow(input);
     return { success: true, data: analysisResult.portfolioDraft };
   } catch (error) {
-    console.error("Error in analyzeResumeForProfileFill (AI Flow):", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during profile analysis.";
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error in analyzeResumeForProfileFill:", errorMessage);
+    }
     return { success: false, error: errorMessage };
   }
 }

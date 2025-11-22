@@ -4,6 +4,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to validate data size (prevent abuse)
+    function isValidSize() {
+      return request.resource.size() < 1048576; // 1MB limit
+    }
+    
     // Default rule: Deny all reads and writes
     match /{document=**} {
       allow read, write: if false;
@@ -11,18 +26,22 @@ service cloud.firestore {
     
     // Allow users to read and write their own data under the /users/{userId} path
     match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize();
     }
     
-    // Allow public read-only access to the 'feedback' collection
+    // Allow authenticated users to create feedback, anyone to read
     match /feedback/{feedbackId} {
-      allow read, create: if true;
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidSize();
+      allow update, delete: if false; // Feedback cannot be updated or deleted
     }
     
-    // Allow public read access to all portfolios using a collection group query
+    // Allow public read access to portfolios (public portfolios feature)
+    // Only owner can write
     match /{path=**}/portfolios/{portfolioId} {
-      allow get: if true;
-      allow list: if true;
+      allow get, list: if true;
+      allow write: if isAuthenticated() && isValidSize();
     }
   }
 }
