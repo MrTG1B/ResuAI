@@ -30,9 +30,10 @@
 
 <div align="center">
   <a href="https://resuu-ai.vercel.app/" target="_blank">
-  <iframe src="https://resuu-ai.vercel.app/" width="100%" height="600px" frameborder="0"></iframe>
+
     <!-- <img src="https://resuu-ai.vercel.app/" alt="ResuAI Application Preview" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); border: 1px solid #333;" /> -->
   </a>
+    <iframe src="https://resuu-ai.vercel.app/" width="100%" height="600px" frameborder="0"></iframe>
 </div>
 
 ## 🚀 Key Features
