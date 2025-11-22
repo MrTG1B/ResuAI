@@ -56,13 +56,14 @@ ResuAI is built with a modern, scalable, and efficient technology stack:
 
 | Category          | Technology                                                                                                        |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Framework**     | [Next.js](https://nextjs.org/) (App Router)                                                                       |
-| **Styling**       | [Tailwind CSS](https://tailwindcss.com/) & [ShadCN UI](https://ui.shadcn.com/)                                    |
-| **AI & Gen UI**   | [Google's Gemini Pro via Genkit](https://firebase.google.com/docs/genkit)                                           |
-| **Authentication**| [Firebase Authentication](https://firebase.google.com/docs/auth)                                                  |
-| **Database**      | [Cloud Firestore](https://firebase.google.com/docs/firestore)                                                     |
-| **Hosting**       | [Vercel](https://vercel.com/)                                                                                     |
-| **PDF Generation**| [Playwright](https://playwright.dev/) in a serverless function                                                      |
+| **Framework**     | ![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)                                                                       |
+| **Styling**       | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) & ![ShadCN UI](https://img.shields.io/badge/ShadCN_UI-black?style=for-the-badge&logo=shadcn-ui&logoColor=white)                                    |
+| **AI & Gen UI**   | ![Genkit](https://img.shields.io/badge/Genkit-blue?style=for-the-badge&logo=google-cloud&logoColor=white)                                           |
+| **Authentication**| ![Firebase Auth](https://img.shields.io/badge/Firebase-Auth-orange?style=for-the-badge&logo=firebase&logoColor=white)                                                  |
+| **Database**      | ![Firestore](https://img.shields.io/badge/Firestore-blue?style=for-the-badge&logo=firebase&logoColor=white)                                                     |
+| **Hosting**       | ![Vercel](https://img.shields.io/badge/Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)                                                                                     |
+| **PDF Generation**| ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)                                                      |
+
 
 ## 🏁 Getting Started
 
