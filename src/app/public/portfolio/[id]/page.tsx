@@ -8,8 +8,8 @@ import { BrandLoader } from '@/components/brand-loader';
 // This line ensures the page is always dynamically rendered
 export const dynamic = 'force-dynamic';
 
-export default async function PublicPortfolioPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function PublicPortfolioPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   if (!id) {
     notFound();
   }

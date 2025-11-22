@@ -91,7 +91,7 @@ const interviewPrepFlow = ai.defineFlow(
     outputSchema: InterviewPrepOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt(input, { history: input.history });
+    const {output} = await prompt(input);
     return output!;
   }
 );

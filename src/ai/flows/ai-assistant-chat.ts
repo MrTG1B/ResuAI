@@ -85,13 +85,9 @@ const aiAssistantChatFlow = ai.defineFlow(
     outputSchema: AIAssistantChatOutputSchema,
   },
   async (input) => {
-    // Combine the history with the current prompt for the model
-    const fullHistory = [
-        ...input.history,
-        { role: 'user' as const, content: input.prompt }
-    ];
-
-    const {output} = await prompt(input, { history: input.history });
+    // The history is already part of the input schema, 
+    // so we just pass the input directly to the prompt
+    const {output} = await prompt(input);
     return output!;
   }
 );

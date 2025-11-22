@@ -37,6 +37,7 @@ export default function FeedbackPage() {
   });
 
   useEffect(() => {
+    if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);

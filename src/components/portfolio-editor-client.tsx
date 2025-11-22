@@ -61,7 +61,7 @@ function PortfolioEditorClient() {
 
 
   const savePortfolio = useCallback(async (dataToSave?: Partial<PortfolioData>): Promise<boolean> => {
-    if (!currentUser || !params.id) return false;
+    if (!currentUser || !params.id || !db) return false;
     
     const finalData = dataToSave || portfolio;
     if (!finalData) return false;
@@ -85,17 +85,18 @@ function PortfolioEditorClient() {
 
   useEffect(() => {
     const portfolioId = params.id as string;
-    if (!portfolioId) {
+    if (!portfolioId || !auth || !db) {
       setNotFound(true);
       setIsLoading(false);
       return;
     }
 
+    const dbInstance = db;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
         try {
-          const docRef = doc(db, 'users', user.uid, 'portfolios', portfolioId);
+          const docRef = doc(dbInstance, 'users', user.uid, 'portfolios', portfolioId);
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             setPortfolio({ id: docSnap.id, ...docSnap.data() } as PortfolioData);

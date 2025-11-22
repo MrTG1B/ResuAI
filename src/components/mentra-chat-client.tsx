@@ -98,6 +98,7 @@ function MentraChatPage() {
   }, []);
 
   useEffect(() => {
+    if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
@@ -140,7 +141,8 @@ function MentraChatPage() {
   }, [messages, isResponding]);
   
   const handleSendMessage = async () => {
-    if (!currentUser || (!input.trim() && attachments.length === 0)) return;
+    if (!currentUser || (!input.trim() && attachments.length === 0) || !db) return;
+    const dbInstance = db;
 
     const userMessage: ChatMessage = { role: 'user', content: input };
     const currentMessageHistory = [...messages, userMessage];
@@ -173,7 +175,7 @@ function MentraChatPage() {
         setMessages(finalMessages);
 
         let docId = currentChatId;
-        const chatsCollectionRef = collection(db, 'users', currentUser.uid, 'chats');
+        const chatsCollectionRef = collection(dbInstance, 'users', currentUser.uid, 'chats');
 
         if (docId) {
             const chatDocRef = doc(chatsCollectionRef, docId);
@@ -365,7 +367,7 @@ function MentraChatPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDeleteChat} variant="destructive">Delete</AlertDialogAction>
+                    <AlertDialogAction onClick={handleDeleteChat} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
@@ -383,7 +385,7 @@ function MentraChatPage() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
                                 <Avatar className="h-9 w-9 border-2 border-primary/50">
-                                    <AvatarImage unoptimized key={currentUser.photoURL} src={currentUser.photoURL || undefined} alt={currentUser.displayName || currentUser.email || 'User'} />
+                                    <AvatarImage key={currentUser.photoURL} src={currentUser.photoURL || undefined} alt={currentUser.displayName || currentUser.email || 'User'} />
                                     <AvatarFallback className="text-sm font-semibold">
                                         {getInitials(currentUser.displayName)}
                                     </AvatarFallback>

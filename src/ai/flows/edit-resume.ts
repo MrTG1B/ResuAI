@@ -255,7 +255,7 @@ const _editResumeFlow = ai.defineFlow(
     // DEBUG: Log the full input being sent to the AI
     console.log('AI Input:', JSON.stringify(input, null, 2));
 
-    const {output} = await prompt(input, { history: input.history as ChatMessage[]});
+    const {output} = await prompt(input);
 
     if (!output) {
       // Handle case where the entire output is null

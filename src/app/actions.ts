@@ -5,7 +5,7 @@ import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput, type AnalyzeRes
 import { generateAvatar as generateAvatarFlow, GenerateAvatarInput } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
-import { atsAnalyzerFlow } from "@/ai/flows/job-match-analyzer";
+import { atsAnalyzerFlow, type AtsAnalyzerInput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow, GenerateProjectImageInput } from "@/ai/flows/generate-project-image";
 import { analyzeCertificate as analyzeCertificateFlow, type AnalyzeCertificateInput } from "@/ai/flows/analyze-certificate";
@@ -17,7 +17,7 @@ import { generateAptitudeExam as generateAptitudeExamFlow } from "@/ai/flows/gen
 import { generateChatTitle as generateChatTitleFlow, type GenerateChatTitleInput } from "@/ai/flows/generate-chat-title";
 import { type PortfolioData, type Project, type PersonalInfo } from "@/types/portfolio";
 import { type ParsedResume, type EditedResume, type CoachChatResponse } from "@/types/resume";
-import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp, collectionGroup, where } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, doc, deleteDoc, getDoc, setDoc, query, orderBy, updateDoc, Timestamp, collectionGroup, where, type FieldValue } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { uploadImage, deleteImage } from "@/services/image-upload-service";
 import { type CoverLetter } from "@/types/cover-letter";
@@ -110,7 +110,7 @@ export async function analyzeResumeForProfileFill(input: AnalyzeResumeInput): Pr
 }
 
 
-export async function parseResumeAction(input: ParseResumeInput) {
+export async function parseResumeAction(input: ParseResumeInput): Promise<{ success: boolean; data?: ParsedResume; error?: string }> {
   try {
     const result = await parseResumeFlow(input);
     const parsedData: ParsedResume = {
@@ -217,7 +217,7 @@ export async function generateCoverLetterAction(userId: string, input: GenerateC
              throw new Error("AI failed to generate the cover letter content.");
         }
 
-        const letterData: Omit<CoverLetter, 'id' | 'createdAt'> & { lastModified: any, createdAt?: any } = {
+        const letterData = {
             title: title,
             content: result.coverLetter,
             jobDescription: aiInput.jobDescription,
@@ -225,7 +225,7 @@ export async function generateCoverLetterAction(userId: string, input: GenerateC
             hiringManager: aiInput.hiringManager,
             tone: aiInput.tone,
             lastModified: serverTimestamp(),
-        };
+        } as Omit<CoverLetter, 'id' | 'createdAt'> & { lastModified: FieldValue, createdAt?: FieldValue };
 
         const collectionRef = collection(db, 'users', userId, 'coverletters');
         let docId = id;

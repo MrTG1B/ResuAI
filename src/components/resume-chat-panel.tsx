@@ -62,7 +62,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
     const handleSendMessage = async () => {
         if ((!input.trim() && attachments.length === 0) || !editorState.htmlContent) return;
 
-        const userMessage = { role: 'user', content: input };
+        const userMessage = { role: 'user' as const, content: input };
         const newMessages = [...messages, userMessage];
         setEditorState({ ...editorState, chatHistory: newMessages });
 
@@ -78,12 +78,12 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                 htmlContent: editorState.htmlContent,
                 prompt: currentInput,
                 history: editorState.chatHistory,
-                userProfile: userProfile,
+                userProfile: userProfile ? { ...userProfile, profilePictureUrl: userProfile.profilePictureUrl || undefined } : undefined,
                 attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.mimeType }))
             });
             
             if (result.success && result.data) {
-                const finalMessages = [...newMessages, { role: 'assistant', content: result.data.response }];
+                const finalMessages = [...newMessages, { role: 'assistant' as const, content: result.data.response }];
                 setEditorState({ 
                     ...editorState, 
                     htmlContent: result.data.newHtmlContent,

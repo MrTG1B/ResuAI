@@ -124,7 +124,7 @@ export default function ResumeEditorClient() {
         try {
             if (!currentUser) throw new Error("User not authenticated.");
             
-            const parseResult = await parseResumeAction({ resumeDataUri });
+            const parseResult = await parseResumeAction({ resumeDataUri }) as { success: boolean; data?: { htmlContent: string }; error?: string };
             if (!parseResult.success || !parseResult.data) {
                 throw new Error(parseResult.error || "Failed to parse resume for editing.");
             }
