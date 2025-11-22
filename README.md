@@ -28,10 +28,9 @@
 
 <br />
 
-![Portfolio Hero Section](https://image.thum.io/get/width/1200/crop/630/https://resuu-ai.vercel.app/dashboard)
 <div align="center">
 <a href="https://resuu-ai.vercel.app">
-<img src="https://www.google.com/search?q=https://placehold.co/1200x600/1a1a1a/ffffff%3Ftext%3DResuAI%2BDashboard%2BPreview%26font%3Droboto" alt="ResuAI Dashboard Preview" width="100%" style="border-radius: 10px;" />
+<img src="https://image.thum.io/get/width/1200/crop/630/https://resuu-ai.vercel.app/" alt="ResuAI Live Preview" width="100%" style="border-radius: 10px;" />
 </a>
 <br />
 <br />
@@ -55,13 +54,15 @@ Our suite of AI-powered tools is designed to give you a competitive edge in the 
 
 ResuAI is built with a modern, scalable, and efficient technology stack:
 
-- **Framework**: [Next.js](https://nextjs.org/) (App Router)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [ShadCN UI](https://ui.shadcn.com/)
-- **AI & Generative UI**: [Google's Gemini Pro via Genkit](https://firebase.google.com/docs/genkit)
-- **Authentication**: [Firebase Authentication](https://firebase.google.com/docs/auth)
-- **Database**: [Cloud Firestore](https://firebase.google.com/docs/firestore)
-- **Hosting**: [Vercel](https://vercel.com/)
-- **PDF Generation**: [Playwright](https://playwright.dev/) in a serverless function
+| Category          | Technology                                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Framework**     | [Next.js](https://nextjs.org/) (App Router)                                                                       |
+| **Styling**       | [Tailwind CSS](https://tailwindcss.com/) & [ShadCN UI](https://ui.shadcn.com/)                                    |
+| **AI & Gen UI**   | [Google's Gemini Pro via Genkit](https://firebase.google.com/docs/genkit)                                           |
+| **Authentication**| [Firebase Authentication](https://firebase.google.com/docs/auth)                                                  |
+| **Database**      | [Cloud Firestore](https://firebase.google.com/docs/firestore)                                                     |
+| **Hosting**       | [Vercel](https://vercel.com/)                                                                                     |
+| **PDF Generation**| [Playwright](https://playwright.dev/) in a serverless function                                                      |
 
 ## 🏁 Getting Started
 
