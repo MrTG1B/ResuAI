@@ -17,9 +17,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResumeChatPanel } from '@/components/resume-chat-panel';
 import { cn } from '@/lib/utils';
 import { type PersonalInfo } from '@/types/portfolio';
-import { parseResume as parseResumeAction } from "@/ai/flows/parse-resume";
-import { editResumeFlow as editResumeAction } from "@/ai/flows/edit-resume";
-import { analyzeResume as analyzeResumeForPortfolioAction } from "@/ai/flows/resume-analysis";
+import { parseResumeAction } from "@/app/actions";
+import { editResumeAction } from "@/app/actions";
+import { analyzeResumeForPortfolioAction } from "@/app/actions";
 
 
 const parsingTexts = [
@@ -124,7 +124,7 @@ export default function ResumeEditorClient() {
         try {
             if (!currentUser) throw new Error("User not authenticated.");
             
-            const parseResult = (await parseResumeAction({ resumeDataUri })) as unknown as { success: boolean; data?: { htmlContent: string }; error?: string };
+            const parseResult = await parseResumeAction({ resumeDataUri });
             if (!parseResult.success || !parseResult.data) {
                 throw new Error(parseResult.error || "Failed to parse resume for editing.");
             }
@@ -133,12 +133,12 @@ export default function ResumeEditorClient() {
     
             const editPrompt = `Based on the following analysis and suggestions, please apply the necessary changes to my resume. Focus on improving ATS compatibility by adjusting keywords, formatting, and structure as recommended.\n\nANALYSIS:\n${suggestions}`;
             
-            const editResult = (await editResumeAction({
+            const editResult = await editResumeAction({
                 htmlContent: initialHtmlContent,
                 prompt: editPrompt,
                 history: [],
                 userProfile: userProfile as any
-            })) as unknown as { success: boolean; data?: { newHtmlContent: string; response: string }; error?: string };
+            });
     
             if (editResult.success && editResult.data) {
                 const finalState: SavedEditorState = {
@@ -306,7 +306,7 @@ export default function ResumeEditorClient() {
                 const uploadedResumeDataUri = reader.result as string;
                 
                 // Then, parse the resume for the editor
-                const result = (await parseResumeAction({ resumeDataUri: uploadedResumeDataUri })) as unknown as { success: boolean; data?: { htmlContent: string }; error?: string };
+                const result = await parseResumeAction({ resumeDataUri: uploadedResumeDataUri });
     
                 if (result.success && result.data) {
                     const finalState: SavedEditorState = {
@@ -406,7 +406,7 @@ export default function ResumeEditorClient() {
             analysisInput.resumeDataUri = `data:text/html;base64,${encodedHtml}`;
         }
         
-        const result = (await analyzeResumeForPortfolioAction(analysisInput)) as unknown as { success: boolean; data?: any; error?: string };
+        const result = await analyzeResumeForPortfolioAction(analysisInput);
     
         if (result.success && result.data) {
           const portfolioData = result.data;
