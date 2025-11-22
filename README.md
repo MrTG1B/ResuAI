@@ -9,7 +9,6 @@
 
   <p>
     <a href="https://resuu-ai.vercel.app/" target="_blank">
-    <iframe href="https://resuu-ai.vercel.app/">
       <img src="https://img.shields.io/badge/Live%20Demo-Visit%20Now-brightgreen?style=for-the-badge&logo=vercel" alt="Live Demo" />
     </a>
   </p>
@@ -31,7 +30,7 @@
 
 <div align="center">
   <a href="https://resuu-ai.vercel.app/" target="_blank">
-    <img src="https://i.ibb.co/L84mPjP/project-preview.png" alt="ResuAI Application Preview" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); border: 1px solid #333;" />
+    <img src="[https://i.ibb.co/L84mPjP/project-preview.png](https://resuu-ai.vercel.app/)" alt="ResuAI Application Preview" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); border: 1px solid #333;" />
   </a>
 </div>
 
