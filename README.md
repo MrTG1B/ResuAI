@@ -158,6 +158,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📬 Contact
 
-Tirthankar Dasgupta - [@TirthankarDasg7](https://twitter.com/TirthankarDasg7)
+Tirthankar Dasgupta - [@MrTG1B]
+(https://github.com/MrTG1B)
 
 Project Link: [https://github.com/MrTG1B/ResuAI](https://github.com/MrTG1B/ResuAI)
