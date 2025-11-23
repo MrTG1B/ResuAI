@@ -1,164 +1,394 @@
 <div align="center">
-  <img src="public/logo.png" alt="ResuAI Logo" width="200" style="margin-bottom: 20px;" />
 
-  <h1 style="font-size: 3rem; margin: 0;"><b>ResuAI</b></h1>
+<img src="public/logo.png" alt="ResuAI Logo" width="120" />
 
-  <p style="font-size: 1.25rem; color: #888;">
-    Create Stunning Resumes & Portfolios with the Power of AI
-  </p>
+# **ResuAI**
 
-  <p>
-    <a href="https://resuu-ai.vercel.app/" target="_blank">
-      <img src="https://img.shields.io/badge/Live%20Demo-Visit%20Now-brightgreen?style=for-the-badge&logo=vercel" alt="Live Demo" />
-    </a>
-  </p>
+### *Your AI-Powered Career Companion*
 
-  <p>
-    <img src="https://img.shields.io/github/stars/MrTG1B/ResuAI?style=social" alt="GitHub Stars" />
-    <img src="https://img.shields.io/github/forks/MrTG1B/ResuAI?style=social" alt="GitHub Forks" />
-    <img src="https://img.shields.io/github/license/MrTG1B/ResuAI?style=flat-square&logo=github&label=license" alt="License" />
-  </p>
+**Create stunning resumes, optimize for ATS, generate portfolios, and ace interviews—all powered by advanced AI technology.**
+
+<p>
+  <a href="https://resuu-ai.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-Visit_Now-4F46E5?style=for-the-badge" alt="Live Demo" />
+  </a>
+  <a href="#-getting-started">
+    <img src="https://img.shields.io/badge/📖_Quick_Start-Get_Started-10B981?style=for-the-badge" alt="Quick Start" />
+  </a>
+  <a href="docs/SECURITY.md">
+    <img src="https://img.shields.io/badge/🔒_Security-View_Docs-EF4444?style=for-the-badge" alt="Security" />
+  </a>
+</p>
+
+<p>
+  <img src="https://img.shields.io/github/stars/MrTG1B/ResuAI?style=flat-square&logo=github&color=yellow" alt="GitHub Stars" />
+  <img src="https://img.shields.io/github/forks/MrTG1B/ResuAI?style=flat-square&logo=github&color=blue" alt="GitHub Forks" />
+  <img src="https://img.shields.io/github/license/MrTG1B/ResuAI?style=flat-square&color=green" alt="License" />
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" />
+</p>
+
 </div>
 
 ---
 
-## ✨ Introduction
+## 📋 Table of Contents
+
+- [Introduction](#-introduction)
+- [Key Features](#-key-features)
+- [Tech Stack](#️-tech-stack)
+- [Getting Started](#-getting-started)
+- [Security](#-security)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Contact](#-contact)
+
+---
+
+## 🎯 Introduction
 
 **ResuAI** is an intelligent, modern platform designed to revolutionize your job application process. By leveraging the power of Generative AI, ResuAI helps you effortlessly create, refine, and showcase your professional story. Whether you're building a resume from scratch, optimizing it for Applicant Tracking Systems (ATS), or generating a stunning portfolio website, ResuAI is your personal career-building assistant.
+
+### Why Choose ResuAI?
+
+- ✅ **AI-Powered Intelligence** - Leverages Google's Gemini AI for smart suggestions
+- ✅ **ATS Optimization** - Ensures your resume passes automated screening systems
+- ✅ **All-in-One Platform** - Resume builder, analyzer, portfolio generator, and more
+- ✅ **Enterprise-Grade Security** - Built with security best practices and comprehensive protection
+- ✅ **Modern & Responsive** - Beautiful UI that works seamlessly on all devices
+- ✅ **Open Source** - Transparent, community-driven development
 
 <br />
 
 <div align="center">
 <a href="https://resuu-ai.vercel.app">
-<img src="https://image.thum.io/get/width/1200/crop/630/https://resuu-ai.vercel.app/" alt="ResuAI Live Preview" width="100%" style="border-radius: 10px;" />
+<img src="https://image.thum.io/get/width/1200/crop/630/https://resuu-ai.vercel.app/" alt="ResuAI Live Preview" width="90%" />
 </a>
-<br />
-<br />
-<a href="https://resuu-ai.vercel.app"><b>🚀 Click here to try ResuAI Live</b></a>
+
+### [🚀 **Try ResuAI Live Demo**](https://resuu-ai.vercel.app)
+
 </div>
+
+<br />
+
+---
 
 ## 🚀 Key Features
 
-Our suite of AI-powered tools is designed to give you a competitive edge in the job market.
+Our comprehensive suite of AI-powered tools gives you a competitive edge in the job market:
 
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h4>📄 AI Resume Editor</h4>
-      <p>Refine content, improve phrasing, and redesign layouts with ATS-friendly templates, all guided by AI.</p>
+      <h3>📄 AI Resume Editor</h3>
+      <p><strong>Smart Resume Creation & Optimization</strong></p>
+      <ul>
+        <li>AI-powered content refinement and phrasing improvements</li>
+        <li>Multiple ATS-friendly professional templates</li>
+        <li>Real-time preview and editing</li>
+        <li>One-click PDF generation</li>
+      </ul>
     </td>
     <td width="50%" valign="top">
-      <h4>🔍 AI Resume Analyzer</h4>
-      <p>Get instant, data-driven feedback on your resume against any job description for optimal ATS performance.</p>
+      <h3>🔍 AI Resume Analyzer</h3>
+      <p><strong>Intelligent ATS Optimization</strong></p>
+      <ul>
+        <li>Instant data-driven feedback and scoring</li>
+        <li>Job description compatibility analysis</li>
+        <li>Keyword optimization suggestions</li>
+        <li>ATS compatibility scoring</li>
+      </ul>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <h4>🌐 AI Portfolio Generator</h4>
-      <p>Transform your resume into a beautiful, responsive portfolio website in seconds with unique, shareable links.</p>
+      <h3>🌐 AI Portfolio Generator</h3>
+      <p><strong>Professional Portfolio Websites</strong></p>
+      <ul>
+        <li>Transform resume to responsive portfolio in seconds</li>
+        <li>Multiple modern design templates</li>
+        <li>Unique shareable links</li>
+        <li>Fully customizable with live preview</li>
+      </ul>
     </td>
     <td width="50%" valign="top">
-      <h4>✍️ AI Cover Letter Writer</h4>
-      <p>Generate personalized and professional cover letters tailored to any job, based on your unique profile data.</p>
+      <h3>✍️ AI Cover Letter Writer</h3>
+      <p><strong>Personalized Cover Letters</strong></p>
+      <ul>
+        <li>AI-generated personalized content</li>
+        <li>Tailored to specific job descriptions</li>
+        <li>Professional formatting and tone</li>
+        <li>Multiple revision options</li>
+      </ul>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <h4>🧠 AI Interview & Aptitude Tests</h4>
-      <p>Practice for interviews with a mock AI coach and sharpen your skills with timed aptitude tests.</p>
+      <h3>🧠 AI Interview Preparation</h3>
+      <p><strong>Mock Interviews & Practice</strong></p>
+      <ul>
+        <li>AI-powered interview coach</li>
+        <li>Industry-specific question banks</li>
+        <li>Timed aptitude tests</li>
+        <li>Performance analytics and feedback</li>
+      </ul>
     </td>
     <td width="50%" valign="top">
-      <h4>👤 Centralized Professional Profile</h4>
-      <p>Maintain a single source of truth for your career information, ensuring consistency across all AI tools.</p>
+      <h3>👤 Centralized Profile Management</h3>
+      <p><strong>Single Source of Truth</strong></p>
+      <ul>
+        <li>Unified professional profile</li>
+        <li>Consistent data across all tools</li>
+        <li>Easy profile updates</li>
+        <li>Secure cloud storage</li>
+      </ul>
     </td>
   </tr>
 </table>
 
+---
+
 ## 🛠️ Tech Stack
 
-ResuAI is built with a modern, scalable, and efficient technology stack:
+ResuAI leverages cutting-edge technologies for optimal performance and security:
 
-| Category          | Technology                                                                                                        |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Framework**     | ![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)                                                                       |
-| **Styling**       | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) & ![ShadCN UI](https://img.shields.io/badge/ShadCN_UI-black?style=for-the-badge&logo=shadcn-ui&logoColor=white)                                    |
-| **AI & Gen UI**   | ![Genkit](https://img.shields.io/badge/Genkit-blue?style=for-the-badge&logo=google-cloud&logoColor=white)                                           |
-| **Authentication**| ![Firebase Auth](https://img.shields.io/badge/Firebase-Auth-orange?style=for-the-badge&logo=firebase&logoColor=white)                                                  |
-| **Database**      | ![Firestore](https://img.shields.io/badge/Firestore-blue?style=for-the-badge&logo=firebase&logoColor=white)                                                     |
-| **Hosting**       | ![Vercel](https://img.shields.io/badge/Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)                                                                                     |
-| **PDF Generation**| ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)                                                      |
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/Next.js_15-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" /><br />
+      <sub><b>React Framework</b></sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /><br />
+      <sub><b>Type Safety</b></sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" /><br />
+      <sub><b>Styling</b></sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/ShadCN_UI-black?style=for-the-badge&logo=shadcnui&logoColor=white" alt="ShadCN" /><br />
+      <sub><b>UI Components</b></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/Google_Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" /><br />
+      <sub><b>AI Engine</b></sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" /><br />
+      <sub><b>Auth & Database</b></sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/Vercel-black?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" /><br />
+      <sub><b>Hosting</b></sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright" /><br />
+      <sub><b>PDF Generation</b></sub>
+    </td>
+  </tr>
+</table>
 
+### Core Technologies
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS, ShadCN UI, Radix UI
+- **AI/ML**: Google Generative AI (Gemini), Firebase Genkit
+- **Backend**: Next.js Server Actions, Node.js
+- **Database**: Cloud Firestore (NoSQL)
+- **Authentication**: Firebase Authentication
+- **Storage**: Firebase Storage, ImageBB
+- **Deployment**: Vercel (Frontend), Firebase Cloud Functions
+- **PDF Generation**: Playwright, Puppeteer
+
+---
 
 ## 🏁 Getting Started
 
-To get a local copy up and running, follow these simple steps.
+Get ResuAI running locally in minutes:
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm or yarn
+Ensure you have the following installed:
 
-### Installation
+- **Node.js** v18.0.0 or higher ([Download](https://nodejs.org/))
+- **npm** v9.0.0 or higher (comes with Node.js)
+- **Git** ([Download](https://git-scm.com/))
 
-1.  **Clone the repository:**
-    ```sh
-    git clone https://github.com/MrTG1B/ResuAI.git
-    cd ResuAI
-    ```
+### Quick Start
 
-2.  **Install NPM packages:**
-    ```sh
-    npm install
-    ```
+#### 1. Clone the Repository
 
-3.  **Set up your environment variables:**
-    Create a `.env` file in the root of your project and add your Firebase and API keys. You can get these from your Firebase project settings and the Google AI Studio.
-    ```env
-    # Firebase Client SDK Configuration
-    NEXT_PUBLIC_FIREBASE_API_KEY=
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-    NEXT_PUBLIC_FIREBASE_APP_ID=
+```bash
+git clone https://github.com/MrTG1B/ResuAI.git
+cd ResuAI
+```
 
-    # Google AI (Gemini) API Key - for direct Google AI usage
-    NEXT_PUBLIC_GEMINI_API_KEY=
+#### 2. Install Dependencies
 
-    # Google Cloud Vertex AI Configuration - for cloud-based AI execution (optional)
-    # If set, Vertex AI will be used instead of Google AI for better cloud integration
-    NEXT_PUBLIC_GOOGLE_CLOUD_PROJECT_ID=
-    NEXT_PUBLIC_VERTEX_AI_LOCATION=us-central1
+```bash
+npm install
+```
 
-    # ImageBB API Key (for image uploads)
-    NEXT_PUBLIC_IMGBB_API_KEY=
-    ```
+#### 3. Configure Environment Variables
 
-4.  **Run the development server:**
-    ```sh
-    npm run dev
-    ```
-    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create a `.env` file in the root directory:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your credentials:
+
+```env
+# Firebase Configuration (Required)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+# Google AI API Key (Required)
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
+
+# Optional: Google Cloud Vertex AI
+NEXT_PUBLIC_GOOGLE_CLOUD_PROJECT_ID=your_gcp_project_id
+NEXT_PUBLIC_VERTEX_AI_LOCATION=us-central1
+
+# Image Upload Service
+NEXT_PUBLIC_IMGBB_API_KEY=your_imgbb_api_key
+```
+
+<details>
+<summary><b>📖 Where to Get API Keys</b></summary>
+
+- **Firebase**: [Create a Firebase project](https://console.firebase.google.com/)
+- **Google AI (Gemini)**: [Get API key from Google AI Studio](https://makersuite.google.com/app/apikey)
+- **ImageBB**: [Register at ImageBB](https://imgbb.com/signup) and get API key
+
+</details>
+
+#### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. 🎉
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+## 🔒 Security
+
+ResuAI is built with **enterprise-grade security** as a top priority:
+
+### Security Features
+
+✅ **HTTP Security Headers** - CSP, HSTS, X-Frame-Options, etc.  
+✅ **Rate Limiting** - Protection against DoS and API abuse  
+✅ **Input Validation** - Comprehensive sanitization and validation  
+✅ **Secure Authentication** - Firebase Auth with best practices  
+✅ **Database Security** - Firestore rules with owner-based access control  
+✅ **Environment Protection** - Secrets management with `.env` files  
+✅ **XSS Prevention** - HTML sanitization and CSP policies  
+✅ **Error Handling** - Secure error messages without information disclosure  
+
+### Security Documentation
+
+- 📖 [**Security Guidelines**](docs/SECURITY.md) - Comprehensive security measures and best practices
+- 🔧 [**Security Fixes**](docs/SECURITY_FIXES.md) - Detailed security improvements implemented
+- 📊 [**Security Summary**](docs/SECURITY_FIXES_SUMMARY.md) - Quick overview of security enhancements
+
+### Reporting Security Issues
+
+Found a security vulnerability? Please **do not** create a public issue.
+
+📧 **Email**: [Report Security Issue](mailto:tirthankardasgupta913913@gmail.com)
+
+We take security seriously and will respond within 48 hours.
+
+---
 
 ## 🤝 Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+We welcome contributions from the community! Whether it's bug fixes, new features, or documentation improvements, your help is appreciated.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+### How to Contribute
 
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+1. **Fork** the repository
+2. **Clone** your fork: `git clone https://github.com/your-username/ResuAI.git`
+3. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+4. **Make** your changes and commit: `git commit -m 'Add amazing feature'`
+5. **Push** to your fork: `git push origin feature/amazing-feature`
+6. **Open** a Pull Request
+
+### Contribution Guidelines
+
+- ✅ Follow existing code style and conventions
+- ✅ Write clear commit messages
+- ✅ Add tests for new features
+- ✅ Update documentation as needed
+- ✅ Ensure all tests pass before submitting PR
+
+### Development Workflow
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Run type checking
+npm run type-check
+
+# Build for production
+npm run build
+```
+
+---
 
 ## 📜 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+```
+MIT License - Copyright (c) 2025 Tirthankar Dasgupta
+```
+
+---
 
 ## 📬 Contact
 
-Tirthankar Dasgupta - [@MrTG1B]
-(https://github.com/MrTG1B)
+<div align="center">
 
-Project Link: [https://github.com/MrTG1B/ResuAI](https://github.com/MrTG1B/ResuAI)
+**Tirthankar Dasgupta**
+
+[![GitHub](https://img.shields.io/badge/GitHub-MrTG1B-181717?style=for-the-badge&logo=github)](https://github.com/MrTG1B)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/tirthankardasgupta)
+[![Email](https://img.shields.io/badge/Email-Contact-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:tirthankardasgupta913913@gmail.com)
+
+**Project Link**: [https://github.com/MrTG1B/ResuAI](https://github.com/MrTG1B/ResuAI)
+
+**Live Demo**: [https://resuu-ai.vercel.app](https://resuu-ai.vercel.app)
+
+</div>
+
+---
+
+<div align="center">
+
+### ⭐ Star this repository if you find it helpful!
+
+**Made with ❤️ by [Tirthankar Dasgupta](https://github.com/MrTG1B)**
+
+</div>
