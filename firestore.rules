@@ -14,6 +14,14 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
+    // Helper function to check if user is admin
+    // Replace with your actual admin UID from Firebase Console
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == request.auth.token.get('email', '');
+      // For production, use: request.auth.uid == 'YOUR_ADMIN_UID_HERE'
+      // Or implement custom claims with Firebase Admin SDK
+    }
+    
     // Helper function to validate data size (prevent abuse)
     function isValidSize() {
       return request.resource.size() < 1048576; // 1MB limit
@@ -25,9 +33,16 @@ service cloud.firestore {
     }
     
     // Allow users to read and write their own data under the /users/{userId} path
+    // Allow admin to read all user data
     match /users/{userId}/{document=**} {
-      allow read: if isOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
       allow write: if isOwner(userId) && isValidSize();
+    }
+    
+    // Admin settings - only admin can write, user can read their own
+    match /users/{userId}/admin/{document=**} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
     }
     
     // Allow authenticated users to create feedback, anyone to read
