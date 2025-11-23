@@ -61,10 +61,17 @@
 
 <div align="center">
 <a href="https://resuu-ai.vercel.app">
-<img src="https://image.thum.io/get/width/1200/crop/630/https://resuu-ai.vercel.app/" alt="ResuAI Live Preview" width="90%" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/previews/modern.png" />
+  <img src="public/previews/creative.png" alt="ResuAI Application Screenshot" width="85%" />
+</picture>
 </a>
 
+<br/>
+
 ### [🚀 **Try ResuAI Live Demo**](https://resuu-ai.vercel.app)
+
+<sub><i>If the live preview image does not load, click above to view the deployed application. Static screenshots are used instead of an external thumbnail service for reliability.</i></sub>
 
 </div>
 
@@ -374,7 +381,7 @@ MIT License - Copyright (c) 2025 Tirthankar Dasgupta
 **Tirthankar Dasgupta**
 
 [![GitHub](https://img.shields.io/badge/GitHub-MrTG1B-181717?style=for-the-badge&logo=github)](https://github.com/MrTG1B)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/tirthankardasgupta)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/tirthankardasguptaprofile)
 [![Email](https://img.shields.io/badge/Email-Contact-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:tirthankardasgupta913913@gmail.com)
 
 **Project Link**: [https://github.com/MrTG1B/ResuAI](https://github.com/MrTG1B/ResuAI)
