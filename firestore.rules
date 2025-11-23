@@ -17,9 +17,7 @@ service cloud.firestore {
     // Helper function to check if user is admin
     // Replace with your actual admin UID from Firebase Console
     function isAdmin() {
-      return isAuthenticated() && request.auth.token.email == request.auth.token.get('email', '');
-      // For production, use: request.auth.uid == 'YOUR_ADMIN_UID_HERE'
-      // Or implement custom claims with Firebase Admin SDK
+  return isAuthenticated() && request.auth.uid == '2wnVOKn2JuhExnxpXLfrBHSFwJo1';
     }
     
     // Helper function to validate data size (prevent abuse)
