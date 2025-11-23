@@ -35,6 +35,15 @@ const StatCard = ({ title, value, icon: Icon, trend }: { title: string; value: s
   </Card>
 );
 
+// Helper function to detect permission issues based on data patterns
+const hasPermissionIssue = (analytics: AnalyticsData): boolean => {
+  return analytics.totalUsers > 0 && 
+         analytics.totalResumes === 0 && 
+         analytics.totalPortfolios === 0 && 
+         analytics.totalCoverLetters === 0 && 
+         analytics.totalFeedbacks > 0;
+};
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -221,7 +230,7 @@ export default function AdminDashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight font-heading">Admin Dashboard</h1>
         </div>
         
-        {analytics.totalUsers > 0 && analytics.totalResumes === 0 && analytics.totalPortfolios === 0 && analytics.totalCoverLetters === 0 && analytics.totalFeedbacks > 0 && (
+        {hasPermissionIssue(analytics) && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Permission Issue Detected</AlertTitle>
