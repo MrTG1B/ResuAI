@@ -64,7 +64,6 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
 
         const userMessage = { role: 'user' as const, content: input };
         const newMessages = [...messages, userMessage];
-        setEditorState({ ...editorState, chatHistory: newMessages });
 
         const currentInput = input;
         const currentAttachments = attachments;
@@ -72,6 +71,9 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
         setInput('');
         setAttachments([]);
         setIsLoading(true);
+        
+        // Update chat history with user message AFTER clearing input and attachments
+        setEditorState({ ...editorState, chatHistory: newMessages });
         
         // Add timeout wrapper
         const timeoutPromise = new Promise((_, reject) => {
@@ -82,7 +84,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             const resultPromise = editResumeAction({
                 htmlContent: editorState.htmlContent,
                 prompt: currentInput,
-                history: editorState.chatHistory,
+                history: messages, // Use original messages, not newMessages
                 userProfile: userProfile as any,
                 attachments: currentAttachments.map(a => ({ dataUri: a.dataUri, mimeType: a.mimeType }))
             });
@@ -97,12 +99,18 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                     chatHistory: finalMessages,
                 });
             } else {
+                // Keep the user message visible even on error
+                const errorResponse = { role: 'assistant' as const, content: `❌ ${result.error || "An unexpected error occurred. Please try again."}` };
+                const messagesWithError = [...newMessages, errorResponse];
+                setEditorState({ 
+                    ...editorState, 
+                    chatHistory: messagesWithError 
+                });
                 toast({ 
                     title: "Request Failed", 
                     description: result.error || "An unexpected error occurred", 
                     variant: "destructive" 
                 });
-                setEditorState({ ...editorState, chatHistory: messages }); // revert on error
             }
         } catch (error: any) {
             console.error('Chat panel error:', error);
@@ -114,12 +122,19 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                 errorMessage = "Network error. Please check your internet connection and try again.";
             }
             
+            // Keep the user message visible even on error
+            const errorResponse = { role: 'assistant' as const, content: `❌ ${errorMessage}` };
+            const messagesWithError = [...newMessages, errorResponse];
+            setEditorState({ 
+                ...editorState, 
+                chatHistory: messagesWithError 
+            });
+            
             toast({ 
                 title: "Request Failed", 
                 description: errorMessage, 
                 variant: "destructive" 
             });
-            setEditorState({ ...editorState, chatHistory: messages }); // revert on error
         } finally {
             setIsLoading(false);
         }
