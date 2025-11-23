@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminHeader } from '@/components/admin/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen, Activity, TrendingUp } from 'lucide-react';
+import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen, Activity, TrendingUp, AlertCircle } from 'lucide-react';
 import { AdminUser } from '@/types/admin/user';
 import { AdminFeedback } from '@/types/admin/feedback';
 import { AnalyticsData } from '@/types/admin/analytics';
@@ -12,6 +12,7 @@ import { AdminUserTable } from '@/components/admin/user-table';
 import { AdminFeedbackTable } from '@/components/admin/feedback-table';
 import { AnalyticsCharts } from '@/components/admin/analytics-charts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { db, auth, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns';
@@ -219,6 +220,18 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight font-heading">Admin Dashboard</h1>
         </div>
+        
+        {analytics.totalUsers > 0 && analytics.totalResumes === 0 && analytics.totalPortfolios === 0 && analytics.totalCoverLetters === 0 && analytics.totalFeedbacks > 0 && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Permission Issue Detected</AlertTitle>
+            <AlertDescription>
+              You can see feedback but not user data. This indicates a Firestore permission issue. 
+              Check the browser console for your UID and update the isAdmin() function in firestore.rules. 
+              See <code className="text-xs">docs/ADMIN_SETUP.md</code> for setup instructions.
+            </AlertDescription>
+          </Alert>
+        )}
         
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
           <StatCard 

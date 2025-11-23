@@ -65,9 +65,22 @@ export default function LoginPage() {
         await signInWithPopup(auth, provider);
         router.push("/dashboard");
     } catch (error: any) {
+        console.error("Google sign-in error:", error);
+        let errorMessage = "Could not sign in with Google. Please try again.";
+        
+        if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = "Sign-in was cancelled. Please try again.";
+        } else if (error.code === 'auth/popup-blocked') {
+          errorMessage = "Pop-up was blocked by your browser. Please allow pop-ups and try again.";
+        } else if (error.code === 'auth/unauthorized-domain') {
+          errorMessage = "This domain is not authorized for Google sign-in. Contact the administrator.";
+        } else if (error.code === 'auth/operation-not-allowed') {
+          errorMessage = "Google sign-in is not enabled. Please contact the administrator.";
+        }
+        
         toast({
             title: "Google Sign-In Failed",
-            description: "Could not sign in with Google. Please try again.",
+            description: errorMessage,
             variant: "destructive",
         });
     } finally {
