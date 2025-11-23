@@ -74,11 +74,13 @@ export function AnalyzerChatPanel({ initialAnalysis, resumeDataUri, jobDescripti
                 setMessages(prev => [...prev, { role: 'assistant', content: result.data.response }]);
             } else {
                 toast({ title: "Error", description: result.error, variant: "destructive" });
-                setMessages(messages); // revert on error
+                // Keep the user message visible even on error
+                setMessages(prev => [...prev, { role: 'assistant', content: `❌ ${result.error || "An error occurred"}` }]);
             }
         } catch (error: any) {
             toast({ title: "Request Failed", description: "Could not communicate with the AI. Please try again.", variant: "destructive" });
-            setMessages(messages); // revert on error
+            // Keep the user message visible even on error
+            setMessages(prev => [...prev, { role: 'assistant', content: '❌ Could not communicate with the AI. Please try again.' }]);
         } finally {
             setIsLoading(false);
         }

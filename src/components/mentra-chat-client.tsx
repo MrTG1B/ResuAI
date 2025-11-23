@@ -202,7 +202,8 @@ function MentraChatPage() {
 
     } catch (error: any) {
         toast({ title: "Request Failed", description: error.message, variant: "destructive" });
-        setMessages(messages); // Revert on error
+        // Keep the user message visible even on error
+        setMessages(prev => [...prev, { role: 'assistant', content: `❌ ${error.message || "Could not communicate with the AI. Please try again."}` }]);
     } finally {
         setIsResponding(false);
     }
