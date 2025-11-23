@@ -277,7 +277,36 @@ NEXT_PUBLIC_IMGBB_API_KEY=your_imgbb_api_key
 
 </details>
 
-#### 4. Run Development Server
+#### 4. Set Up Firebase Authentication
+
+To enable user authentication with Google Sign-In:
+
+```bash
+# Follow the detailed setup guide
+📖 See docs/GOOGLE_SIGNIN_SETUP.md for step-by-step instructions
+```
+
+**Quick steps:**
+1. Enable Google Sign-In provider in Firebase Console
+2. Add authorized domains (including `localhost` for development)
+3. Verify Firebase config in `.env` file
+
+#### 5. Configure Admin Dashboard (Optional)
+
+If you need admin access:
+
+```bash
+# Follow the admin setup guide
+📖 See docs/ADMIN_SETUP.md for configuration instructions
+```
+
+**Quick steps:**
+1. Get your admin UID from Firebase Console
+2. Update `isAdmin()` function in `firestore.rules`
+3. Deploy Firestore rules: `firebase deploy --only firestore:rules`
+4. Set `NEXT_PUBLIC_ADMIN_EMAIL` in `.env`
+
+#### 6. Run Development Server
 
 ```bash
 npm run dev
@@ -314,6 +343,11 @@ ResuAI is built with **enterprise-grade security** as a top priority:
 - 📖 [**Security Guidelines**](docs/SECURITY.md) - Comprehensive security measures and best practices
 - 🔧 [**Security Fixes**](docs/SECURITY_FIXES.md) - Detailed security improvements implemented
 - 📊 [**Security Summary**](docs/SECURITY_FIXES_SUMMARY.md) - Quick overview of security enhancements
+
+### Setup & Configuration Guides
+
+- 🔐 [**Google Sign-In Setup**](docs/GOOGLE_SIGNIN_SETUP.md) - Enable Google authentication for users
+- 👨‍💼 [**Admin Dashboard Setup**](docs/ADMIN_SETUP.md) - Configure admin access and Firestore rules
 
 ### Reporting Security Issues
 
