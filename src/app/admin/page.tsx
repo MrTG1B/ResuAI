@@ -12,7 +12,7 @@ import { AdminUserTable } from '@/components/admin/user-table';
 import { AdminFeedbackTable } from '@/components/admin/feedback-table';
 import { AnalyticsCharts } from '@/components/admin/analytics-charts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
+import { db, auth, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns';
 
@@ -55,6 +55,12 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     if (!db) {
       toast({ title: "Firestore Error", description: "Firestore is not initialized.", variant: "destructive" });
+      setIsLoading(false);
+      return;
+    }
+    
+    if (!auth?.currentUser) {
+      toast({ title: "Authentication Error", description: "You must be logged in to view admin data.", variant: "destructive" });
       setIsLoading(false);
       return;
     }
@@ -114,6 +120,10 @@ export default function AdminDashboardPage() {
 
         } catch (error) {
           console.error(`Failed to fetch details for user ${user.id}`, error);
+          // If this is a permission error, it might indicate admin UID mismatch
+          if (error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied') {
+            console.warn('Permission denied - check if your UID matches the admin UID in firestore.rules');
+          }
         }
         return user;
       }));
@@ -164,9 +174,19 @@ export default function AdminDashboardPage() {
 
     } catch (error: any) {
       console.error("Failed to fetch admin data:", error);
+      let errorMessage = "Failed to load admin data. Please check your permissions.";
+      
+      // Check for permission-denied error
+      if (error && error.code === 'permission-denied') {
+        errorMessage = "Permission denied. Your UID may not match the admin UID in Firestore rules. Check the console for your current UID.";
+        console.log("Current user UID:", auth?.currentUser?.uid);
+        console.log("Current user email:", auth?.currentUser?.email);
+        console.log("Update the isAdmin() function in firestore.rules with your UID");
+      }
+      
       toast({
         title: "Data Fetch Error",
-        description: "Failed to load admin data. Please check your permissions.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
