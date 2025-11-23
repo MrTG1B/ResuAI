@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { GoogleIcon } from "@/components/icons/google-icon";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   
   // Admin email from environment variable - must be set in production
   const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -77,6 +79,65 @@ export default function AdminLoginPage() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    if (!auth) {
+      toast({ title: "Configuration Error", description: "Firebase is not configured.", variant: "destructive" });
+      return;
+    }
+    
+    if (!ADMIN_EMAIL) {
+      toast({ 
+        title: "Configuration Error", 
+        description: "Admin email not configured. Set NEXT_PUBLIC_ADMIN_EMAIL in environment.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    setIsGoogleLoading(true);
+    const provider = new GoogleAuthProvider();
+    
+    try {
+      const userCredential = await signInWithPopup(auth, provider);
+      
+      // Check if the user is the admin
+      if (userCredential.user.email !== ADMIN_EMAIL) {
+        await auth.signOut();
+        toast({
+          title: "Access Denied",
+          description: "You do not have admin privileges.",
+          variant: "destructive",
+        });
+        setIsGoogleLoading(false);
+        return;
+      }
+
+      sessionStorage.setItem("admin-auth", "true");
+      router.push("/admin");
+    } catch (error: any) {
+      console.error("Google sign-in error:", error);
+      let errorMessage = "Could not sign in with Google. Please try again.";
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = "Sign-in was cancelled. Please try again.";
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = "Pop-up was blocked by your browser. Please allow pop-ups and try again.";
+      } else if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = "This domain is not authorized for Google sign-in. Contact the administrator.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = "Google sign-in is not enabled. Please contact the administrator.";
+      }
+      
+      toast({
+        title: "Google Sign-In Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen items-center justify-center p-4 bg-gradient-to-br from-background to-muted">
       <div className="absolute top-8">
@@ -113,11 +174,25 @@ export default function AdminLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Login
             </Button>
           </form>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading || isGoogleLoading}>
+            {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+            Sign in with Google
+          </Button>
         </CardContent>
       </Card>
     </div>

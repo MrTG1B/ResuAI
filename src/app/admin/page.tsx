@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminHeader } from '@/components/admin/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen, Activity, TrendingUp } from 'lucide-react';
+import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen, Activity, TrendingUp, AlertCircle } from 'lucide-react';
 import { AdminUser } from '@/types/admin/user';
 import { AdminFeedback } from '@/types/admin/feedback';
 import { AnalyticsData } from '@/types/admin/analytics';
@@ -12,7 +12,8 @@ import { AdminUserTable } from '@/components/admin/user-table';
 import { AdminFeedbackTable } from '@/components/admin/feedback-table';
 import { AnalyticsCharts } from '@/components/admin/analytics-charts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { db, auth, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns';
 
@@ -33,6 +34,15 @@ const StatCard = ({ title, value, icon: Icon, trend }: { title: string; value: s
     </CardContent>
   </Card>
 );
+
+// Helper function to detect permission issues based on data patterns
+const hasPermissionIssue = (analytics: AnalyticsData): boolean => {
+  return analytics.totalUsers > 0 && 
+         analytics.totalResumes === 0 && 
+         analytics.totalPortfolios === 0 && 
+         analytics.totalCoverLetters === 0 && 
+         analytics.totalFeedbacks > 0;
+};
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -55,6 +65,12 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     if (!db) {
       toast({ title: "Firestore Error", description: "Firestore is not initialized.", variant: "destructive" });
+      setIsLoading(false);
+      return;
+    }
+    
+    if (!auth?.currentUser) {
+      toast({ title: "Authentication Error", description: "You must be logged in to view admin data.", variant: "destructive" });
       setIsLoading(false);
       return;
     }
@@ -114,6 +130,10 @@ export default function AdminDashboardPage() {
 
         } catch (error) {
           console.error(`Failed to fetch details for user ${user.id}`, error);
+          // If this is a permission error, it might indicate admin UID mismatch
+          if (error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied') {
+            console.warn('Permission denied - check if your UID matches the admin UID in firestore.rules');
+          }
         }
         return user;
       }));
@@ -164,9 +184,19 @@ export default function AdminDashboardPage() {
 
     } catch (error: any) {
       console.error("Failed to fetch admin data:", error);
+      let errorMessage = "Failed to load admin data. Please check your permissions.";
+      
+      // Check for permission-denied error
+      if (error && error.code === 'permission-denied') {
+        errorMessage = "Permission denied. Your UID may not match the admin UID in Firestore rules. Check the console for your current UID.";
+        console.log("Current user UID:", auth?.currentUser?.uid);
+        console.log("Current user email:", auth?.currentUser?.email);
+        console.log("Update the isAdmin() function in firestore.rules with your UID");
+      }
+      
       toast({
         title: "Data Fetch Error",
-        description: "Failed to load admin data. Please check your permissions.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -199,6 +229,18 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight font-heading">Admin Dashboard</h1>
         </div>
+        
+        {hasPermissionIssue(analytics) && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Permission Issue Detected</AlertTitle>
+            <AlertDescription>
+              You can see feedback but not user data. This indicates a Firestore permission issue. 
+              Check the browser console for your UID and update the isAdmin() function in firestore.rules. 
+              See <code className="text-xs">docs/ADMIN_SETUP.md</code> for setup instructions.
+            </AlertDescription>
+          </Alert>
+        )}
         
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
           <StatCard 
