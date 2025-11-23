@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -37,34 +37,38 @@ export function ToolAccessDialog({ userId, userName, isOpen, onClose, onUpdated 
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [disabledTools, setDisabledTools] = useState<string[]>([]);
-  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
-  const loadUserSettings = async () => {
-    if (!db || !isOpen || initialLoadDone) return;
+  useEffect(() => {
+    if (!isOpen) return;
     
-    setLoading(true);
-    try {
-      const settingsRef = doc(db, 'users', userId, 'admin', 'settings');
-      const settingsSnap = await getDoc(settingsRef);
+    const loadUserSettings = async () => {
+      if (!db) return;
       
-      if (settingsSnap.exists()) {
-        const data = settingsSnap.data();
-        setDisabledTools(data.disabledTools || []);
-      } else {
-        setDisabledTools([]);
+      setLoading(true);
+      try {
+        const settingsRef = doc(db, 'users', userId, 'admin', 'settings');
+        const settingsSnap = await getDoc(settingsRef);
+        
+        if (settingsSnap.exists()) {
+          const data = settingsSnap.data();
+          setDisabledTools(data.disabledTools || []);
+        } else {
+          setDisabledTools([]);
+        }
+      } catch (error) {
+        console.error("Error loading user settings:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load user settings.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
-      setInitialLoadDone(true);
-    } catch (error) {
-      console.error("Error loading user settings:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load user settings.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    loadUserSettings();
+  }, [isOpen, userId, db, toast]);
 
   const handleToolToggle = (toolId: string) => {
     setDisabledTools(prev => 
@@ -106,16 +110,6 @@ export function ToolAccessDialog({ userId, userName, isOpen, onClose, onUpdated 
     }
   };
 
-  // Load settings when dialog opens
-  if (isOpen && !initialLoadDone) {
-    loadUserSettings();
-  }
-
-  // Reset when dialog closes
-  if (!isOpen && initialLoadDone) {
-    setInitialLoadDone(false);
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
@@ -126,7 +120,7 @@ export function ToolAccessDialog({ userId, userName, isOpen, onClose, onUpdated 
           </DialogDescription>
         </DialogHeader>
         
-        {loading && !initialLoadDone ? (
+        {loading ? (
           <div className="flex justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>

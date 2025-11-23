@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
             title="Active Users" 
             value={analytics.activeUsers} 
             icon={Activity}
-            trend={`${Math.round((analytics.activeUsers / analytics.totalUsers) * 100)}% of total`}
+            trend={analytics.totalUsers > 0 ? `${Math.round((analytics.activeUsers / analytics.totalUsers) * 100)}% of total` : '0% of total'}
           />
           <StatCard title="Total Resumes" value={analytics.totalResumes} icon={FileText} />
           <StatCard title="Total Portfolios" value={analytics.totalPortfolios} icon={LayoutTemplate} />

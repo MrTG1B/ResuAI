@@ -19,12 +19,22 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  // Admin credentials - in production, this should be handled server-side
-  const ADMIN_EMAIL = "tirthankardasgupta2004@gmail.com";
+  // Admin email from environment variable - must be set in production
+  const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (!ADMIN_EMAIL) {
+      toast({ 
+        title: "Configuration Error", 
+        description: "Admin email not configured. Set NEXT_PUBLIC_ADMIN_EMAIL in environment.", 
+        variant: "destructive" 
+      });
+      setIsLoading(false);
+      return;
+    }
 
     if (!auth) {
       toast({ title: "Configuration Error", description: "Firebase is not configured.", variant: "destructive" });
