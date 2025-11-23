@@ -73,7 +73,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
         setIsLoading(true);
         
         // Update chat history with user message AFTER clearing input and attachments
-        setEditorState({ ...editorState, chatHistory: newMessages });
+        setEditorState((prevState) => ({ ...prevState, chatHistory: newMessages }));
         
         // Add timeout wrapper
         const timeoutPromise = new Promise((_, reject) => {
@@ -93,19 +93,19 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             
             if (result.success && result.data) {
                 const finalMessages = [...newMessages, { role: 'assistant' as const, content: result.data.response }];
-                setEditorState({ 
-                    ...editorState, 
+                setEditorState((prevState) => ({ 
+                    ...prevState, 
                     htmlContent: result.data.newHtmlContent,
                     chatHistory: finalMessages,
-                });
+                }));
             } else {
                 // Keep the user message visible even on error
                 const errorResponse = { role: 'assistant' as const, content: `❌ ${result.error || "An unexpected error occurred. Please try again."}` };
                 const messagesWithError = [...newMessages, errorResponse];
-                setEditorState({ 
-                    ...editorState, 
+                setEditorState((prevState) => ({ 
+                    ...prevState, 
                     chatHistory: messagesWithError 
-                });
+                }));
                 toast({ 
                     title: "Request Failed", 
                     description: result.error || "An unexpected error occurred", 
@@ -125,10 +125,10 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             // Keep the user message visible even on error
             const errorResponse = { role: 'assistant' as const, content: `❌ ${errorMessage}` };
             const messagesWithError = [...newMessages, errorResponse];
-            setEditorState({ 
-                ...editorState, 
+            setEditorState((prevState) => ({ 
+                ...prevState, 
                 chatHistory: messagesWithError 
-            });
+            }));
             
             toast({ 
                 title: "Request Failed", 
