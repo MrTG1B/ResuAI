@@ -35,6 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { db, doc, updateDoc } from '@/lib/firebase';
+import { ToolAccessDialog } from './tool-access-dialog';
 
 interface UserTableProps {
   users: AdminUser[];
@@ -44,6 +45,7 @@ interface UserTableProps {
 export function AdminUserTable({ users, onUserUpdated }: UserTableProps) {
   const { toast } = useToast();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [toolAccessDialog, setToolAccessDialog] = useState<{ userId: string; userName: string } | null>(null);
 
   const handleDeleteUser = async (userId: string) => {
     toast({ 
@@ -135,6 +137,12 @@ export function AdminUserTable({ users, onUserUpdated }: UserTableProps) {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
+                        onClick={() => setToolAccessDialog({ userId: user.id, userName: user.name })}
+                      >
+                        <Settings className="mr-2 h-4 w-4" />
+                        Manage tool access
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         onClick={() => handleBlockUser(user.id, user.isBlocked || false)}
                         disabled={actionLoading === user.id}
                       >
@@ -185,6 +193,15 @@ export function AdminUserTable({ users, onUserUpdated }: UserTableProps) {
           </div>
         )}
       </CardContent>
+      {toolAccessDialog && (
+        <ToolAccessDialog
+          userId={toolAccessDialog.userId}
+          userName={toolAccessDialog.userName}
+          isOpen={true}
+          onClose={() => setToolAccessDialog(null)}
+          onUpdated={onUserUpdated}
+        />
+      )}
     </Card>
   );
 }
