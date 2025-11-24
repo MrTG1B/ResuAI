@@ -1,4 +1,3 @@
-
 rules_version = '2';
 
 service cloud.firestore {
@@ -17,7 +16,7 @@ service cloud.firestore {
     // Helper function to check if user is admin
     // Replace with your actual admin UID from Firebase Console
     function isAdmin() {
-  return isAuthenticated() && request.auth.uid == '2wnVOKn2JuhExnxpXLfrBHSFwJo1';
+      return isAuthenticated() && request.auth.uid == '2wnVOKn2JuhExnxpXLfrBHSFwJo1';
     }
     
     // Helper function to validate data size (prevent abuse)
@@ -36,24 +35,27 @@ service cloud.firestore {
       allow read: if isOwner(userId) || isAdmin();
       allow write: if isOwner(userId) && isValidSize();
       
+      // Allow admin to write admin settings
+      allow update: if isAdmin();
+      
       // Allow access to all subcollections
-      match /{document=**} {
+      match /{subcollection}/{document} {
         allow read: if isOwner(userId) || isAdmin();
         allow write: if isOwner(userId) && isValidSize();
-      }
-      
-      // Admin settings - only admin can write, user can read their own
-      match /admin/{document=**} {
-        allow read: if isOwner(userId) || isAdmin();
-        allow write: if isAdmin();
+        
+        // For nested subcollections
+        match /{nestedDocument=**} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow write: if isOwner(userId) && isValidSize();
+        }
       }
     }
     
-    // Allow authenticated users to create feedback, anyone to read
+    // Allow authenticated users to create feedback, admin and anyone to read
     match /feedback/{feedbackId} {
       allow read: if true;
       allow create: if isAuthenticated() && isValidSize();
-      allow update, delete: if false; // Feedback cannot be updated or deleted
+      allow update, delete: if isAdmin(); // Only admin can update/delete
     }
     
     // Allow public read access to portfolios (public portfolios feature)
