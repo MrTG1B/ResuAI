@@ -52,6 +52,12 @@ export default function LoginPage() {
     }
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
+    
+    // Configure the provider for better user experience
+    provider.setCustomParameters({
+      prompt: 'select_account' // Always show account selection
+    });
+    
     try {
         await signInWithPopup(auth, provider);
         router.push("/dashboard");
@@ -67,6 +73,10 @@ export default function LoginPage() {
           errorMessage = "This domain is not authorized for Google sign-in. Contact the administrator.";
         } else if (error.code === 'auth/operation-not-allowed') {
           errorMessage = "Google sign-in is not enabled. Please contact the administrator.";
+        } else if (error.code === 'auth/account-exists-with-different-credential') {
+          errorMessage = "An account already exists with the same email address. Please sign in using your email and password.";
+        } else if (error.code === 'auth/cancelled-popup-request') {
+          errorMessage = "Only one popup request is allowed at a time.";
         }
         
         toast({

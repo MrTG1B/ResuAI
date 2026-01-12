@@ -108,7 +108,27 @@ You can find these values in:
 - This happens when you close the Google Sign-In popup
 - Simply try again and complete the sign-in process
 
-### Issue 5: CORS errors or redirect issues
+### Issue 5: "An account already exists with the same email address"
+
+**Error code:** `auth/account-exists-with-different-credential`
+
+**Solution:**
+- You already have an account with this email using a different sign-in method
+- If you created an account with email/password, use that method to sign in
+- If you want to link accounts, sign in with your original method first
+- Contact support if you need help linking accounts
+
+### Issue 6: "Only one popup request is allowed at a time"
+
+**Error code:** `auth/cancelled-popup-request`
+
+**Solution:**
+- This occurs when you click the Google Sign-In button multiple times quickly
+- Wait for the first popup to complete or close it
+- Click the button once and wait for the popup to appear
+- If stuck, refresh the page and try again
+
+### Issue 7: CORS errors or redirect issues
 
 **Solution:**
 1. Verify all domains in Authorized domains list
@@ -153,6 +173,23 @@ The Google Sign-In functionality is already implemented in:
 - **Admin Login Page:** `/src/app/admin/login/page.tsx`
 
 All pages use `signInWithPopup` from Firebase Auth with proper error handling.
+
+### Recent Improvements (Latest Update)
+
+The Google Sign-In implementation has been enhanced with:
+
+1. **Better User Experience:**
+   - Added `prompt: 'select_account'` parameter to always show account selection screen
+   - This prevents automatic sign-in and gives users control over which account to use
+
+2. **Enhanced Error Handling:**
+   - Added handling for `auth/account-exists-with-different-credential` error
+   - Added handling for `auth/cancelled-popup-request` error (multiple popup attempts)
+   - Improved error messages for better user guidance
+
+3. **Consistent Implementation:**
+   - All three authentication pages (login, signup, admin) have the same configuration
+   - Uniform error handling across all pages
 
 ## Security Considerations
 
