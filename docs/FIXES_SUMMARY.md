@@ -5,7 +5,7 @@ This document summarizes the changes made to fix Google Sign-In and Admin Dashbo
 ## Issues Fixed
 
 ### 1. ✅ Google Sign-In Implementation
-**Status:** Already implemented, documentation added
+**Status:** Implemented and Enhanced (Latest Update)
 
 **What was already working:**
 - Google Sign-In code is already implemented in all authentication pages:
@@ -13,7 +13,24 @@ This document summarizes the changes made to fix Google Sign-In and Admin Dashbo
   - `/src/app/signup/page.tsx` - User signup with Google
   - `/src/app/admin/login/page.tsx` - Admin login with Google
 
-**What needed configuration:**
+**What was improved (Latest Update):**
+1. **Enhanced GoogleAuthProvider Configuration:**
+   - Added `prompt: 'select_account'` parameter to force account selection
+   - Prevents automatic sign-in and gives users control over account choice
+   - Improves security by ensuring users consciously select their account
+
+2. **Better Error Handling:**
+   - Added handling for `auth/account-exists-with-different-credential` error
+   - Added handling for `auth/cancelled-popup-request` error
+   - Improved user-facing error messages for better troubleshooting
+   - All error codes now have clear, actionable messages
+
+3. **Consistent Implementation:**
+   - Applied same configuration across all three authentication pages
+   - Uniform error handling ensures consistent user experience
+   - Code maintainability improved with standardized patterns
+
+**What may still need configuration:**
 - Firebase Console setup (enable Google provider)
 - Add authorized domains
 - Verify Firebase configuration
@@ -23,8 +40,9 @@ This document summarizes the changes made to fix Google Sign-In and Admin Dashbo
 - Guide includes step-by-step instructions for:
   - Enabling Google Sign-In in Firebase Console
   - Adding authorized domains
-  - Troubleshooting common issues
+  - Troubleshooting common issues (now includes new error codes)
   - Testing checklist
+  - Recent improvements documentation
 
 ### 2. ✅ Admin Dashboard Firestore Rules
 **Status:** Fixed
@@ -81,13 +99,49 @@ match /users/{userId} {
 
 ## Files Changed
 
-### 1. `/firestore.rules`
+### Latest Update (Google Sign-In Enhancement)
+
+#### 1. `/src/app/login/page.tsx`
+**Changes:**
+- Added `prompt: 'select_account'` to GoogleAuthProvider configuration
+- Added error handling for `auth/account-exists-with-different-credential`
+- Added error handling for `auth/cancelled-popup-request`
+- Improved error messages for better user guidance
+
+#### 2. `/src/app/signup/page.tsx`
+**Changes:**
+- Added `prompt: 'select_account'` to GoogleAuthProvider configuration
+- Added error handling for `auth/account-exists-with-different-credential`
+- Added error handling for `auth/cancelled-popup-request`
+- Improved error messages for better user guidance
+
+#### 3. `/src/app/admin/login/page.tsx`
+**Changes:**
+- Added `prompt: 'select_account'` to GoogleAuthProvider configuration
+- Added error handling for `auth/account-exists-with-different-credential`
+- Added error handling for `auth/cancelled-popup-request`
+- Improved error messages for better user guidance
+
+#### 4. `/docs/GOOGLE_SIGNIN_SETUP.md`
+**Changes:**
+- Added "Recent Improvements" section documenting latest enhancements
+- Added troubleshooting for new error codes
+- Updated with information about account selection prompt
+
+#### 5. `/docs/FIXES_SUMMARY.md`
+**Changes:**
+- Updated Google Sign-In section with latest improvements
+- Documented all code changes and their benefits
+
+### Previous Changes
+
+#### 1. `/firestore.rules`
 **Changes:**
 - Restructured user data rules with proper nesting
 - Fixed admin access to user subcollections
 - Maintained all existing security features
 
-### 2. `/docs/GOOGLE_SIGNIN_SETUP.md` (NEW)
+#### 2. `/docs/GOOGLE_SIGNIN_SETUP.md` (ORIGINAL)
 **Purpose:** Complete guide for setting up Google Sign-In
 
 **Contents:**
@@ -151,10 +205,14 @@ match /users/{userId} {
 
 After applying these fixes, verify:
 
-### Google Sign-In:
+### Google Sign-In (Enhanced):
 - [ ] Google Sign-In works on login page (`/login`)
 - [ ] Google Sign-In works on signup page (`/signup`)
 - [ ] Google Sign-In works on admin login page (`/admin/login`)
+- [ ] Account selection screen appears (not auto-sign-in)
+- [ ] Error messages are clear and actionable
+- [ ] Multiple rapid clicks don't cause crashes
+- [ ] Account linking errors are handled gracefully
 - [ ] No browser console errors related to authentication
 - [ ] User is properly redirected after sign-in
 
