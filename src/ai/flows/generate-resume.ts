@@ -90,7 +90,7 @@ export async function generateResumeFromProfile(
 
 const generateResumePrompt = ai.definePrompt({
     name: 'generateResumeFromProfilePrompt',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-2.5-flash',
     input: { schema: GenerateResumeInputSchema },
     output: { schema: GenerateResumeOutputSchema },
     system: `You are an expert resume writer and designer. Your task is to generate a single-page, professional, industry-standard, ATS-friendly resume in HTML format using the user's profile data provided below.
