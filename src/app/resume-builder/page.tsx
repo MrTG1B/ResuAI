@@ -65,7 +65,7 @@ export default function ResumeBuilderPage() {
               AI-Powered Resume Builder
             </h1>
             <p className="mt-2 text-lg text-muted-foreground">
-              Choose how you want to create your professional, job-winning resume.
+              Let AI create a professional, ATS-friendly resume for you in seconds.
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
@@ -78,12 +78,12 @@ export default function ResumeBuilderPage() {
                 </div>
                 <CardTitle className="text-center text-2xl">Start from Scratch</CardTitle>
                 <CardDescription className="text-center">
-                  We'll use your profile data to create a new resume with a professional template.
+                  AI reads your profile data and instantly generates a complete, single-page professional resume. Refine it further using the chat assistant.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
                 <Button onClick={handleStartFromScratch}>
-                    Start from Scratch <ArrowRight className="ml-2 h-5 w-5" />
+                    Generate My Resume <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </CardContent>
             </Card>
@@ -96,12 +96,12 @@ export default function ResumeBuilderPage() {
                   </div>
                   <CardTitle className="text-center text-2xl">Upload Existing Resume</CardTitle>
                   <CardDescription className="text-center">
-                      Upload your current resume and let our AI help you refine and improve its content and formatting.
+                      Upload your current resume (PDF). AI extracts all content and regenerates it as a polished, ATS-optimized resume. Chat to make any further changes.
                   </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
                   <Button onClick={handleUploadResume}>
-                      Upload Resume <ArrowRight className="ml-2 h-5 w-5" />
+                      Upload &amp; Regenerate <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
               </CardContent>
             </Card>
