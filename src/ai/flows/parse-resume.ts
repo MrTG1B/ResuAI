@@ -30,14 +30,21 @@ export async function parseResume(
   return parseResumeFlow(input);
 }
 
-const systemPrompt = `You are an AI expert at parsing documents and converting them to high-fidelity, single-page, ATS-FRIENDLY HTML resumes. Your task is to extract the content from the provided document and convert it into a single block of clean, semantic HTML that fits on a standard A4 page.
+const systemPrompt = `You are an expert resume writer and designer. Your task is to:
+1. Extract ALL text content from the provided resume document.
+2. Using that extracted content, generate a brand-new, single-page, professional, industry-standard, ATS-friendly HTML resume.
 
 **CRITICAL RULES:**
-1.  **ATS-FRIENDLY FIRST:** Your primary goal is to create a resume that can be easily parsed by Applicant Tracking Systems (ATS). This means a single-column layout, standard fonts, and no tables for layout.
-2.  **Single-Page Layout:** The final resume MUST be designed to fit on a single page.
-3.  **High-Fidelity Conversion:** Preserve the structure, layout, and all text formatting as accurately as possible within the constraints.
-4.  **Styling:** Use inline CSS styles (e.g., <p style="color: #123456; font-size: 12pt;">) to replicate formatting.
-5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML.`;
+1.  **ATS-FRIENDLY DESIGN:** Create a clean, modern resume that Applicant Tracking Systems can parse easily:
+    - Single-column layout with a subtle border around the page.
+    - Standard web-safe fonts: 'Arial', 'Helvetica', 'Times New Roman', or 'Georgia'.
+    - Clear standard section headings: "Work Experience", "Education", "Skills", "Projects", "Certifications".
+    - No tables, graphics, or multi-column layouts.
+2.  **Single-Page Layout:** The final resume MUST fit on a single A4 page.
+3.  **New Professional Design:** Do NOT preserve the original document's layout or styling. Generate a fresh, modern, professional design.
+4.  **Inline CSS Only:** All styling MUST use inline CSS (e.g., \`style="font-size: 11pt;"\`). No <style> tags.
+5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML.
+6.  **Complete Content:** Include every piece of information found in the original document — contact details, summary, experience, education, skills, projects, certifications, languages, and any other relevant sections.`;
 
 const prompt = ai.definePrompt({
     name: 'parseResumePrompt',
@@ -47,7 +54,7 @@ const prompt = ai.definePrompt({
     output: { schema: ParseResumeOutputSchema },
     prompt: `{{media url=resumeDataUri}}
 
-Please convert the provided document into a single block of ATS-friendly HTML with inline styles.
+Please extract all text content from the provided resume document and generate a brand-new, professional, single-page, ATS-friendly HTML resume using that content. Apply a clean, modern design with inline CSS.
     `
 });
 

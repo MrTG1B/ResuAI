@@ -199,7 +199,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
                         {messages.length === 0 && (
                             <div className="flex items-end gap-2 justify-start">
                                 <div className="max-w-xs rounded-lg px-3 py-2 break-words bg-muted">
-                                    <p className="text-sm">Hello! I'm here to help you improve your resume. What changes would you like to make? You can also attach documents like certificates for context.</p>
+                                    <p className="text-sm">Hello! I'm your AI resume assistant. Your resume has been generated — ask me to make any changes you'd like, such as updating your summary, adding sections, changing the design, or tailoring it for a specific job role.</p>
                                 </div>
                             </div>
                         )}

@@ -5,6 +5,7 @@ import { analyzeResume as analyzeResumeFlow, AnalyzeResumeInput, type AnalyzeRes
 import { generateAvatar as generateAvatarFlow, GenerateAvatarInput } from "@/ai/flows/generate-avatar";
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
+import { generateResumeFromProfile, type GenerateResumeInput } from "@/ai/flows/generate-resume";
 import { atsAnalyzerFlow, type AtsAnalyzerInput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow, GenerateProjectImageInput } from "@/ai/flows/generate-project-image";
@@ -120,6 +121,16 @@ export async function parseResumeAction(input: ParseResumeInput): Promise<{ succ
   } catch (error) {
     console.error("Error parsing resume:", error);
     return { success: false, error: "Failed to parse resume. Please check the file format and try again." };
+  }
+}
+
+export async function generateResumeFromProfileAction(input: GenerateResumeInput): Promise<{ success: boolean; data?: ParsedResume; error?: string }> {
+  try {
+    const result = await generateResumeFromProfile(input);
+    return { success: true, data: { htmlContent: result.htmlContent } };
+  } catch (error) {
+    console.error("Error generating resume from profile:", error);
+    return { success: false, error: "Failed to generate resume. Please try again." };
   }
 }
 

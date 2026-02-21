@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, db, doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs } from '@/lib/firebase';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, UploadCloud, Download, Search, Briefcase } from 'lucide-react';
+import { Loader2, UploadCloud, Download, Search, Briefcase, Wand2 } from 'lucide-react';
 import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,14 +19,24 @@ import { cn } from '@/lib/utils';
 import { type PersonalInfo } from '@/types/portfolio';
 import { parseResumeAction } from "@/app/actions";
 import { editResumeAction } from "@/app/actions";
+import { generateResumeFromProfileAction } from "@/app/actions";
 import { analyzeResumeForPortfolioAction } from "@/app/actions";
 
 
 const parsingTexts = [
     "Reading your document...",
-    "Parsing structure and style...",
-    "Preparing the editor...",
-    "Just a moment...",
+    "Extracting all content...",
+    "Generating your new professional resume...",
+    "Applying ATS-friendly formatting...",
+    "Almost ready...",
+];
+
+const generatingFromProfileTexts = [
+    "Reading your profile data...",
+    "Crafting your professional resume...",
+    "Applying ATS-friendly formatting...",
+    "Polishing the final layout...",
+    "Almost ready...",
 ];
 
 const generatingPdfTexts = [
@@ -51,6 +61,7 @@ export default function ResumeEditorClient() {
     const [isLoading, setIsLoading] = useState(true);
     const [isAILoading, setIsAILoading] = useState(false);
     const [isParsing, setIsParsing] = useState(false);
+    const [isGeneratingFromProfile, setIsGeneratingFromProfile] = useState(false);
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [isConverting, setIsConverting] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -206,47 +217,32 @@ export default function ResumeEditorClient() {
                         router.push('/dashboard');
                     }
                 } else if (fromFlow === 'scratch') {
-                     setFlow('edit');
-                     
-                    const socialLinksHtml = (profileData.socials || [])
-                        .map((s: { platform: string; url: string; }) => `<span><a href="${s.url}" target="_blank" style="color: #007bff; text-decoration: none;">${s.platform}</a></span>`)
-                        .join(' | ');
-
-                    const initialHtml = `
-                      <div style="font-family: 'Roboto', sans-serif; color: #333; border: 1px solid #ddd; padding: 20mm;">
-                        <header style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
-                          <h1 style="font-size: 2.5em; margin: 0; color: #1a1a1a;">${profileData.name || '<!-- YOUR NAME HERE -->'}</h1>
-                          <p style="font-size: 1.2em; margin: 5px 0 0;">${profileData.title || '<!-- YOUR TITLE HERE -->'}</p>
-                        </header>
-                        <section style="margin-bottom: 20px;">
-                          <div style="display: flex; justify-content: center; gap: 20px; font-size: 0.9em; color: #555;">
-                            <span>${profileData.email || '<!-- email@example.com -->'}</span>
-                            <span>${profileData.phone || '<!-- (123) 456-7890 -->'}</span>
-                            <span>${profileData.location || '<!-- City, State -->'}</span>
-                          </div>
-                          <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.9em;">
-                            ${socialLinksHtml}
-                          </div>
-                        </section>
-                        <section>
-                          <h2 style="font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px;">Summary</h2>
-                          <p>${profileData.summary || '<!-- Add a professional summary here. You can ask the AI to write one for you based on your experience! -->'}</p>
-                        </section>
-                         <!-- To add more sections like Experience, Education, Skills, Projects, or Certifications, just ask the AI! For example: 'Add my work experience' or 'Create a skills section'. The AI will use your saved profile data. -->
-                      </div>
-                    `;
-                    const newState: SavedEditorState = {
-                        htmlContent: initialHtml,
-                        chatHistory: [],
-                        fileName: `${profileData.name || 'User'}'s Resume`.replace(/\.[^/.]+$/, ""),
-                        initialPreviewUri: '',
-                    };
-                    saveStateToFirestore(newState, null).then(newId => {
-                         if (newId) {
-                            setEditorState(newState);
-                            setResumeId(newId);
+                    // Show generating state while AI builds the full resume
+                    setIsGeneratingFromProfile(true);
+                    try {
+                        const result = await generateResumeFromProfileAction({ userProfile: profileData as any });
+                        if (result.success && result.data) {
+                            const newState: SavedEditorState = {
+                                htmlContent: result.data.htmlContent,
+                                chatHistory: [],
+                                fileName: `${profileData.name || 'User'}'s Resume`,
+                                initialPreviewUri: '',
+                            };
+                            const newId = await saveStateToFirestore(newState, null);
+                            if (newId) {
+                                setEditorState(newState);
+                                setResumeId(newId);
+                                setFlow('edit');
+                            }
+                        } else {
+                            throw new Error(result.error || 'Failed to generate resume from profile.');
                         }
-                    });
+                    } catch (error: any) {
+                        toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
+                        router.push('/dashboard');
+                    } finally {
+                        setIsGeneratingFromProfile(false);
+                    }
                 } else if (fromFlow === 'analysis') {
                     setFlow('analysis');
                     const suggestions = sessionStorage.getItem('resumeSuggestions');
@@ -494,6 +490,17 @@ export default function ResumeEditorClient() {
         );
     }
 
+    if (isGeneratingFromProfile) {
+        return (
+            <div className="flex flex-col h-screen bg-muted/20">
+                <Header />
+                <main className="flex-grow flex flex-col items-center justify-center h-full text-center">
+                    <CreativeLoader texts={generatingFromProfileTexts} />
+                </main>
+            </div>
+        );
+    }
+
     if (!currentUser) return null;
 
     const hasBeenEdited = (editorState?.chatHistory?.length || 0) > 0;
@@ -529,8 +536,8 @@ export default function ResumeEditorClient() {
                             <CreativeLoader texts={parsingTexts} />
                         ) : (
                              <>
-                                <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">AI Resume Editor</h1>
-                                <p className="mt-2 text-lg text-muted-foreground">Upload a resume to start editing with our AI assistant.</p>
+                                <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl font-heading">AI Resume Builder</h1>
+                                <p className="mt-2 text-lg text-muted-foreground">Upload your existing resume. Our AI will extract all content and generate a brand-new, professional, ATS-friendly resume for you.</p>
                                 <div className="mt-8 w-full">
                                     <label
                                     htmlFor="resume-upload"
