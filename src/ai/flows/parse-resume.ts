@@ -79,10 +79,15 @@ const parseResumeFlow = ai.defineFlow(
       } catch (error: any) {
         console.error(`parseResume attempt ${attempt} failed:`, error);
         if (
-          error.message &&
-          (error.message.includes('SAFETY') ||
-            error.message.includes('blocked') ||
-            error.message.includes('API_KEY'))
+          error.status === 403 ||
+          error.status === 401 ||
+          (error.message &&
+            (error.message.includes('SAFETY') ||
+              error.message.includes('blocked') ||
+              error.message.includes('API_KEY') ||
+              error.message.includes('leaked') ||
+              error.message.includes('Forbidden') ||
+              error.message.includes('API key')))
         ) {
           throw error;
         }

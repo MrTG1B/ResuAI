@@ -281,12 +281,19 @@ const _editResumeFlow = ai.defineFlow(
         console.error(`AI request attempt ${attempt} failed:`, error);
         
         // Don't retry on certain types of errors
-        if (error.message && (
-          error.message.includes('SAFETY') ||
-          error.message.includes('blocked') ||
-          error.message.includes('API_KEY') ||
-          error.message.includes('Zod')
-        )) {
+        if (
+          error.status === 403 ||
+          error.status === 401 ||
+          (error.message && (
+            error.message.includes('SAFETY') ||
+            error.message.includes('blocked') ||
+            error.message.includes('API_KEY') ||
+            error.message.includes('leaked') ||
+            error.message.includes('Forbidden') ||
+            error.message.includes('API key') ||
+            error.message.includes('Zod')
+          ))
+        ) {
           throw error; // Rethrow immediately for non-retryable errors
         }
         
