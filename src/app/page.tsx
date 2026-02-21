@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -9,352 +9,667 @@ import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { ArrowRight, Bot, PenSquare, Eye, Star, Quote, FileText, LayoutTemplate, SearchCheck, NotebookPen, Users, Zap, ShieldCheck } from 'lucide-react';
+import {
+  ArrowRight, Bot, PenSquare, Eye, Star, FileText,
+  LayoutTemplate, SearchCheck, NotebookPen, Users, Zap, ShieldCheck,
+  Sparkles, CheckCircle2, BrainCircuit, Rocket, Target, Medal,
+  TrendingUp, MessageSquare, Globe,
+} from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { BrandLoader } from '@/components/brand-loader';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useScrollReveal } from '@/hooks/use-scroll-reveal';
+import { useDynamicText } from '@/hooks/use-dynamic-text';
+
+/* ── Count-Up Hook ─────────────────────────────────────────────────────── */
+function useCountUp(target: number, duration = 1800, active = false) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    const start = Date.now();
+    const id = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const p = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(Math.round(eased * target));
+      if (p >= 1) clearInterval(id);
+    }, 16);
+    return () => clearInterval(id);
+  }, [target, duration, active]);
+  return value;
+}
+
+/* ── Animated Stat ─────────────────────────────────────────────────────── */
+function AnimatedStat({
+  target,
+  suffix,
+  active,
+}: {
+  target: number;
+  suffix: string;
+  active: boolean;
+}) {
+  const val = useCountUp(target, 1800, active);
+  return (
+    <span>
+      {val.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 export default function HomePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [statsActive, setStatsActive] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
 
+  /* ── Scroll-reveal refs ─────────────────────────────────────────────── */
+  const heroRevealRef  = useScrollReveal();
+  const howRevealRef   = useScrollReveal();
+  const toolsRevealRef = useScrollReveal();
+  const whyRevealRef   = useScrollReveal();
+  const testiRevealRef = useScrollReveal();
+  const faqRevealRef   = useScrollReveal();
+  const ctaRevealRef   = useScrollReveal();
+
+  /* ── Dynamic typewriter words ───────────────────────────────────────── */
+  const profession = useDynamicText(
+    ['Developers', 'Designers', 'Engineers', 'Managers', 'Analysts', 'Graduates'],
+    2400,
+  );
+
+  /* ── Auth redirect ──────────────────────────────────────────────────── */
   useEffect(() => {
     if (!auth) {
       setIsLoading(false);
       return;
     }
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push('/dashboard');
-      } else {
-        setIsLoading(false);
-      }
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) router.push('/dashboard');
+      else setIsLoading(false);
     });
-
-    return () => unsubscribe();
+    return () => unsub();
   }, [router]);
+
+  /* ── Mouse parallax ─────────────────────────────────────────────────── */
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    setMousePos({
+      x: (e.clientX / window.innerWidth  - 0.5) * 38,
+      y: (e.clientY / window.innerHeight - 0.5) * 38,
+    });
+  }, []);
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [handleMouseMove]);
+
+  /* ── Stats IntersectionObserver ─────────────────────────────────────── */
+  useEffect(() => {
+    const el = statsRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStatsActive(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center bg-background">
         <BrandLoader size="lg" />
-        <p className="mt-4 text-muted-foreground">Loading...</p>
+        <p className="mt-4 text-muted-foreground">Loading…</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background overflow-x-hidden">
       <Header />
       <main>
-        {/* Hero Section */}
-        <section className="relative flex flex-col justify-center items-center text-center min-h-screen py-20 animate-fade-in-down overflow-hidden">
-          <div className="absolute top-0 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full bg-primary/10 blur-[120px] -z-10" />
-          <div className="absolute top-0 left-2/3 -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full bg-[#45b8ac]/10 blur-[120px] -z-10" />
-          <div 
-            className="container mx-auto px-4 relative z-10"
-          >
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-[#FFA62E] via-[#F71B3D] to-[#45B8AC] bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-              Your Career Elevated by AI
+
+        {/* ── HERO ──────────────────────────────────────────────────────── */}
+        <section
+          className="relative flex flex-col justify-center items-center text-center min-h-screen py-20 overflow-hidden dot-grid"
+          ref={heroRevealRef as React.RefObject<HTMLElement>}
+        >
+          {/* Animated background orbs with mouse-parallax */}
+          <div
+            className="absolute top-[8%] left-[22%] w-[55vw] h-[55vw] max-w-[780px] max-h-[780px] rounded-full bg-primary/10 blur-[130px] -z-10 animate-pulse-glow"
+            style={{ transform: `translate(${mousePos.x * 0.4}px, ${mousePos.y * 0.4}px)` }}
+          />
+          <div
+            className="absolute top-[15%] right-[15%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] rounded-full bg-[#45b8ac]/10 blur-[120px] -z-10 animate-pulse-glow"
+            style={{ transform: `translate(${mousePos.x * -0.3}px, ${mousePos.y * -0.3}px)`, animationDelay: '1.2s' }}
+          />
+          <div
+            className="absolute bottom-[10%] left-[10%] w-[30vw] h-[30vw] max-w-[450px] max-h-[450px] rounded-full bg-[#F71B3D]/[0.08] blur-[100px] -z-10 animate-pulse-glow"
+            style={{ transform: `translate(${mousePos.x * 0.25}px, ${mousePos.y * 0.25}px)`, animationDelay: '2.4s' }}
+          />
+
+          <div className="container mx-auto px-4 relative z-10">
+            {/* Badge */}
+            <div className="reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium mb-8 mx-auto">
+              <Sparkles className="h-4 w-4 animate-wobble" />
+              AI-Powered Career Platform
+            </div>
+
+            {/* Headline */}
+            <h1 className="reveal text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-[#FFA62E] via-[#F71B3D] to-[#45B8AC] bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient leading-[1.05]">
+              Your Career<br />Elevated by AI
             </h1>
-            <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-              Create standout resumes and portfolios with intelligent, personalized AI tools.
-            </p>
-            <div className="flex justify-center gap-4 mt-12">
-                <div className="relative group animated-border-glow">
-                    <Button asChild size="lg" className="font-bold relative bg-background hover:bg-background text-foreground transition-all duration-300 transform group-hover:scale-105 group-hover:-translate-y-2 text-xl px-8 py-6">
-                      <Link href="/signup">
-                        Get Started
-                         <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
-                      </Link>
-                    </Button>
-                </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Features Section */}
-        <section className="parallax-bg py-20 lg:py-32 bg-transparent">
-          <div className="container mx-auto px-4">
-            <div 
-              className="text-center mb-12 md:mb-16"
+            {/* Dynamic sub-headline */}
+            <p
+              className="reveal text-lg md:text-2xl text-muted-foreground mb-3 max-w-2xl mx-auto"
+              style={{ transitionDelay: '120ms' }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Simple, Powerful, and Fast</h2>
-              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our AI streamlines the entire process, from analyzing your experience to designing a beautiful final product.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div 
-                className="p-8 rounded-lg border bg-card/80 backdrop-blur-sm shadow-2xl animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 hover:shadow-primary/20"
+              Create standout resumes &amp; portfolios tailored for
+            </p>
+            <p
+              className="reveal text-2xl md:text-3xl font-bold mb-10 max-w-2xl mx-auto"
+              style={{ transitionDelay: '200ms' }}
+            >
+              <span className="shimmer-text">{profession}</span>
+            </p>
+
+            {/* CTAs */}
+            <div
+              className="reveal flex flex-col sm:flex-row justify-center gap-4 mt-6"
+              style={{ transitionDelay: '280ms' }}
+            >
+              <div className="relative group animated-border-glow">
+                <Button
+                  asChild
+                  size="lg"
+                  className="font-bold relative bg-background hover:bg-background text-foreground transition-all duration-300 transform group-hover:scale-105 group-hover:-translate-y-1 text-xl px-10 py-6"
+                >
+                  <Link href="/signup">
+                    Get Started Free
+                    <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
+                  </Link>
+                </Button>
+              </div>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="text-lg px-8 py-6 border-border hover:border-primary/40 transition-all duration-300 hover:-translate-y-1"
               >
-                <div className="flex justify-center items-center mb-4">
-                  <div className="bg-primary/10 p-4 rounded-full">
-                    <Bot className="h-8 w-8 text-primary" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold mb-2 font-heading">1. Provide Your Info</h3>
-                <p className="text-muted-foreground">
-                  Simply upload your resume. Our AI analyzes your info to create a structured draft for a resume or portfolio.
-                </p>
-              </div>
-              <div 
-                className="p-8 rounded-lg border bg-card/80 backdrop-blur-sm shadow-2xl animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 hover:shadow-primary/20"
-                style={{ animationDelay: '200ms' }}
-              >
-                 <div className="flex justify-center items-center mb-4">
-                  <div className="bg-primary/10 p-4 rounded-full">
-                    <PenSquare className="h-8 w-8 text-primary" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold mb-2 font-heading">2. Customize & Refine</h3>
-                <p className="text-muted-foreground">
-                  Easily edit any section. Get AI suggestions, apply professional templates, and customize the design to match your style.
-                </p>
-              </div>
-              <div 
-                className="p-8 rounded-lg border bg-card/80 backdrop-blur-sm shadow-2xl animate-fade-in-up transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 hover:shadow-primary/20"
-                style={{ animationDelay: '400ms' }}
-              >
-                 <div className="flex justify-center items-center mb-4">
-                  <div className="bg-primary/10 p-4 rounded-full">
-                    <Eye className="h-8 w-8 text-primary" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold mb-2 font-heading">3. Publish & Share</h3>
-                <p className="text-muted-foreground">
-                  Download a professional resume or share your portfolio with a unique link. Impress recruiters and land your dream job.
-                </p>
-              </div>
+                <Link href="/login">Sign In</Link>
+              </Button>
             </div>
+
+            {/* Floating social-proof pills */}
+            <div
+              className="reveal mt-14 flex flex-wrap justify-center gap-3 opacity-80"
+              style={{ transitionDelay: '380ms' }}
+            >
+              {[
+                { icon: Users,    text: '10,000+ Professionals' },
+                { icon: FileText, text: '50,000+ Resumes Created' },
+                { icon: Star,     text: '4.9 / 5 Rating' },
+              ].map(({ icon: Icon, text }) => (
+                <span
+                  key={text}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-card/70 border border-border text-sm text-muted-foreground backdrop-blur-sm"
+                >
+                  <Icon className="h-3.5 w-3.5 text-primary" />
+                  {text}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce opacity-40">
+            <span className="text-xs text-muted-foreground tracking-widest uppercase">Scroll</span>
+            <div className="w-px h-8 bg-gradient-to-b from-primary/60 to-transparent" />
           </div>
         </section>
 
-        {/* Toolkit Section */}
-        <section className="py-20 lg:py-32 bg-background">
+        {/* ── TICKER / MARQUEE ──────────────────────────────────────────── */}
+        <div className="border-y border-border/60 bg-card/30 py-4 overflow-hidden">
+          <div className="flex animate-ticker whitespace-nowrap select-none">
+            {[...Array(2)].map((_, pass) => (
+              <div key={pass} className="flex items-center gap-10 px-5 shrink-0">
+                {[
+                  'AI Resume Editor',
+                  'ATS Score Checker',
+                  'Portfolio Generator',
+                  'Cover Letter Writer',
+                  'Interview Prep',
+                  'Career Coach AI',
+                  'Aptitude Tests',
+                  'Job Match Analyser',
+                  'Resume Parser',
+                ].map((item) => (
+                  <span
+                    key={`${pass}-${item}`}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
+        <section
+          className="parallax-bg py-24 lg:py-36"
+          ref={howRevealRef as React.RefObject<HTMLElement>}
+        >
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Your AI-Powered Career Toolkit</h2>
-              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Everything you need to analyze, edit, and showcase your professional story.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="animate-fade-in-up group" style={{ animationDelay: '0ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 hover:shadow-primary/20 flex flex-col h-full text-center">
-                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
-                    <div className="bg-primary/10 p-4 rounded-full">
-                      <FileText className="h-10 w-10 text-primary" />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2 font-heading">AI Resume Editor</h3>
-                  <p className="text-muted-foreground flex-grow mb-6">
-                    Upload your existing resume and let our AI assistant help you refine content, fix typos, and even redesign the entire layout with professional templates.
-                  </p>
-                </Card>
-              </div>
-              <div className="animate-fade-in-up group" style={{ animationDelay: '150ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 hover:shadow-[#F71B3D]/20 flex flex-col h-full text-center">
-                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
-                    <div style={{ backgroundColor: '#F71B3D1A' }} className="p-4 rounded-full">
-                      <NotebookPen className="h-10 w-10" style={{ color: '#F71B3D' }} />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2 font-heading">AI Cover Letter Generator</h3>
-                  <p className="text-muted-foreground flex-grow mb-6">
-                    Create a professional cover letter tailored to any job description in seconds, using your profile data to highlight your strengths.
-                  </p>
-                </Card>
-              </div>
-              <div className="animate-fade-in-up group" style={{ animationDelay: '300ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 hover:shadow-[#45B8AC]/20 flex flex-col h-full text-center">
-                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
-                    <div style={{ backgroundColor: '#45B8AC1A' }} className="p-4 rounded-full">
-                      <SearchCheck className="h-10 w-10" style={{ color: '#45B8AC' }} />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2 font-heading">AI Resume ATS Checker</h3>
-                  <p className="text-muted-foreground flex-grow mb-6">
-                    Get instant, detailed feedback. Our AI coach analyzes your resume against a job description to identify strengths, weaknesses, and actionable steps.
-                  </p>
-                </Card>
-              </div>
-              <div className="animate-fade-in-up group" style={{ animationDelay: '450ms' }}>
-                <Card className="p-6 rounded-lg border bg-card shadow-2xl transition-all duration-300 hover:shadow-primary/20 flex flex-col h-full text-center">
-                  <div className="flex-shrink-0 flex justify-center items-center mb-4">
-                    <div className="bg-primary/10 p-4 rounded-full">
-                      <LayoutTemplate className="h-10 w-10 text-primary" />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2 font-heading">AI Portfolio Generator</h3>
-                  <p className="text-muted-foreground flex-grow mb-6">
-                    Transform your resume into a stunning, professional portfolio website in seconds. Choose from beautiful themes and share your unique link.
-                  </p>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="parallax-bg py-20 lg:py-32 bg-transparent">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">Why Professionals Love ResuAI</h2>
-              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Don't just take our word for it. Here's what our users are saying.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 shadow-2xl hover:shadow-[#45B8AC]/20">
-                <Quote className="h-10 w-10 mb-4" style={{ color: '#45B8AC' }} />
-                <p className="text-muted-foreground mb-6 flex-grow">"I created a portfolio in under 5 minutes that looked better than what I spent weeks trying to build myself. Truly magical!"</p>
-                <div className="flex items-center gap-2 mb-2">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />)}
-                </div>
-                <p className="font-semibold">Sarah L.</p>
-                <p className="text-sm text-muted-foreground">UX Designer</p>
-              </Card>
-               <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 shadow-2xl hover:shadow-[#45B8AC]/20" style={{ animationDelay: '200ms' }}>
-                <Quote className="h-10 w-10 mb-4" style={{ color: '#45B8AC' }} />
-                <p className="text-muted-foreground mb-6 flex-grow">"The AI Resume Analyzer gave me the exact feedback I needed to land three interviews. It's like having a personal career coach."</p>
-                <div className="flex items-center gap-2 mb-2">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />)}
-                </div>
-                <p className="font-semibold">Michael B.</p>
-                <p className="text-sm text-muted-foreground">Software Engineer</p>
-              </Card>
-               <Card className="p-8 bg-card/80 backdrop-blur-sm flex flex-col items-center text-center animate-fade-in-up transition-transform duration-300 hover:scale-105 shadow-2xl hover:shadow-[#45B8AC]/20" style={{ animationDelay: '400ms' }}>
-                <Quote className="h-10 w-10 mb-4" style={{ color: '#45B8AC' }} />
-                <p className="text-muted-foreground mb-6 flex-grow">"As a recent graduate, this tool was a lifesaver. It helped me create a resume that got noticed and felt professional."</p>
-                 <div className="flex items-center gap-2 mb-2">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />)}
-                </div>
-                <p className="font-semibold">Jessica R.</p>
-                <p className="text-sm text-muted-foreground">Marketing Graduate</p>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className="py-14 lg:py-20 bg-background border-y border-border">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <div className="animate-fade-in-up">
-                <div className="flex justify-center mb-3">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-                <p className="text-3xl font-bold font-heading text-foreground">10,000+</p>
-                <p className="text-sm text-muted-foreground mt-1">Professionals Helped</p>
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                <div className="flex justify-center mb-3">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <FileText className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-                <p className="text-3xl font-bold font-heading text-foreground">50,000+</p>
-                <p className="text-sm text-muted-foreground mt-1">Resumes Created</p>
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                <div className="flex justify-center mb-3">
-                  <div style={{ backgroundColor: '#45B8AC1A' }} className="p-3 rounded-full">
-                    <Zap className="h-6 w-6" style={{ color: '#45B8AC' }} />
-                  </div>
-                </div>
-                <p className="text-3xl font-bold font-heading text-foreground">2 min</p>
-                <p className="text-sm text-muted-foreground mt-1">Average Build Time</p>
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-                <div className="flex justify-center mb-3">
-                  <div style={{ backgroundColor: '#F71B3D1A' }} className="p-3 rounded-full">
-                    <ShieldCheck className="h-6 w-6" style={{ color: '#F71B3D' }} />
-                  </div>
-                </div>
-                <p className="text-3xl font-bold font-heading text-foreground">100%</p>
-                <p className="text-sm text-muted-foreground mt-1">Data Privacy</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-20 lg:py-32 bg-background">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Frequently Asked Questions</h2>
-              <p className="text-lg text-muted-foreground mt-2">Got questions? We have answers. Visit our{' '}
-                <Link href="/faq" className="text-primary hover:underline">full FAQ page</Link> for more.
+            <div className="reveal text-center mb-16">
+              <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
+                Process
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">
+                Simple, Powerful, and Fast
+              </h2>
+              <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">
+                Our AI streamlines the entire process — from analysing your experience to designing a beautiful final product.
               </p>
             </div>
-            <Accordion type="single" collapsible className="space-y-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              {/* Connecting line (desktop only) */}
+              <div className="hidden md:block absolute top-14 left-[calc(16.67%+2rem)] right-[calc(16.67%+2rem)] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+
               {[
                 {
-                  q: 'Is ResuAI free to use?',
-                  a: 'Yes! ResuAI offers a free tier that includes access to all core AI features — resume editor, ATS checker, portfolio generator, and cover letter writer.',
+                  icon: Bot,
+                  step: '01',
+                  title: 'Provide Your Info',
+                  desc: 'Upload your existing resume. Our AI analyses your information to create a structured, polished draft instantly.',
+                  delay: '0ms',
                 },
                 {
-                  q: 'How does the ATS resume checker work?',
-                  a: 'Our AI analyzes your resume against a specific job description, assigns a compatibility score, and provides actionable recommendations to improve your chances of passing automated screening systems used by recruiters.',
+                  icon: PenSquare,
+                  step: '02',
+                  title: 'Customise & Refine',
+                  desc: 'Edit any section with AI suggestions, apply professional templates, and tailor the design to match your style.',
+                  delay: '180ms',
                 },
                 {
-                  q: 'Is my resume data secure?',
-                  a: 'Absolutely. Your data is stored in Google Firebase with strict security rules — only you can access your documents. All connections are encrypted via HTTPS/TLS and we enforce industry-standard security headers.',
+                  icon: Eye,
+                  step: '03',
+                  title: 'Publish & Share',
+                  desc: 'Download a recruiter-ready resume or share your portfolio via a unique public link and land your dream job.',
+                  delay: '360ms',
                 },
-                {
-                  q: 'Can I create multiple resumes?',
-                  a: 'Yes. You can create and manage multiple resume versions, tailoring each one for different roles or industries from a single account.',
-                },
-                {
-                  q: 'What AI powers ResuAI?',
-                  a: 'ResuAI uses Google\'s Gemini AI models via the Genkit framework for all intelligent features including content generation, analysis, and coaching.',
-                },
-              ].map((faq, i) => (
-                <AccordionItem
-                  key={i}
-                  value={`home-faq-${i}`}
-                  className="border border-border rounded-lg px-6 bg-card/60 backdrop-blur-sm"
+              ].map(({ icon: Icon, step, title, desc, delay }) => (
+                <div
+                  key={step}
+                  className="reveal relative text-center group"
+                  style={{ transitionDelay: delay }}
                 >
-                  <AccordionTrigger className="text-left font-semibold text-foreground hover:text-primary hover:no-underline py-5">
-                    {faq.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
-                    {faq.a}
-                  </AccordionContent>
-                </AccordionItem>
+                  <div className="flex justify-center mb-6 relative">
+                    <div className="relative bg-primary/10 p-5 rounded-2xl border border-primary/20 group-hover:border-primary/50 transition-all duration-300 group-hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]">
+                      <Icon className="h-9 w-9 text-primary" />
+                      <span className="absolute -top-3 -right-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
+                        {step}
+                      </span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 font-heading">{title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
               ))}
-            </Accordion>
-            <div className="text-center mt-8">
+            </div>
+          </div>
+        </section>
+
+        {/* ── AI TOOLKIT ────────────────────────────────────────────────── */}
+        <section
+          className="py-24 lg:py-36 bg-background"
+          ref={toolsRevealRef as React.RefObject<HTMLElement>}
+        >
+          <div className="container mx-auto px-4">
+            <div className="reveal text-center mb-16">
+              <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
+                Tools
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Your AI-Powered Career Toolkit
+              </h2>
+              <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">
+                Everything you need to analyse, edit, and showcase your professional story.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                {
+                  icon: FileText,
+                  colorHex: 'hsl(var(--primary))',
+                  title: 'AI Resume Editor',
+                  desc: 'Upload your existing resume and let our AI refine content, fix typos, and redesign the layout with professional templates.',
+                  delay: '0ms',
+                },
+                {
+                  icon: NotebookPen,
+                  colorHex: '#F71B3D',
+                  title: 'Cover Letter Generator',
+                  desc: 'Create a tailored cover letter for any job description in seconds, using your profile data to highlight your strengths.',
+                  delay: '120ms',
+                },
+                {
+                  icon: SearchCheck,
+                  colorHex: '#45B8AC',
+                  title: 'ATS Resume Checker',
+                  desc: 'Get instant feedback. Our AI scores your resume against a job description and provides actionable recommendations.',
+                  delay: '240ms',
+                },
+                {
+                  icon: LayoutTemplate,
+                  colorHex: 'hsl(var(--primary))',
+                  title: 'Portfolio Generator',
+                  desc: 'Transform your resume into a stunning portfolio website in seconds. Choose from beautiful themes and share your unique link.',
+                  delay: '360ms',
+                },
+              ].map(({ icon: Icon, colorHex, title, desc, delay }) => (
+                <div key={title} className="reveal group" style={{ transitionDelay: delay }}>
+                  <Card className="p-6 rounded-xl border bg-card/60 backdrop-blur-sm shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col h-full text-center relative overflow-hidden">
+                    {/* Per-card glow on hover */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl"
+                      style={{ background: `radial-gradient(circle at 50% 0%, ${colorHex}22, transparent 65%)` }}
+                    />
+                    <div className="flex-shrink-0 flex justify-center mb-5">
+                      <div
+                        className="p-4 rounded-2xl transition-transform duration-300 group-hover:scale-110"
+                        style={{ backgroundColor: `${colorHex}1A` }}
+                      >
+                        <Icon className="h-10 w-10" style={{ color: colorHex }} />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 font-heading">{title}</h3>
+                    <p className="text-muted-foreground text-sm flex-grow">{desc}</p>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── WHY RESUAI ────────────────────────────────────────────────── */}
+        <section
+          className="parallax-bg py-24 lg:py-36"
+          ref={whyRevealRef as React.RefObject<HTMLElement>}
+        >
+          <div className="container mx-auto px-4">
+            <div className="reveal text-center mb-16">
+              <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
+                Advantages
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">
+                Why Professionals Choose ResuAI
+              </h2>
+              <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">
+                We combine powerful AI with a seamless experience so you can focus on landing the job.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                { icon: BrainCircuit, colorHex: 'hsl(var(--primary))', title: 'Gemini AI Engine',       desc: 'Powered by Google Gemini — the most advanced AI to generate, analyse, and refine your career documents.',  delay: '0ms'   },
+                { icon: Rocket,       colorHex: '#45B8AC',              title: 'Ready in 2 Minutes',    desc: 'From raw experience to a polished, ATS-optimised resume or live portfolio in under two minutes.',          delay: '120ms' },
+                { icon: Target,       colorHex: '#F71B3D',              title: 'ATS Optimised',         desc: 'Every document is crafted to pass automated screening systems used by top recruiters worldwide.',          delay: '240ms' },
+                { icon: Medal,        colorHex: 'hsl(var(--primary))', title: 'Pro Templates',          desc: 'Curated, recruiter-approved templates that look stunning across all screen sizes and print layouts.',      delay: '360ms' },
+                { icon: ShieldCheck,  colorHex: '#45B8AC',              title: '100% Data Privacy',     desc: 'Your data lives in Firebase under strict security rules. Only you can access your documents.',             delay: '480ms' },
+                { icon: TrendingUp,   colorHex: '#F71B3D',              title: 'Career Growth Tools',   desc: 'Go beyond resumes — interview prep, aptitude tests, cover letters, and an AI career coach in one place.',  delay: '600ms' },
+              ].map(({ icon: Icon, colorHex, title, desc, delay }) => (
+                <div key={title} className="reveal group" style={{ transitionDelay: delay }}>
+                  <div className="glass-card rounded-xl p-6 h-full transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_8px_30px_hsl(var(--primary)/0.12)]">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className="flex-shrink-0 p-3 rounded-xl"
+                        style={{ backgroundColor: `${colorHex}1A` }}
+                      >
+                        <Icon className="h-6 w-6" style={{ color: colorHex }} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1 font-heading">{title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── STATS ─────────────────────────────────────────────────────── */}
+        <section className="py-20 lg:py-28 bg-background border-y border-border/50">
+          <div className="container mx-auto px-4" ref={statsRef}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
+              {[
+                { icon: Users,       colorHex: 'hsl(var(--primary))', target: 10000, suffix: '+',   label: 'Professionals Helped' },
+                { icon: FileText,    colorHex: 'hsl(var(--primary))', target: 50000, suffix: '+',   label: 'Resumes Created'      },
+                { icon: Zap,         colorHex: '#45B8AC',              target: 2,     suffix: ' min',label: 'Avg Build Time'       },
+                { icon: ShieldCheck, colorHex: '#F71B3D',              target: 100,   suffix: '%',   label: 'Data Privacy'         },
+              ].map(({ icon: Icon, colorHex, target, suffix, label }) => (
+                <div key={label} className="flex flex-col items-center gap-3">
+                  <div className="p-3 rounded-xl" style={{ backgroundColor: `${colorHex}1A` }}>
+                    <Icon className="h-6 w-6" style={{ color: colorHex }} />
+                  </div>
+                  <p className="text-4xl font-bold font-heading text-foreground">
+                    <AnimatedStat target={target} suffix={suffix} active={statsActive} />
+                  </p>
+                  <p className="text-sm text-muted-foreground">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── TESTIMONIALS ──────────────────────────────────────────────── */}
+        <section
+          className="py-24 lg:py-36 bg-background"
+          ref={testiRevealRef as React.RefObject<HTMLElement>}
+        >
+          <div className="container mx-auto px-4">
+            <div className="reveal text-center mb-16">
+              <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
+                Reviews
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">
+                Why Professionals Love ResuAI
+              </h2>
+              <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">
+                Don&apos;t just take our word for it. Here&apos;s what our users are saying.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { quote: '"I created a portfolio in under 5 minutes that looked better than what I spent weeks building myself. Truly magical!"',                  name: 'Sarah L.',   role: 'UX Designer',        initials: 'SL', color: '#45B8AC',              delay: '0ms'   },
+                { quote: '"The AI Resume Analyser gave me the exact feedback I needed to land three interviews. It\'s like having a personal career coach."',      name: 'Michael B.', role: 'Software Engineer',  initials: 'MB', color: 'hsl(var(--primary))', delay: '160ms' },
+                { quote: '"As a recent graduate, this tool was a lifesaver. It helped me craft a resume that got noticed and felt truly professional."',           name: 'Jessica R.', role: 'Marketing Graduate',  initials: 'JR', color: '#F71B3D',              delay: '320ms' },
+              ].map(({ quote, name, role, initials, color, delay }) => (
+                <div key={name} className="reveal" style={{ transitionDelay: delay }}>
+                  <Card className="p-8 glass-card rounded-xl flex flex-col h-full shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl group">
+                    <div className="flex gap-1 mb-5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                      ))}
+                    </div>
+                    <p className="text-muted-foreground mb-8 flex-grow italic leading-relaxed">{quote}</p>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
+                        style={{ background: `linear-gradient(135deg, ${color}, ${color}aa)` }}
+                      >
+                        {initials}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">{name}</p>
+                        <p className="text-xs text-muted-foreground">{role}</p>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── MORE TOOLS ────────────────────────────────────────────────── */}
+        <section className="py-20 lg:py-28 bg-card/30 border-y border-border/50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight font-heading text-foreground">
+                Even More Career Tools
+              </h2>
+              <p className="text-muted-foreground mt-2 max-w-xl mx-auto">
+                Beyond resumes — a full suite to accelerate your job search.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { icon: MessageSquare, colorHex: '#45B8AC',              title: 'Mentra AI Coach',    desc: 'A conversational AI career coach that helps you navigate your next move.'             },
+                { icon: Globe,         colorHex: 'hsl(var(--primary))', title: 'Live Portfolio',      desc: 'Publish a beautiful personal website with a shareable public link in one click.'      },
+                { icon: BrainCircuit,  colorHex: '#F71B3D',              title: 'Interview Prep',     desc: 'Practice tough interview questions with AI-powered feedback and guidance.'            },
+                { icon: Target,        colorHex: '#45B8AC',              title: 'Job Match Analyser', desc: 'Paste a job description and instantly see how well your profile matches.'             },
+              ].map(({ icon: Icon, colorHex, title, desc }) => (
+                <div
+                  key={title}
+                  className="flex flex-col items-center text-center gap-3 p-6 rounded-xl glass-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 group"
+                >
+                  <div
+                    className="p-3 rounded-xl transition-transform duration-300 group-hover:scale-110"
+                    style={{ backgroundColor: `${colorHex}1A` }}
+                  >
+                    <Icon className="h-7 w-7" style={{ color: colorHex }} />
+                  </div>
+                  <h3 className="font-semibold font-heading text-sm">{title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FAQ ───────────────────────────────────────────────────────── */}
+        <section
+          className="py-24 lg:py-36 bg-background"
+          ref={faqRevealRef as React.RefObject<HTMLElement>}
+        >
+          <div className="container mx-auto px-4 max-w-3xl">
+            <div className="reveal text-center mb-14">
+              <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
+                FAQs
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-lg text-muted-foreground mt-3">
+                Got questions? We have answers. Visit our{' '}
+                <Link href="/faq" className="text-primary hover:underline">
+                  full FAQ page
+                </Link>{' '}
+                for more.
+              </p>
+            </div>
+
+            <div className="reveal" style={{ transitionDelay: '100ms' }}>
+              <Accordion type="single" collapsible className="space-y-4">
+                {[
+                  { q: 'Is ResuAI free to use?',               a: 'Yes! ResuAI offers a free tier with access to all core AI features — resume editor, ATS checker, portfolio generator, and cover letter writer.' },
+                  { q: 'How does the ATS resume checker work?', a: 'Our AI analyses your resume against a specific job description, assigns a compatibility score, and provides actionable recommendations to improve your chances of passing automated screening systems.' },
+                  { q: 'Is my resume data secure?',            a: 'Absolutely. Your data is stored in Google Firebase with strict security rules — only you can access your documents. All connections are encrypted via HTTPS/TLS.' },
+                  { q: 'Can I create multiple resumes?',       a: 'Yes. You can create and manage multiple resume versions, tailoring each one for different roles or industries from a single account.' },
+                  { q: 'What AI powers ResuAI?',               a: "ResuAI uses Google's Gemini AI models via the Genkit framework for all intelligent features including content generation, analysis, and career coaching." },
+                ].map((faq, i) => (
+                  <AccordionItem
+                    key={i}
+                    value={`home-faq-${i}`}
+                    className="border border-border/60 rounded-xl px-6 bg-card/50 backdrop-blur-sm"
+                  >
+                    <AccordionTrigger className="text-left font-semibold text-foreground hover:text-primary hover:no-underline py-5">
+                      {faq.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            <div className="reveal text-center mt-8" style={{ transitionDelay: '200ms' }}>
               <Button variant="outline" asChild>
-                <Link href="/faq">View All FAQs <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link href="/faq">
+                  View All FAQs <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
         </section>
 
-        {/* Final CTA Section */}
-        <section className="py-20 lg:py-32 bg-background">
-           <div className="container mx-auto px-4 text-center">
-             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Ready to Build Your Future?</h2>
-             <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-               Join thousands of professionals who are taking their careers to the next level. Get started today and see the difference AI can make.
-             </p>
-             <div className="flex justify-center gap-4">
-               <Button asChild size="lg" className="font-bold">
-                 <Link href="/signup">Get Started for Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
-               </Button>
-             </div>
-           </div>
-         </section>
+        {/* ── FINAL CTA ─────────────────────────────────────────────────── */}
+        <section
+          className="relative py-28 lg:py-40 overflow-hidden"
+          ref={ctaRevealRef as React.RefObject<HTMLElement>}
+        >
+          <div className="absolute inset-0 bg-background" />
+          <div className="absolute inset-0 dot-grid opacity-50" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] rounded-full bg-primary/[0.07] blur-[140px] animate-pulse-glow" />
+
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <div className="reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium mb-8">
+              <CheckCircle2 className="h-4 w-4" />
+              Free to Start — No Credit Card Required
+            </div>
+            <h2
+              className="reveal text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 font-heading bg-gradient-to-r from-[#FFA62E] via-[#F71B3D] to-[#45B8AC] bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient"
+              style={{ transitionDelay: '100ms' }}
+            >
+              Ready to Build<br />Your Future?
+            </h2>
+            <p
+              className="reveal max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10"
+              style={{ transitionDelay: '200ms' }}
+            >
+              Join thousands of professionals taking their careers to the next level. Get started today and see the difference AI can make.
+            </p>
+            <div
+              className="reveal flex flex-col sm:flex-row justify-center gap-4"
+              style={{ transitionDelay: '300ms' }}
+            >
+              <div className="relative group animated-border-glow">
+                <Button
+                  asChild
+                  size="lg"
+                  className="font-bold relative bg-background hover:bg-background text-foreground transition-all duration-300 transform group-hover:scale-105 group-hover:-translate-y-1 text-xl px-10 py-6"
+                >
+                  <Link href="/signup">
+                    Get Started for Free
+                    <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
       <Footer />
     </div>
   );
 }
-
-    
-
-    
