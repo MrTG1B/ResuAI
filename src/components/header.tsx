@@ -124,6 +124,10 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                                 <Info className="mr-2 h-4 w-4" />
                                 <span>About Us</span>
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/faq')} className="cursor-pointer">
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>FAQ</span>
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => router.push('/terms')} className="cursor-pointer">
                                 <FileText className="mr-2 h-4 w-4" />
                                 <span>Terms &amp; Conditions</span>
@@ -137,6 +141,12 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                     </DropdownMenu>
                 ) : (
                     <div className="hidden md:flex items-center gap-2">
+                        <Button variant="ghost" asChild size="sm">
+                            <Link href="/about">About</Link>
+                        </Button>
+                        <Button variant="ghost" asChild size="sm">
+                            <Link href="/faq">FAQ</Link>
+                        </Button>
                         <Button variant="ghost" asChild size="sm">
                             <Link href="/login">Login</Link>
                         </Button>

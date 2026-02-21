@@ -1,10 +1,18 @@
 
+import type { Metadata } from 'next';
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: 'Terms of Service | ResuAI',
+  description: 'Read the ResuAI Terms of Service to understand your rights and obligations when using our AI career tools.',
+  alternates: { canonical: 'https://resuai.web.app/terms' },
+};
 
 export default function TermsPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-4xl">
         <Card className="shadow-lg">
@@ -41,6 +49,7 @@ export default function TermsPage() {
           </CardContent>
         </Card>
       </main>
+      <Footer />
     </div>
   );
 }
