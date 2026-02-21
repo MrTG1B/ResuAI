@@ -7,7 +7,7 @@ const CSP_POLICY = [
   "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://vercel.live https://apis.google.com https://accounts.google.com",
   "style-src 'self' 'unsafe-inline' https://accounts.google.com",
   "img-src 'self' data: https: blob:",
-  "font-src 'self' data: https://fonts.gstatic.com",
+  "font-src 'self' data:",
   "connect-src 'self' https://*.googleapis.com https://*.google.com https://i.ibb.co https://*.firebaseio.com https://*.cloudfunctions.net wss://ws-us3.pusher.com https://sockjs-us3.pusher.com https://accounts.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com",
   "frame-src 'self' https://*.google.com https://accounts.google.com data:",
   "object-src 'none'",
@@ -17,6 +17,7 @@ const CSP_POLICY = [
 ].join('; ') + ';';
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   async headers() {
     return [
       {
