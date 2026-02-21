@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Inter Tight"', 'sans-serif'],
-        heading: ['"Archivo Black"', 'sans-serif'],
+        sans: ['var(--font-inter-tight)', 'sans-serif'],
+        heading: ['var(--font-archivo-black)', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
