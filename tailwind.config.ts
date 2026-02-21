@@ -126,6 +126,35 @@ export default {
         'brand-spin': {
           to: {transform: 'rotate(360deg)'},
         },
+        float: {
+          '0%, 100%': {transform: 'translateY(0px) rotate(0deg)'},
+          '33%': {transform: 'translateY(-18px) rotate(2deg)'},
+          '66%': {transform: 'translateY(-10px) rotate(-1deg)'},
+        },
+        shimmer: {
+          '0%': {'background-position': '-200% center'},
+          '100%': {'background-position': '200% center'},
+        },
+        'pulse-glow': {
+          '0%, 100%': {opacity: '0.4'},
+          '50%': {opacity: '0.9'},
+        },
+        'slide-in-left': {
+          '0%': {opacity: '0', transform: 'translateX(-60px)'},
+          '100%': {opacity: '1', transform: 'translateX(0)'},
+        },
+        'slide-in-right': {
+          '0%': {opacity: '0', transform: 'translateX(60px)'},
+          '100%': {opacity: '1', transform: 'translateX(0)'},
+        },
+        'scale-in': {
+          '0%': {opacity: '0', transform: 'scale(0.85)'},
+          '100%': {opacity: '1', transform: 'scale(1)'},
+        },
+        'ticker': {
+          '0%': {transform: 'translateX(0)'},
+          '100%': {transform: 'translateX(-50%)'},
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -136,6 +165,13 @@ export default {
         wobble: 'wobble 1s ease-in-out infinite',
         gradient: 'gradient 3s ease infinite',
         'brand-spin': 'brand-spin 1s linear infinite',
+        float: 'float 7s ease-in-out infinite',
+        shimmer: 'shimmer 4s linear infinite',
+        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
+        'slide-in-left': 'slide-in-left 0.7s ease-out forwards',
+        'slide-in-right': 'slide-in-right 0.7s ease-out forwards',
+        'scale-in': 'scale-in 0.6s ease-out forwards',
+        ticker: 'ticker 30s linear infinite',
       },
     },
   },
