@@ -48,7 +48,7 @@ const systemPrompt = `You are an expert resume writer and designer. Your task is
 
 const prompt = ai.definePrompt({
     name: 'parseResumePrompt',
-    model: 'googleai/gemini-2.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     system: systemPrompt,
     input: { schema: ParseResumeInputSchema },
     output: { schema: ParseResumeOutputSchema },
@@ -66,11 +66,30 @@ const parseResumeFlow = ai.defineFlow(
     outputSchema: ParseResumeOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_BASE = 1000;
 
-    if (!output) {
-      throw new Error('AI failed to generate a response.');
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const { output } = await prompt(input);
+        if (!output) {
+          throw new Error('AI failed to generate a response.');
+        }
+        return output;
+      } catch (error: any) {
+        console.error(`parseResume attempt ${attempt} failed:`, error);
+        if (
+          error.message &&
+          (error.message.includes('SAFETY') ||
+            error.message.includes('blocked') ||
+            error.message.includes('API_KEY'))
+        ) {
+          throw error;
+        }
+        if (attempt === MAX_RETRIES) throw error;
+        const delay = RETRY_DELAY_BASE * Math.pow(2, attempt - 1);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
-    return output;
   }
 );

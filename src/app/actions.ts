@@ -118,9 +118,23 @@ export async function parseResumeAction(input: ParseResumeInput): Promise<{ succ
       htmlContent: result.htmlContent,
     };
     return { success: true, data: parsedData };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error parsing resume:", error);
-    return { success: false, error: "Failed to parse resume. Please check the file format and try again." };
+    const errorMsg: string = error.message || '';
+
+    if (errorMsg.includes('quota') || errorMsg.includes('QUOTA_EXCEEDED')) {
+      return { success: false, error: "The AI service has reached its usage limit. Please try again in a few minutes." };
+    }
+    if (errorMsg.includes('SAFETY') || errorMsg.includes('blocked')) {
+      return { success: false, error: "The resume content was flagged by safety filters. Please try a different file." };
+    }
+    if (errorMsg.includes('timeout') || errorMsg.includes('TIMEOUT')) {
+      return { success: false, error: "The request timed out. Please try again." };
+    }
+    if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
+      return { success: false, error: "A network error occurred. Please check your connection and try again." };
+    }
+    return { success: false, error: "Failed to process your resume. Please ensure the file is a valid PDF and try again." };
   }
 }
 
