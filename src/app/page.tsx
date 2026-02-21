@@ -251,11 +251,11 @@ export default function HomePage() {
 
         {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
         <section
-          className="parallax-bg py-24 lg:py-36"
+          className="parallax-bg py-14 lg:py-20"
           ref={howRevealRef}
         >
           <div className="container mx-auto px-4">
-            <div className="reveal text-center mb-16">
+            <div className="reveal text-center mb-10">
               <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
                 Process
               </span>
@@ -315,11 +315,11 @@ export default function HomePage() {
 
         {/* ── AI TOOLKIT ────────────────────────────────────────────────── */}
         <section
-          className="py-24 lg:py-36 bg-background"
+          className="py-14 lg:py-20 bg-background"
           ref={toolsRevealRef}
         >
           <div className="container mx-auto px-4">
-            <div className="reveal text-center mb-16">
+            <div className="reveal text-center mb-10">
               <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
                 Tools
               </span>
@@ -388,11 +388,11 @@ export default function HomePage() {
 
         {/* ── WHY RESUAI ────────────────────────────────────────────────── */}
         <section
-          className="parallax-bg py-24 lg:py-36"
+          className="parallax-bg py-14 lg:py-20"
           ref={whyRevealRef}
         >
           <div className="container mx-auto px-4">
-            <div className="reveal text-center mb-16">
+            <div className="reveal text-center mb-10">
               <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
                 Advantages
               </span>
@@ -435,7 +435,7 @@ export default function HomePage() {
         </section>
 
         {/* ── STATS ─────────────────────────────────────────────────────── */}
-        <section className="py-20 lg:py-28 bg-background border-y border-border/50">
+        <section className="py-12 lg:py-16 bg-background border-y border-border/50">
           <div className="container mx-auto px-4" ref={statsRef}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
               {[
@@ -460,11 +460,11 @@ export default function HomePage() {
 
         {/* ── TESTIMONIALS ──────────────────────────────────────────────── */}
         <section
-          className="py-24 lg:py-36 bg-background"
+          className="py-14 lg:py-20 bg-background"
           ref={testiRevealRef}
         >
           <div className="container mx-auto px-4">
-            <div className="reveal text-center mb-16">
+            <div className="reveal text-center mb-10">
               <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
                 Reviews
               </span>
@@ -510,9 +510,9 @@ export default function HomePage() {
         </section>
 
         {/* ── MORE TOOLS ────────────────────────────────────────────────── */}
-        <section className="py-20 lg:py-28 bg-card/30 border-y border-border/50">
+        <section className="py-12 lg:py-16 bg-card/30 border-y border-border/50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight font-heading text-foreground">
                 Even More Career Tools
               </h2>
@@ -547,11 +547,11 @@ export default function HomePage() {
 
         {/* ── FAQ ───────────────────────────────────────────────────────── */}
         <section
-          className="py-24 lg:py-36 bg-background"
+          className="py-14 lg:py-20 bg-background"
           ref={faqRevealRef}
         >
           <div className="container mx-auto px-4 max-w-3xl">
-            <div className="reveal text-center mb-14">
+            <div className="reveal text-center mb-10">
               <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
                 FAQs
               </span>
@@ -604,7 +604,7 @@ export default function HomePage() {
 
         {/* ── FINAL CTA ─────────────────────────────────────────────────── */}
         <section
-          className="relative py-28 lg:py-40 overflow-hidden"
+          className="relative py-16 lg:py-24 overflow-hidden"
           ref={ctaRevealRef}
         >
           <div className="absolute inset-0 bg-background" />
