@@ -91,5 +91,6 @@ const parseResumeFlow = ai.defineFlow(
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
+    throw new Error('Maximum retries exceeded');
   }
 );
