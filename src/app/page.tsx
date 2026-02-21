@@ -174,7 +174,7 @@ export default function HomePage() {
               className="reveal text-lg md:text-2xl text-muted-foreground mb-3 max-w-2xl mx-auto"
               style={{ transitionDelay: '120ms' }}
             >
-              Create standout resumes &amp; portfolios tailored for
+              Create standout resumes & portfolios tailored for
             </p>
             <p
               className="reveal text-2xl md:text-3xl font-bold mb-10 max-w-2xl mx-auto"
@@ -499,7 +499,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 { quote: '"I created a portfolio in under 5 minutes that looked better than what I spent weeks building myself. Truly magical!"',                  name: 'Sarah L.',   role: 'UX Designer',        initials: 'SL', color: '#45B8AC',              delay: '0ms'   },
-                { quote: '"The AI Resume Analyser gave me the exact feedback I needed to land three interviews. It\'s like having a personal career coach."',      name: 'Michael B.', role: 'Software Engineer',  initials: 'MB', color: 'hsl(var(--primary))', delay: '160ms' },
+                { quote: '"The ATS checker gave me the exact feedback I needed to land three interviews. It\'s like having a personal career coach."',            name: 'Michael B.', role: 'Software Engineer',  initials: 'MB', color: 'hsl(var(--primary))', delay: '160ms' },
                 { quote: '"As a recent graduate, this tool was a lifesaver. It helped me craft a resume that got noticed and felt truly professional."',           name: 'Jessica R.', role: 'Marketing Graduate',  initials: 'JR', color: '#F71B3D',              delay: '320ms' },
               ].map(({ quote, name, role, initials, color, delay }) => (
                 <div key={name} className="reveal" style={{ transitionDelay: delay }}>
