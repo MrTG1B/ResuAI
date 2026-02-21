@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Header } from "@/components/header";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { GoogleIcon } from "@/components/icons/google-icon";
 
@@ -23,6 +23,33 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    if (!auth) return;
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setIsGoogleLoading(true);
+          router.push("/dashboard");
+        }
+      })
+      .catch((error: any) => {
+        console.error("Google sign-in redirect error:", error);
+        let errorMessage = "Could not sign in with Google. Please try again.";
+        if (error.code === 'auth/unauthorized-domain') {
+          errorMessage = "This domain is not authorized for Google sign-in. Contact the administrator.";
+        } else if (error.code === 'auth/operation-not-allowed') {
+          errorMessage = "Google sign-in is not enabled. Please contact the administrator.";
+        } else if (error.code === 'auth/account-exists-with-different-credential') {
+          errorMessage = "An account already exists with the same email address. Please sign in using your email and password.";
+        }
+        toast({
+          title: "Google Sign-In Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      });
+  }, [router, toast]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,40 +79,19 @@ export default function LoginPage() {
     }
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
-    
-    // Configure the provider for better user experience
     provider.setCustomParameters({
-      prompt: 'select_account' // Always show account selection
+      prompt: 'select_account'
     });
-    
     try {
-        await signInWithPopup(auth, provider);
-        router.push("/dashboard");
+      await signInWithRedirect(auth, provider);
     } catch (error: any) {
-        console.error("Google sign-in error:", error);
-        let errorMessage = "Could not sign in with Google. Please try again.";
-        
-        if (error.code === 'auth/popup-closed-by-user') {
-          errorMessage = "Sign-in was cancelled. Please try again.";
-        } else if (error.code === 'auth/popup-blocked') {
-          errorMessage = "Pop-up was blocked by your browser. Please allow pop-ups and try again.";
-        } else if (error.code === 'auth/unauthorized-domain') {
-          errorMessage = "This domain is not authorized for Google sign-in. Contact the administrator.";
-        } else if (error.code === 'auth/operation-not-allowed') {
-          errorMessage = "Google sign-in is not enabled. Please contact the administrator.";
-        } else if (error.code === 'auth/account-exists-with-different-credential') {
-          errorMessage = "An account already exists with the same email address. Please sign in using your email and password.";
-        } else if (error.code === 'auth/cancelled-popup-request') {
-          errorMessage = "Only one popup request is allowed at a time.";
-        }
-        
-        toast({
-            title: "Google Sign-In Failed",
-            description: errorMessage,
-            variant: "destructive",
-        });
-    } finally {
-        setIsGoogleLoading(false);
+      console.error("Google sign-in error:", error);
+      toast({
+        title: "Google Sign-In Failed",
+        description: "Could not initiate Google sign-in. Please try again.",
+        variant: "destructive",
+      });
+      setIsGoogleLoading(false);
     }
   };
 
