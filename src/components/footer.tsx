@@ -36,6 +36,7 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Company</h3>
             <nav className="flex flex-col space-y-2 text-sm">
               <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">About</Link>
+              <Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors">FAQ</Link>
               <Link href="/feedback" className="text-muted-foreground hover:text-primary transition-colors">Feedback</Link>
               <Link href="/#contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</Link>
             </nav>
@@ -46,7 +47,7 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Legal</h3>
             <nav className="flex flex-col space-y-2 text-sm">
               <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
-              <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
+              <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
             </nav>
           </div>
         </div>

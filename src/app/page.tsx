@@ -9,9 +9,15 @@ import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { ArrowRight, Bot, PenSquare, Eye, Star, Quote, FileText, LayoutTemplate, SearchCheck, NotebookPen } from 'lucide-react';
+import { ArrowRight, Bot, PenSquare, Eye, Star, Quote, FileText, LayoutTemplate, SearchCheck, NotebookPen, Users, Zap, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { BrandLoader } from '@/components/brand-loader';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -227,6 +233,104 @@ export default function HomePage() {
                 <p className="font-semibold">Jessica R.</p>
                 <p className="text-sm text-muted-foreground">Marketing Graduate</p>
               </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="py-14 lg:py-20 bg-background border-y border-border">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="animate-fade-in-up">
+                <div className="flex justify-center mb-3">
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold font-heading text-foreground">10,000+</p>
+                <p className="text-sm text-muted-foreground mt-1">Professionals Helped</p>
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                <div className="flex justify-center mb-3">
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <FileText className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold font-heading text-foreground">50,000+</p>
+                <p className="text-sm text-muted-foreground mt-1">Resumes Created</p>
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                <div className="flex justify-center mb-3">
+                  <div style={{ backgroundColor: '#45B8AC1A' }} className="p-3 rounded-full">
+                    <Zap className="h-6 w-6" style={{ color: '#45B8AC' }} />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold font-heading text-foreground">2 min</p>
+                <p className="text-sm text-muted-foreground mt-1">Average Build Time</p>
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                <div className="flex justify-center mb-3">
+                  <div style={{ backgroundColor: '#F71B3D1A' }} className="p-3 rounded-full">
+                    <ShieldCheck className="h-6 w-6" style={{ color: '#F71B3D' }} />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold font-heading text-foreground">100%</p>
+                <p className="text-sm text-muted-foreground mt-1">Data Privacy</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-20 lg:py-32 bg-background">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <div className="text-center mb-12 md:mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Frequently Asked Questions</h2>
+              <p className="text-lg text-muted-foreground mt-2">Got questions? We have answers. Visit our{' '}
+                <Link href="/faq" className="text-primary hover:underline">full FAQ page</Link> for more.
+              </p>
+            </div>
+            <Accordion type="single" collapsible className="space-y-4">
+              {[
+                {
+                  q: 'Is ResuAI free to use?',
+                  a: 'Yes! ResuAI offers a free tier that includes access to all core AI features — resume editor, ATS checker, portfolio generator, and cover letter writer.',
+                },
+                {
+                  q: 'How does the ATS resume checker work?',
+                  a: 'Our AI analyzes your resume against a specific job description, assigns a compatibility score, and provides actionable recommendations to improve your chances of passing automated screening systems used by recruiters.',
+                },
+                {
+                  q: 'Is my resume data secure?',
+                  a: 'Absolutely. Your data is stored in Google Firebase with strict security rules — only you can access your documents. All connections are encrypted via HTTPS/TLS and we enforce industry-standard security headers.',
+                },
+                {
+                  q: 'Can I create multiple resumes?',
+                  a: 'Yes. You can create and manage multiple resume versions, tailoring each one for different roles or industries from a single account.',
+                },
+                {
+                  q: 'What AI powers ResuAI?',
+                  a: 'ResuAI uses Google\'s Gemini AI models via the Genkit framework for all intelligent features including content generation, analysis, and coaching.',
+                },
+              ].map((faq, i) => (
+                <AccordionItem
+                  key={i}
+                  value={`home-faq-${i}`}
+                  className="border border-border rounded-lg px-6 bg-card/60 backdrop-blur-sm"
+                >
+                  <AccordionTrigger className="text-left font-semibold text-foreground hover:text-primary hover:no-underline py-5">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
+                    {faq.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+            <div className="text-center mt-8">
+              <Button variant="outline" asChild>
+                <Link href="/faq">View All FAQs <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
             </div>
           </div>
         </section>

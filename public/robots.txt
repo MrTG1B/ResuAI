@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and private routes
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /build/
+Disallow: /resume-builder/
+Disallow: /resume-analyzer/
+Disallow: /cover-letter-generator/
+Disallow: /interview-prep/
+Disallow: /aptitude-test/
+Disallow: /mentra/
+
+# Sitemap
+Sitemap: https://resuai.web.app/sitemap.xml

@@ -1,10 +1,18 @@
 
+import type { Metadata } from 'next';
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: 'About ResuAI – AI-Powered Career Tools',
+  description: 'Learn about ResuAI\'s mission to empower professionals with AI-powered resume builders, ATS checkers, portfolio generators, and cover letter tools.',
+  alternates: { canonical: 'https://resuai.web.app/about' },
+};
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-4xl">
         <Card className="shadow-lg">
@@ -39,6 +47,7 @@ export default function AboutPage() {
           </CardContent>
         </Card>
       </main>
+      <Footer />
     </div>
   );
 }
