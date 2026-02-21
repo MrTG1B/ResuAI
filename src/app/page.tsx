@@ -141,7 +141,7 @@ export default function HomePage() {
         {/* ── HERO ──────────────────────────────────────────────────────── */}
         <section
           className="relative flex flex-col justify-center items-center text-center min-h-screen py-20 overflow-hidden dot-grid"
-          ref={heroRevealRef as React.RefObject<HTMLElement>}
+          ref={heroRevealRef}
         >
           {/* Animated background orbs with mouse-parallax */}
           <div
@@ -270,7 +270,7 @@ export default function HomePage() {
         {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
         <section
           className="parallax-bg py-24 lg:py-36"
-          ref={howRevealRef as React.RefObject<HTMLElement>}
+          ref={howRevealRef}
         >
           <div className="container mx-auto px-4">
             <div className="reveal text-center mb-16">
@@ -336,7 +336,7 @@ export default function HomePage() {
         {/* ── AI TOOLKIT ────────────────────────────────────────────────── */}
         <section
           className="py-24 lg:py-36 bg-background"
-          ref={toolsRevealRef as React.RefObject<HTMLElement>}
+          ref={toolsRevealRef}
         >
           <div className="container mx-auto px-4">
             <div className="reveal text-center mb-16">
@@ -409,7 +409,7 @@ export default function HomePage() {
         {/* ── WHY RESUAI ────────────────────────────────────────────────── */}
         <section
           className="parallax-bg py-24 lg:py-36"
-          ref={whyRevealRef as React.RefObject<HTMLElement>}
+          ref={whyRevealRef}
         >
           <div className="container mx-auto px-4">
             <div className="reveal text-center mb-16">
@@ -481,7 +481,7 @@ export default function HomePage() {
         {/* ── TESTIMONIALS ──────────────────────────────────────────────── */}
         <section
           className="py-24 lg:py-36 bg-background"
-          ref={testiRevealRef as React.RefObject<HTMLElement>}
+          ref={testiRevealRef}
         >
           <div className="container mx-auto px-4">
             <div className="reveal text-center mb-16">
@@ -568,7 +568,7 @@ export default function HomePage() {
         {/* ── FAQ ───────────────────────────────────────────────────────── */}
         <section
           className="py-24 lg:py-36 bg-background"
-          ref={faqRevealRef as React.RefObject<HTMLElement>}
+          ref={faqRevealRef}
         >
           <div className="container mx-auto px-4 max-w-3xl">
             <div className="reveal text-center mb-14">
@@ -625,7 +625,7 @@ export default function HomePage() {
         {/* ── FINAL CTA ─────────────────────────────────────────────────── */}
         <section
           className="relative py-28 lg:py-40 overflow-hidden"
-          ref={ctaRevealRef as React.RefObject<HTMLElement>}
+          ref={ctaRevealRef}
         >
           <div className="absolute inset-0 bg-background" />
           <div className="absolute inset-0 dot-grid opacity-50" />
