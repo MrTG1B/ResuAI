@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -21,7 +21,6 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useScrollReveal } from '@/hooks/use-scroll-reveal';
-import { useDynamicText } from '@/hooks/use-dynamic-text';
 
 /* ── Count-Up Hook ─────────────────────────────────────────────────────── */
 function useCountUp(target: number, duration = 1800, active = false) {
@@ -65,7 +64,8 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [statsActive, setStatsActive] = useState(false);
-  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsEl, setStatsEl] = useState<HTMLDivElement | null>(null);
+  const statsRef = useCallback((node: HTMLDivElement | null) => setStatsEl(node), []);
 
   /* ── Scroll-reveal refs ─────────────────────────────────────────────── */
   const heroRevealRef  = useScrollReveal();
@@ -75,12 +75,6 @@ export default function HomePage() {
   const testiRevealRef = useScrollReveal();
   const faqRevealRef   = useScrollReveal();
   const ctaRevealRef   = useScrollReveal();
-
-  /* ── Dynamic typewriter words ───────────────────────────────────────── */
-  const profession = useDynamicText(
-    ['Developers', 'Designers', 'Engineers', 'Managers', 'Analysts', 'Graduates'],
-    2400,
-  );
 
   /* ── Auth redirect ──────────────────────────────────────────────────── */
   useEffect(() => {
@@ -109,8 +103,7 @@ export default function HomePage() {
 
   /* ── Stats IntersectionObserver ─────────────────────────────────────── */
   useEffect(() => {
-    const el = statsRef.current;
-    if (!el) return;
+    if (!statsEl) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -120,9 +113,9 @@ export default function HomePage() {
       },
       { threshold: 0.3 },
     );
-    obs.observe(el);
+    obs.observe(statsEl);
     return () => obs.disconnect();
-  }, []);
+  }, [statsEl]);
 
   if (isLoading) {
     return (
@@ -169,18 +162,12 @@ export default function HomePage() {
               Your Career<br />Elevated by AI
             </h1>
 
-            {/* Dynamic sub-headline */}
+            {/* Subtitle */}
             <p
-              className="reveal text-lg md:text-2xl text-muted-foreground mb-3 max-w-2xl mx-auto"
+              className="reveal text-lg md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto"
               style={{ transitionDelay: '120ms' }}
             >
-              Create standout resumes & portfolios tailored for
-            </p>
-            <p
-              className="reveal text-2xl md:text-3xl font-bold mb-10 max-w-2xl mx-auto"
-              style={{ transitionDelay: '200ms' }}
-            >
-              <span className="shimmer-text">{profession}</span>
+              Create standout resumes &amp; portfolios with intelligent, personalised AI tools.
             </p>
 
             {/* CTAs */}
@@ -231,11 +218,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Scroll indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce opacity-40">
-            <span className="text-xs text-muted-foreground tracking-widest uppercase">Scroll</span>
-            <div className="w-px h-8 bg-gradient-to-b from-primary/60 to-transparent" />
-          </div>
         </section>
 
         {/* ── TICKER / MARQUEE ──────────────────────────────────────────── */}
@@ -286,8 +268,6 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              {/* Connecting line (desktop only) */}
-              <div className="hidden md:block absolute top-14 left-[calc(16.67%+2rem)] right-[calc(16.67%+2rem)] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
               {[
                 {
