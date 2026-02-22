@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
           await adminDb
             .doc(`users/${userId}/subscription/current`)
             .set(
-              { status: 'canceled', cancelAtPeriodEnd: false, updatedAt: admin.firestore.FieldValue.serverTimestamp() },
+              { planId: 'free', status: 'canceled', cancelAtPeriodEnd: false, updatedAt: admin.firestore.FieldValue.serverTimestamp() },
               { merge: true }
             );
           await adminDb.doc(`users/${userId}`).set({ plan: 'free' }, { merge: true });
