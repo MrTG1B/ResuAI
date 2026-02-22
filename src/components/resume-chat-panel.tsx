@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -20,7 +20,7 @@ import { type PersonalInfo } from '@/types/portfolio';
 
 interface ResumeChatPanelProps {
     editorState: SavedEditorState;
-    setEditorState: (state: SavedEditorState) => void;
+    setEditorState: Dispatch<SetStateAction<SavedEditorState | null>>;
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
     userProfile?: Partial<PersonalInfo>;
@@ -73,7 +73,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
         setIsLoading(true);
         
         // Update chat history with user message AFTER clearing input and attachments
-        setEditorState({ ...editorState, chatHistory: newMessages });
+        setEditorState(prev => prev ? { ...prev, chatHistory: newMessages } : null);
         
         // Add timeout wrapper
         const timeoutPromise = new Promise((_, reject) => {
@@ -93,19 +93,16 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             
             if (result.success && result.data) {
                 const finalMessages = [...newMessages, { role: 'assistant' as const, content: result.data.response }];
-                setEditorState({ 
-                    ...editorState, 
+                setEditorState(prev => prev ? { 
+                    ...prev, 
                     htmlContent: result.data.newHtmlContent,
                     chatHistory: finalMessages,
-                });
+                } : null);
             } else {
                 // Keep the user message visible even on error
                 const errorResponse = { role: 'assistant' as const, content: `❌ ${result.error || "An unexpected error occurred. Please try again."}` };
                 const messagesWithError = [...newMessages, errorResponse];
-                setEditorState({ 
-                    ...editorState, 
-                    chatHistory: messagesWithError 
-                });
+                setEditorState(prev => prev ? { ...prev, chatHistory: messagesWithError } : null);
                 toast({ 
                     title: "Request Failed", 
                     description: result.error || "An unexpected error occurred", 
@@ -125,10 +122,7 @@ export function ResumeChatPanel({ editorState, setEditorState, isLoading, setIsL
             // Keep the user message visible even on error
             const errorResponse = { role: 'assistant' as const, content: `❌ ${errorMessage}` };
             const messagesWithError = [...newMessages, errorResponse];
-            setEditorState({ 
-                ...editorState, 
-                chatHistory: messagesWithError 
-            });
+            setEditorState(prev => prev ? { ...prev, chatHistory: messagesWithError } : null);
             
             toast({ 
                 title: "Request Failed", 

@@ -75,6 +75,7 @@ export default function ResumeEditorClient() {
     const [flow, setFlow] = useState<'upload' | 'scratch' | 'edit' | 'loading' | 'analysis'>('loading');
     
     const livePreviewRef = useRef<HTMLDivElement>(null);
+    const hasInitializedRef = useRef(false);
     const MAX_RESUMES = 10;
     
     // Function to save state to Firestore
@@ -191,6 +192,17 @@ export default function ResumeEditorClient() {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setCurrentUser(user);
+
+                // Guard: only run data initialization once per component mount.
+                // The useEffect can re-run when saveStateToFirestore/applyAtsSuggestions
+                // are recreated after the first auth callback, which would otherwise
+                // overwrite in-memory editorState with stale Firestore data.
+                if (hasInitializedRef.current) {
+                    setIsLoading(false);
+                    return;
+                }
+                hasInitializedRef.current = true;
+
                 const idFromUrl = searchParams.get('id');
                 const fromFlow = searchParams.get('from');
 
