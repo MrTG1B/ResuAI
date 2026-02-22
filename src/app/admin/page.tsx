@@ -3,16 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminHeader } from '@/components/admin/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen, Activity, TrendingUp, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen, Activity, TrendingUp, AlertCircle, CreditCard } from 'lucide-react';
 import { AdminUser } from '@/types/admin/user';
 import { AdminFeedback } from '@/types/admin/feedback';
 import { AnalyticsData } from '@/types/admin/analytics';
+import type { PlanId } from '@/types/subscription';
+import { PLANS } from '@/lib/plans';
 import { AdminUserTable } from '@/components/admin/user-table';
 import { AdminFeedbackTable } from '@/components/admin/feedback-table';
 import { AnalyticsCharts } from '@/components/admin/analytics-charts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { db, auth, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns';
@@ -43,6 +46,64 @@ const hasPermissionIssue = (analytics: AnalyticsData): boolean => {
          analytics.totalCoverLetters === 0 && 
          analytics.totalFeedbacks > 0;
 };
+
+const PLAN_COLORS: Record<PlanId, string> = {
+  free: 'bg-slate-100 text-slate-700',
+  medium: 'bg-blue-100 text-blue-700',
+  pro: 'bg-violet-100 text-violet-700',
+  ultra_pro: 'bg-amber-100 text-amber-700',
+};
+
+function PlanStatsCard({ users }: { users: AdminUser[] }) {
+  const planCounts: Record<PlanId, number> = { free: 0, medium: 0, pro: 0, ultra_pro: 0 };
+  users.forEach((u) => { planCounts[u.plan ?? 'free']++; });
+  const total = users.length || 1;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Plan &amp; Subscription Overview</CardTitle>
+        <CardDescription>Distribution of users across subscription plans</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {(Object.keys(PLANS) as PlanId[]).map((planId) => {
+            const plan = PLANS[planId];
+            const count = planCounts[planId];
+            const pct = Math.round((count / total) * 100);
+            return (
+              <div key={planId} className="rounded-lg border p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{plan.name}</span>
+                  <Badge className={PLAN_COLORS[planId]}>{planId === 'free' ? 'Free' : `$${plan.price}/mo`}</Badge>
+                </div>
+                <div className="text-3xl font-bold">{count}</div>
+                <div className="text-xs text-muted-foreground">{pct}% of users</div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-6 rounded-lg border p-4 bg-muted/30">
+          <div className="flex items-center gap-2 mb-2">
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Revenue Estimate (Monthly)</span>
+          </div>
+          <div className="text-2xl font-bold">
+            ${(
+              planCounts.medium * PLANS.medium.price +
+              planCounts.pro * PLANS.pro.price +
+              planCounts.ultra_pro * PLANS.ultra_pro.price
+            ).toFixed(2)}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Based on current plan distribution at monthly rates</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -127,6 +188,18 @@ export default function AdminDashboardPage() {
           const coverLettersSnapshot = await getDocs(coverLettersCollectionRef);
           user.coverLetters = coverLettersSnapshot.size;
           totalCoverLetters += coverLettersSnapshot.size;
+
+          // Get subscription/plan data
+          const subDocRef = doc(db, 'users', user.id, 'subscription', 'current');
+          const subSnap = await getDoc(subDocRef);
+          if (subSnap.exists()) {
+            const subData = subSnap.data();
+            user.plan = subData.planId || 'free';
+          } else {
+            // Fall back to top-level plan field
+            const userDocData = userDoc.data();
+            user.plan = userDocData?.plan || 'free';
+          }
 
         } catch (error) {
           console.error(`Failed to fetch details for user ${user.id}`, error);
@@ -269,10 +342,14 @@ export default function AdminDashboardPage() {
         <Tabs defaultValue="users" className="space-y-4">
           <TabsList>
             <TabsTrigger value="users">Users ({analytics.totalUsers})</TabsTrigger>
+            <TabsTrigger value="plans">Plans &amp; Subscriptions</TabsTrigger>
             <TabsTrigger value="feedback">Feedbacks ({analytics.totalFeedbacks})</TabsTrigger>
           </TabsList>
           <TabsContent value="users">
             <AdminUserTable users={users} onUserUpdated={fetchData} />
+          </TabsContent>
+          <TabsContent value="plans">
+            <PlanStatsCard users={users} />
           </TabsContent>
           <TabsContent value="feedback">
             <AdminFeedbackTable feedback={feedback} />

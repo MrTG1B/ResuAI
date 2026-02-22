@@ -1,18 +1,28 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen } from 'lucide-react';
-import { User } from '@/types/user';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Loader2, Users, FileText, LayoutTemplate, MessageSquare, NotebookPen, CreditCard } from 'lucide-react';
+import { User, type PlanId } from '@/types/user';
 import { Feedback } from '@/types/feedback';
 import { UserTable } from '@/components/user-table';
 import { FeedbackTable } from '@/components/feedback-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+
+const PLAN_LABELS: Record<PlanId, string> = { free: 'Free', medium: 'Medium', pro: 'Pro', ultra_pro: 'Ultra Pro' };
+const PLAN_PRICES: Record<PlanId, number> = { free: 0, medium: 9.99, pro: 19.99, ultra_pro: 39.99 };
+const PLAN_COLORS: Record<PlanId, string> = {
+  free: 'bg-slate-100 text-slate-700',
+  medium: 'bg-blue-100 text-blue-700',
+  pro: 'bg-violet-100 text-violet-700',
+  ultra_pro: 'bg-amber-100 text-amber-700',
+};
 
 const StatCard = ({ title, value, icon: Icon }: { title: string; value: string | number; icon: React.ElementType }) => (
     <Card>
@@ -26,6 +36,50 @@ const StatCard = ({ title, value, icon: Icon }: { title: string; value: string |
     </Card>
 );
 
+function PlanOverviewCard({ users }: { users: User[] }) {
+    const planCounts: Record<PlanId, number> = { free: 0, medium: 0, pro: 0, ultra_pro: 0 };
+    users.forEach((u) => { planCounts[u.plan ?? 'free']++; });
+    const total = users.length || 1;
+    const revenue = (planCounts.medium * PLAN_PRICES.medium + planCounts.pro * PLAN_PRICES.pro + planCounts.ultra_pro * PLAN_PRICES.ultra_pro).toFixed(2);
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Plan Distribution</CardTitle>
+                <CardDescription>User subscription breakdown &amp; estimated revenue</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                    {(Object.keys(PLAN_LABELS) as PlanId[]).map((planId) => {
+                        const count = planCounts[planId];
+                        const pct = Math.round((count / total) * 100);
+                        return (
+                            <div key={planId} className="rounded-lg border p-3 space-y-1">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-medium">{PLAN_LABELS[planId]}</span>
+                                    <Badge className={`text-xs ${PLAN_COLORS[planId]}`}>
+                                        {planId === 'free' ? 'Free' : `$${PLAN_PRICES[planId]}`}
+                                    </Badge>
+                                </div>
+                                <div className="text-2xl font-bold">{count}</div>
+                                <div className="text-xs text-muted-foreground">{pct}%</div>
+                                <div className="h-1 rounded-full bg-muted overflow-hidden">
+                                    <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-3">
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Estimated Monthly Revenue:</span>
+                    <span className="text-lg font-bold">${revenue}</span>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
 export default function AdminDashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
@@ -35,6 +89,87 @@ export default function AdminDashboardPage() {
     const [feedback, setFeedback] = useState<Feedback[]>([]);
     const [stats, setStats] = useState({ users: 0, resumes: 0, portfolios: 0, feedbacks: 0, coverLetters: 0 });
 
+    const fetchData = useCallback(async () => {
+        if (!db) {
+            toast({ title: "Firestore Error", description: "Firestore is not initialized.", variant: "destructive" });
+            setIsLoading(false);
+            return;
+        }
+        try {
+            const usersCollectionRef = collection(db, 'users');
+            const usersSnapshot = await getDocs(usersCollectionRef);
+            let totalCoverLetters = 0;
+
+            const fetchedUsers: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
+                const userDocData = userDoc.data();
+                const user: User = {
+                    id: userDoc.id, name: 'N/A', email: 'N/A', resumes: 0, portfolios: 0,
+                    plan: userDocData?.plan || 'free',
+                };
+                try {
+                    const profileDocRef = doc(db, 'users', user.id, 'profile', 'data');
+                    const profileSnap = await getDoc(profileDocRef);
+                    if (profileSnap.exists()) {
+                        const profileData = profileSnap.data();
+                        user.name = profileData.name || 'N/A';
+                        user.email = profileData.email || 'N/A';
+                    }
+                    const portfoliosSnapshot = await getDocs(collection(db, 'users', user.id, 'portfolios'));
+                    user.portfolios = portfoliosSnapshot.size;
+                    const resumesSnapshot = await getDocs(collection(db, 'users', user.id, 'resumes'));
+                    user.resumes = resumesSnapshot.size;
+                    const coverLettersSnapshot = await getDocs(collection(db, 'users', user.id, 'coverletters'));
+                    user.coverLetters = coverLettersSnapshot.size;
+                    totalCoverLetters += coverLettersSnapshot.size;
+
+                    // Load subscription/plan
+                    const subSnap = await getDoc(doc(db, 'users', user.id, 'subscription', 'current'));
+                    if (subSnap.exists()) {
+                        user.plan = subSnap.data().planId ?? userDocData?.plan ?? 'free';
+                    }
+                } catch (error) {
+                    console.error(`Failed to fetch details for user ${user.id}`, error);
+                }
+                return user;
+            }));
+            
+            const feedbackCollectionRef = collection(db, 'feedback');
+            const feedbackQuery = query(feedbackCollectionRef, orderBy('createdAt', 'desc'));
+            const feedbackSnapshot = await getDocs(feedbackQuery);
+
+            const fetchedFeedback: Feedback[] = feedbackSnapshot.docs.map(feedbackDoc => {
+                const data = feedbackDoc.data();
+                return {
+                    id: feedbackDoc.id,
+                    feedback: data.feedback,
+                    userId: data.userId,
+                    userName: data.userName || 'N/A',
+                    userEmail: data.userEmail || 'N/A',
+                    createdAt: data.createdAt.toDate().toISOString(),
+                };
+            });
+
+            setUsers(fetchedUsers);
+            setFeedback(fetchedFeedback);
+            setStats({
+                users: fetchedUsers.length,
+                resumes: fetchedUsers.reduce((sum, u) => sum + (u.resumes || 0), 0),
+                portfolios: fetchedUsers.reduce((sum, u) => sum + (u.portfolios || 0), 0),
+                feedbacks: fetchedFeedback.length,
+                coverLetters: totalCoverLetters,
+            });
+        } catch (error: any) {
+            console.error("Failed to fetch admin data:", error);
+            toast({
+                title: "Data Fetch Error",
+                description: "Could not load data. Check Firestore permissions.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
     useEffect(() => {
         const isAdmin = sessionStorage.getItem('admin-auth') === 'true';
         if (!isAdmin) {
@@ -42,92 +177,8 @@ export default function AdminDashboardPage() {
             return;
         }
         setIsAuthorized(true);
-
-        async function fetchData() {
-            if (!db) {
-                toast({ title: "Firestore Error", description: "Firestore is not initialized.", variant: "destructive" });
-                setIsLoading(false);
-                return;
-            }
-            try {
-                // Fetch users and their subcollection counts
-                const usersCollectionRef = collection(db, 'users');
-                const usersSnapshot = await getDocs(usersCollectionRef);
-                let totalCoverLetters = 0;
-
-                const fetchedUsers: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
-                    const user: User = { id: userDoc.id, name: 'N/A', email: 'N/A', resumes: 0, portfolios: 0 };
-                    try {
-                        const profileDocRef = doc(db, 'users', user.id, 'profile', 'data');
-                        const profileSnap = await getDoc(profileDocRef);
-                        if (profileSnap.exists()) {
-                            const profileData = profileSnap.data();
-                            user.name = profileData.name || 'N/A';
-                            user.email = profileData.email || 'N/A';
-                        }
-                        const portfoliosCollectionRef = collection(db, 'users', user.id, 'portfolios');
-                        const portfoliosSnapshot = await getDocs(portfoliosCollectionRef);
-                        user.portfolios = portfoliosSnapshot.size;
-
-                        const resumesCollectionRef = collection(db, 'users', user.id, 'resumes');
-                        const resumesSnapshot = await getDocs(resumesCollectionRef);
-                        user.resumes = resumesSnapshot.size;
-
-                        const coverLettersCollectionRef = collection(db, 'users', user.id, 'coverletters');
-                        const coverLettersSnapshot = await getDocs(coverLettersCollectionRef);
-                        totalCoverLetters += coverLettersSnapshot.size;
-
-                    } catch (error) {
-                        console.error(`Failed to fetch details for user ${user.id}`, error);
-                    }
-                    return user;
-                }));
-                
-                // Fetch feedback
-                const feedbackCollectionRef = collection(db, 'feedback');
-                const feedbackQuery = query(feedbackCollectionRef, orderBy('createdAt', 'desc'));
-                const feedbackSnapshot = await getDocs(feedbackQuery);
-
-                const fetchedFeedback: Feedback[] = feedbackSnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return {
-                        id: doc.id,
-                        feedback: data.feedback,
-                        userId: data.userId,
-                        userName: data.userName || 'N/A',
-                        userEmail: data.userEmail || 'N/A',
-                        createdAt: data.createdAt.toDate().toISOString(),
-                    }
-                });
-
-                setUsers(fetchedUsers);
-                setFeedback(fetchedFeedback);
-
-                const totalResumes = fetchedUsers.reduce((sum, user) => sum + (user.resumes || 0), 0);
-                const totalPortfolios = fetchedUsers.reduce((sum, user) => sum + (user.portfolios || 0), 0);
-
-                setStats({
-                    users: fetchedUsers.length,
-                    resumes: totalResumes,
-                    portfolios: totalPortfolios,
-                    feedbacks: fetchedFeedback.length,
-                    coverLetters: totalCoverLetters,
-                });
-
-            } catch (error: any) {
-                console.error("Failed to fetch admin data:", error);
-                toast({
-                    title: "Data Fetch Error",
-                    description: "You might not have permission to view this data. Ensure you are logged in as the admin and your UID is set correctly in Firestore rules.",
-                    variant: "destructive"
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
         fetchData();
-    }, [router, toast]);
+    }, [router, fetchData]);
 
     if (isLoading || !isAuthorized) {
         return (
@@ -149,13 +200,14 @@ export default function AdminDashboardPage() {
                     <StatCard title="Total Portfolios" value={stats.portfolios} icon={LayoutTemplate} />
                     <StatCard title="Total Feedbacks" value={stats.feedbacks} icon={MessageSquare} />
                 </div>
+                <PlanOverviewCard users={users} />
                 <Tabs defaultValue="users">
                     <TabsList>
-                        <TabsTrigger value="users">Users</TabsTrigger>
-                        <TabsTrigger value="feedback">Feedbacks</TabsTrigger>
+                        <TabsTrigger value="users">Users ({stats.users})</TabsTrigger>
+                        <TabsTrigger value="feedback">Feedbacks ({stats.feedbacks})</TabsTrigger>
                     </TabsList>
                     <TabsContent value="users">
-                         <UserTable users={users} />
+                         <UserTable users={users} onRefresh={fetchData} />
                     </TabsContent>
                     <TabsContent value="feedback">
                         <FeedbackTable feedback={feedback} />

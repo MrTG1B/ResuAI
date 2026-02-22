@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from "next/link";
 import Image from 'next/image';
-import { LogOut, User as UserIcon, LayoutDashboard, Info, FileText, MessageSquare } from "lucide-react";
+import { LogOut, User as UserIcon, LayoutDashboard, Info, FileText, MessageSquare, CreditCard } from "lucide-react";
 import { Button } from "./ui/button";
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
@@ -119,6 +119,10 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                                 <MessageSquare className="mr-2 h-4 w-4" />
                                 <span>Feedback</span>
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/pricing')} className="cursor-pointer">
+                                <CreditCard className="mr-2 h-4 w-4" />
+                                <span>Pricing &amp; Plans</span>
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => router.push('/about')} className="cursor-pointer">
                                 <Info className="mr-2 h-4 w-4" />
@@ -143,6 +147,9 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
                     <div className="hidden md:flex items-center gap-2">
                         <Button variant="ghost" asChild size="sm">
                             <Link href="/about">About</Link>
+                        </Button>
+                        <Button variant="ghost" asChild size="sm">
+                            <Link href="/pricing">Pricing</Link>
                         </Button>
                         <Button variant="ghost" asChild size="sm">
                             <Link href="/faq">FAQ</Link>

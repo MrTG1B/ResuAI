@@ -29,13 +29,35 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Trash2, MoreHorizontal, Ban, CheckCircle, Settings } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Trash2, MoreHorizontal, Ban, CheckCircle, Settings, CreditCard } from "lucide-react";
 import { AdminUser } from "@/types/admin/user";
+import type { PlanId } from "@/types/subscription";
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { db, doc, updateDoc } from '@/lib/firebase';
+import { db, doc, updateDoc, setDoc, collection, serverTimestamp } from '@/lib/firebase';
 import { ToolAccessDialog } from './tool-access-dialog';
+
+const PLAN_COLORS: Record<PlanId, string> = {
+  free: 'bg-slate-100 text-slate-700 border-slate-200',
+  medium: 'bg-blue-100 text-blue-700 border-blue-200',
+  pro: 'bg-violet-100 text-violet-700 border-violet-200',
+  ultra_pro: 'bg-amber-100 text-amber-700 border-amber-200',
+};
+
+const PLAN_LABELS: Record<PlanId, string> = {
+  free: 'Free',
+  medium: 'Medium',
+  pro: 'Pro',
+  ultra_pro: 'Ultra Pro',
+};
 
 interface UserTableProps {
   users: AdminUser[];
@@ -86,6 +108,43 @@ export function AdminUserTable({ users, onUserUpdated }: UserTableProps) {
     }
   };
 
+  const handlePlanChange = async (userId: string, newPlan: PlanId) => {
+    if (!db) {
+      toast({ title: "Error", description: "Firebase not initialized.", variant: "destructive" });
+      return;
+    }
+
+    setActionLoading(`plan-${userId}`);
+    try {
+      // Update the user document with the new plan
+      const userRef = doc(db, 'users', userId);
+      await setDoc(userRef, { plan: newPlan }, { merge: true });
+
+      // Update the subscription subcollection
+      const subRef = doc(db, 'users', userId, 'subscription', 'current');
+      await setDoc(subRef, {
+        planId: newPlan,
+        status: newPlan === 'free' ? 'inactive' : 'active',
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+
+      toast({
+        title: "Plan Updated",
+        description: `User plan changed to ${PLAN_LABELS[newPlan]}.`,
+      });
+      onUserUpdated();
+    } catch (error) {
+      console.error("Error updating plan:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update user plan.",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -99,6 +158,7 @@ export function AdminUserTable({ users, onUserUpdated }: UserTableProps) {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Plan</TableHead>
               <TableHead className="text-right">Resumes</TableHead>
               <TableHead className="text-right">Portfolios</TableHead>
               <TableHead className="text-right">Cover Letters</TableHead>
@@ -116,6 +176,23 @@ export function AdminUserTable({ users, onUserUpdated }: UserTableProps) {
                   ) : (
                     <Badge variant="default" className="bg-green-600">Active</Badge>
                   )}
+                </TableCell>
+                <TableCell>
+                  <Select
+                    value={user.plan ?? 'free'}
+                    onValueChange={(val) => handlePlanChange(user.id, val as PlanId)}
+                    disabled={actionLoading === `plan-${user.id}`}
+                  >
+                    <SelectTrigger className="h-7 w-28 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="pro">Pro</SelectItem>
+                      <SelectItem value="ultra_pro">Ultra Pro</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell className="text-right">{user.resumes}</TableCell>
                 <TableCell className="text-right">{user.portfolios}</TableCell>

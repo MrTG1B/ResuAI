@@ -1,3 +1,5 @@
+import type { PlanId } from '../subscription';
+
 export interface AdminUser {
   id: string;
   name: string;
@@ -9,4 +11,5 @@ export interface AdminUser {
   disabledTools?: string[];
   createdAt?: string;
   lastLogin?: string;
+  plan?: PlanId;
 }
