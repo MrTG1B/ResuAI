@@ -37,7 +37,7 @@ export async function generateAptitudeExam(input: GenerateAptitudeExamInput): Pr
 
 const prompt = ai.definePrompt({
   name: 'generateAptitudeExamPrompt',
-  model: 'googleai/gemini-2.5-flash-preview-04-17',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: GenerateAptitudeExamInputSchema},
   output: {schema: GenerateAptitudeExamOutputSchema},
   system: `You are an expert test creator for professional aptitude exams. Your task is to generate a set of unique, high-quality questions for a timed aptitude test.

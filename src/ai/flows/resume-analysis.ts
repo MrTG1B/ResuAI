@@ -108,7 +108,7 @@ export async function analyzeResume(input: AnalyzeResumeInput): Promise<AnalyzeR
 
 const prompt = ai.definePrompt({
   name: 'analyzeResumePrompt',
-  model: 'googleai/gemini-2.5-flash-preview-04-17',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: AnalyzeResumeInputSchema},
   output: {schema: AnalyzeResumeOutputSchema},
   system: `You are an AI expert at analyzing resumes and extracting structured information. The provided resume may be in a variety of formats and layouts. Do your best to logically parse the content.
