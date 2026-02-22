@@ -35,7 +35,7 @@ export async function analyzeCertificate(input: AnalyzeCertificateInput): Promis
 
 const prompt = ai.definePrompt({
   name: 'analyzeCertificatePrompt',
-  model: 'googleai/gemini-2.5-flash',
+  model: 'googleai/gemini-2.5-flash-preview-04-17',
   input: {schema: AnalyzeCertificateInputSchema},
   output: {schema: AnalyzeCertificateOutputSchema},
   system: `You are an AI expert at analyzing official documents, licenses, and certificates.

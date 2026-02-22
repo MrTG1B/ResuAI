@@ -48,7 +48,7 @@ const systemPrompt = `You are an expert resume writer and designer. Your task is
 
 const prompt = ai.definePrompt({
     name: 'parseResumePrompt',
-    model: 'googleai/gemini-2.5-flash',
+    model: 'googleai/gemini-2.5-flash-preview-04-17',
     system: systemPrompt,
     input: { schema: ParseResumeInputSchema },
     output: { schema: ParseResumeOutputSchema },

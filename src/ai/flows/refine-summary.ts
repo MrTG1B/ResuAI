@@ -29,7 +29,7 @@ export async function refineSummary(input: RefineSummaryInput): Promise<RefineSu
 
 const prompt = ai.definePrompt({
   name: 'refineSummaryPrompt',
-  model: 'googleai/gemini-2.5-flash',
+  model: 'googleai/gemini-2.5-flash-preview-04-17',
   input: {schema: RefineSummaryInputSchema},
   output: {schema: RefineSummaryOutputSchema},
   system: `You are an expert career coach and copywriter specializing in personal branding.
