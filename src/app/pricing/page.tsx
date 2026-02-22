@@ -163,18 +163,7 @@ function PlanCard({ plan, isAnnual, currentPlanId, onSubscribe, loadingPlanId }:
   const savings = annualSavings(plan);
   const isLoading = loadingPlanId === plan.id;
 
-  const stripeConfigured = (() => {
-    if (plan.id === "free") return true;
-    if (plan.id === "medium")
-      return !!(isAnnual ? process.env.NEXT_PUBLIC_STRIPE_MEDIUM_ANNUAL_PRICE_ID : process.env.NEXT_PUBLIC_STRIPE_MEDIUM_PRICE_ID);
-    if (plan.id === "pro")
-      return !!(isAnnual ? process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID : process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID);
-    if (plan.id === "ultra_pro")
-      return !!(isAnnual
-        ? process.env.NEXT_PUBLIC_STRIPE_ULTRA_PRO_ANNUAL_PRICE_ID
-        : process.env.NEXT_PUBLIC_STRIPE_ULTRA_PRO_PRICE_ID);
-    return false;
-  })();
+  const stripeConfigured = plan.id === "free" || !!(isAnnual ? plan.stripeAnnualPriceId : plan.stripePriceId);
 
   return (
     <div

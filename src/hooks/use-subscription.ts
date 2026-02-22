@@ -28,6 +28,8 @@ export function useSubscription(): UseSubscriptionReturn {
       return;
     }
 
+    const firestore = db;
+
     const unsubAuth = onAuthStateChanged(auth, (user) => {
       if (!user) {
         setPlanId('free');
@@ -36,7 +38,7 @@ export function useSubscription(): UseSubscriptionReturn {
         return;
       }
 
-      const subRef = doc(db!, 'users', user.uid, 'subscription', 'current');
+      const subRef = doc(firestore, 'users', user.uid, 'subscription', 'current');
       const unsubSnap = onSnapshot(subRef, (snap) => {
         if (snap.exists()) {
           const data = snap.data() as Subscription;

@@ -545,6 +545,36 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── PRICING TEASER ───────────────────────────────────────────── */}
+        <section className="py-14 lg:py-20 bg-gradient-to-b from-background to-muted/30">
+          <div className="container mx-auto px-4 text-center">
+            <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">Pricing</span>
+            <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto mb-8">
+              Start free and scale as your career grows. No hidden fees, no surprises.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-8">
+              {[
+                { name: 'Free', price: '$0', color: 'border-slate-200 bg-card' },
+                { name: 'Medium', price: '$9.99', color: 'border-blue-200 bg-card' },
+                { name: 'Pro', price: '$19.99', color: 'border-violet-300 bg-violet-50/50 dark:bg-violet-950/20 ring-2 ring-violet-400' },
+                { name: 'Ultra Pro', price: '$39.99', color: 'border-amber-200 bg-card' },
+              ].map(({ name, price, color }) => (
+                <div key={name} className={`rounded-xl border p-4 ${color}`}>
+                  <div className="font-semibold text-sm mb-1">{name}</div>
+                  <div className="text-2xl font-bold">{price}</div>
+                  <div className="text-xs text-muted-foreground">/month</div>
+                </div>
+              ))}
+            </div>
+            <Link href="/pricing">
+              <Button size="lg" className="gap-2">
+                See Full Pricing <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </section>
+
         {/* ── FAQ ───────────────────────────────────────────────────────── */}
         <section
           className="py-14 lg:py-20 bg-background"

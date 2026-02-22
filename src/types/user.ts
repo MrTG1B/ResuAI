@@ -1,3 +1,4 @@
+import type { PlanId } from './subscription';
 
 export interface User {
     id: string;
@@ -5,4 +6,5 @@ export interface User {
     email: string;
     resumes: number;
     portfolios: number;
+    plan?: PlanId;
 }

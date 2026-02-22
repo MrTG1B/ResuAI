@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages, Smile, FileText } from "lucide-react";
+import { Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages, Smile, FileText, CreditCard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -37,6 +37,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useSubscription } from "@/hooks/use-subscription";
+import { PLANS } from "@/lib/plans";
 import { BrandLoader } from "@/components/brand-loader";
 
 
@@ -144,6 +146,7 @@ export default function ProfilePage() {
   const [isRefining, setIsRefining] = useState(false);
   const [localImagePreview, setLocalImagePreview] = useState<string | null>(null);
   const [isAnalyzingCert, setIsAnalyzingCert] = useState(false);
+  const { planId, plan, subscription, isPremium } = useSubscription();
 
   // State for managing which dialog is open and for what purpose (add/edit)
   const [editingSection, setEditingSection] = useState<EditableSection | null>(null);
@@ -428,7 +431,62 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+      <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-4xl space-y-6">
+        {/* Subscription Card */}
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-background">
+          <CardHeader className="pb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  Your Subscription
+                </CardTitle>
+                <CardDescription>Manage your plan and billing</CardDescription>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  planId === 'free' ? 'bg-slate-100 text-slate-700' :
+                  planId === 'medium' ? 'bg-blue-100 text-blue-700' :
+                  planId === 'pro' ? 'bg-violet-100 text-violet-700' :
+                  'bg-amber-100 text-amber-700'
+                }`}>
+                  {plan.name} Plan
+                </div>
+                {!isPremium ? (
+                  <Button size="sm" onClick={() => router.push('/pricing')}>
+                    Upgrade Now
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    if (!auth?.currentUser) return;
+                    const token = await auth.currentUser.getIdToken();
+                    const res = await fetch('/api/stripe/portal', {
+                      method: 'POST',
+                      headers: { authorization: `Bearer ${token}` },
+                    });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  }}>
+                    Manage Billing
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          {isPremium && subscription && (
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
+                {subscription.currentPeriodEnd && (
+                  <span>Renews: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</span>
+                )}
+                {subscription.cancelAtPeriodEnd && (
+                  <span className="text-amber-600 font-medium">Cancels at period end</span>
+                )}
+                <span className="capitalize">Status: {subscription.status}</span>
+              </div>
+            </CardContent>
+          )}
+        </Card>
         <Card className="shadow-lg">
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-center gap-4">
