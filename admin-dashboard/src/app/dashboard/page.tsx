@@ -12,7 +12,7 @@ import { UserTable } from '@/components/user-table';
 import { FeedbackTable } from '@/components/feedback-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { db, collection, getDocs, doc, getDoc, query, orderBy, collectionGroup } from '@/lib/firebase';
+import { auth, db, collection, getDocs, doc, getDoc, query, orderBy, collectionGroup, onAuthStateChanged } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
 const PLAN_LABELS: Record<PlanId, string> = { free: 'Free', medium: 'Medium', pro: 'Pro', ultra_pro: 'Ultra Pro' };
@@ -186,8 +186,24 @@ export default function AdminDashboardPage() {
             router.push('/login');
             return;
         }
-        setIsAuthorized(true);
-        fetchData();
+        // Wait for Firebase Auth state to be restored before fetching Firestore data.
+        // Without this, page refreshes may attempt Firestore queries before the auth
+        // token is available, causing "Missing or insufficient permissions" errors.
+        if (!auth) {
+            toast({ title: "Configuration Error", description: "Firebase Auth is not initialized.", variant: "destructive" });
+            setIsLoading(false);
+            return;
+        }
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setIsAuthorized(true);
+                fetchData();
+            } else {
+                sessionStorage.removeItem('admin-auth');
+                router.push('/login');
+            }
+        });
+        return () => unsubscribe();
     }, [router, fetchData]);
 
     if (isLoading || !isAuthorized) {

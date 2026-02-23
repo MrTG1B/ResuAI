@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if the requester is the admin
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'tirthankardasgupta2004@gmail.com';
+    }
+
+    // Helper function to check if the requester owns the document
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Admin has full read/write access to every document in the database
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Regular users can read and write their own user data
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /{subcollection}/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Authenticated users can create feedback; only admin can list/delete
+    match /feedback/{feedbackId} {
+      allow create: if request.auth != null;
+      allow read, delete: if isAdmin();
+    }
+  }
+}
