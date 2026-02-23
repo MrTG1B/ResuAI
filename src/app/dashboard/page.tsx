@@ -404,30 +404,6 @@ export default function DashboardPage() {
           Overview
         </button>
 
-        {/* AI Tools */}
-        <div>
-          <p className="text-[10px] uppercase font-semibold text-muted-foreground/50 px-3 mb-2 tracking-widest">AI Tools</p>
-          <div className="space-y-0.5">
-            {sidebarItems.tools.map(tool => (
-              <Link
-                key={tool.href}
-                href={tool.locked ? '/pricing' : tool.href}
-                className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group ${tool.locked ? 'text-muted-foreground/40 cursor-default' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
-              >
-                <div className="flex items-center gap-3">
-                  <tool.icon className="h-4 w-4 flex-shrink-0" />
-                  {tool.label}
-                </div>
-                {tool.locked ? (
-                  <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />
-                ) : (
-                  <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity flex-shrink-0" />
-                )}
-              </Link>
-            ))}
-          </div>
-        </div>
-
         {/* My Work */}
         <div>
           <p className="text-[10px] uppercase font-semibold text-muted-foreground/50 px-3 mb-2 tracking-widest">My Work</p>
@@ -453,43 +429,74 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
-      </nav>
 
-      {/* Bottom links */}
-      <div className="p-3 border-t border-border/50 space-y-0.5">
-        <Link
-          href={canAccess('mentorChat') ? '/mentra' : '/pricing'}
-          className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${canAccess('mentorChat') ? 'text-[#45B8AC] hover:bg-[#45B8AC]/10' : 'text-muted-foreground/40'}`}
-        >
-          <MentraIcon className="h-4 w-4 flex-shrink-0" isAnimated={canAccess('mentorChat')} />
-          Chat with Mentra
-          {!canAccess('mentorChat') && <Lock className="h-3 w-3 ml-auto text-amber-500/60 flex-shrink-0" />}
-        </Link>
-        <Link href="/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200">
-          <UserIcon className="h-4 w-4 flex-shrink-0" />
-          Profile
-        </Link>
-        <Link href="/pricing" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200">
-          <CreditCard className="h-4 w-4 flex-shrink-0" />
-          Plans &amp; Pricing
-        </Link>
-      </div>
+        {/* AI Tools */}
+        <div>
+          <p className="text-[10px] uppercase font-semibold text-muted-foreground/50 px-3 mb-2 tracking-widest">AI Tools</p>
+          <div className="space-y-0.5">
+            {sidebarItems.tools.map(tool => (
+              <Link
+                key={tool.href}
+                href={tool.locked ? '/pricing' : tool.href}
+                className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group ${tool.locked ? 'text-muted-foreground/40 cursor-default' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <tool.icon className="h-4 w-4 flex-shrink-0" />
+                  {tool.label}
+                </div>
+                {tool.locked ? (
+                  <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />
+                ) : (
+                  <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity flex-shrink-0" />
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Account */}
+        <div>
+          <p className="text-[10px] uppercase font-semibold text-muted-foreground/50 px-3 mb-2 tracking-widest">Account</p>
+          <div className="space-y-0.5">
+            <Link
+              href={canAccess('mentorChat') ? '/mentra' : '/pricing'}
+              className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${canAccess('mentorChat') ? 'text-[#45B8AC] hover:bg-[#45B8AC]/10' : 'text-muted-foreground/40'}`}
+            >
+              <div className="flex items-center gap-3">
+                <MentraIcon className="h-4 w-4 flex-shrink-0" isAnimated={canAccess('mentorChat')} />
+                Mentra Chat
+              </div>
+              {!canAccess('mentorChat') && <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />}
+            </Link>
+            <Link href="/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200">
+              <UserIcon className="h-4 w-4 flex-shrink-0" />
+              Profile
+            </Link>
+            <Link href="/pricing" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200">
+              <CreditCard className="h-4 w-4 flex-shrink-0" />
+              Plans &amp; Pricing
+            </Link>
+          </div>
+        </div>
+      </nav>
     </div>
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-background relative overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-background relative">
       <div className="dot-grid fixed inset-0 pointer-events-none opacity-60" />
       <Header />
 
-      <div className="flex flex-1 relative z-10">
-        {/* Desktop sidebar */}
-        <aside
-          className="hidden lg:flex flex-col w-64 shrink-0 border-r border-border/40 glass-card sticky self-start z-30 overflow-hidden"
-          style={{ top: HEADER_HEIGHT, height: `calc(100vh - ${HEADER_HEIGHT})` }}
-        >
-          <SidebarContent />
-        </aside>
+      {/* Desktop sidebar — truly fixed so it never scrolls */}
+      <aside
+        className="hidden lg:flex flex-col w-64 shrink-0 border-r border-border/40 glass-card fixed z-30 overflow-hidden"
+        style={{ top: HEADER_HEIGHT, left: 0, height: `calc(100vh - ${HEADER_HEIGHT})` }}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* Content area — offset by sidebar width on desktop */}
+      <div className="flex flex-1 relative z-10 lg:ml-64">
 
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
