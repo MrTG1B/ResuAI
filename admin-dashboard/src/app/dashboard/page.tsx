@@ -12,7 +12,7 @@ import { UserTable } from '@/components/user-table';
 import { FeedbackTable } from '@/components/feedback-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { db, collection, getDocs, doc, getDoc, query, orderBy } from '@/lib/firebase';
+import { db, collection, getDocs, doc, getDoc, query, orderBy, collectionGroup } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
 const PLAN_LABELS: Record<PlanId, string> = { free: 'Free', medium: 'Medium', pro: 'Pro', ultra_pro: 'Ultra Pro' };
@@ -96,42 +96,52 @@ export default function AdminDashboardPage() {
             return;
         }
         try {
-            const usersCollectionRef = collection(db, 'users');
-            const usersSnapshot = await getDocs(usersCollectionRef);
+            // Use collectionGroup to find all user profiles, since the main app stores
+            // user data in subcollections (users/{uid}/profile/data) without creating
+            // explicit top-level users/{uid} documents.
+            const profilesSnapshot = await getDocs(collectionGroup(db, 'profile'));
             let totalCoverLetters = 0;
 
-            const fetchedUsers: User[] = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
-                const userDocData = userDoc.data();
-                const user: User = {
-                    id: userDoc.id, name: 'N/A', email: 'N/A', resumes: 0, portfolios: 0,
-                    plan: userDocData?.plan || 'free',
-                };
-                try {
-                    const profileDocRef = doc(db, 'users', user.id, 'profile', 'data');
-                    const profileSnap = await getDoc(profileDocRef);
-                    if (profileSnap.exists()) {
-                        const profileData = profileSnap.data();
-                        user.name = profileData.name || 'N/A';
-                        user.email = profileData.email || 'N/A';
-                    }
-                    const portfoliosSnapshot = await getDocs(collection(db, 'users', user.id, 'portfolios'));
-                    user.portfolios = portfoliosSnapshot.size;
-                    const resumesSnapshot = await getDocs(collection(db, 'users', user.id, 'resumes'));
-                    user.resumes = resumesSnapshot.size;
-                    const coverLettersSnapshot = await getDocs(collection(db, 'users', user.id, 'coverletters'));
-                    user.coverLetters = coverLettersSnapshot.size;
-                    totalCoverLetters += coverLettersSnapshot.size;
+            const fetchedUsers: User[] = await Promise.all(
+                profilesSnapshot.docs
+                    .filter(profileDoc => profileDoc.id === 'data' && profileDoc.ref.parent.parent?.path.startsWith('users/'))
+                    .map(async (profileDoc) => {
+                        const uid = profileDoc.ref.parent.parent!.id;
+                        const profileData = profileDoc.data();
+                        const user: User = {
+                            id: uid,
+                            name: profileData.name || 'N/A',
+                            email: profileData.email || 'N/A',
+                            resumes: 0,
+                            portfolios: 0,
+                            plan: 'free',
+                        };
+                        try {
+                            const portfoliosSnapshot = await getDocs(collection(db, 'users', uid, 'portfolios'));
+                            user.portfolios = portfoliosSnapshot.size;
+                            const resumesSnapshot = await getDocs(collection(db, 'users', uid, 'resumes'));
+                            user.resumes = resumesSnapshot.size;
+                            const coverLettersSnapshot = await getDocs(collection(db, 'users', uid, 'coverletters'));
+                            user.coverLetters = coverLettersSnapshot.size;
+                            totalCoverLetters += coverLettersSnapshot.size;
 
-                    // Load subscription/plan
-                    const subSnap = await getDoc(doc(db, 'users', user.id, 'subscription', 'current'));
-                    if (subSnap.exists()) {
-                        user.plan = subSnap.data().planId ?? userDocData?.plan ?? 'free';
-                    }
-                } catch (error) {
-                    console.error(`Failed to fetch details for user ${user.id}`, error);
-                }
-                return user;
-            }));
+                            // Load subscription/plan
+                            const subSnap = await getDoc(doc(db, 'users', uid, 'subscription', 'current'));
+                            if (subSnap.exists()) {
+                                user.plan = subSnap.data().planId ?? 'free';
+                            } else {
+                                // Fallback to top-level user doc plan field if it exists
+                                const userDocSnap = await getDoc(doc(db, 'users', uid));
+                                if (userDocSnap.exists()) {
+                                    user.plan = userDocSnap.data()?.plan ?? 'free';
+                                }
+                            }
+                        } catch (error) {
+                            console.error(`Failed to fetch details for user ${uid}`, error);
+                        }
+                        return user;
+                    })
+            );
             
             const feedbackCollectionRef = collection(db, 'feedback');
             const feedbackQuery = query(feedbackCollectionRef, orderBy('createdAt', 'desc'));
