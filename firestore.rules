@@ -77,6 +77,12 @@ service cloud.firestore {
       allow delete: if isAuthenticated();
     }
 
+    // Config documents: plan config readable by all authenticated users; only admin can write
+    match /config/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
     // Allow admin to run collection-group queries on profile subcollections
     match /{path=**}/profile/{profileData} {
       allow read: if isAdmin();

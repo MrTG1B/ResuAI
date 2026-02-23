@@ -5,7 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { type Subscription, type PlanId, type Plan } from '@/types/subscription';
-import { getPlan, getLimit, isFeatureAvailable, applyPlanConfigOverrides } from '@/lib/plans';
+import { getPlan, getLimit, isFeatureAvailable, applyPlanConfigOverrides, type PlanOverride } from '@/lib/plans';
 
 interface UseSubscriptionReturn {
   planId: PlanId;
@@ -28,7 +28,7 @@ function getOverridesPromise(): Promise<void> {
     try {
       const snap = await getDoc(doc(db, 'config', 'plans'));
       if (snap.exists()) {
-        applyPlanConfigOverrides(snap.data() as Partial<Record<PlanId, Partial<Plan['features']>>>);
+        applyPlanConfigOverrides(snap.data() as Partial<Record<PlanId, PlanOverride>>);
       }
     } catch {
       // Silently fall back to static defaults if Firestore is unreachable

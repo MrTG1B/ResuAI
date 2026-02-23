@@ -47,13 +47,15 @@ interface PlanConfig {
   name: string;
   price: number;
   annualPrice: number;
+  priceINR: number;
+  annualPriceINR: number;
   description: string;
   features: PlanFeatures;
 }
 
 const DEFAULT_PLANS: Record<PlanId, PlanConfig> = {
   free: {
-    id: 'free', name: 'Free', price: 0, annualPrice: 0,
+    id: 'free', name: 'Free', price: 0, annualPrice: 0, priceINR: 0, annualPriceINR: 0,
     description: 'Perfect for getting started with AI-powered career tools',
     features: {
       resumeBuilds: 2, portfolios: 1, coverLetters: 3, aiRequests: 10, atsScans: 3,
@@ -63,7 +65,7 @@ const DEFAULT_PLANS: Record<PlanId, PlanConfig> = {
     },
   },
   medium: {
-    id: 'medium', name: 'Medium', price: 9.99, annualPrice: 7.99,
+    id: 'medium', name: 'Medium', price: 9.99, annualPrice: 7.99, priceINR: 799, annualPriceINR: 649,
     description: 'For professionals actively searching for their next opportunity',
     features: {
       resumeBuilds: 10, portfolios: 5, coverLetters: 20, aiRequests: 100, atsScans: 20,
@@ -73,7 +75,7 @@ const DEFAULT_PLANS: Record<PlanId, PlanConfig> = {
     },
   },
   pro: {
-    id: 'pro', name: 'Pro', price: 19.99, annualPrice: 15.99,
+    id: 'pro', name: 'Pro', price: 19.99, annualPrice: 15.99, priceINR: 1599, annualPriceINR: 1299,
     description: 'For power users who want the full career acceleration experience',
     features: {
       resumeBuilds: 50, portfolios: 20, coverLetters: 'unlimited', aiRequests: 500, atsScans: 100,
@@ -83,7 +85,7 @@ const DEFAULT_PLANS: Record<PlanId, PlanConfig> = {
     },
   },
   ultra_pro: {
-    id: 'ultra_pro', name: 'Ultra Pro', price: 39.99, annualPrice: 31.99,
+    id: 'ultra_pro', name: 'Ultra Pro', price: 39.99, annualPrice: 31.99, priceINR: 3199, annualPriceINR: 2599,
     description: 'The ultimate suite for teams and career coaches',
     features: {
       resumeBuilds: 'unlimited', portfolios: 'unlimited', coverLetters: 'unlimited',
@@ -173,12 +175,14 @@ function FeatureNumericInput({
 function PlanCard({
   plan,
   onChange,
+  onPriceChange,
   onSave,
   isSaving,
   isDirty,
 }: {
   plan: PlanConfig;
   onChange: (key: keyof PlanFeatures, value: FeatureValue) => void;
+  onPriceChange: (field: 'priceINR' | 'annualPriceINR', value: number) => void;
   onSave: () => void;
   isSaving: boolean;
   isDirty: boolean;
@@ -196,7 +200,7 @@ function PlanCard({
             <div>
               <CardTitle className="text-sm font-bold">{plan.name}</CardTitle>
               <CardDescription className="text-xs">
-                {plan.price === 0 ? 'Free forever' : `$${plan.price}/mo · $${plan.annualPrice}/mo annual`}
+                {plan.priceINR === 0 ? 'Free forever' : `₹${plan.priceINR}/mo · ₹${plan.annualPriceINR}/mo annual`}
               </CardDescription>
             </div>
           </div>
@@ -219,6 +223,43 @@ function PlanCard({
 
       {expanded && (
         <CardContent className="p-4 space-y-4">
+          {/* INR Price fields */}
+          {plan.id !== 'free' && (
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Pricing (INR)</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium">Monthly Price (₹)</p>
+                    <p className="text-[10px] text-muted-foreground">Billed monthly</p>
+                  </div>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={plan.priceINR}
+                    disabled={isSaving}
+                    onChange={e => onPriceChange('priceINR', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                    className="h-7 w-24 text-xs text-center"
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium">Annual Price (₹/mo)</p>
+                    <p className="text-[10px] text-muted-foreground">Per month when billed annually</p>
+                  </div>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={plan.annualPriceINR}
+                    disabled={isSaving}
+                    onChange={e => onPriceChange('annualPriceINR', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                    className="h-7 w-24 text-xs text-center"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Numeric limits */}
           <div>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Limits</p>
@@ -309,7 +350,13 @@ export default function PlansPage() {
         const merged = { ...DEFAULT_PLANS };
         (Object.keys(DEFAULT_PLANS) as PlanId[]).forEach(id => {
           if (data[id]) {
-            merged[id] = { ...DEFAULT_PLANS[id], features: { ...DEFAULT_PLANS[id].features, ...data[id] } };
+            const { priceINR, annualPriceINR, ...featureData } = data[id];
+            merged[id] = {
+              ...DEFAULT_PLANS[id],
+              priceINR: priceINR ?? DEFAULT_PLANS[id].priceINR,
+              annualPriceINR: annualPriceINR ?? DEFAULT_PLANS[id].annualPriceINR,
+              features: { ...DEFAULT_PLANS[id].features, ...featureData },
+            };
           }
         });
         setPlans(merged);
@@ -331,6 +378,13 @@ export default function PlansPage() {
     }));
   };
 
+  const handlePriceChange = (planId: PlanId, field: 'priceINR' | 'annualPriceINR', value: number) => {
+    setPlans(prev => ({
+      ...prev,
+      [planId]: { ...prev[planId], [field]: value },
+    }));
+  };
+
   const handleSave = async (planId: PlanId) => {
     if (!db) {
       toast({ title: "Error", description: "Firestore not initialized.", variant: "destructive" });
@@ -338,8 +392,10 @@ export default function PlansPage() {
     }
     setSavingPlan(planId);
     try {
-      const planFeatures = plans[planId].features;
-      await setDoc(doc(db, 'config', 'plans'), { [planId]: planFeatures }, { merge: true });
+      const { features, priceINR, annualPriceINR } = plans[planId];
+      await setDoc(doc(db, 'config', 'plans'), {
+        [planId]: { ...features, priceINR, annualPriceINR },
+      }, { merge: true });
       setSavedPlans(prev => ({ ...prev, [planId]: plans[planId] }));
       toast({ title: "Plan Saved", description: `${plans[planId].name} plan configuration saved successfully.` });
     } catch {
@@ -350,7 +406,11 @@ export default function PlansPage() {
   };
 
   const isPlanDirty = (planId: PlanId) => {
-    return JSON.stringify(plans[planId].features) !== JSON.stringify(savedPlans[planId].features);
+    const a = plans[planId];
+    const b = savedPlans[planId];
+    return JSON.stringify(a.features) !== JSON.stringify(b.features)
+      || a.priceINR !== b.priceINR
+      || a.annualPriceINR !== b.annualPriceINR;
   };
 
   const dirtyCount = (Object.keys(plans) as PlanId[]).filter(isPlanDirty).length;
@@ -400,6 +460,7 @@ export default function PlansPage() {
               key={planId}
               plan={plans[planId]}
               onChange={(key, value) => handleChange(planId, key, value)}
+              onPriceChange={(field, value) => handlePriceChange(planId, field, value)}
               onSave={() => handleSave(planId)}
               isSaving={savingPlan === planId}
               isDirty={isPlanDirty(planId)}
