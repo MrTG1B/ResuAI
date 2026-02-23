@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Check, X, Zap, Star, Crown, Sparkles, AlertCircle, Loader2, ChevronDown } from "lucide-react";
+import { Check, X, Zap, Star, Crown, Sparkles, AlertCircle, Loader2, ChevronDown, Users, TrendingUp, Award, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -388,7 +388,7 @@ function PricingInner() {
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Hero */}
-          <div className="text-center max-w-2xl mx-auto mb-14">
+          <div className="text-center max-w-2xl mx-auto mb-10">
             <Badge variant="outline" className="mb-4 px-3 py-1 text-xs font-medium border-violet-300 text-violet-700 dark:border-violet-700 dark:text-violet-400">
               Simple, transparent pricing
             </Badge>
@@ -401,6 +401,22 @@ function PricingInner() {
             <p className="text-lg text-muted-foreground">
               Pick the plan that fits your goals. Upgrade or cancel any time.
             </p>
+          </div>
+
+          {/* Social proof stats strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
+            {[
+              { icon: <Users className="w-5 h-5 text-violet-500" />, stat: "10,000+", label: "Active users" },
+              { icon: <TrendingUp className="w-5 h-5 text-emerald-500" />, stat: "3×", label: "More interviews landed" },
+              { icon: <Award className="w-5 h-5 text-amber-500" />, stat: "95%", label: "User satisfaction" },
+              { icon: <Rocket className="w-5 h-5 text-blue-500" />, stat: "₹799/mo", label: "Starting price" },
+            ].map(({ icon, stat, label }) => (
+              <div key={label} className="flex flex-col items-center gap-1.5 py-4 px-3 rounded-xl bg-muted/40 border border-border/60 text-center">
+                <div className="p-2 rounded-lg bg-background border border-border/60 shadow-sm">{icon}</div>
+                <span className="text-2xl font-extrabold text-foreground tracking-tight">{stat}</span>
+                <span className="text-xs text-muted-foreground">{label}</span>
+              </div>
+            ))}
           </div>
 
           {/* Cancelled banner */}
@@ -434,7 +450,7 @@ function PricingInner() {
           </div>
 
           {/* Plan cards grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
+          <div id="pricing-cards" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
             {plansList.map((plan) => (
               <PlanCard
                 key={plan.id}
@@ -452,6 +468,69 @@ function PricingInner() {
             {["🔒 Secure payments via Stripe", "↩ 7-day money-back guarantee", "🚫 No hidden fees", "✏️ Cancel anytime"].map((item) => (
               <span key={item} className="flex items-center gap-1">{item}</span>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why upgrade section */}
+      <section className="py-16 border-t border-border">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">Why upgrade?</h2>
+            <p className="text-muted-foreground">See how our paid plans accelerate your job search.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <TrendingUp className="w-6 h-6 text-violet-500" />,
+                title: "Land interviews faster",
+                desc: "Pro users report getting 3× more interview callbacks thanks to ATS-optimised resumes and personalised AI suggestions.",
+                highlight: "bg-violet-50 border-violet-200 dark:bg-violet-950/30 dark:border-violet-800",
+              },
+              {
+                icon: <Sparkles className="w-6 h-6 text-amber-500" />,
+                title: "Unlimited AI power",
+                desc: "Stop rationing AI requests. Pro & Ultra Pro plans give you 500–unlimited requests so you can iterate freely.",
+                highlight: "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800",
+              },
+              {
+                icon: <Award className="w-6 h-6 text-emerald-500" />,
+                title: "Stand out with portfolio",
+                desc: "Build up to 20 stunning portfolio sites. Share one link with recruiters and watch your response rate soar.",
+                highlight: "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800",
+              },
+              {
+                icon: <Rocket className="w-6 h-6 text-blue-500" />,
+                title: "Ace every interview",
+                desc: "Unlock AI Interview Prep and Aptitude Tests — practice until you're confident, then walk in ready to impress.",
+                highlight: "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800",
+              },
+              {
+                icon: <Users className="w-6 h-6 text-pink-500" />,
+                title: "Your personal AI mentor",
+                desc: "Mentra, our AI career mentor, is available 24/7 on Pro+ plans. Ask anything — resume tips, salary negotiation, career pivots.",
+                highlight: "bg-pink-50 border-pink-200 dark:bg-pink-950/30 dark:border-pink-800",
+              },
+              {
+                icon: <Check className="w-6 h-6 text-teal-500" />,
+                title: "Risk-free guarantee",
+                desc: "Not satisfied? We offer a 7-day money-back guarantee, no questions asked. Your career success is our priority.",
+                highlight: "bg-teal-50 border-teal-200 dark:bg-teal-950/30 dark:border-teal-800",
+              },
+            ].map(({ icon, title, desc, highlight }) => (
+              <div key={title} className={`rounded-xl border p-5 ${highlight}`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-background rounded-lg border border-border/60 shadow-sm">{icon}</div>
+                  <h3 className="font-semibold text-sm text-foreground">{title}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-10">
+            <a href="#pricing-cards" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-violet-200/60 dark:shadow-violet-900/40">
+              <Rocket className="w-4 h-4" /> Choose your plan &amp; upgrade now
+            </a>
           </div>
         </div>
       </section>

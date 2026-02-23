@@ -11,7 +11,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle, Lock } from 'lucide-react';
+import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle, Lock, Rocket, TrendingUp, Gift } from 'lucide-react';
 import { type SavedEditorState, type ResumeCheck } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
@@ -45,7 +45,7 @@ function ToolCard({ href, icon: Icon, title, description, actionText, color = 'p
     const isDisabled = disabled || locked;
 
     return (
-        <Card className={`shadow-lg ${isDisabled ? 'opacity-60 cursor-not-allowed' : `hover:shadow-2xl ${shadowColor}`} transition-all duration-300 flex flex-col h-full relative`}>
+        <Card className={`shadow-lg ${isDisabled ? 'opacity-60' : `hover:shadow-2xl ${shadowColor}`} transition-all duration-300 flex flex-col h-full relative`}>
             {disabled && !locked && (
                 <Badge variant="destructive" className="absolute top-3 right-3">Coming Soon</Badge>
             )}
@@ -71,9 +71,15 @@ function ToolCard({ href, icon: Icon, title, description, actionText, color = 'p
                 )}
             </CardContent>
             <CardFooter>
-                 <Button asChild className="w-full" disabled={isDisabled}>
-                    <Link href={isDisabled ? '#' : href}>{actionText} <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                </Button>
+                {locked ? (
+                    <Button asChild className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-semibold shadow-md shadow-amber-200 dark:shadow-amber-900/40">
+                        <Link href="/pricing"><Lock className="mr-2 h-4 w-4" /> Unlock — Upgrade Plan</Link>
+                    </Button>
+                ) : (
+                    <Button asChild className="w-full" disabled={disabled}>
+                        <Link href={disabled ? '#' : href}>{actionText} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     )
@@ -344,6 +350,67 @@ export default function DashboardPage() {
                         </Button>
                     </CardFooter>
                 </Card>
+            )}
+
+            {/* Upgrade marketing banner — shown for free and medium plan users */}
+            {(planId === 'free' || planId === 'medium') && (
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 p-px animate-fade-in-up shadow-lg shadow-violet-200/50 dark:shadow-violet-900/40">
+                    <div className="relative rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 p-6 md:p-8">
+                        {/* Decorative blobs */}
+                        <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                        <div className="absolute -bottom-4 left-10 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
+
+                        <div className="relative flex flex-col md:flex-row items-center gap-6">
+                            <div className="shrink-0 bg-white/15 p-4 rounded-2xl">
+                                <Rocket className="h-10 w-10 text-white" />
+                            </div>
+                            <div className="flex-1 text-center md:text-left">
+                                <div className="flex items-center gap-2 justify-center md:justify-start mb-1">
+                                    <span className="inline-flex items-center gap-1 bg-white/20 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                                        <Gift className="h-3 w-3" />
+                                        {planId === 'free' ? 'Unlock Your Full Potential' : 'Level Up to Pro'}
+                                    </span>
+                                </div>
+                                <h2 className="text-2xl font-extrabold text-white leading-tight">
+                                    {planId === 'free'
+                                        ? 'You\'re on the Free plan — you\'re just getting started!'
+                                        : 'Ready for unlimited power? Go Pro today!'}
+                                </h2>
+                                <p className="mt-2 text-sm text-white/80 leading-relaxed max-w-xl">
+                                    {planId === 'free'
+                                        ? 'Upgrade to unlock AI Interview Prep, Aptitude Tests, Mentra AI Chat, 10× more resumes & cover letters, and priority support — everything you need to land your dream job faster.'
+                                        : 'Pro gives you unlimited cover letters, 50 resumes, 500 AI requests/month, Mentra Chat and priority support. Ultra Pro goes even further with unlimited everything.'}
+                                </p>
+                                <div className="mt-3 flex flex-wrap gap-2 justify-center md:justify-start text-xs text-white/70">
+                                    {planId === 'free' ? (
+                                        <>
+                                            <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-white/60" /> 5× more AI requests</span>
+                                            <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-white/60" /> Interview Prep & Aptitude Tests</span>
+                                            <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-white/60" /> Mentra AI Mentor Chat</span>
+                                            <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-white/60" /> Priority Support</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-white/60" /> 5× more AI requests</span>
+                                            <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-white/60" /> Unlimited cover letters</span>
+                                            <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-white/60" /> Mentra AI Mentor Chat</span>
+                                            <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3 text-white/60" /> Priority Support</span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="shrink-0 flex flex-col gap-2 w-full md:w-auto">
+                                <Button asChild size="lg" className="bg-white text-violet-700 hover:bg-white/90 font-bold shadow-lg shadow-black/20 whitespace-nowrap">
+                                    <Link href="/pricing">
+                                        <Sparkles className="mr-2 h-4 w-4" />
+                                        {planId === 'free' ? 'Upgrade Now →' : 'Go Pro →'}
+                                    </Link>
+                                </Button>
+                                <p className="text-center text-[11px] text-white/60">7-day money-back guarantee · Cancel anytime</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             <Card className={`shadow-lg hover:shadow-2xl hover:shadow-[#45B8AC]/25 transition-all duration-300 w-full animate-fade-in-up ${!canAccess('mentorChat') ? 'opacity-60' : ''}`}>
