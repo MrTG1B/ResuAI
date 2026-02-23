@@ -108,10 +108,37 @@ export const PLANS: Record<PlanId, Plan> = {
   },
 };
 
+// Runtime-mutable plan cache. The admin dashboard writes overrides to
+// Firestore at `config/plans`; calling `applyPlanConfigOverrides` merges
+// those overrides into this cache so that subsequent calls to `getPlan`,
+// `isFeatureAvailable`, and `getLimit` reflect the admin's configuration
+// without requiring a redeployment.
+let _runtimePlans: Record<PlanId, Plan> = { ...PLANS };
+
+/**
+ * Merges admin-configured feature overrides (loaded from Firestore
+ * `config/plans`) into the runtime plan cache.  Safe to call multiple
+ * times – each call replaces the previous cache.
+ */
+export function applyPlanConfigOverrides(
+  overrides: Partial<Record<PlanId, Partial<Plan['features']>>>
+): void {
+  const merged = { ...PLANS };
+  (Object.keys(overrides) as PlanId[]).forEach((id) => {
+    if (merged[id] && overrides[id]) {
+      merged[id] = {
+        ...merged[id],
+        features: { ...merged[id].features, ...overrides[id] },
+      };
+    }
+  });
+  _runtimePlans = merged;
+}
+
 export const PLANS_LIST: Plan[] = Object.values(PLANS);
 
 export function getPlan(planId: PlanId): Plan {
-  return PLANS[planId] ?? PLANS.free;
+  return _runtimePlans[planId] ?? _runtimePlans.free;
 }
 
 export function isFeatureAvailable(planId: PlanId, feature: keyof Plan['features']): boolean {

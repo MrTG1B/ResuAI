@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { type Subscription, type PlanId, type Plan } from '@/types/subscription';
-import { getPlan, getLimit, isFeatureAvailable } from '@/lib/plans';
+import { getPlan, getLimit, isFeatureAvailable, applyPlanConfigOverrides } from '@/lib/plans';
 
 interface UseSubscriptionReturn {
   planId: PlanId;
@@ -15,6 +15,31 @@ interface UseSubscriptionReturn {
   isPremium: boolean;
   canAccess: (feature: keyof Plan['features']) => boolean;
   getFeatureLimit: (feature: keyof Plan['features']) => number | 'unlimited';
+}
+
+// Singleton promise to ensure plan-config overrides are loaded only once,
+// even when multiple hook instances mount simultaneously.
+let _overridesPromise: Promise<void> | null = null;
+
+function getOverridesPromise(): Promise<void> {
+  if (_overridesPromise) return _overridesPromise;
+  _overridesPromise = (async () => {
+    if (!db) return;
+    try {
+      const snap = await getDoc(doc(db, 'config', 'plans'));
+      if (snap.exists()) {
+        applyPlanConfigOverrides(snap.data() as Partial<Record<PlanId, Partial<Plan['features']>>>);
+      }
+    } catch {
+      // Silently fall back to static defaults if Firestore is unreachable
+    }
+  })();
+  return _overridesPromise;
+}
+
+// Kick off override loading once at module load (non-blocking, client-side only)
+if (typeof window !== 'undefined') {
+  getOverridesPromise();
 }
 
 export function useSubscription(): UseSubscriptionReturn {
