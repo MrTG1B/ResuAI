@@ -155,7 +155,7 @@ function FeatureNumericInput({
           min={0}
           value={value as number}
           disabled={disabled}
-          onChange={e => onChange(Math.max(0, parseInt(e.target.value) || 0))}
+          onChange={e => onChange(Math.max(0, parseInt(e.target.value, 10) || 0))}
           className="h-7 w-20 text-xs text-center"
         />
       )}

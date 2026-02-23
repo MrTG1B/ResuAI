@@ -152,7 +152,7 @@ export default function OverviewPage() {
                 <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50" />
               </div>
               <div className={`text-2xl font-bold tabular-nums ${isLoading ? 'animate-pulse bg-muted rounded w-12 h-7' : ''}`}>
-                {!isLoading && (stats as any)[key]}
+                {!isLoading && stats[key as keyof Stats]}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{label}</p>
             </CardContent>

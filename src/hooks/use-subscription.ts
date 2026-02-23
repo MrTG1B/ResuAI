@@ -17,26 +17,29 @@ interface UseSubscriptionReturn {
   getFeatureLimit: (feature: keyof Plan['features']) => number | 'unlimited';
 }
 
-// Load plan feature overrides from Firestore `config/plans` and apply them to
-// the runtime plan cache. This allows the admin dashboard to update plan
-// limits/features without requiring a redeployment of the main app.
-async function loadAndApplyPlanOverrides(): Promise<void> {
-  if (!db) return;
-  try {
-    const snap = await getDoc(doc(db, 'config', 'plans'));
-    if (snap.exists()) {
-      applyPlanConfigOverrides(snap.data() as Partial<Record<PlanId, Partial<Plan['features']>>>);
+// Singleton promise to ensure plan-config overrides are loaded only once,
+// even when multiple hook instances mount simultaneously.
+let _overridesPromise: Promise<void> | null = null;
+
+function getOverridesPromise(): Promise<void> {
+  if (_overridesPromise) return _overridesPromise;
+  _overridesPromise = (async () => {
+    if (!db) return;
+    try {
+      const snap = await getDoc(doc(db, 'config', 'plans'));
+      if (snap.exists()) {
+        applyPlanConfigOverrides(snap.data() as Partial<Record<PlanId, Partial<Plan['features']>>>);
+      }
+    } catch {
+      // Silently fall back to static defaults if Firestore is unreachable
     }
-  } catch {
-    // Silently fall back to static defaults if Firestore is unreachable
-  }
+  })();
+  return _overridesPromise;
 }
 
-// Kick off override loading once at module load (non-blocking)
-let _overridesLoaded = false;
-if (typeof window !== 'undefined' && !_overridesLoaded) {
-  _overridesLoaded = true;
-  loadAndApplyPlanOverrides();
+// Kick off override loading once at module load (non-blocking, client-side only)
+if (typeof window !== 'undefined') {
+  getOverridesPromise();
 }
 
 export function useSubscription(): UseSubscriptionReturn {

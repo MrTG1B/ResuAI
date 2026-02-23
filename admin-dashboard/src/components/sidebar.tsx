@@ -79,10 +79,9 @@ export function Sidebar() {
             >
               <Icon
                 className={cn(
-                  'h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-110',
+                  'h-[1.125rem] w-[1.125rem] shrink-0 transition-transform duration-200 group-hover:scale-110',
                   active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
                 )}
-                style={{ width: '1.125rem', height: '1.125rem' }}
               />
               <span>{label}</span>
               {active && (

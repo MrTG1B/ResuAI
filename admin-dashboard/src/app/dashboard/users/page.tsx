@@ -10,7 +10,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialog, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
@@ -77,8 +77,7 @@ export default function UsersPage() {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const handlePlanChange = async (userId: string, newPlan: PlanId) => {
-    if (!db) return;
+  const handlePlanChange = async (userId: string, newPlan: PlanId) => {    if (!db) return;
     setChangingPlan(userId);
     try {
       await setDoc(doc(db, 'users', userId), { plan: newPlan }, { merge: true });
@@ -93,10 +92,6 @@ export default function UsersPage() {
     } finally {
       setChangingPlan(null);
     }
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    toast({ title: "Note", description: "User deletion requires Firebase Admin SDK (server-side).", variant: "default" });
   };
 
   const filtered = users.filter(u => {
@@ -236,17 +231,11 @@ export default function UsersPage() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete User?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete {user.name}&apos;s account and all their data.
+                                  Deleting {user.name} requires the Firebase Admin SDK via a server-side API route (not yet wired up). User data deletion cannot be performed from the client side for security reasons.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  onClick={() => handleDeleteUser(user.id)}
-                                >
-                                  Delete
-                                </AlertDialogAction>
+                                <AlertDialogCancel>Close</AlertDialogCancel>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
