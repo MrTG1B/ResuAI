@@ -11,7 +11,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle } from 'lucide-react';
+import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle, Lock } from 'lucide-react';
 import { type SavedEditorState, type ResumeCheck } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
@@ -35,17 +35,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrandLoader } from '@/components/brand-loader';
 import { TemplatePreview } from '@/components/template-preview';
 import { Badge } from '@/components/ui/badge';
+import { useSubscription } from '@/hooks/use-subscription';
 
 
-function ToolCard({ href, icon: Icon, title, description, actionText, color = 'primary', disabled = false }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string, color?: 'primary' | 'secondary', disabled?: boolean }) {
+function ToolCard({ href, icon: Icon, title, description, actionText, color = 'primary', disabled = false, locked = false }: { href: string, icon: React.ElementType, title: string, description: string, actionText: string, color?: 'primary' | 'secondary', disabled?: boolean, locked?: boolean }) {
     const shadowColor = color === 'primary' ? 'hover:shadow-primary/25' : 'hover:shadow-[#45B8AC]/25';
     const iconColor = color === 'primary' ? 'text-primary' : 'text-[#45B8AC]';
     const bgColor = color === 'primary' ? 'bg-primary/10' : 'bg-[#45B8AC]/10';
+    const isDisabled = disabled || locked;
 
     return (
-        <Card className={`shadow-lg ${disabled ? 'opacity-50 cursor-not-allowed' : `hover:shadow-2xl ${shadowColor}`} transition-all duration-300 flex flex-col h-full relative`}>
-            {disabled && (
+        <Card className={`shadow-lg ${isDisabled ? 'opacity-60 cursor-not-allowed' : `hover:shadow-2xl ${shadowColor}`} transition-all duration-300 flex flex-col h-full relative`}>
+            {disabled && !locked && (
                 <Badge variant="destructive" className="absolute top-3 right-3">Coming Soon</Badge>
+            )}
+            {locked && (
+                <Badge variant="outline" className="absolute top-3 right-3 border-amber-400 text-amber-600 dark:text-amber-400 gap-1">
+                    <Lock className="h-3 w-3" /> Upgrade
+                </Badge>
             )}
             <CardHeader>
                 <div className="flex justify-center items-center mb-4">
@@ -57,10 +64,15 @@ function ToolCard({ href, icon: Icon, title, description, actionText, color = 'p
             </CardHeader>
             <CardContent className="flex-grow text-center">
                 <p className="text-muted-foreground">{description}</p>
+                {locked && (
+                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                        Upgrade your plan to access this tool.
+                    </p>
+                )}
             </CardContent>
             <CardFooter>
-                 <Button asChild className="w-full" disabled={disabled}>
-                    <Link href={disabled ? '#' : href}>{actionText} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                 <Button asChild className="w-full" disabled={isDisabled}>
+                    <Link href={isDisabled ? '#' : href}>{actionText} <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
             </CardFooter>
         </Card>
@@ -109,6 +121,8 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   
+  const { planId, plan, getFeatureLimit, canAccess } = useSubscription();
+
   const [resumes, setResumes] = useState<(SavedEditorState & {id: string})[]>([]);
   const [isResumeLoading, setIsResumeLoading] = useState(true);
   
@@ -125,9 +139,18 @@ export default function DashboardPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<{type: 'resume' | 'portfolio' | 'coverletter' | 'resumecheck', id: string} | null>(null);
 
-  const MAX_RESUMES = 10;
-  const MAX_PORTFOLIOS = 5;
-  const MAX_COVER_LETTERS = 10;
+  // Plan-based limits (fall back to sensible numbers if unlimited is returned)
+  const maxResumes = getFeatureLimit('resumeBuilds');
+  const maxPortfolios = getFeatureLimit('portfolios');
+  const maxCoverLetters = getFeatureLimit('coverLetters');
+
+  // Plan display helpers
+  const PLAN_BADGE_COLORS: Record<string, string> = {
+    free: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300',
+    medium: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/50 dark:text-blue-300',
+    pro: 'bg-violet-100 text-violet-700 border-violet-300 dark:bg-violet-900/50 dark:text-violet-300',
+    ultra_pro: 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/50 dark:text-amber-300',
+  };
 
   const isEmailUser = user?.providerData.some(p => p.providerId === 'password');
   const isEmailVerified = user?.emailVerified;
@@ -273,12 +296,22 @@ export default function DashboardPage() {
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
             <div className="animate-fade-in-down">
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground font-heading">
-                    Welcome back, {user.displayName || 'Creator'}!
-                </h1>
+                <div className="flex flex-wrap items-center gap-3 mb-1">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground font-heading">
+                        Welcome back, {user.displayName || 'Creator'}!
+                    </h1>
+                    <Badge variant="outline" className={`text-xs font-semibold px-2 py-0.5 ${PLAN_BADGE_COLORS[planId] ?? PLAN_BADGE_COLORS.free}`}>
+                        {plan.name} Plan
+                    </Badge>
+                </div>
                 <p className="mt-2 text-lg text-muted-foreground">
                     Your career toolkit is ready. Let's build something amazing today.
                 </p>
+                {planId === 'free' && (
+                    <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                        🔓 <Link href="/pricing" className="font-medium underline underline-offset-2">Upgrade your plan</Link> to unlock more tools and higher limits.
+                    </p>
+                )}
             </div>
 
             {isEmailUser && !isEmailVerified && (
@@ -313,18 +346,29 @@ export default function DashboardPage() {
                 </Card>
             )}
 
-            <Card className="shadow-lg hover:shadow-2xl hover:shadow-[#45B8AC]/25 transition-all duration-300 w-full animate-fade-in-up">
-                <Link href="/mentra" className="block hover:bg-card/20 rounded-lg">
+            <Card className={`shadow-lg hover:shadow-2xl hover:shadow-[#45B8AC]/25 transition-all duration-300 w-full animate-fade-in-up ${!canAccess('mentorChat') ? 'opacity-60' : ''}`}>
+                <Link href={canAccess('mentorChat') ? "/mentra" : "/pricing"} className="block hover:bg-card/20 rounded-lg">
                     <CardHeader className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left p-4 sm:p-6">
                         <div className="bg-[#45B8AC]/10 p-4 rounded-full">
-                            <MentraIcon className="h-10 w-10 text-[#45B8AC]" isAnimated={true} />
+                            <MentraIcon className="h-10 w-10 text-[#45B8AC]" isAnimated={canAccess('mentorChat')} />
                         </div>
                         <div className="flex-1">
-                            <CardTitle className="text-2xl">Chat with Mentra</CardTitle>
+                            <div className="flex items-center gap-2 justify-center md:justify-start">
+                                <CardTitle className="text-2xl">Chat with Mentra</CardTitle>
+                                {!canAccess('mentorChat') && (
+                                    <Badge variant="outline" className="border-amber-400 text-amber-600 dark:text-amber-400 gap-1 text-xs">
+                                        <Lock className="h-3 w-3" /> Pro+
+                                    </Badge>
+                                )}
+                            </div>
                             <p className="text-muted-foreground mt-1">Get instant guidance on your career, help writing professional content, and more from your personal AI mentor.</p>
+                            {!canAccess('mentorChat') && (
+                                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">Available on Pro and Ultra Pro plans.</p>
+                            )}
                         </div>
-                        <Button variant="ghost" className="shrink-0 mt-4 md:mt-0">
-                            Start Chatting <Sparkles className="ml-2 h-4 w-4" /></Button>
+                        <Button variant="ghost" className="shrink-0 mt-4 md:mt-0" disabled={!canAccess('mentorChat')}>
+                            {canAccess('mentorChat') ? <>Start Chatting <Sparkles className="ml-2 h-4 w-4" /></> : <>Upgrade to Unlock <Lock className="ml-2 h-4 w-4" /></>}
+                        </Button>
                     </CardHeader>
                 </Link>
             </Card>
@@ -361,6 +405,7 @@ export default function DashboardPage() {
                     description="Practice common interview questions and get AI-powered feedback."
                     actionText="Start Practice"
                     color="secondary"
+                    locked={!canAccess('interviewPrep')}
                 />
                  <ToolCard 
                     href="/aptitude-test"
@@ -369,6 +414,7 @@ export default function DashboardPage() {
                     description="Take a timed test with unique questions to sharpen your skills for interviews."
                     actionText="Start Test"
                     color="primary"
+                    locked={!canAccess('aptitudeTests')}
                 />
                 <ToolCard 
                     href="/build"
@@ -434,7 +480,7 @@ export default function DashboardPage() {
                             ) : (
                                 <div className="text-center p-8 bg-muted/50 rounded-lg"><CardTitle className="text-lg">No Saved Resumes</CardTitle><CardDescription className="mt-2 mb-4">You haven't started editing a resume yet.</CardDescription></div>
                             )}
-                            <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button onClick={() => handleStartNew('resume')} className="w-full" disabled={resumes.length >= MAX_RESUMES}><PlusCircle className="mr-2 h-4 w-4" /> Create New Resume</Button></div></TooltipTrigger>{resumes.length >= MAX_RESUMES && (<TooltipContent><p>You have reached the free limit of {MAX_RESUMES} resumes.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
+                            <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button onClick={() => handleStartNew('resume')} className="w-full" disabled={maxResumes !== 'unlimited' && resumes.length >= maxResumes}><PlusCircle className="mr-2 h-4 w-4" /> Create New Resume</Button></div></TooltipTrigger>{maxResumes !== 'unlimited' && resumes.length >= maxResumes && (<TooltipContent><p>You have reached the {plan.name} plan limit of {maxResumes} resumes. <Link href="/pricing" className="underline">Upgrade</Link> for more.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
                         </TabsContent>
                         <TabsContent value="portfolios" className="space-y-4">
                              {isPortfolioLoading ? (
@@ -473,7 +519,7 @@ export default function DashboardPage() {
                             ) : (
                                 <div className="text-center p-8 bg-muted/50 rounded-lg"><CardTitle className="text-lg">No Portfolios Yet</CardTitle><CardDescription className="mt-2 mb-4">You haven't created a portfolio.</CardDescription></div>
                             )}
-                            <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button asChild className="w-full" disabled={portfolios.length >= MAX_PORTFOLIOS}><Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create New Portfolio</Link></Button></div></TooltipTrigger>{portfolios.length >= MAX_PORTFOLIOS && (<TooltipContent><p>You have reached the free limit of {MAX_PORTFOLIOS} portfolios.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
+                            <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button asChild className="w-full" disabled={maxPortfolios !== 'unlimited' && portfolios.length >= maxPortfolios}><Link href="/build"><PlusCircle className="mr-2 h-4 w-4" /> Create New Portfolio</Link></Button></div></TooltipTrigger>{maxPortfolios !== 'unlimited' && portfolios.length >= maxPortfolios && (<TooltipContent><p>You have reached the {plan.name} plan limit of {maxPortfolios} portfolios. <Link href="/pricing" className="underline">Upgrade</Link> for more.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
                         </TabsContent>
                         <TabsContent value="coverletters" className="space-y-4">
                              {isCoverLetterLoading ? (
@@ -500,7 +546,7 @@ export default function DashboardPage() {
                             ) : (
                                 <div className="text-center p-8 bg-muted/50 rounded-lg"><CardTitle className="text-lg">No Saved Cover Letters</CardTitle><CardDescription className="mt-2 mb-4">You haven't created a cover letter yet.</CardDescription></div>
                             )}
-                             <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button onClick={() => handleStartNew('coverletter')} className="w-full" disabled={coverLetters.length >= MAX_COVER_LETTERS}><PlusCircle className="mr-2 h-4 w-4" /> Create New Cover Letter</Button></div></TooltipTrigger>{coverLetters.length >= MAX_COVER_LETTERS && (<TooltipContent><p>You have reached the free limit of {MAX_COVER_LETTERS} cover letters.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
+                             <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button onClick={() => handleStartNew('coverletter')} className="w-full" disabled={maxCoverLetters !== 'unlimited' && coverLetters.length >= maxCoverLetters}><PlusCircle className="mr-2 h-4 w-4" /> Create New Cover Letter</Button></div></TooltipTrigger>{maxCoverLetters !== 'unlimited' && coverLetters.length >= maxCoverLetters && (<TooltipContent><p>You have reached the {plan.name} plan limit of {maxCoverLetters} cover letters. <Link href="/pricing" className="underline">Upgrade</Link> for more.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
                         </TabsContent>
                         <TabsContent value="atschecks" className="space-y-4">
                             {isResumeCheckLoading ? (

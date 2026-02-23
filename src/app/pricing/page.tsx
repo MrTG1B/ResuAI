@@ -9,10 +9,11 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { PLANS_LIST } from "@/lib/plans";
+import { PLANS_LIST, applyPlanConfigOverrides, getRuntimePlansList, type PlanOverride } from "@/lib/plans";
 import type { Plan, PlanId } from "@/types/subscription";
-import { auth } from "@/lib/firebase";
+import { auth, db, doc, getDoc } from "@/lib/firebase";
 import { getIdToken } from "firebase/auth";
+import { useSubscription } from "@/hooks/use-subscription";
 
 // ---------------------------------------------------------------------------
 // Constants & helpers
@@ -53,8 +54,8 @@ function featureIncluded(value: Plan["features"][keyof Plan["features"]]): boole
 }
 
 function annualSavings(plan: Plan): number {
-  if (plan.price === 0) return 0;
-  return Math.round((1 - plan.annualPrice / plan.price) * 100);
+  if (plan.priceINR === 0) return 0;
+  return Math.round((1 - plan.annualPriceINR / plan.priceINR) * 100);
 }
 
 const PLAN_META: Record<PlanId, { icon: React.ReactNode; gradient: string; border: string; badge: string; badgeClass: string }> = {
@@ -159,7 +160,7 @@ function PlanCard({ plan, isAnnual, currentPlanId, onSubscribe, loadingPlanId }:
   const isPopular = plan.id === "pro";
   const isUltraPro = plan.id === "ultra_pro";
   const isCurrent = currentPlanId === plan.id;
-  const price = isAnnual ? plan.annualPrice : plan.price;
+  const price = isAnnual ? plan.annualPriceINR : plan.priceINR;
   const savings = annualSavings(plan);
   const isLoading = loadingPlanId === plan.id;
 
@@ -210,8 +211,8 @@ function PlanCard({ plan, isAnnual, currentPlanId, onSubscribe, loadingPlanId }:
         ) : (
           <>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-muted-foreground">$</span>
-              <span className="text-4xl font-extrabold text-foreground">{price.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-muted-foreground">₹</span>
+              <span className="text-4xl font-extrabold text-foreground">{price.toLocaleString('en-IN')}</span>
               <span className="text-sm text-muted-foreground">/month</span>
             </div>
             {isAnnual && savings > 0 && (
@@ -221,7 +222,7 @@ function PlanCard({ plan, isAnnual, currentPlanId, onSubscribe, loadingPlanId }:
             )}
             {!isAnnual && (
               <p className="mt-1 text-xs text-muted-foreground">
-                or ${plan.annualPrice.toFixed(2)}/mo billed annually
+                or ₹{plan.annualPriceINR.toLocaleString('en-IN')}/mo billed annually
               </p>
             )}
           </>
@@ -308,11 +309,26 @@ function PricingInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isAnnual, setIsAnnual] = useState(false);
-  const [currentPlanId] = useState<PlanId | null>(null);
   const [loadingPlanId, setLoadingPlanId] = useState<PlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [plansList, setPlansList] = useState<Plan[]>(PLANS_LIST);
+
+  const { planId: currentPlanId, isLoading: subLoading } = useSubscription();
 
   const cancelled = searchParams.get("canceled") === "true";
+
+  // Load Firestore plan config overrides (prices + features)
+  useEffect(() => {
+    if (!db) return;
+    getDoc(doc(db, 'config', 'plans'))
+      .then((snap) => {
+        if (snap.exists()) {
+          applyPlanConfigOverrides(snap.data() as Partial<Record<PlanId, PlanOverride>>);
+          setPlansList(getRuntimePlansList());
+        }
+      })
+      .catch(() => {/* silently fall back to defaults */});
+  }, []);
 
   async function handleSubscribe(plan: Plan) {
     setError(null);
@@ -419,12 +435,12 @@ function PricingInner() {
 
           {/* Plan cards grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
-            {PLANS_LIST.map((plan) => (
+            {plansList.map((plan) => (
               <PlanCard
                 key={plan.id}
                 plan={plan}
                 isAnnual={isAnnual}
-                currentPlanId={currentPlanId}
+                currentPlanId={subLoading ? null : currentPlanId}
                 onSubscribe={handleSubscribe}
                 loadingPlanId={loadingPlanId}
               />

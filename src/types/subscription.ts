@@ -5,6 +5,8 @@ export interface Plan {
   name: string;
   price: number; // monthly USD
   annualPrice: number; // annual USD (per month equivalent)
+  priceINR: number; // monthly INR (editable via admin dashboard)
+  annualPriceINR: number; // annual INR per month equivalent
   stripePriceId: string; // env var name for the price ID
   stripeAnnualPriceId: string;
   description: string;
