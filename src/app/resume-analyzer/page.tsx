@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { auth, db, collection, addDoc, serverTimestamp } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ export default function ResumeAnalyzerPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
@@ -59,6 +60,7 @@ export default function ResumeAnalyzerPage() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuthenticated(true);
+        setUser(user);
       } else {
         router.push('/login');
       }
@@ -118,6 +120,24 @@ export default function ResumeAnalyzerPage() {
 
             if (result.success && result.data) {
                 setAnalysisResult(result.data);
+
+                // Save the ATS check result to Firestore
+                if (user && db) {
+                    try {
+                        await addDoc(collection(db, 'users', user.uid, 'resumechecks'), {
+                            resumeFileName: resumeFileName,
+                            jobDescription: jobDescription,
+                            isAtsFriendly: result.data.isAtsFriendly,
+                            atsFriendlinessScore: result.data.atsFriendlinessScore,
+                            atsSummary: result.data.atsSummary,
+                            detailedAnalysis: result.data.detailedAnalysis,
+                            createdAt: serverTimestamp(),
+                        });
+                    } catch (saveError) {
+                        console.error("Failed to save ATS check result:", saveError);
+                        toast({ title: "Note", description: "Analysis complete, but the result could not be saved to your history.", variant: "destructive" });
+                    }
+                }
             } else {
                 throw new Error(result.error || "Failed to analyze resume.");
             }

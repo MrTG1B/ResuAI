@@ -11,8 +11,8 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit } from 'lucide-react';
-import { type SavedEditorState } from '@/types/resume';
+import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle } from 'lucide-react';
+import { type SavedEditorState, type ResumeCheck } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
 import Image from 'next/image';
@@ -118,9 +118,12 @@ export default function DashboardPage() {
   const [coverLetters, setCoverLetters] = useState<(CoverLetter & {id: string})[]>([]);
   const [isCoverLetterLoading, setIsCoverLetterLoading] = useState(true);
   
+  const [resumeChecks, setResumeChecks] = useState<ResumeCheck[]>([]);
+  const [isResumeCheckLoading, setIsResumeCheckLoading] = useState(true);
+  
   const [profileCompletion, setProfileCompletion] = useState(0);
 
-  const [deleteTarget, setDeleteTarget] = useState<{type: 'resume' | 'portfolio' | 'coverletter', id: string} | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{type: 'resume' | 'portfolio' | 'coverletter' | 'resumecheck', id: string} | null>(null);
 
   const MAX_RESUMES = 10;
   const MAX_PORTFOLIOS = 5;
@@ -140,10 +143,10 @@ export default function DashboardPage() {
       if (user) {
         setUser(user);
         
-        const fetchData = async (collectionName: string, setter: Function, loaderSetter: Function) => {
+        const fetchData = async (collectionName: string, setter: Function, loaderSetter: Function, sortField: string = 'lastModified') => {
             try {
                 if (!db) throw new Error("Firestore not initialized");
-                const q = query(collection(db, `users/${user.uid}/${collectionName}`), orderBy('lastModified', 'desc'));
+                const q = query(collection(db, `users/${user.uid}/${collectionName}`), orderBy(sortField, 'desc'));
                 const snapshot = await getDocs(q);
                  const items = snapshot.docs.map(doc => {
                     const data = doc.data();
@@ -178,6 +181,7 @@ export default function DashboardPage() {
         fetchData('resumes', setResumes, setIsResumeLoading);
         fetchData('portfolios', setPortfolios, setIsPortfolioLoading);
         fetchData('coverletters', setCoverLetters, setIsCoverLetterLoading);
+        fetchData('resumechecks', setResumeChecks, setIsResumeCheckLoading, 'createdAt');
         setIsLoading(false);
 
       } else {
@@ -210,15 +214,17 @@ export default function DashboardPage() {
     setDeleteTarget(null);
   
     try {
-      const collectionName = type === 'coverletter' ? 'coverletters' : `${type}s`;
+      const collectionName = type === 'coverletter' ? 'coverletters' : type === 'resumecheck' ? 'resumechecks' : `${type}s`;
       const docRef = doc(db, "users", uid, collectionName, id);
       await deleteDoc(docRef);
   
       if (type === 'resume') setResumes(prev => prev.filter(r => r.id !== id));
       else if (type === 'portfolio') setPortfolios(prev => prev.filter(p => p.id !== id));
       else if (type === 'coverletter') setCoverLetters(prev => prev.filter(cl => cl.id !== id));
+      else if (type === 'resumecheck') setResumeChecks(prev => prev.filter(rc => rc.id !== id));
       
-      toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} Deleted`, description: `The ${type} has been successfully deleted.` });
+      const displayName = type === 'resumecheck' ? 'ATS Check' : type.charAt(0).toUpperCase() + type.slice(1);
+      toast({ title: `${displayName} Deleted`, description: `The ${displayName.toLowerCase()} has been successfully deleted.` });
     } catch (error: any) {
       console.error(`Error deleting ${type}:`, error);
       let errorMessage = `Failed to delete ${type}. Please try again.`;
@@ -380,12 +386,13 @@ export default function DashboardPage() {
                         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                             <div>
                                 <CardTitle>Your Saved Work</CardTitle>
-                                <CardDescription>Manage your generated resumes, portfolios, and cover letters.</CardDescription>
+                                <CardDescription>Manage your generated resumes, portfolios, cover letters, and ATS checks.</CardDescription>
                             </div>
-                            <TabsList className="grid grid-cols-3 w-full sm:w-auto">
+                            <TabsList className="grid grid-cols-4 w-full sm:w-auto">
                                 <TabsTrigger value="resumes">Resumes</TabsTrigger>
                                 <TabsTrigger value="portfolios">Portfolios</TabsTrigger>
                                 <TabsTrigger value="coverletters">Cover Letters</TabsTrigger>
+                                <TabsTrigger value="atschecks">ATS Checks</TabsTrigger>
                             </TabsList>
                         </div>
                     </CardHeader>
@@ -495,6 +502,42 @@ export default function DashboardPage() {
                             )}
                              <div className="pt-4 border-t"><TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-full"><Button onClick={() => handleStartNew('coverletter')} className="w-full" disabled={coverLetters.length >= MAX_COVER_LETTERS}><PlusCircle className="mr-2 h-4 w-4" /> Create New Cover Letter</Button></div></TooltipTrigger>{coverLetters.length >= MAX_COVER_LETTERS && (<TooltipContent><p>You have reached the free limit of {MAX_COVER_LETTERS} cover letters.</p></TooltipContent>)}</Tooltip></TooltipProvider></div>
                         </TabsContent>
+                        <TabsContent value="atschecks" className="space-y-4">
+                            {isResumeCheckLoading ? (
+                                <div className="flex items-center justify-center min-h-[200px]"><BrandLoader /></div>
+                            ) : resumeChecks.length > 0 ? (
+                                <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                                    {resumeChecks.map(rc => (
+                                        <li key={rc.id} className="group relative flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
+                                            <div className="flex items-center gap-3 overflow-hidden flex-grow">
+                                                <div className="flex-shrink-0 bg-[#45B8AC]/10 p-3 rounded-full">
+                                                    {rc.isAtsFriendly ? (
+                                                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                                    ) : (
+                                                        <XCircle className="h-5 w-5 text-red-500" />
+                                                    )}
+                                                </div>
+                                                <div className="overflow-hidden">
+                                                    <p className="font-semibold text-sm truncate">{rc.resumeFileName || "Resume"}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">Score: {rc.atsFriendlinessScore}% | {rc.atsSummary}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">{rc.createdAt ? (typeof rc.createdAt === 'string' ? new Date(rc.createdAt).toLocaleDateString() : (rc.createdAt as any).toDate().toLocaleDateString()) : 'N/A'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center flex-shrink-0 ml-2 space-x-1">
+                                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteTarget({ type: 'resumecheck', id: rc.id })}><Trash2 className="h-4 w-4 text-red-500 hover:text-red-700"/></Button></TooltipTrigger><TooltipContent><p>Delete ATS Check</p></TooltipContent></Tooltip></TooltipProvider>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="text-center p-8 bg-muted/50 rounded-lg"><CardTitle className="text-lg">No ATS Checks Yet</CardTitle><CardDescription className="mt-2 mb-4">You haven't run an ATS check yet.</CardDescription></div>
+                            )}
+                            <div className="pt-4 border-t">
+                                <Button asChild className="w-full" style={{backgroundColor: '#45B8AC', color: 'white'}}>
+                                    <Link href="/resume-analyzer"><SearchCheck className="mr-2 h-4 w-4" /> Run New ATS Check</Link>
+                                </Button>
+                            </div>
+                        </TabsContent>
                     </CardContent>
                 </Tabs>
             </Card>
@@ -508,7 +551,7 @@ export default function DashboardPage() {
             <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your {deleteTarget?.type}.
+                    This action cannot be undone. This will permanently delete your {deleteTarget?.type === 'resumecheck' ? 'ATS check' : deleteTarget?.type}.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
