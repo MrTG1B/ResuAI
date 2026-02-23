@@ -35,7 +35,8 @@ service cloud.firestore {
     // Allow admin to read all user data
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow write: if isOwner(userId) && isValidSize();
+      allow create, update: if isOwner(userId) && isValidSize();
+      allow delete: if isOwner(userId);
       
       // Allow admin to write admin settings
       allow update: if isAdmin();
@@ -43,12 +44,14 @@ service cloud.firestore {
       // Allow access to all subcollections
       match /{subcollection}/{document} {
         allow read: if isOwner(userId) || isAdmin();
-        allow write: if isOwner(userId) && isValidSize();
+        allow create, update: if isOwner(userId) && isValidSize();
+        allow delete: if isOwner(userId);
         
         // For nested subcollections
         match /{nestedDocument=**} {
           allow read: if isOwner(userId) || isAdmin();
-          allow write: if isOwner(userId) && isValidSize();
+          allow create, update: if isOwner(userId) && isValidSize();
+          allow delete: if isOwner(userId);
         }
       }
       
@@ -70,7 +73,8 @@ service cloud.firestore {
     // Only owner can write
     match /{path=**}/portfolios/{portfolioId} {
       allow get, list: if true;
-      allow write: if isAuthenticated() && isValidSize();
+      allow create, update: if isAuthenticated() && isValidSize();
+      allow delete: if isAuthenticated();
     }
   }
 }
