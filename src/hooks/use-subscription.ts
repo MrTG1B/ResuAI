@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { type Subscription, type PlanId, type Plan } from '@/types/subscription';
-import { getPlan, getLimit, isFeatureAvailable } from '@/lib/plans';
+import { getPlan, getLimit, isFeatureAvailable, applyPlanConfigOverrides } from '@/lib/plans';
 
 interface UseSubscriptionReturn {
   planId: PlanId;
@@ -15,6 +15,28 @@ interface UseSubscriptionReturn {
   isPremium: boolean;
   canAccess: (feature: keyof Plan['features']) => boolean;
   getFeatureLimit: (feature: keyof Plan['features']) => number | 'unlimited';
+}
+
+// Load plan feature overrides from Firestore `config/plans` and apply them to
+// the runtime plan cache. This allows the admin dashboard to update plan
+// limits/features without requiring a redeployment of the main app.
+async function loadAndApplyPlanOverrides(): Promise<void> {
+  if (!db) return;
+  try {
+    const snap = await getDoc(doc(db, 'config', 'plans'));
+    if (snap.exists()) {
+      applyPlanConfigOverrides(snap.data() as Partial<Record<PlanId, Partial<Plan['features']>>>);
+    }
+  } catch {
+    // Silently fall back to static defaults if Firestore is unreachable
+  }
+}
+
+// Kick off override loading once at module load (non-blocking)
+let _overridesLoaded = false;
+if (typeof window !== 'undefined' && !_overridesLoaded) {
+  _overridesLoaded = true;
+  loadAndApplyPlanOverrides();
 }
 
 export function useSubscription(): UseSubscriptionReturn {
