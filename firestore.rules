@@ -14,9 +14,11 @@ service cloud.firestore {
     }
     
     // Helper function to check if user is admin
-    // Replace with your actual admin UID from Firebase Console
     function isAdmin() {
-      return isAuthenticated() && request.auth.uid == '2wnVOKn2JuhExnxpXLfrBHSFwJo1';
+      return isAuthenticated() && (
+        request.auth.uid == '2wnVOKn2JuhExnxpXLfrBHSFwJo1' ||
+        request.auth.token.email == 'tirthankardasgupta2004@gmail.com'
+      );
     }
     
     // Helper function to validate data size (prevent abuse)
