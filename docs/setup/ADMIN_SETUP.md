@@ -155,17 +155,24 @@ await setDoc(settingsRef, { isBlocked: false }); // Permission denied
 ## File Structure
 
 ```
-firestore.rules          # Security rules (deploy this)
-docs/ADMIN_SETUP.md     # This guide
+firestore.rules          # Single security rules file for both main site and admin dashboard (deploy this)
+admin-dashboard/firebase.json  # Points to ../firestore.rules so both sites share the same rules
+docs/setup/ADMIN_SETUP.md     # This guide
 .env                    # NEXT_PUBLIC_ADMIN_EMAIL
 ```
+
+> **Note:** There is only **one** `firestore.rules` file at the repository root. Both the main site and the
+> admin dashboard share the same Firebase project and therefore the same Firestore rules. The
+> `admin-dashboard/firebase.json` references `../firestore.rules` so that deploying from either
+> directory always applies the same, unified rules.
 
 ## Summary
 
 The Firestore rules have been updated to support the admin dashboard. Make sure to:
 
 1. ✅ Replace `YOUR_ADMIN_UID_HERE` with your actual admin UID
-2. ✅ Deploy rules: `firebase deploy --only firestore:rules`
+2. ✅ Deploy rules from repo root: `firebase deploy --only firestore:rules`
+   - Or from admin-dashboard dir: `firebase deploy --only firestore:rules` (uses `../firestore.rules`)
 3. ✅ Set `NEXT_PUBLIC_ADMIN_EMAIL` in environment variables
 4. ✅ Test admin login and functionality
 
