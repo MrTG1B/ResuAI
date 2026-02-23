@@ -808,7 +808,7 @@ export default function DashboardPage() {
                       </div>
                     )}
                     <div className="pt-4 border-t border-border/40">
-                      <Button asChild className="w-full" style={{ backgroundColor: '#45B8AC', color: 'white' }}>
+                      <Button asChild className="w-full bg-[#45B8AC] hover:bg-[#3aa99e] text-white">
                         <Link href="/resume-analyzer"><SearchCheck className="mr-2 h-4 w-4" /> Run New ATS Check</Link>
                       </Button>
                     </div>
