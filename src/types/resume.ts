@@ -35,4 +35,15 @@ export interface SavedEditorState {
     lastModified?: Timestamp | string;
 }
 
+export interface ResumeCheck {
+    id: string;
+    resumeFileName: string;
+    jobDescription: string;
+    isAtsFriendly: boolean;
+    atsFriendlinessScore: number;
+    atsSummary: string;
+    detailedAnalysis: string;
+    createdAt: Timestamp | string;
+}
+
     
