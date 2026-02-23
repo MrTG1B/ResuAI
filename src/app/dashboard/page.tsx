@@ -329,8 +329,21 @@ export default function DashboardPage() {
     if (!name) return '';
     const names = name.split(' ').filter(Boolean);
     if (names.length > 1) return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-    if (names.length === 1 && names[0].length > 1) return `${names[0][0]}${names[0][1]}`.toUpperCase();
+    if (names.length === 1 && names[0].length >= 2) return `${names[0][0]}${names[0][1]}`.toUpperCase();
     return (name[0] || '').toUpperCase();
+  };
+
+  const HEADER_HEIGHT = '57px';
+
+  const formatSectionName = (section: string) => {
+    const names: Record<string, string> = {
+      overview: 'Dashboard',
+      resumes: 'Resumes',
+      portfolios: 'Portfolios',
+      coverletters: 'Cover Letters',
+      atschecks: 'ATS Checks',
+    };
+    return names[section] ?? section;
   };
 
   if (isLoading) {
@@ -471,7 +484,10 @@ export default function DashboardPage() {
 
       <div className="flex flex-1 relative z-10">
         {/* Desktop sidebar */}
-        <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-border/40 glass-card sticky top-[57px] self-start h-[calc(100vh-57px)] z-30">
+        <aside
+          className="hidden lg:flex flex-col w-64 shrink-0 border-r border-border/40 glass-card sticky self-start z-30 overflow-hidden"
+          style={{ top: HEADER_HEIGHT, height: `calc(100vh - ${HEADER_HEIGHT})` }}
+        >
           <SidebarContent />
         </aside>
 
@@ -486,7 +502,7 @@ export default function DashboardPage() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <div className="h-[calc(100%-57px)] overflow-y-auto">
+              <div className="overflow-y-auto" style={{ height: `calc(100% - ${HEADER_HEIGHT})` }}>
                 <SidebarContent onNav={() => setSidebarOpen(false)} />
               </div>
             </aside>
@@ -507,7 +523,7 @@ export default function DashboardPage() {
                   <Menu className="h-5 w-5" />
                 </button>
                 <span className="text-sm font-medium text-muted-foreground capitalize">
-                  {activeSection === 'overview' ? 'Dashboard' : activeSection === 'coverletters' ? 'Cover Letters' : activeSection === 'atschecks' ? 'ATS Checks' : activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}
+                  {formatSectionName(activeSection)}
                 </span>
               </div>
 
