@@ -76,5 +76,10 @@ service cloud.firestore {
       allow create, update: if isAuthenticated() && isValidSize();
       allow delete: if isAuthenticated();
     }
+
+    // Allow admin to run collection-group queries on profile subcollections
+    match /{path=**}/profile/{profileData} {
+      allow read: if isAdmin();
+    }
   }
 }
