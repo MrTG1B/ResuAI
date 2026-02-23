@@ -398,7 +398,7 @@ export default function DashboardPage() {
         {/* Overview */}
         <button
           onClick={() => { setActiveSection('overview'); onNav?.(); }}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${activeSection === 'overview' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${activeSection === 'overview' ? 'bg-primary/15 text-primary' : 'text-foreground/70 hover:text-foreground hover:bg-white/8'}`}
         >
           <Home className="h-4 w-4 flex-shrink-0" />
           Overview
@@ -406,13 +406,13 @@ export default function DashboardPage() {
 
         {/* My Work */}
         <div>
-          <p className="text-[10px] uppercase font-semibold text-muted-foreground/50 px-3 mb-2 tracking-widest">My Work</p>
+          <p className="text-[10px] uppercase font-semibold text-foreground/40 px-3 mb-2 tracking-widest">My Work</p>
           <div className="space-y-0.5">
             {sidebarItems.myWork.map(item => (
               <button
                 key={item.key}
                 onClick={() => { setActiveSection(item.key); onNav?.(); }}
-                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${activeSection === item.key ? `${item.activeBg} ${item.accentColor}` : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${activeSection === item.key ? `${item.activeBg} ${item.accentColor}` : 'text-foreground/70 hover:text-foreground hover:bg-white/8'}`}
               >
                 <div className="flex items-center gap-3">
                   <item.icon className="h-4 w-4 flex-shrink-0" />
@@ -421,7 +421,7 @@ export default function DashboardPage() {
                 {item.loading ? (
                   <span className="h-4 w-4 bg-muted/60 rounded-full animate-pulse flex-shrink-0" />
                 ) : (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0 ${activeSection === item.key ? item.activeBadge : 'bg-muted/80 text-muted-foreground'}`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0 ${activeSection === item.key ? item.activeBadge : 'bg-white/10 text-foreground/60'}`}>
                     {item.count}
                   </span>
                 )}
@@ -432,13 +432,13 @@ export default function DashboardPage() {
 
         {/* AI Tools */}
         <div>
-          <p className="text-[10px] uppercase font-semibold text-muted-foreground/50 px-3 mb-2 tracking-widest">AI Tools</p>
+          <p className="text-[10px] uppercase font-semibold text-foreground/40 px-3 mb-2 tracking-widest">AI Tools</p>
           <div className="space-y-0.5">
             {sidebarItems.tools.map(tool => (
               <Link
                 key={tool.href}
                 href={tool.locked ? '/pricing' : tool.href}
-                className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group ${tool.locked ? 'text-muted-foreground/40 cursor-default' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group ${tool.locked ? 'text-foreground/30 cursor-default' : 'text-foreground/70 hover:text-foreground hover:bg-white/8'}`}
               >
                 <div className="flex items-center gap-3">
                   <tool.icon className="h-4 w-4 flex-shrink-0" />
@@ -456,11 +456,11 @@ export default function DashboardPage() {
 
         {/* Account */}
         <div>
-          <p className="text-[10px] uppercase font-semibold text-muted-foreground/50 px-3 mb-2 tracking-widest">Account</p>
+          <p className="text-[10px] uppercase font-semibold text-foreground/40 px-3 mb-2 tracking-widest">Account</p>
           <div className="space-y-0.5">
             <Link
               href={canAccess('mentorChat') ? '/mentra' : '/pricing'}
-              className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${canAccess('mentorChat') ? 'text-[#45B8AC] hover:bg-[#45B8AC]/10' : 'text-muted-foreground/40'}`}
+              className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${canAccess('mentorChat') ? 'text-[#45B8AC] hover:bg-[#45B8AC]/10' : 'text-foreground/30'}`}
             >
               <div className="flex items-center gap-3">
                 <MentraIcon className="h-4 w-4 flex-shrink-0" isAnimated={canAccess('mentorChat')} />
@@ -468,11 +468,11 @@ export default function DashboardPage() {
               </div>
               {!canAccess('mentorChat') && <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />}
             </Link>
-            <Link href="/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200">
+            <Link href="/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-foreground/70 hover:text-foreground hover:bg-white/8 transition-all duration-200">
               <UserIcon className="h-4 w-4 flex-shrink-0" />
               Profile
             </Link>
-            <Link href="/pricing" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200">
+            <Link href="/pricing" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-foreground/70 hover:text-foreground hover:bg-white/8 transition-all duration-200">
               <CreditCard className="h-4 w-4 flex-shrink-0" />
               Plans &amp; Pricing
             </Link>
@@ -485,7 +485,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background relative">
       <div className="dot-grid fixed inset-0 pointer-events-none opacity-60" />
-      <Header />
+      <Header hideUserMenu />
 
       {/* Desktop sidebar — truly fixed so it never scrolls */}
       <aside
@@ -907,7 +907,6 @@ export default function DashboardPage() {
 
             </div>
           </main>
-          <Footer />
         </div>
       </div>
 

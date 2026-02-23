@@ -20,7 +20,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Skeleton } from './ui/skeleton';
 
-export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
+export function Header({ pageActions, hideUserMenu }: { pageActions?: React.ReactNode; hideUserMenu?: boolean }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(null);
@@ -85,7 +85,7 @@ export function Header({ pageActions }: { pageActions?: React.ReactNode }) {
           </div>
 
             <nav className="flex items-center gap-4">
-                {loading ? (
+                {hideUserMenu ? null : loading ? (
                     <Skeleton className="h-9 w-24" />
                 ) : user ? (
                     <DropdownMenu>
