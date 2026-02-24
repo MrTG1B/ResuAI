@@ -9,7 +9,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle, Lock, Rocket, TrendingUp, Gift, Menu, X, Home, User as UserIcon, CreditCard } from 'lucide-react';
+import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle, Lock, Rocket, TrendingUp, Gift, Menu, X, Home, User as UserIcon, CreditCard, Settings, MessageSquare, ChevronDown } from 'lucide-react';
 import { type SavedEditorState, type ResumeCheck } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
@@ -34,6 +34,7 @@ import { BrandLoader } from '@/components/brand-loader';
 import { TemplatePreview } from '@/components/template-preview';
 import { Badge } from '@/components/ui/badge';
 import { useSubscription } from '@/hooks/use-subscription';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
 function ToolCard({
@@ -380,17 +381,49 @@ export default function DashboardPage() {
     <div className="flex flex-col h-full">
       {/* User info */}
       <div className="p-4 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
-            {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
-          </div>
-          <div className="overflow-hidden min-w-0">
-            <p className="font-semibold text-sm truncate leading-tight">{user.displayName || user.email}</p>
-            <Badge variant="outline" className={`text-[10px] font-semibold px-1.5 py-0 mt-0.5 ${PLAN_BADGE_COLORS[planId] ?? PLAN_BADGE_COLORS.free}`}>
-              ✦ {plan.name}
-            </Badge>
-          </div>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-3 w-full rounded-xl hover:bg-white/8 transition-all duration-200 p-1 -m-1" aria-label="Open user menu">
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
+                {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
+              </div>
+              <div className="overflow-hidden min-w-0 flex-1 text-left">
+                <p className="font-semibold text-sm truncate leading-tight">{user.displayName || user.email}</p>
+                <Badge variant="outline" className={`text-[10px] font-semibold px-1.5 py-0 mt-0.5 ${PLAN_BADGE_COLORS[planId] ?? PLAN_BADGE_COLORS.free}`}>
+                  ✦ {plan.name}
+                </Badge>
+              </div>
+              <ChevronDown className="h-4 w-4 text-foreground/50 flex-shrink-0" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-52">
+            <DropdownMenuItem asChild>
+              <Link href="/profile" onClick={onNav} className="flex items-center gap-2 cursor-pointer">
+                <UserIcon className="h-4 w-4" />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/settings" onClick={onNav} className="flex items-center gap-2 cursor-pointer">
+                <Settings className="h-4 w-4" />
+                Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/pricing" onClick={onNav} className="flex items-center gap-2 cursor-pointer">
+                <CreditCard className="h-4 w-4" />
+                Payment
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/feedback" onClick={onNav} className="flex items-center gap-2 cursor-pointer">
+                <MessageSquare className="h-4 w-4" />
+                Feedback
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Scrollable nav */}
