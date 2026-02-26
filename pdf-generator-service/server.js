@@ -1,7 +1,7 @@
 
 const express = require('express');
 const cors = require('cors');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -37,10 +37,12 @@ app.post('/generate-pdf', async (req, res) => {
 
       // Compile LaTeX to PDF
       try {
-        execSync(
-          `pdflatex -interaction=nonstopmode -halt-on-error -output-directory="${tmpDir}" "${texFile}"`,
-          { timeout: 30000, stdio: 'pipe' }
-        );
+        execFileSync('pdflatex', [
+          '-interaction=nonstopmode',
+          '-halt-on-error',
+          `-output-directory=${tmpDir}`,
+          texFile
+        ], { timeout: 30000, stdio: 'pipe' });
       } catch (compileError) {
         // Read the log file for debugging
         const logFile = path.join(tmpDir, 'resume.log');

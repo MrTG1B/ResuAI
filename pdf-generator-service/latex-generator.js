@@ -5,20 +5,25 @@
 
 /**
  * Escapes special LaTeX characters in a string.
+ * Uses a single-pass regex to avoid re-escaping issues.
  */
 function escapeLatex(text) {
   if (!text) return '';
-  return String(text)
-    .replace(/\\/g, '\\textbackslash{}')
-    .replace(/&/g, '\\&')
-    .replace(/%/g, '\\%')
-    .replace(/\$/g, '\\$')
-    .replace(/#/g, '\\#')
-    .replace(/_/g, '\\_')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}')
-    .replace(/~/g, '\\textasciitilde{}')
-    .replace(/\^/g, '\\textasciicircum{}');
+  return String(text).replace(/[\\&%$#_{}~^]/g, (char) => {
+    switch (char) {
+      case '\\': return '\\textbackslash{}';
+      case '&': return '\\&';
+      case '%': return '\\%';
+      case '$': return '\\$';
+      case '#': return '\\#';
+      case '_': return '\\_';
+      case '{': return '\\{';
+      case '}': return '\\}';
+      case '~': return '\\textasciitilde{}';
+      case '^': return '\\textasciicircum{}';
+      default: return char;
+    }
+  });
 }
 
 /**

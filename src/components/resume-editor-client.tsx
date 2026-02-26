@@ -354,71 +354,53 @@ export default function ResumeEditorClient() {
     
         setIsGeneratingPdf(true);
     
-        try {
-            const PDF_SERVICE_URL = 'https://pdf-generator-service-52ry.onrender.com/generate-pdf';
+        const downloadBlob = (blob: Blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
+            a.download = `${cleanFileName}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        };
 
+        const fetchPdf = async (body: object): Promise<Blob> => {
+            const PDF_SERVICE_URL = 'https://pdf-generator-service-52ry.onrender.com/generate-pdf';
+            const response = await fetch(PDF_SERVICE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                let errorDetails = `PDF service responded with status ${response.status}`;
+                try {
+                    const errorData = await response.text();
+                    errorDetails = errorData || errorDetails;
+                } catch (e) {
+                    // response is not text, ignore
+                }
+                throw new Error(errorDetails);
+            }
+
+            return response.blob();
+        };
+
+        try {
             // Step 1: Extract structured data from HTML using AI
             const extractResult = await extractResumeDataAction({ htmlContent: editorState.htmlContent });
 
             if (extractResult.success && extractResult.data?.resumeData) {
                 // Step 2: Send structured data to PDF service for LaTeX compilation
-                const response = await fetch(PDF_SERVICE_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ resumeData: extractResult.data.resumeData }),
-                });
-
-                if (!response.ok) {
-                    let errorDetails = `PDF service responded with status ${response.status}`;
-                    try {
-                        const errorData = await response.text();
-                        errorDetails = errorData || errorDetails;
-                    } catch (e) {
-                        // response is not text, ignore
-                    }
-                    throw new Error(errorDetails);
-                }
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
-                a.download = `${cleanFileName}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
+                const blob = await fetchPdf({ resumeData: extractResult.data.resumeData });
+                downloadBlob(blob);
             } else {
                 // Fallback: send HTML directly (legacy approach)
                 console.warn('LaTeX extraction failed, falling back to HTML-to-PDF:', extractResult.error);
-                const response = await fetch(PDF_SERVICE_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ html: editorState.htmlContent }),
-                });
-
-                if (!response.ok) {
-                    let errorDetails = `PDF service responded with status ${response.status}`;
-                    try {
-                        const errorData = await response.text();
-                        errorDetails = errorData || errorDetails;
-                    } catch (e) {
-                        // response is not text, ignore
-                    }
-                    throw new Error(errorDetails);
-                }
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
-                a.download = `${cleanFileName}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
+                const blob = await fetchPdf({ html: editorState.htmlContent });
+                downloadBlob(blob);
             }
         } catch (error) {
             console.error('PDF Download error:', error);
