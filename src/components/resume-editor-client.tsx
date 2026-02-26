@@ -40,7 +40,7 @@ const generatingFromProfileTexts = [
 ];
 
 const generatingPdfTexts = [
-    "Connecting to rendering service...",
+    "Preparing your resume...",
     "Building your high-fidelity PDF...",
     "Applying professional formatting...",
     "Finalizing document...",
@@ -350,45 +350,71 @@ export default function ResumeEditorClient() {
             toast({ title: "Nothing to download", description: "The resume content is not available.", variant: "destructive" });
             return;
         }
-    
+
         setIsGeneratingPdf(true);
-    
+
+        // A4 dimensions at 96 dpi
+        const A4_WIDTH_PX = 794;
+        const A4_HEIGHT_PX = 1123;
+        // Brief wait after injecting HTML so web fonts and images finish loading
+        const FONT_LOAD_DELAY_MS = 300;
+
+        let container: HTMLDivElement | null = null;
         try {
-            const PDF_SERVICE_URL = 'https://pdf-generator-service-52ry.onrender.com/generate-pdf';
-            
-            const response = await fetch(PDF_SERVICE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ html: editorState.htmlContent }),
-            });
-    
-            if (!response.ok) {
-                let errorDetails = `PDF service responded with status ${response.status}`;
-                try {
-                    const errorData = await response.text();
-                    errorDetails = errorData || errorDetails;
-                } catch (e) {
-                    // response is not json, ignore
-                }
-                throw new Error(errorDetails);
-            }
-    
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+            const html2pdf = (await import('html2pdf.js')).default;
+
             const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
-            a.download = `${cleanFileName}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-    
+
+            // Render the HTML off-screen at exactly A4 width so layout matches
+            container = document.createElement('div');
+            container.style.cssText = `position:fixed;top:-9999px;left:-9999px;width:${A4_WIDTH_PX}px;background:white;box-sizing:border-box;`;
+            container.innerHTML = editorState.htmlContent;
+            document.body.appendChild(container);
+
+            // Allow fonts and images to settle before measuring
+            await new Promise(resolve => setTimeout(resolve, FONT_LOAD_DELAY_MS));
+
+            // Measure actual rendered height and scale down if taller than one A4 page
+            const contentHeight = container.scrollHeight;
+            if (contentHeight > A4_HEIGHT_PX) {
+                const scale = A4_HEIGHT_PX / contentHeight;
+                container.style.transform = `scale(${scale})`;
+                container.style.transformOrigin = '0 0';
+                // Keep the outer footprint at A4 size so html2canvas captures correctly
+                container.style.width = `${A4_WIDTH_PX / scale}px`;
+                container.style.height = `${A4_HEIGHT_PX / scale}px`;
+                container.style.overflow = 'hidden';
+            }
+
+            const opt = {
+                margin: 0,
+                filename: `${cleanFileName}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    width: A4_WIDTH_PX,
+                    height: A4_HEIGHT_PX,
+                    windowWidth: A4_WIDTH_PX,
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait',
+                },
+                pagebreak: { mode: 'avoid-all' },
+            };
+
+            await html2pdf().set(opt).from(container).save();
         } catch (error) {
             console.error('PDF Download error:', error);
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
             toast({ title: "Download failed", description: `Could not generate PDF. Reason: ${errorMessage}`, variant: "destructive" });
         } finally {
+            if (container && document.body.contains(container)) {
+                document.body.removeChild(container);
+            }
             setIsGeneratingPdf(false);
         }
     };
