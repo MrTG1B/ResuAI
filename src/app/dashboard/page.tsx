@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, type User, sendEmailVerification } from 'firebase/auth';
+import { onAuthStateChanged, type User, sendEmailVerification, signOut } from 'firebase/auth';
 import { auth, db, doc, getDoc, collection, getDocs, query, orderBy, deleteDoc, Timestamp } from '@/lib/firebase';
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle, Lock, Rocket, TrendingUp, Gift, Menu, X, Home, User as UserIcon, CreditCard, Settings, MessageSquare, ChevronDown } from 'lucide-react';
+import { FileText, LayoutTemplate, ArrowRight, SearchCheck, Edit, Eye, PlusCircle, Trash2, ShieldAlert, Sparkles, NotebookPen, MessageCircleQuestion, BrainCircuit, CheckCircle2, XCircle, Lock, Rocket, TrendingUp, Gift, Menu, X, Home, User as UserIcon, CreditCard, Settings, MessageSquare, ChevronDown, LogOut } from 'lucide-react';
 import { type SavedEditorState, type ResumeCheck } from '@/types/resume';
 import { type PortfolioData } from '@/types/portfolio';
 import { type CoverLetter } from '@/types/cover-letter';
@@ -336,6 +336,12 @@ export default function DashboardPage() {
 
   const HEADER_HEIGHT = '57px';
 
+  const handleLogout = async () => {
+    if (!auth) return;
+    await signOut(auth);
+    router.push('/');
+  };
+
   const formatSectionName = (section: string) => {
     const names: Record<string, string> = {
       overview: 'Dashboard',
@@ -421,6 +427,11 @@ export default function DashboardPage() {
                 <MessageSquare className="h-4 w-4" />
                 Feedback
               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={async () => { onNav?.(); await handleLogout(); }} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+              <LogOut className="h-4 w-4" />
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

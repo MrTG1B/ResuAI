@@ -430,7 +430,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header hideUserMenu />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-4xl space-y-6">
         {/* Subscription Card */}
         <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-background">
