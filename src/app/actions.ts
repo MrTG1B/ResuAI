@@ -6,6 +6,7 @@ import { generateAvatar as generateAvatarFlow, GenerateAvatarInput } from "@/ai/
 import { parseResume as parseResumeFlow, type ParseResumeInput } from "@/ai/flows/parse-resume";
 import { editResumeFlow, type EditResumeInput } from "@/ai/flows/edit-resume";
 import { generateResumeFromProfile, type GenerateResumeInput } from "@/ai/flows/generate-resume";
+import { extractResumeData, type ExtractResumeDataInput } from "@/ai/flows/extract-resume-data";
 import { atsAnalyzerFlow, type AtsAnalyzerInput } from "@/ai/flows/job-match-analyzer";
 import { coachChat as coachChatFlow, type CoachChatInput } from "@/ai/flows/coach-chat";
 import { generateProjectImage as generateProjectImageFlow, GenerateProjectImageInput } from "@/ai/flows/generate-project-image";
@@ -186,6 +187,16 @@ export async function editResumeAction(input: EditResumeInput) {
     
     // Generic fallback with more helpful guidance
     return { success: false, error: "Unable to process your request right now. This could be due to high demand or a temporary service issue. Please try again in a few moments, or try rephrasing your instruction." };
+  }
+}
+
+export async function extractResumeDataAction(input: ExtractResumeDataInput): Promise<{ success: boolean; data?: { resumeData: any }; error?: string }> {
+  try {
+    const result = await extractResumeData(input);
+    return { success: true, data: { resumeData: result.resumeData } };
+  } catch (error: any) {
+    console.error("Error extracting resume data:", error);
+    return { success: false, error: "Failed to extract resume data for PDF generation. Please try again." };
   }
 }
 
