@@ -478,6 +478,16 @@ export default function DashboardPage() {
         <div>
           <p className="text-[10px] uppercase font-semibold text-foreground/40 px-3 mb-2 tracking-widest">AI Tools</p>
           <div className="space-y-0.5">
+            <Link
+              href={canAccess('mentorChat') ? '/mentra' : '/pricing'}
+              className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${canAccess('mentorChat') ? 'text-[#45B8AC] hover:bg-[#45B8AC]/10' : 'text-foreground/30 cursor-default'}`}
+            >
+              <div className="flex items-center gap-3">
+                <MentraIcon className="h-4 w-4 flex-shrink-0" isAnimated={canAccess('mentorChat')} />
+                Mentra Chat
+              </div>
+              {!canAccess('mentorChat') && <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />}
+            </Link>
             {sidebarItems.tools.map(tool => (
               <Link
                 key={tool.href}
@@ -495,31 +505,6 @@ export default function DashboardPage() {
                 )}
               </Link>
             ))}
-          </div>
-        </div>
-
-        {/* Account */}
-        <div>
-          <p className="text-[10px] uppercase font-semibold text-foreground/40 px-3 mb-2 tracking-widest">Account</p>
-          <div className="space-y-0.5">
-            <Link
-              href={canAccess('mentorChat') ? '/mentra' : '/pricing'}
-              className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${canAccess('mentorChat') ? 'text-[#45B8AC] hover:bg-[#45B8AC]/10' : 'text-foreground/30'}`}
-            >
-              <div className="flex items-center gap-3">
-                <MentraIcon className="h-4 w-4 flex-shrink-0" isAnimated={canAccess('mentorChat')} />
-                Mentra Chat
-              </div>
-              {!canAccess('mentorChat') && <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />}
-            </Link>
-            <Link href="/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-foreground/70 hover:text-foreground hover:bg-white/8 transition-all duration-200">
-              <UserIcon className="h-4 w-4 flex-shrink-0" />
-              Profile
-            </Link>
-            <Link href="/pricing" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-foreground/70 hover:text-foreground hover:bg-white/8 transition-all duration-200">
-              <CreditCard className="h-4 w-4 flex-shrink-0" />
-              Plans &amp; Pricing
-            </Link>
           </div>
         </div>
       </nav>
