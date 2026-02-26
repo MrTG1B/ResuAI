@@ -28,15 +28,20 @@ function escapeLatex(text) {
 
 /**
  * Sanitizes a URL for use in LaTeX \href commands.
+ * Uses a single-pass regex to handle all special characters at once.
  * Backslashes are replaced with forward slashes since they're
  * not valid URL characters and would break LaTeX commands.
  */
 function escapeUrl(url) {
   if (!url) return '';
-  return String(url)
-    .replace(/\\/g, '/')
-    .replace(/%/g, '\\%')
-    .replace(/#/g, '\\#');
+  return String(url).replace(/[\\%#]/g, (char) => {
+    switch (char) {
+      case '\\': return '/';
+      case '%': return '\\%';
+      case '#': return '\\#';
+      default: return char;
+    }
+  });
 }
 
 /**
