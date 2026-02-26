@@ -1,8 +1,7 @@
-
 {
   "name": "pdf-generator-service",
   "version": "1.0.0",
-  "description": "A microservice to generate PDFs from HTML using Playwright.",
+  "description": "A microservice to generate professional single-page PDFs using LaTeX compilation, with HTML-to-PDF fallback.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -14,6 +13,7 @@
     "@sparticuz/chromium": "^123.0.1",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.2.1",
     "playwright-core": "^1.45.1"
   }
 }
