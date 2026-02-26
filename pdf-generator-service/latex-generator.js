@@ -27,12 +27,14 @@ function escapeLatex(text) {
 }
 
 /**
- * Wraps a URL for use in LaTeX \href commands.
- * The URL itself needs less escaping — only #, %, and ~ are problematic.
+ * Sanitizes a URL for use in LaTeX \href commands.
+ * Backslashes are replaced with forward slashes since they're
+ * not valid URL characters and would break LaTeX commands.
  */
 function escapeUrl(url) {
   if (!url) return '';
   return String(url)
+    .replace(/\\/g, '/')
     .replace(/%/g, '\\%')
     .replace(/#/g, '\\#');
 }

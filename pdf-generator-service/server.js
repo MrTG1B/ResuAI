@@ -1,6 +1,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -11,6 +12,13 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+const pdfLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { error: 'Too many PDF generation requests. Please try again later.' },
+});
+
+
 /**
  * POST /generate-pdf
  * Accepts JSON resume data, generates a LaTeX document, compiles it with pdflatex,
@@ -19,7 +27,7 @@ app.use(express.json({ limit: '10mb' }));
  * Request body: { resumeData: { name, title, email, ... } }
  * Falls back to legacy HTML-to-PDF if only { html } is provided.
  */
-app.post('/generate-pdf', async (req, res) => {
+app.post('/generate-pdf', pdfLimiter, async (req, res) => {
   const { resumeData, html } = req.body;
 
   // If resumeData is provided, use the LaTeX route
