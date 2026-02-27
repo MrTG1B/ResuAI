@@ -21,7 +21,6 @@ import { parseResumeAction } from "@/app/actions";
 import { editResumeAction } from "@/app/actions";
 import { generateResumeFromProfileAction } from "@/app/actions";
 import { analyzeResumeForPortfolioAction } from "@/app/actions";
-import { extractResumeDataAction } from "@/app/actions";
 
 
 const parsingTexts = [
@@ -41,9 +40,9 @@ const generatingFromProfileTexts = [
 ];
 
 const generatingPdfTexts = [
-    "Extracting resume data...",
-    "Building your professional LaTeX document...",
-    "Compiling single-page PDF...",
+    "Preparing your resume...",
+    "Rendering document layout...",
+    "Generating PDF...",
     "Finalizing document...",
 ];
 
@@ -354,53 +353,36 @@ export default function ResumeEditorClient() {
     
         setIsGeneratingPdf(true);
     
-        const downloadBlob = (blob: Blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
-            a.download = `${cleanFileName}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        };
-
-        const fetchPdf = async (body: object): Promise<Blob> => {
-            const PDF_SERVICE_URL = 'https://pdf-generator-service-52ry.onrender.com/generate-pdf';
-            const response = await fetch(PDF_SERVICE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-
-            if (!response.ok) {
-                let errorDetails = `PDF service responded with status ${response.status}`;
-                try {
-                    const errorData = await response.text();
-                    errorDetails = errorData || errorDetails;
-                } catch (e) {
-                    // response is not text, ignore
-                }
-                throw new Error(errorDetails);
-            }
-
-            return response.blob();
-        };
-
         try {
-            // Step 1: Extract structured data from HTML using AI
-            const extractResult = await extractResumeDataAction({ htmlContent: editorState.htmlContent });
+            const { default: html2pdf } = await import('html2pdf.js');
 
-            if (extractResult.success && extractResult.data?.resumeData) {
-                // Step 2: Send structured data to PDF service for LaTeX compilation
-                const blob = await fetchPdf({ resumeData: extractResult.data.resumeData });
-                downloadBlob(blob);
-            } else {
-                // Fallback: send HTML directly (legacy approach)
-                console.warn('LaTeX extraction failed, falling back to HTML-to-PDF:', extractResult.error);
-                const blob = await fetchPdf({ html: editorState.htmlContent });
-                downloadBlob(blob);
+            const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
+
+            // Create a container styled exactly like the A4 preview
+            const element = document.createElement('div');
+            element.style.width = '210mm';
+            element.style.minHeight = '297mm';
+            element.style.boxSizing = 'border-box';
+            element.style.padding = '12.7mm';
+            element.style.backgroundColor = 'white';
+            element.style.color = 'black';
+            element.innerHTML = editorState.htmlContent;
+
+            // Temporarily append to DOM so html2pdf can render it
+            document.body.appendChild(element);
+
+            try {
+                const opt = {
+                    margin: 0,
+                    filename: `${cleanFileName}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                };
+
+                await html2pdf().from(element).set(opt).save();
+            } finally {
+                document.body.removeChild(element);
             }
         } catch (error) {
             console.error('PDF Download error:', error);
