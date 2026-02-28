@@ -358,31 +358,50 @@ export default function ResumeEditorClient() {
 
             const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
 
-            // Create a container styled exactly like the A4 preview
-            const element = document.createElement('div');
-            element.style.width = '210mm';
-            element.style.minHeight = '297mm';
-            element.style.boxSizing = 'border-box';
-            element.style.padding = '12.7mm';
-            element.style.backgroundColor = 'white';
-            element.style.color = 'black';
-            element.innerHTML = editorState.htmlContent;
+            // Determine the pixel height of a single A4 page in the current browser
+            const pageRef = document.createElement('div');
+            pageRef.style.cssText = 'position:fixed;top:-9999px;left:0;height:297mm;width:1px;pointer-events:none;visibility:hidden;';
+            document.body.appendChild(pageRef);
+            const pageHeightPx = pageRef.offsetHeight;
+            document.body.removeChild(pageRef);
 
-            // Temporarily append to DOM so html2pdf can render it
-            document.body.appendChild(element);
+            // Measure the actual rendered content height at 210mm width with standard padding
+            const probe = document.createElement('div');
+            probe.style.cssText = 'position:fixed;top:-9999px;left:0;width:210mm;padding:12.7mm;box-sizing:border-box;background:#fff;color:#000;visibility:hidden;';
+            probe.innerHTML = editorState.htmlContent;
+            document.body.appendChild(probe);
+            const contentHeightPx = probe.scrollHeight;
+            document.body.removeChild(probe);
+
+            // Calculate a scale factor so all content fits within one A4 page
+            const scale = contentHeightPx > pageHeightPx ? pageHeightPx / contentHeightPx : 1;
+
+            // Build the outer container that is exactly one A4 page tall (clips anything that overflows)
+            const outer = document.createElement('div');
+            outer.style.cssText = 'width:210mm;height:297mm;overflow:hidden;background:#fff;';
+
+            // Widen the inner div before scaling so its visual width (= layoutWidth × scale) still fills 210mm
+            const innerWidthPct = scale < 1 ? `${(100 / scale).toFixed(6)}%` : '100%';
+            const inner = document.createElement('div');
+            inner.style.cssText = `width:${innerWidthPct};padding:12.7mm;box-sizing:border-box;color:#000;transform-origin:top left;transform:scale(${scale});`;
+            inner.innerHTML = editorState.htmlContent;
+
+            outer.appendChild(inner);
+            document.body.appendChild(outer);
 
             try {
-                const opt = {
-                    margin: 0,
-                    filename: `${cleanFileName}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                };
-
-                await html2pdf().from(element).set(opt).save();
+                await html2pdf()
+                    .from(outer)
+                    .set({
+                        margin: 0,
+                        filename: `${cleanFileName}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    })
+                    .save();
             } finally {
-                document.body.removeChild(element);
+                document.body.removeChild(outer);
             }
         } catch (error) {
             console.error('PDF Download error:', error);
