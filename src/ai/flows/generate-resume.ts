@@ -101,10 +101,18 @@ const generateResumePrompt = ai.definePrompt({
    - Use standard web-safe fonts such as 'Arial', 'Helvetica', 'Times New Roman', or 'Georgia'.
    - Use clear, standard section headings: "Work Experience", "Education", "Skills", "Projects", "Certifications", "Languages".
    - Avoid tables, graphics, icons (unless explicitly requested), or multi-column layouts.
-2. **Single-Page Layout:** The entire resume MUST fit neatly on a single A4 page (content area approx 184.6mm × 271.6mm, accounting for 12.7mm margins on each side). Be concise.
+2. **STRICT Single-Page Layout:** The entire resume MUST fit neatly on a SINGLE A4 page. The outermost wrapper div MUST have \`style="max-height:271.6mm;overflow:hidden;"\` so nothing spills onto a second page. To achieve this:
+   - Body / paragraph font-size: **9pt–10pt** (never larger).
+   - Name heading: **16pt–18pt** max.
+   - Section headings: **11pt–12pt**.
+   - Line-height: **1.2–1.3** throughout.
+   - Margins between sections: **4px–6px** top/bottom only.
+   - Bullet-point lists: max **3 bullets per job/project**.
+   - Summary: max **2–3 sentences**.
+   - Reduce or omit lower-priority sections (Interests, Languages) if space is tight.
 3. **HTML Only:** Output MUST be a single, complete block of valid HTML. Do NOT include \`<html>\`, \`<head>\`, or \`<body>\` tags.
-4. **Inline CSS:** All styling MUST use inline CSS (e.g., \`style="font-size: 11pt;"\`). Use a clean, modern, professional colour scheme.
-5. **Complete Content:** Include ALL sections for which data is provided — Contact Info, Summary/Objective, Work Experience, Education, Skills, Projects, Certifications, Languages, Interests, and Social Links.
+4. **Inline CSS:** All styling MUST use inline CSS (e.g., \`style="font-size: 10pt;"\`). Use a clean, modern, professional colour scheme.
+5. **Complete Content:** Include ALL sections for which data is provided — Contact Info, Summary/Objective, Work Experience, Education, Skills, Projects, Certifications, Languages, Interests, and Social Links — but keep each section concise.
 6. **Professional Language:** Write or improve bullet points to be action-oriented, quantified where possible, and impactful.
 7. **No Placeholders:** Only include sections where real data is available. Do not add placeholder text or comments.`,
     prompt: `Generate a complete, professional, single-page ATS-friendly resume in HTML using the following profile data.
@@ -112,7 +120,7 @@ const generateResumePrompt = ai.definePrompt({
 Profile Data:
 {{{json userProfile}}}
 
-Return a single block of HTML with inline CSS only (no <html>, <head>, or <body> tags).`,
+Return a single block of HTML with inline CSS only (no <html>, <head>, or <body> tags). The outermost wrapper div MUST include \`style="max-height:271.6mm;overflow:hidden;"\` and all text must use compact font sizes (body 9–10pt, line-height 1.2) so the entire resume fits on one A4 page.`,
 });
 
 const generateResumeFlow = ai.defineFlow(
