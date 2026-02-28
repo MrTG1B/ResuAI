@@ -101,19 +101,24 @@ const generateResumePrompt = ai.definePrompt({
    - Use standard web-safe fonts such as 'Arial', 'Helvetica', 'Times New Roman', or 'Georgia'.
    - Use clear, standard section headings: "Work Experience", "Education", "Skills", "Projects", "Certifications", "Languages".
    - Avoid tables, graphics, icons (unless explicitly requested), or multi-column layouts.
-2. **STRICT Single-Page Layout:** The entire resume MUST fit neatly on a SINGLE A4 page. The outermost wrapper div MUST have \`style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;max-height:271.6mm;"\` so nothing spills onto a second page or overflows to the right. To achieve this:
-   - Body / paragraph font-size: **9pt–10pt** (never larger).
-   - Name heading: **16pt–18pt** max.
-   - Section headings: **11pt–12pt**.
-   - Line-height: **1.2–1.3** throughout.
-   - Margins between sections: **4px–6px** top/bottom only.
-   - Bullet-point lists: max **3 bullets per job/project**.
-   - Summary: max **2–3 sentences**.
-   - Reduce or omit lower-priority sections (Interests, Languages) if space is tight.
-   - **DO NOT** use fixed pixel or mm widths (e.g. \`width:210mm\`, \`width:794px\`) on any element — use \`width:100%\` or percentage-based widths only so content never overflows horizontally.
-3. **HTML Only:** Output MUST be a single, complete block of valid HTML. Do NOT include \`<html>\`, \`<head>\`, or \`<body>\` tags.
-4. **Inline CSS:** All styling MUST use inline CSS (e.g., \`style="font-size: 10pt;"\`). Use a clean, modern, professional colour scheme.
-5. **Complete Content:** Include ALL sections for which data is provided — Contact Info, Summary/Objective, Work Experience, Education, Skills, Projects, Certifications, Languages, Interests, and Social Links — but keep each section concise.
+2. **UNIFORM FONT SIZES — NEVER vary font sizes to squeeze content:**
+   - Body / paragraph text: **exactly 10pt** everywhere — no exceptions, no mixing sizes.
+   - Name heading: **exactly 18pt**.
+   - Section headings: **exactly 12pt**.
+   - Sub-labels (company name, dates, job title): **exactly 10pt**, bold or styled with colour/weight only.
+   - Line-height: **1.3** throughout — do not alter it per element.
+   - **NEVER shrink a single element to a smaller size just to make it fit. Consistent typography is mandatory.**
+3. **STRICT Single-Page Layout — fit via CONTENT CURATION, not font juggling:**
+   The outermost wrapper div MUST have \`style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;max-height:271.6mm;"\`. To fit everything on one page, curate the content intelligently:
+   - **Projects:** Include only the **2–3 most impressive/relevant projects**. If there are more, add a short line at the end of the section: *"For additional projects, visit [GitHub Profile URL]"* (use the actual GitHub URL from socials if available, otherwise write "my GitHub profile").
+   - **Work Experience:** Max **3 concise bullet points per role**. Rewrite them to be action-oriented and impactful, not just copy-pasted.
+   - **Summary:** Max **2–3 sentences**, tightly written.
+   - **Skills:** List as comma-separated inline text or a compact wrapped list — not one skill per line.
+   - **Certifications / Languages / Interests:** Include only if space allows; omit lower-priority ones if the page is full.
+   - **Section spacing:** 6px top/bottom margin between sections only.
+   - **DO NOT** use fixed pixel or mm widths (e.g. \`width:210mm\`, \`width:794px\`) on any element — use \`width:100%\` or percentage-based widths only.
+4. **HTML Only:** Output MUST be a single, complete block of valid HTML. Do NOT include \`<html>\`, \`<head>\`, or \`<body>\` tags.
+5. **Inline CSS:** All styling MUST use inline CSS (e.g., \`style="font-size: 10pt;"\`). Use a clean, modern, professional colour scheme.
 6. **Professional Language:** Write or improve bullet points to be action-oriented, quantified where possible, and impactful.
 7. **No Placeholders:** Only include sections where real data is available. Do not add placeholder text or comments.`,
     prompt: `Generate a complete, professional, single-page ATS-friendly resume in HTML using the following profile data.
@@ -121,7 +126,7 @@ const generateResumePrompt = ai.definePrompt({
 Profile Data:
 {{{json userProfile}}}
 
-Return a single block of HTML with inline CSS only (no <html>, <head>, or <body> tags). The outermost wrapper div MUST include \`style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;max-height:271.6mm;"\` and all text must use compact font sizes (body 9–10pt, line-height 1.2) so the entire resume fits on one A4 page without any horizontal overflow.`,
+Return a single block of HTML with inline CSS only (no <html>, <head>, or <body> tags). The outermost wrapper div MUST include \`style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;max-height:271.6mm;"\`. Use UNIFORM font sizes throughout (body 10pt, section headings 12pt, name 18pt, line-height 1.3 — never deviate). Fit the content on one A4 page by curating it intelligently: show only the 2–3 best projects (add a GitHub line for the rest), write concise bullets, and keep skills inline — do NOT shrink font sizes to squeeze content.`,
 });
 
 const generateResumeFlow = ai.defineFlow(
