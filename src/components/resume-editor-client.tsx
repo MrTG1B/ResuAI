@@ -376,14 +376,15 @@ export default function ResumeEditorClient() {
             // Calculate a scale factor so all content fits within one A4 page
             const scale = contentHeightPx > pageHeightPx ? pageHeightPx / contentHeightPx : 1;
 
-            // Build the outer container that is exactly one A4 page tall (clips anything that overflows)
+            // Build the outer container that is exactly one A4 page tall (clips anything that overflows).
+            // Use 296mm instead of 297mm to prevent sub-pixel rounding from creating a blank second page.
             const outer = document.createElement('div');
-            outer.style.cssText = 'width:210mm;height:297mm;overflow:hidden;background:#fff;';
+            outer.style.cssText = 'width:210mm;height:296mm;overflow:hidden;background:#fff;margin:0 auto;';
 
             // Widen the inner div before scaling so its visual width (= layoutWidth × scale) still fills 210mm
             const innerWidthPct = scale < 1 ? `${(100 / scale).toFixed(6)}%` : '100%';
             const inner = document.createElement('div');
-            inner.style.cssText = `width:${innerWidthPct};padding:12.7mm;box-sizing:border-box;color:#000;transform-origin:top left;transform:scale(${scale});`;
+            inner.style.cssText = `width:${innerWidthPct};padding:12.7mm;box-sizing:border-box;color:#000;overflow:hidden;transform-origin:top left;transform:scale(${scale});`;
             inner.innerHTML = editorState.htmlContent;
 
             outer.appendChild(inner);
@@ -396,8 +397,9 @@ export default function ResumeEditorClient() {
                         margin: 0,
                         filename: `${cleanFileName}.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak: { mode: 'avoid-all' },
                     })
                     .save();
             } finally {
@@ -622,8 +624,10 @@ export default function ResumeEditorClient() {
                                                         style={{
                                                             width: '210mm',
                                                             minHeight: '297mm',
+                                                            maxHeight: '297mm',
                                                             boxSizing: 'border-box',
                                                             padding: '12.7mm',
+                                                            overflow: 'hidden',
                                                         }}
                                                         dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                                     />

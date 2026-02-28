@@ -40,11 +40,12 @@ const systemPrompt = `You are an expert resume writer and designer. Your task is
     - Standard web-safe fonts: 'Arial', 'Helvetica', 'Times New Roman', or 'Georgia'.
     - Clear standard section headings: "Work Experience", "Education", "Skills", "Projects", "Certifications".
     - No tables, graphics, or multi-column layouts.
-2.  **STRICT Single-Page Layout:** The resume MUST fit entirely on a SINGLE A4 page. The outermost wrapper div MUST include \`style="max-height:271.6mm;overflow:hidden;"\`. Enforce compactness:
+2.  **STRICT Single-Page Layout:** The resume MUST fit entirely on a SINGLE A4 page. The outermost wrapper div MUST include \`style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;max-height:271.6mm;"\`. Enforce compactness:
     - Body font-size: **9pt–10pt**; Name heading: **16pt–18pt**; Section headings: **11pt–12pt**.
     - Line-height: **1.2–1.3** throughout.
     - Section spacing: **4px–6px** top/bottom margin only.
     - Max **3 bullets per job/project**; Summary: max **2–3 sentences**.
+    - **DO NOT** use fixed pixel or mm widths (e.g. \`width:210mm\`, \`width:794px\`) on any element — use \`width:100%\` or percentage-based widths only so content never overflows horizontally.
 3.  **New Professional Design:** Do NOT preserve the original document's layout or styling. Generate a fresh, modern, professional design.
 4.  **Inline CSS Only:** All styling MUST use inline CSS (e.g., \`style="font-size: 10pt;"\`). No <style> tags.
 5.  **No Extra Tags:** Do not include <html>, <head>, or <body> tags. The output MUST be a single block of HTML.
@@ -58,7 +59,7 @@ const prompt = ai.definePrompt({
     output: { schema: ParseResumeOutputSchema },
     prompt: `{{media url=resumeDataUri}}
 
-Please extract all text content from the provided resume document and generate a brand-new, professional, single-page, ATS-friendly HTML resume using that content. Apply a clean, modern design with inline CSS. The outermost wrapper div MUST include \`style="max-height:271.6mm;overflow:hidden;"\` and all text must use compact font sizes (body 9–10pt, line-height 1.2) so the entire resume fits on one A4 page.
+Please extract all text content from the provided resume document and generate a brand-new, professional, single-page, ATS-friendly HTML resume using that content. Apply a clean, modern design with inline CSS. The outermost wrapper div MUST include \`style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;max-height:271.6mm;"\` and all text must use compact font sizes (body 9–10pt, line-height 1.2) so the entire resume fits on one A4 page without any horizontal overflow. Do NOT use fixed pixel or mm widths on any element.
     `
 });
 

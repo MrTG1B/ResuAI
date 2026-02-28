@@ -101,7 +101,7 @@ const generateResumePrompt = ai.definePrompt({
    - Use standard web-safe fonts such as 'Arial', 'Helvetica', 'Times New Roman', or 'Georgia'.
    - Use clear, standard section headings: "Work Experience", "Education", "Skills", "Projects", "Certifications", "Languages".
    - Avoid tables, graphics, icons (unless explicitly requested), or multi-column layouts.
-2. **STRICT Single-Page Layout:** The entire resume MUST fit neatly on a SINGLE A4 page. The outermost wrapper div MUST have \`style="max-height:271.6mm;overflow:hidden;"\` so nothing spills onto a second page. To achieve this:
+2. **STRICT Single-Page Layout:** The entire resume MUST fit neatly on a SINGLE A4 page. The outermost wrapper div MUST have \`style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;max-height:271.6mm;"\` so nothing spills onto a second page or overflows to the right. To achieve this:
    - Body / paragraph font-size: **9pt–10pt** (never larger).
    - Name heading: **16pt–18pt** max.
    - Section headings: **11pt–12pt**.
@@ -110,6 +110,7 @@ const generateResumePrompt = ai.definePrompt({
    - Bullet-point lists: max **3 bullets per job/project**.
    - Summary: max **2–3 sentences**.
    - Reduce or omit lower-priority sections (Interests, Languages) if space is tight.
+   - **DO NOT** use fixed pixel or mm widths (e.g. \`width:210mm\`, \`width:794px\`) on any element — use \`width:100%\` or percentage-based widths only so content never overflows horizontally.
 3. **HTML Only:** Output MUST be a single, complete block of valid HTML. Do NOT include \`<html>\`, \`<head>\`, or \`<body>\` tags.
 4. **Inline CSS:** All styling MUST use inline CSS (e.g., \`style="font-size: 10pt;"\`). Use a clean, modern, professional colour scheme.
 5. **Complete Content:** Include ALL sections for which data is provided — Contact Info, Summary/Objective, Work Experience, Education, Skills, Projects, Certifications, Languages, Interests, and Social Links — but keep each section concise.
@@ -120,7 +121,7 @@ const generateResumePrompt = ai.definePrompt({
 Profile Data:
 {{{json userProfile}}}
 
-Return a single block of HTML with inline CSS only (no <html>, <head>, or <body> tags). The outermost wrapper div MUST include \`style="max-height:271.6mm;overflow:hidden;"\` and all text must use compact font sizes (body 9–10pt, line-height 1.2) so the entire resume fits on one A4 page.`,
+Return a single block of HTML with inline CSS only (no <html>, <head>, or <body> tags). The outermost wrapper div MUST include \`style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;max-height:271.6mm;"\` and all text must use compact font sizes (body 9–10pt, line-height 1.2) so the entire resume fits on one A4 page without any horizontal overflow.`,
 });
 
 const generateResumeFlow = ai.defineFlow(
