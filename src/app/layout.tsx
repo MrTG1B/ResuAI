@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: '%s | ResuAI',
   },
   description:
-    'Build a job-winning resume, check ATS compatibility, generate a stunning portfolio, and write personalized cover letters — all powered by AI. Free to get started.',
+    'Build a job-winning resume, check ATS compatibility, generate a stunning portfolio, and write personalized cover letters — all powered by AI. Every paid subscription plants a real tree in your name. Free to get started.',
   keywords: [
     'AI resume builder',
     'ATS resume checker',
@@ -37,6 +37,11 @@ export const metadata: Metadata = {
     'ResuAI',
     'job application tools',
     'career tools',
+    'eco-friendly career platform',
+    'tree planting subscription',
+    'green tech career tools',
+    'plant a tree certificate',
+    'sustainable career growth',
   ],
   authors: [{ name: 'ResuAI' }],
   creator: 'ResuAI',
@@ -56,7 +61,7 @@ export const metadata: Metadata = {
     siteName: 'ResuAI',
     title: 'ResuAI – AI Resume Builder, ATS Checker & Portfolio Generator',
     description:
-      'Build a job-winning resume, check ATS compatibility, generate a stunning portfolio, and write personalized cover letters — all powered by AI.',
+      'Build a job-winning resume, check ATS compatibility, generate a stunning portfolio, and write personalized cover letters with AI. Every paid plan plants a tree in your name.',
     images: [
       {
         url: `${BASE_URL}/og-image.png`,
@@ -82,12 +87,45 @@ const websiteSchema = {
   name: 'ResuAI',
   url: BASE_URL,
   description:
-    'AI-powered tools to build job-winning resumes, portfolios, and cover letters.',
+    'AI-powered tools to build job-winning resumes, portfolios, and cover letters. Every paid plan plants a tree in your name.',
   potentialAction: {
     '@type': 'SearchAction',
     target: `${BASE_URL}/?q={search_term_string}`,
     'query-input': 'required name=search_term_string',
   },
+};
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'ResuAI',
+  url: BASE_URL,
+  description:
+    'ResuAI is an eco-friendly AI career platform. Every paid subscription plants a real tree in the subscriber\'s name and comes with a personalised tree-planting certificate.',
+  slogan: 'Grow your career. Grow the planet.',
+};
+
+const treePlantingFaqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does ResuAI plant trees for subscriptions?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Every paid ResuAI plan subscription plants a real tree in your name through verified reforestation partners. You also receive a personalised tree-planting certificate delivered to your email.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the ResuAI green initiative?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'ResuAI\'s green initiative means that for every paid plan subscription (Medium, Pro, or Ultra Pro), we plant a tree in the subscriber\'s name and issue a personalised digital certificate as proof of their positive environmental contribution.',
+      },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -102,6 +140,14 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(treePlantingFaqSchema) }}
         />
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
