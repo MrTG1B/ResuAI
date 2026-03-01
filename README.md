@@ -15,7 +15,7 @@
   <a href="#-getting-started">
     <img src="https://img.shields.io/badge/📖_Quick_Start-Get_Started-10B981?style=for-the-badge" alt="Quick Start" />
   </a>
-  <a href="docs/SECURITY.md">
+  <a href="docs/security/SECURITY.md">
     <img src="https://img.shields.io/badge/🔒_Security-View_Docs-EF4444?style=for-the-badge" alt="Security" />
   </a>
 </p>
@@ -36,6 +36,7 @@
 - [Introduction](#-introduction)
 - [Key Features](#-key-features)
 - [Tech Stack](#️-tech-stack)
+- [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Security](#-security)
 - [Contributing](#-contributing)
@@ -211,6 +212,52 @@ ResuAI leverages cutting-edge technologies for optimal performance and security:
 
 ---
 
+## 🗂️ Project Structure
+
+This is a **Next.js monorepo** with a clear separation between frontend and backend to allow two engineers to work simultaneously without conflicts.
+
+```
+ResuAI/
+├── src/
+│   ├── ai/           🔵 Backend  – Genkit AI flows (Gemini)
+│   ├── app/
+│   │   ├── api/      🔵 Backend  – REST API routes (Stripe, Genkit)
+│   │   ├── actions.ts 🔵 Backend – Next.js Server Actions
+│   │   └── **/page.tsx 🟢 Frontend – Page components
+│   ├── components/   🟢 Frontend – React UI components
+│   ├── hooks/        🟢 Frontend – Custom React hooks
+│   ├── lib/          🔵 Backend  – Firebase, utilities
+│   ├── middleware.ts  🔵 Backend  – Auth & security middleware
+│   ├── services/     🔵 Backend  – External service wrappers
+│   └── types/        ⚪ Shared   – TypeScript interfaces
+├── admin-dashboard/  🟢 Frontend – Separate admin Next.js app
+├── pdf-generator-service/ 🔵 Backend – PDF microservice (Node.js)
+├── public/           🟢 Frontend – Static assets
+├── docs/             📖 Documentation
+│   ├── ARCHITECTURE.md      – System architecture overview
+│   ├── frontend/README.md   – Frontend engineer guide
+│   ├── backend/README.md    – Backend engineer guide
+│   ├── setup/               – Setup & configuration guides
+│   └── security/            – Security documentation
+├── .github/
+│   ├── CODEOWNERS           – Auto-assign PR reviewers by path
+│   └── PULL_REQUEST_TEMPLATE.md
+└── CONTRIBUTING.md          – Branching strategy & contribution guide
+```
+
+**Legend:** 🟢 Frontend &nbsp;|&nbsp; 🔵 Backend &nbsp;|&nbsp; ⚪ Shared
+
+### 📖 Engineer Guides
+
+| Guide | Description |
+|-------|-------------|
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Branching strategy, PR workflow, and how two engineers can work in parallel |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full system architecture and data flow diagrams |
+| [docs/frontend/README.md](docs/frontend/README.md) | Frontend engineer: components, styling, hooks, and conventions |
+| [docs/backend/README.md](docs/backend/README.md) | Backend engineer: AI flows, API routes, Firestore, and Stripe |
+
+---
+
 ## 🏁 Getting Started
 
 Get ResuAI running locally in minutes:
@@ -283,7 +330,7 @@ To enable user authentication with Google Sign-In:
 
 ```bash
 # Follow the detailed setup guide
-📖 See docs/GOOGLE_SIGNIN_SETUP.md for step-by-step instructions
+📖 See docs/setup/GOOGLE_SIGNIN_SETUP.md for step-by-step instructions
 ```
 
 **Quick steps:**
@@ -297,7 +344,7 @@ If you need admin access:
 
 ```bash
 # Follow the admin setup guide
-📖 See docs/ADMIN_SETUP.md for configuration instructions
+📖 See docs/setup/ADMIN_SETUP.md for configuration instructions
 ```
 
 **Quick steps:**
@@ -340,14 +387,14 @@ ResuAI is built with **enterprise-grade security** as a top priority:
 
 ### Security Documentation
 
-- 📖 [**Security Guidelines**](docs/SECURITY.md) - Comprehensive security measures and best practices
-- 🔧 [**Security Fixes**](docs/SECURITY_FIXES.md) - Detailed security improvements implemented
-- 📊 [**Security Summary**](docs/SECURITY_FIXES_SUMMARY.md) - Quick overview of security enhancements
+- 📖 [**Security Guidelines**](docs/security/SECURITY.md) - Comprehensive security measures and best practices
+- 🔧 [**Security Fixes**](docs/security/SECURITY_FIXES.md) - Detailed security improvements implemented
+- 📊 [**Security Summary**](docs/security/SECURITY_FIXES_SUMMARY.md) - Quick overview of security enhancements
 
 ### Setup & Configuration Guides
 
-- 🔐 [**Google Sign-In Setup**](docs/GOOGLE_SIGNIN_SETUP.md) - Enable Google authentication for users
-- 👨‍💼 [**Admin Dashboard Setup**](docs/ADMIN_SETUP.md) - Configure admin access and Firestore rules
+- 🔐 [**Google Sign-In Setup**](docs/setup/GOOGLE_SIGNIN_SETUP.md) - Enable Google authentication for users
+- 👨‍💼 [**Admin Dashboard Setup**](docs/setup/ADMIN_SETUP.md) - Configure admin access and Firestore rules
 
 ### Reporting Security Issues
 

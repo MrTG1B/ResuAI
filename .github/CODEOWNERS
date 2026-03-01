@@ -1,0 +1,47 @@
+# CODEOWNERS
+#
+# This file defines code ownership for the ResuAI repository.
+# When a pull request modifies files in these paths, GitHub will
+# automatically request a review from the assigned owner(s).
+#
+# Format: <pattern>  <@github-username or @org/team>
+#
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ─── Default owner for everything not matched below ───────────────
+*  @MrTG1B
+
+# ─── FRONTEND – UI components, pages, hooks, styles ───────────────
+src/components/         @MrTG1B
+src/app/**/page.tsx     @MrTG1B
+src/app/**/layout.tsx   @MrTG1B
+src/app/globals.css     @MrTG1B
+src/hooks/              @MrTG1B
+public/                 @MrTG1B
+tailwind.config.ts      @MrTG1B
+postcss.config.mjs      @MrTG1B
+admin-dashboard/        @MrTG1B
+
+# ─── BACKEND – API routes, AI flows, server actions, services ──────
+src/app/api/            @MrTG1B
+src/ai/                 @MrTG1B
+src/app/actions.ts      @MrTG1B
+src/lib/                @MrTG1B
+src/services/           @MrTG1B
+src/middleware.ts       @MrTG1B
+firestore.rules         @MrTG1B
+firebase.json           @MrTG1B
+apphosting.yaml         @MrTG1B
+pdf-generator-service/  @MrTG1B
+
+# ─── SHARED – Both engineers should review ────────────────────────
+src/types/              @MrTG1B
+next.config.ts          @MrTG1B
+tsconfig.json           @MrTG1B
+package.json            @MrTG1B
+package-lock.json       @MrTG1B
+
+# ─── DOCUMENTATION ────────────────────────────────────────────────
+docs/                   @MrTG1B
+README.md               @MrTG1B
+CONTRIBUTING.md         @MrTG1B
