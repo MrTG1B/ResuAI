@@ -13,7 +13,7 @@ import {
   ArrowRight, Bot, PenSquare, Eye, Star, FileText,
   LayoutTemplate, SearchCheck, NotebookPen, Users, Zap, ShieldCheck,
   Sparkles, CheckCircle2, BrainCircuit, Rocket, Target, Medal,
-  TrendingUp, MessageSquare, Globe,
+  TrendingUp, MessageSquare, Globe, TreePine, ScrollText,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { BrandLoader } from '@/components/brand-loader';
@@ -206,6 +206,7 @@ export default function HomePage() {
                 { icon: Users,    text: '10,000+ Professionals' },
                 { icon: FileText, text: '50,000+ Resumes Created' },
                 { icon: Star,     text: '4.9 / 5 Rating' },
+                { icon: TreePine, text: '🌱 Trees Planted with Every Plan' },
               ].map(({ icon: Icon, text }) => (
                 <span
                   key={text}
@@ -572,6 +573,47 @@ export default function HomePage() {
                 See Full Pricing <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
+          </div>
+        </section>
+
+        {/* ── GREEN INITIATIVE ─────────────────────────────────────────── */}
+        <section className="py-14 lg:py-20 bg-background border-y border-border/50">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 dark:border-emerald-800 p-8 md:p-10 text-center">
+              <div className="flex justify-center mb-5">
+                <div className="p-4 rounded-full bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-700">
+                  <TreePine className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </div>
+              <span className="inline-block text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-semibold mb-3">
+                Green Initiative
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-heading text-emerald-900 dark:text-emerald-100 mb-4">
+                We Plant a Tree for Every Pro Subscription
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
+                At ResuAI, we believe your career growth should also contribute to the planet&apos;s growth.
+                When you subscribe to any paid plan, we plant a real tree in your name through our verified reforestation partners.
+                You&apos;ll also receive a <strong className="text-emerald-700 dark:text-emerald-400">personalised tree-planting certificate</strong> delivered to your email — a meaningful reminder that your success is making a difference.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-700">
+                  <TreePine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">1 subscription = 1 tree planted</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-700">
+                  <ScrollText className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Personalised certificate included</span>
+                </div>
+              </div>
+              <div className="mt-8">
+                <Link href="/pricing">
+                  <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 shadow-md shadow-emerald-200 dark:shadow-emerald-900/40">
+                    Subscribe &amp; Make an Impact <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 
