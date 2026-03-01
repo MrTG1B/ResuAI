@@ -4,6 +4,16 @@ import { initializeFirebaseAdmin, admin } from '@/lib/firebaseAdmin';
 const VALID_PLAN_IDS = ['free', 'medium', 'pro', 'ultra_pro'] as const;
 type PlanId = (typeof VALID_PLAN_IDS)[number];
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': process.env.ADMIN_DASHBOARD_URL || '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
 /**
  * POST /api/admin/update-subscription
  *
@@ -27,7 +37,7 @@ export async function POST(request: NextRequest) {
   // ── 1. Authenticate ──────────────────────────────────────────────────────
   const authHeader = request.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: CORS_HEADERS });
   }
 
   const token = authHeader.split('Bearer ')[1];
@@ -36,7 +46,7 @@ export async function POST(request: NextRequest) {
     initializeFirebaseAdmin();
     decodedToken = await admin.auth().verifyIdToken(token);
   } catch {
-    return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401, headers: CORS_HEADERS });
   }
 
   // ── 2. Authorise (admin-only) ─────────────────────────────────────────────
@@ -48,7 +58,7 @@ export async function POST(request: NextRequest) {
     (adminEmail && decodedToken.email === adminEmail);
 
   if (!isAdmin) {
-    return NextResponse.json({ error: 'Forbidden: admin access required' }, { status: 403 });
+    return NextResponse.json({ error: 'Forbidden: admin access required' }, { status: 403, headers: CORS_HEADERS });
   }
 
   // ── 3. Validate request body ──────────────────────────────────────────────
@@ -56,7 +66,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400, headers: CORS_HEADERS });
   }
 
   const { userId, planId } = body;
@@ -64,14 +74,14 @@ export async function POST(request: NextRequest) {
   if (!userId || !planId) {
     return NextResponse.json(
       { error: 'Missing required fields: userId and planId' },
-      { status: 400 }
+      { status: 400, headers: CORS_HEADERS }
     );
   }
 
   if (!VALID_PLAN_IDS.includes(planId as PlanId)) {
     return NextResponse.json(
       { error: `Invalid planId. Must be one of: ${VALID_PLAN_IDS.join(', ')}` },
-      { status: 400 }
+      { status: 400, headers: CORS_HEADERS }
     );
   }
 
@@ -97,11 +107,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { message: 'Subscription updated successfully', userId, planId },
-      { status: 200 }
+      { status: 200, headers: CORS_HEADERS }
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Admin update-subscription error:', message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500, headers: CORS_HEADERS });
   }
 }
