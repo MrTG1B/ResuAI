@@ -21,6 +21,7 @@ import { parseResumeAction } from "@/app/actions";
 import { editResumeAction } from "@/app/actions";
 import { generateResumeFromProfileAction } from "@/app/actions";
 import { analyzeResumeForPortfolioAction } from "@/app/actions";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 const parsingTexts = [
@@ -41,9 +42,9 @@ const generatingFromProfileTexts = [
 
 const generatingPdfTexts = [
     "Preparing your resume...",
-    "Rendering document layout...",
-    "Generating PDF...",
-    "Finalizing document...",
+    "Building print layout...",
+    "Opening print dialog...",
+    "Almost ready...",
 ];
 
 const applyingSuggestionsTexts = [
@@ -350,59 +351,71 @@ export default function ResumeEditorClient() {
             toast({ title: "Nothing to download", description: "The resume content is not available.", variant: "destructive" });
             return;
         }
-    
-        setIsGeneratingPdf(true);
-    
-        try {
-            const { default: html2pdf } = await import('html2pdf.js');
 
+        setIsGeneratingPdf(true);
+
+        try {
             const cleanFileName = (editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "");
 
-            // Determine the pixel height of a single A4 page in the current browser
-            const pageRef = document.createElement('div');
-            pageRef.style.cssText = 'position:fixed;top:-9999px;left:0;height:297mm;width:1px;pointer-events:none;visibility:hidden;';
-            document.body.appendChild(pageRef);
-            const pageHeightPx = pageRef.offsetHeight;
-            document.body.removeChild(pageRef);
+            // Build a self-contained print document so the browser renders real text
+            // (not a bitmap image), producing a fully text-selectable, ATS-friendly PDF.
+            const printHtml = `<!DOCTYPE html>
+<html><head>
+  <meta charset="utf-8">
+  <title>${cleanFileName}</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    html, body { width: 210mm; margin: 0; padding: 0; background: #fff; }
+    body { padding: 12.7mm; box-sizing: border-box; }
+  </style>
+</head><body>${editorState.htmlContent}</body></html>`;
 
-            // Measure the actual rendered content height at 210mm width with standard padding
-            const probe = document.createElement('div');
-            probe.style.cssText = 'position:fixed;top:-9999px;left:0;width:210mm;padding:12.7mm;box-sizing:border-box;background:#fff;color:#000;visibility:hidden;';
-            probe.innerHTML = editorState.htmlContent;
-            document.body.appendChild(probe);
-            const contentHeightPx = probe.scrollHeight;
-            document.body.removeChild(probe);
+            // Delay before removing the iframe to give the browser time to spool the print job.
+            const PRINT_CLEANUP_DELAY_MS = 1000;
 
-            // Calculate a scale factor so all content fits within one A4 page
-            const scale = contentHeightPx > pageHeightPx ? pageHeightPx / contentHeightPx : 1;
+            await new Promise<void>((resolve, reject) => {
+                const iframe = document.createElement('iframe');
+                // No `src` — the iframe stays on the same origin as the parent page,
+                // which is required for `contentWindow.print()` to work without a
+                // cross-origin security error.
+                iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;visibility:hidden;';
 
-            // Build the outer container that is exactly one A4 page tall (clips anything that overflows)
-            const outer = document.createElement('div');
-            outer.style.cssText = 'width:210mm;height:297mm;overflow:hidden;background:#fff;';
+                const cleanup = () => {
+                    // Delay removal so the browser has time to spool the print job.
+                    setTimeout(() => {
+                        if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                    }, PRINT_CLEANUP_DELAY_MS);
+                };
 
-            // Widen the inner div before scaling so its visual width (= layoutWidth × scale) still fills 210mm
-            const innerWidthPct = scale < 1 ? `${(100 / scale).toFixed(6)}%` : '100%';
-            const inner = document.createElement('div');
-            inner.style.cssText = `width:${innerWidthPct};padding:12.7mm;box-sizing:border-box;color:#000;transform-origin:top left;transform:scale(${scale});`;
-            inner.innerHTML = editorState.htmlContent;
+                document.body.appendChild(iframe);
 
-            outer.appendChild(inner);
-            document.body.appendChild(outer);
+                try {
+                    // Write HTML directly into the iframe document (same origin → no CORS block).
+                    const doc = iframe.contentDocument;
+                    if (!doc) throw new Error('Could not access iframe document.');
+                    doc.open();
+                    doc.write(printHtml);
+                    doc.close();
 
-            try {
-                await html2pdf()
-                    .from(outer)
-                    .set({
-                        margin: 0,
-                        filename: `${cleanFileName}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    })
-                    .save();
-            } finally {
-                document.body.removeChild(outer);
-            }
+                    const win = iframe.contentWindow;
+                    if (!win) throw new Error('Could not access iframe window.');
+                    win.focus();
+                    // window.print() is synchronous in all major browsers — it blocks until
+                    // the user dismisses the print dialog (whether they save or cancel).
+                    win.print();
+                    resolve();
+                } catch (e) {
+                    reject(e);
+                } finally {
+                    cleanup();
+                }
+            });
+
+            toast({
+                title: "Ready to save as PDF",
+                description: `Your browser will suggest "${cleanFileName}" as the filename. Use 'Save as PDF' to save with fully selectable text.`,
+            });
         } catch (error) {
             console.error('PDF Download error:', error);
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
@@ -548,10 +561,19 @@ export default function ResumeEditorClient() {
                 {isConverting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Briefcase className="mr-2 h-4 w-4"/>}
                 Create Portfolio
             </Button>
-            <Button onClick={handleDownload} size="sm" disabled={!canDownload || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
-                {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                Download PDF
-            </Button>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button onClick={handleDownload} size="sm" disabled={!canDownload || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
+                            {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                            Save as PDF
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                        PDF will be named &quot;{(editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "")}&quot; — edit the title above to change it
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
         </div>
     );
 
@@ -622,8 +644,10 @@ export default function ResumeEditorClient() {
                                                         style={{
                                                             width: '210mm',
                                                             minHeight: '297mm',
+                                                            maxHeight: '297mm',
                                                             boxSizing: 'border-box',
                                                             padding: '12.7mm',
+                                                            overflow: 'hidden',
                                                         }}
                                                         dangerouslySetInnerHTML={{ __html: editorState.htmlContent || '' }}
                                                     />
