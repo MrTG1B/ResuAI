@@ -374,40 +374,41 @@ export default function ResumeEditorClient() {
             const PRINT_CLEANUP_DELAY_MS = 1000;
 
             await new Promise<void>((resolve, reject) => {
-                const blob = new Blob([printHtml], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-
                 const iframe = document.createElement('iframe');
+                // No `src` — the iframe stays on the same origin as the parent page,
+                // which is required for `contentWindow.print()` to work without a
+                // cross-origin security error.
                 iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;visibility:hidden;';
 
                 const cleanup = () => {
+                    // Delay removal so the browser has time to spool the print job.
                     setTimeout(() => {
                         if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                        URL.revokeObjectURL(url);
                     }, PRINT_CLEANUP_DELAY_MS);
                 };
 
-                iframe.onload = () => {
-                    try {
-                        iframe.contentWindow?.focus();
-                        // window.print() is synchronous in all major browsers — it blocks until
-                        // the user dismisses the print dialog (whether they save or cancel).
-                        iframe.contentWindow?.print();
-                        resolve();
-                    } catch (e) {
-                        reject(e);
-                    } finally {
-                        cleanup();
-                    }
-                };
-
-                iframe.onerror = () => {
-                    cleanup();
-                    reject(new Error('Failed to load print frame.'));
-                };
-
                 document.body.appendChild(iframe);
-                iframe.src = url;
+
+                try {
+                    // Write HTML directly into the iframe document (same origin → no CORS block).
+                    const doc = iframe.contentDocument;
+                    if (!doc) throw new Error('Could not access iframe document.');
+                    doc.open();
+                    doc.write(printHtml);
+                    doc.close();
+
+                    const win = iframe.contentWindow;
+                    if (!win) throw new Error('Could not access iframe window.');
+                    win.focus();
+                    // window.print() is synchronous in all major browsers — it blocks until
+                    // the user dismisses the print dialog (whether they save or cancel).
+                    win.print();
+                    resolve();
+                } catch (e) {
+                    reject(e);
+                } finally {
+                    cleanup();
+                }
             });
 
             toast({
