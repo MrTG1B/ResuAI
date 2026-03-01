@@ -35,6 +35,7 @@ import { TemplatePreview } from '@/components/template-preview';
 import { Badge } from '@/components/ui/badge';
 import { useSubscription } from '@/hooks/use-subscription';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 function ToolCard({
@@ -187,6 +188,7 @@ export default function DashboardPage() {
   const [isResumeCheckLoading, setIsResumeCheckLoading] = useState(true);
   
   const [profileCompletion, setProfileCompletion] = useState(0);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<{type: 'resume' | 'portfolio' | 'coverletter' | 'resumecheck', id: string} | null>(null);
   const [activeSection, setActiveSection] = useState<'overview' | 'resumes' | 'portfolios' | 'coverletters' | 'atschecks'>('overview');
@@ -247,8 +249,10 @@ export default function DashboardPage() {
             const profileData = profileSnap.exists() ? profileSnap.data() : {};
             const completion = calculateProfileCompletion(profileData, user);
             setProfileCompletion(completion);
+            setAvatarUrl(profileData.profilePictureUrl || user.photoURL || null);
         } catch (error) {
             console.error("Failed to fetch profile data:", error);
+            setAvatarUrl(user.photoURL || null);
         }
 
         fetchData('resumes', setResumes, setIsResumeLoading);
@@ -265,6 +269,17 @@ export default function DashboardPage() {
 
     return () => unsubscribe();
   }, [router, toast]);
+
+  useEffect(() => {
+    const handleProfilePictureUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail.newUrl !== undefined) {
+        setAvatarUrl(customEvent.detail.newUrl || null);
+      }
+    };
+    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate);
+    return () => window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate);
+  }, []);
 
   const handleStartNew = (type: 'resume' | 'coverletter') => {
     if (type === 'resume') {
@@ -390,9 +405,12 @@ export default function DashboardPage() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 w-full rounded-xl hover:bg-white/8 transition-all duration-200 p-1 -m-1" aria-label="Open user menu">
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
-                {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
-              </div>
+              <Avatar className="h-9 w-9 flex-shrink-0">
+                <AvatarImage src={avatarUrl || undefined} alt={user.displayName || user.email || 'User'} />
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-primary-foreground font-bold text-xs">
+                  {getInitials(user.displayName) || <UserIcon className="h-4 w-4" />}
+                </AvatarFallback>
+              </Avatar>
               <div className="overflow-hidden min-w-0 flex-1 text-left">
                 <p className="font-semibold text-sm truncate leading-tight">{user.displayName || user.email}</p>
                 <Badge variant="outline" className={`text-[10px] font-semibold px-1.5 py-0 mt-0.5 ${PLAN_BADGE_COLORS[planId] ?? PLAN_BADGE_COLORS.free}`}>
