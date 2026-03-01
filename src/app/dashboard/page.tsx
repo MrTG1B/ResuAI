@@ -389,12 +389,12 @@ export default function DashboardPage() {
       { key: 'atschecks' as const, icon: SearchCheck, label: 'ATS Checks', count: resumeChecks.length, loading: isResumeCheckLoading, accentColor: 'text-blue-400', activeBg: 'bg-blue-500/15', activeBadge: 'bg-blue-500/20 text-blue-400' },
     ],
     tools: [
-      { href: '/resume-builder', icon: FileText, label: 'Resume Editor', locked: false, color: 'primary' as const },
-      { href: '/resume-analyzer', icon: SearchCheck, label: 'ATS Checker', locked: false, color: 'secondary' as const },
-      { href: '/cover-letter-generator', icon: NotebookPen, label: 'Cover Letter', locked: false, color: 'primary' as const },
-      { href: '/interview-prep', icon: MessageCircleQuestion, label: 'Interview Prep', locked: !canAccess('interviewPrep'), color: 'secondary' as const },
-      { href: '/aptitude-test', icon: BrainCircuit, label: 'Aptitude Test', locked: !canAccess('aptitudeTests'), color: 'primary' as const },
-      { href: '/build', icon: LayoutTemplate, label: 'Portfolio Gen', locked: false, color: 'secondary' as const },
+      { href: '/resume-builder', icon: FileText, label: 'Resume Editor', locked: false, color: 'primary' as const, description: 'Build or polish your resume with AI-powered suggestions and ATS-friendly templates.', preview: '/previews/modern.png' },
+      { href: '/resume-analyzer', icon: SearchCheck, label: 'ATS Checker', locked: false, color: 'secondary' as const, description: 'Scan your resume against a job description and get an instant ATS compatibility score.', preview: '/previews/minimal.png' },
+      { href: '/cover-letter-generator', icon: NotebookPen, label: 'Cover Letter', locked: false, color: 'primary' as const, description: 'Generate a professional, tailored cover letter for any job posting in seconds.', preview: '/previews/corporate.png' },
+      { href: '/interview-prep', icon: MessageCircleQuestion, label: 'Interview Prep', locked: !canAccess('interviewPrep'), color: 'secondary' as const, description: 'Practice common interview questions and receive AI-powered coaching feedback.', preview: '/previews/classic.png' },
+      { href: '/aptitude-test', icon: BrainCircuit, label: 'Aptitude Test', locked: !canAccess('aptitudeTests'), color: 'primary' as const, description: 'Take timed aptitude tests to sharpen your logical and numerical reasoning skills.', preview: '/previews/classic.png' },
+      { href: '/build', icon: LayoutTemplate, label: 'Portfolio Gen', locked: false, color: 'secondary' as const, description: 'Turn your resume into a stunning personal portfolio website in one click.', preview: '/previews/creative.png' },
     ],
   };
 
@@ -506,23 +506,46 @@ export default function DashboardPage() {
               </div>
               {!canAccess('mentorChat') && <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />}
             </Link>
+            <TooltipProvider delayDuration={400}>
             {sidebarItems.tools.map(tool => (
-              <Link
-                key={tool.href}
-                href={tool.locked ? '/pricing' : tool.href}
-                className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group ${tool.locked ? 'text-foreground/30 cursor-default' : 'text-foreground/70 hover:text-foreground hover:bg-white/8'}`}
-              >
-                <div className="flex items-center gap-3">
-                  <tool.icon className="h-4 w-4 flex-shrink-0" />
-                  {tool.label}
-                </div>
-                {tool.locked ? (
-                  <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />
-                ) : (
-                  <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity flex-shrink-0" />
-                )}
-              </Link>
+              <Tooltip key={tool.href}>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={tool.locked ? '/pricing' : tool.href}
+                      className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group ${tool.locked ? 'text-foreground/30 cursor-default' : 'text-foreground/70 hover:text-foreground hover:bg-white/8'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <tool.icon className="h-4 w-4 flex-shrink-0" />
+                        {tool.label}
+                      </div>
+                      {tool.locked ? (
+                        <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />
+                      ) : (
+                        <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity flex-shrink-0" />
+                      )}
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="center" className="p-0 w-56 overflow-hidden border-border/50 shadow-2xl bg-popover" sideOffset={8}>
+                    <div className="relative h-28 overflow-hidden bg-muted">
+                      <Image src={tool.preview} alt={tool.label} fill className="object-cover animate-ken-burns" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      <div className="absolute bottom-2 left-3 flex items-center gap-1.5">
+                        <tool.icon className="h-3.5 w-3.5 text-white/90 drop-shadow" />
+                        <span className="text-white text-[11px] font-semibold drop-shadow">{tool.label}</span>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-xs text-muted-foreground leading-relaxed">{tool.description}</p>
+                      {tool.locked && (
+                        <p className="text-[10px] text-amber-400 font-semibold mt-2 flex items-center gap-1">
+                          <Lock className="h-2.5 w-2.5" /> Upgrade to unlock
+                        </p>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
             ))}
+            </TooltipProvider>
           </div>
         </div>
       </nav>
