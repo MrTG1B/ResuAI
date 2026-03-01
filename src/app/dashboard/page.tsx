@@ -496,16 +496,40 @@ export default function DashboardPage() {
         <div>
           <p className="text-[10px] uppercase font-semibold text-foreground/40 px-3 mb-2 tracking-widest">AI Tools</p>
           <div className="space-y-0.5">
-            <Link
-              href={canAccess('mentorChat') ? '/mentra' : '/pricing'}
-              className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${canAccess('mentorChat') ? 'text-[#45B8AC] hover:bg-[#45B8AC]/10' : 'text-foreground/30 cursor-default'}`}
-            >
-              <div className="flex items-center gap-3">
-                <MentraIcon className="h-4 w-4 flex-shrink-0" isAnimated={canAccess('mentorChat')} />
-                Mentra Chat
-              </div>
-              {!canAccess('mentorChat') && <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />}
-            </Link>
+            <TooltipProvider delayDuration={400}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={canAccess('mentorChat') ? '/mentra' : '/pricing'}
+                    className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group ${canAccess('mentorChat') ? 'text-[#45B8AC] hover:bg-[#45B8AC]/10' : 'text-foreground/30 cursor-default'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <MentraIcon className="h-4 w-4 flex-shrink-0" isAnimated={canAccess('mentorChat')} />
+                      Mentra Chat
+                    </div>
+                    {!canAccess('mentorChat') && <Lock className="h-3 w-3 text-amber-500/60 flex-shrink-0" />}
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" align="center" className="p-0 w-56 overflow-hidden border-border/50 shadow-2xl bg-popover" sideOffset={8}>
+                  <div className="relative h-28 overflow-hidden bg-muted">
+                    <Image src="/previews/creative.png" alt="" fill className="object-cover animate-ken-burns" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    <div className="absolute bottom-2 left-3 flex items-center gap-1.5">
+                      <MentraIcon className="h-3.5 w-3.5 text-white/90 drop-shadow" />
+                      <span className="text-white text-[11px] font-semibold drop-shadow">Mentra Chat</span>
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <p className="text-xs text-muted-foreground leading-relaxed">Your AI career mentor — ask questions, get guidance, and plan your next career move.</p>
+                    {!canAccess('mentorChat') && (
+                      <p className="text-[10px] text-amber-400 font-semibold mt-2 flex items-center gap-1">
+                        <Lock className="h-2.5 w-2.5" /> Upgrade to unlock
+                      </p>
+                    )}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <TooltipProvider delayDuration={400}>
             {sidebarItems.tools.map(tool => (
               <Tooltip key={tool.href}>

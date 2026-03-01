@@ -16,9 +16,9 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages, Smile, FileText, CreditCard } from "lucide-react";
+import { Trash2, PlusCircle, UserCircle, Briefcase, GraduationCap, Lightbulb, Award, Camera, Sparkles, Wrench, Edit, UploadCloud, Link as LinkIcon, Github, Linkedin, Globe, Languages, Smile, FileText, ArrowLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CountryCodeSelector } from "@/components/country-code-selector";
@@ -418,6 +418,8 @@ export default function ProfilePage() {
 
   const profilePictureUrl = watch('profilePictureUrl');
   const displayImageUrl = localImagePreview || profilePictureUrl;
+  const watchedName = watch('name');
+  const watchedTitle = watch('title');
   const watchedEducation = watch('education');
   const watchedProjects = watch('projects');
   const watchedCerts = watch('certifications');
@@ -428,93 +430,161 @@ export default function ProfilePage() {
   const watchedLanguages = watch('languages');
   const watchedInterests = watch('interests');
 
+  const tabTriggerBase = "flex items-center gap-1.5 rounded-t-lg rounded-b-none text-xs font-medium px-3 py-2.5 border-b-2 border-transparent transition-none";
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background relative">
+      <div className="dot-grid fixed inset-0 pointer-events-none opacity-60" />
       <Header hideUserMenu />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-4xl space-y-6">
-        {/* Subscription Card */}
-        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-background">
-          <CardHeader className="pb-3">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-primary" />
-                  Your Subscription
-                </CardTitle>
-                <CardDescription>Manage your plan and billing</CardDescription>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                  planId === 'free' ? 'bg-slate-100 text-slate-700' :
-                  planId === 'medium' ? 'bg-blue-100 text-blue-700' :
-                  planId === 'pro' ? 'bg-violet-100 text-violet-700' :
-                  'bg-amber-100 text-amber-700'
-                }`}>
-                  {plan.name} Plan
+      <main className="flex-grow container mx-auto px-4 py-6 md:py-8 max-w-4xl">
+
+        {/* Back Navigation */}
+        <div className="flex items-center gap-1.5 mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 h-8"
+            onClick={() => router.push('/dashboard')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40" />
+          <span className="text-sm text-foreground/60 font-medium">Profile</span>
+        </div>
+
+        {/* Hero Card */}
+        <div className="relative overflow-hidden rounded-2xl border border-border/50 mb-6 glass-card">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent pointer-events-none" />
+          <div className="relative px-6 py-7 md:px-8">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              {/* Avatar */}
+              <div className="relative w-24 h-24 flex-shrink-0 group">
+                <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-primary/40 ring-offset-2 ring-offset-background shadow-lg">
+                  <Image
+                    unoptimized
+                    key={displayImageUrl}
+                    src={displayImageUrl || `https://placehold.co/96x96.png`}
+                    alt="Profile"
+                    width={96}
+                    height={96}
+                    className="object-cover w-full h-full"
+                  />
                 </div>
-                {!isPremium ? (
-                  <Button size="sm" onClick={() => router.push('/pricing')}>
-                    Upgrade Now
-                  </Button>
-                ) : (
-                  <Button size="sm" variant="outline" onClick={async () => {
-                    if (!auth?.currentUser) return;
-                    const token = await auth.currentUser.getIdToken();
-                    const res = await fetch('/api/stripe/portal', {
-                      method: 'POST',
-                      headers: { authorization: `Bearer ${token}` },
-                    });
-                    const data = await res.json();
-                    if (data.url) window.location.href = data.url;
-                  }}>
-                    Manage Billing
-                  </Button>
-                )}
+                <label
+                  htmlFor="profile-picture-upload-hero"
+                  className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-2xl cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  {isUploading ? <BrandLoader size="md" /> : <Camera className="h-6 w-6 text-white" />}
+                </label>
+                <input
+                  id="profile-picture-upload-hero"
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  aria-label="Upload profile picture"
+                  onChange={handleProfilePictureUpload}
+                  disabled={isUploading}
+                />
               </div>
+
+              {/* User info */}
+              <div className="flex-1 min-w-0 text-center sm:text-left">
+                <h1 className="text-2xl md:text-3xl font-bold font-heading truncate" aria-label="Your display name">
+                  {watchedName || currentUser?.displayName || 'Your Profile'}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {watchedTitle || 'Add your professional title below'}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-3 justify-center sm:justify-start">
+                  <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                    planId === 'free' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' :
+                    planId === 'medium' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                    planId === 'pro' ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300' :
+                    'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                  }`}>
+                    ✦ {plan.name} Plan
+                  </div>
+                  {!isPremium ? (
+                    <Button size="sm" className="h-7 text-xs" onClick={() => router.push('/pricing')}>
+                      Upgrade Now
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={async () => {
+                      if (!auth?.currentUser) return;
+                      const token = await auth.currentUser.getIdToken();
+                      const res = await fetch('/api/stripe/portal', {
+                        method: 'POST',
+                        headers: { authorization: `Bearer ${token}` },
+                      });
+                      const data = await res.json();
+                      if (data.url) window.location.href = data.url;
+                    }}>
+                      Manage Billing
+                    </Button>
+                  )}
+                  {isPremium && subscription?.currentPeriodEnd && (
+                    <span className="text-xs text-muted-foreground">
+                      Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                    </span>
+                  )}
+                  {isPremium && subscription?.cancelAtPeriodEnd && (
+                    <span className="text-xs text-amber-500 font-medium">· Cancels at period end</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick save */}
+              <Button
+                onClick={handleSubmit(onSubmit)}
+                disabled={isSaving || isAnalyzingCert || isUploading || isRefining}
+                className="flex-shrink-0 gap-2"
+              >
+                {(isSaving || isUploading || isRefining) && <BrandLoader size="sm" />}
+                Save Changes
+              </Button>
             </div>
-          </CardHeader>
-          {isPremium && subscription && (
-            <CardContent className="pt-0">
-              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
-                {subscription.currentPeriodEnd && (
-                  <span>Renews: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</span>
-                )}
-                {subscription.cancelAtPeriodEnd && (
-                  <span className="text-amber-600 font-medium">Cancels at period end</span>
-                )}
-                <span className="capitalize">Status: {subscription.status}</span>
-              </div>
-            </CardContent>
-          )}
-        </Card>
-        <Card className="shadow-lg">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <UserCircle className="h-10 w-10 text-primary flex-shrink-0"/>
-              <div className="text-center sm:text-left">
-                <CardTitle>Your Professional Profile</CardTitle>
-                <CardDescription>
-                  This information will be used to auto-fill your resumes and portfolios. Keep it up-to-date!
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          </div>
+        </div>
+
+        {/* Profile Form Card */}
+        <Card className="shadow-md border-border/40">
+          <CardContent className="p-0">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-0">
               <Tabs defaultValue="personal" className="w-full" orientation="horizontal">
-                <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
-                  <TabsTrigger value="personal" className="brand-color-1 data-[state=active]:bg-[--brand-color] data-[state=active]:text-primary-foreground">Personal</TabsTrigger>
-                  <TabsTrigger value="skills" className="brand-color-2 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Skills</TabsTrigger>
-                  <TabsTrigger value="languages" className="brand-color-3 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Languages</TabsTrigger>
-                  <TabsTrigger value="interests" className="brand-color-1 data-[state=active]:bg-[--brand-color] data-[state=active]:text-primary-foreground">Interests</TabsTrigger>
-                  <TabsTrigger value="experience" className="brand-color-2 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Experience</TabsTrigger>
-                  <TabsTrigger value="education" className="brand-color-3 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Education</TabsTrigger>
-                  <TabsTrigger value="projects" className="brand-color-1 data-[state=active]:bg-[--brand-color] data-[state=active]:text-primary-foreground">Projects</TabsTrigger>
-                  <TabsTrigger value="certifications" className="brand-color-2 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Certs</TabsTrigger>
-                  <TabsTrigger value="publications" className="brand-color-3 data-[state=active]:bg-[--brand-color] data-[state=active]:text-white">Pubs</TabsTrigger>
-                </TabsList>
+                <div className="border-b border-border/40 px-4 pt-3 pb-0 overflow-x-auto">
+                  <TabsList className="inline-flex w-auto min-w-full bg-transparent gap-0.5 p-0 h-auto rounded-none">
+                    <TabsTrigger value="personal" className={`${tabTriggerBase} data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5`}>
+                      <UserCircle className="h-3.5 w-3.5" />Personal
+                    </TabsTrigger>
+                    <TabsTrigger value="skills" className={`${tabTriggerBase} data-[state=active]:border-[#45B8AC] data-[state=active]:text-[#45B8AC] data-[state=active]:bg-[#45B8AC]/5`}>
+                      <Wrench className="h-3.5 w-3.5" />Skills
+                    </TabsTrigger>
+                    <TabsTrigger value="languages" className={`${tabTriggerBase} data-[state=active]:border-[#F71B3D] data-[state=active]:text-[#F71B3D] data-[state=active]:bg-[#F71B3D]/5`}>
+                      <Languages className="h-3.5 w-3.5" />Languages
+                    </TabsTrigger>
+                    <TabsTrigger value="interests" className={`${tabTriggerBase} data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5`}>
+                      <Smile className="h-3.5 w-3.5" />Interests
+                    </TabsTrigger>
+                    <TabsTrigger value="experience" className={`${tabTriggerBase} data-[state=active]:border-[#45B8AC] data-[state=active]:text-[#45B8AC] data-[state=active]:bg-[#45B8AC]/5`}>
+                      <Briefcase className="h-3.5 w-3.5" />Experience
+                    </TabsTrigger>
+                    <TabsTrigger value="education" className={`${tabTriggerBase} data-[state=active]:border-[#F71B3D] data-[state=active]:text-[#F71B3D] data-[state=active]:bg-[#F71B3D]/5`}>
+                      <GraduationCap className="h-3.5 w-3.5" />Education
+                    </TabsTrigger>
+                    <TabsTrigger value="projects" className={`${tabTriggerBase} data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5`}>
+                      <Lightbulb className="h-3.5 w-3.5" />Projects
+                    </TabsTrigger>
+                    <TabsTrigger value="certifications" className={`${tabTriggerBase} data-[state=active]:border-[#45B8AC] data-[state=active]:text-[#45B8AC] data-[state=active]:bg-[#45B8AC]/5`}>
+                      <Award className="h-3.5 w-3.5" />Certs
+                    </TabsTrigger>
+                    <TabsTrigger value="publications" className={`${tabTriggerBase} data-[state=active]:border-[#F71B3D] data-[state=active]:text-[#F71B3D] data-[state=active]:bg-[#F71B3D]/5`}>
+                      <FileText className="h-3.5 w-3.5" />Pubs
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
                 
-                <TabsContent value="personal" className="space-y-6 pt-4">
+                <TabsContent value="personal" className="space-y-6 p-6">
                    <SectionTitle icon={UserCircle} text="Personal Information" />
                    <div className="flex flex-col md:flex-row items-start gap-8">
                         <div className="space-y-2 flex-shrink-0 text-center md:w-1/4 w-full">
@@ -637,7 +707,7 @@ export default function ProfilePage() {
                     </div>
                 </TabsContent>
 
-                <TabsContent value="skills" className="space-y-6 pt-4">
+                <TabsContent value="skills" className="space-y-6 p-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Wrench} text="Skills" color="secondary" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('skills')}>
@@ -672,7 +742,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="languages" className="space-y-6 pt-4">
+                <TabsContent value="languages" className="space-y-6 p-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Languages} text="Languages" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('languages')}>
@@ -709,7 +779,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="interests" className="space-y-6 pt-4">
+                <TabsContent value="interests" className="space-y-6 p-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Smile} text="Interests" color="secondary" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('interests')}>
@@ -744,7 +814,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="experience" className="space-y-6 pt-4">
+                <TabsContent value="experience" className="space-y-6 p-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Briefcase} text="Work Experience" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('experience')}>
@@ -776,7 +846,7 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                 <TabsContent value="education" className="space-y-6 pt-4">
+                 <TabsContent value="education" className="space-y-6 p-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={GraduationCap} text="Education" color="secondary"/>
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('education')}>
@@ -808,7 +878,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="projects" className="space-y-6 pt-4">
+                <TabsContent value="projects" className="space-y-6 p-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={Lightbulb} text="Projects" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('projects')}>
@@ -840,7 +910,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="certifications" className="space-y-6 pt-4">
+                <TabsContent value="certifications" className="space-y-6 p-6">
                    <div className="flex items-center justify-between">
                     <SectionTitle icon={Award} text="Licenses & Certifications" color="secondary" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('certifications')}>
@@ -872,7 +942,7 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="publications" className="space-y-6 pt-4">
+                <TabsContent value="publications" className="space-y-6 p-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle icon={FileText} text="Publications" />
                     <Button type="button" variant="outline" size="sm" onClick={() => openDialog('publications')}>
@@ -906,16 +976,17 @@ export default function ProfilePage() {
 
 
               </Tabs>
-              
-              <div className="flex justify-end pt-4 border-t">
-                <Button type="submit" disabled={isSaving || isAnalyzingCert || isUploading || isRefining}>
-                  {(isSaving || isUploading || isRefining) && <BrandLoader size="sm" className="mr-2" />}
-                  Save Profile
-                </Button>
-              </div>
             </form>
           </CardContent>
         </Card>
+
+        {/* Bottom save button */}
+        <div className="flex justify-end pt-4 pb-6">
+          <Button onClick={handleSubmit(onSubmit)} disabled={isSaving || isAnalyzingCert || isUploading || isRefining} className="gap-2">
+            {(isSaving || isUploading || isRefining) && <BrandLoader size="sm" />}
+            Save Profile
+          </Button>
+        </div>
       </main>
 
       {/* DIALOG FOR EDITING/ADDING */}
