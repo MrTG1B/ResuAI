@@ -21,6 +21,7 @@ import { parseResumeAction } from "@/app/actions";
 import { editResumeAction } from "@/app/actions";
 import { generateResumeFromProfileAction } from "@/app/actions";
 import { analyzeResumeForPortfolioAction } from "@/app/actions";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 const parsingTexts = [
@@ -412,8 +413,8 @@ export default function ResumeEditorClient() {
             });
 
             toast({
-                title: "Print dialog closed",
-                description: "Use your browser's 'Save as PDF' or 'Print to PDF' option to save your resume with fully selectable text.",
+                title: "Ready to save as PDF",
+                description: `Your browser will suggest "${cleanFileName}" as the filename. Use 'Save as PDF' to save with fully selectable text.`,
             });
         } catch (error) {
             console.error('PDF Download error:', error);
@@ -560,10 +561,19 @@ export default function ResumeEditorClient() {
                 {isConverting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Briefcase className="mr-2 h-4 w-4"/>}
                 Create Portfolio
             </Button>
-            <Button onClick={handleDownload} size="sm" disabled={!canDownload || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
-                {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                Save as PDF
-            </Button>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button onClick={handleDownload} size="sm" disabled={!canDownload || isGeneratingPdf || isParsing || isAnalyzing || isConverting}>
+                            {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                            Save as PDF
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                        PDF will be named &quot;{(editorState?.fileName || 'resume').replace(/\.[^/.]+$/, "")}&quot; — edit the title above to change it
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
         </div>
     );
 
