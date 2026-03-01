@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Trash2, Search, RefreshCw, Users, Crown, Loader2 } from 'lucide-react';
-import { db, collection, getDocs, doc, getDoc, collectionGroup, setDoc } from '@/lib/firebase';
+import { db, auth, collection, getDocs, doc, getDoc, collectionGroup } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import type { User, PlanId } from '@/types/user';
 
@@ -77,18 +77,33 @@ export default function UsersPage() {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const handlePlanChange = async (userId: string, newPlan: PlanId) => {    if (!db) return;
+  const handlePlanChange = async (userId: string, newPlan: PlanId) => {
+    if (!auth) return;
     setChangingPlan(userId);
     try {
-      await setDoc(doc(db, 'users', userId), { plan: newPlan }, { merge: true });
-      await setDoc(doc(db, 'users', userId, 'subscription', 'current'), {
-        planId: newPlan,
-        status: newPlan === 'free' ? 'inactive' : 'active',
-      }, { merge: true });
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Not authenticated');
+      const token = await currentUser.getIdToken();
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+      const res = await fetch(`${appUrl}/api/admin/update-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId, planId: newPlan }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed with status ${res.status}`);
+      }
+
       toast({ title: "Plan Updated", description: `Plan changed to ${PLAN_LABELS[newPlan]}.` });
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, plan: newPlan } : u));
-    } catch {
-      toast({ title: "Error", description: "Failed to update plan.", variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to update plan.", variant: "destructive" });
     } finally {
       setChangingPlan(null);
     }
