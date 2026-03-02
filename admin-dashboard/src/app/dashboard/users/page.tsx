@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Trash2, Search, RefreshCw, Users, Crown, Loader2 } from 'lucide-react';
-import { db, collection, getDocs, doc, getDoc, setDoc, collectionGroup } from '@/lib/firebase';
+import { auth, db, collection, getDocs, doc, getDoc, setDoc, collectionGroup } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import type { User, PlanId } from '@/types/user';
 
@@ -78,14 +78,38 @@ export default function UsersPage() {
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const handlePlanChange = async (userId: string, newPlan: PlanId) => {
-    if (!db) return;
     setChangingPlan(userId);
     try {
-      await setDoc(doc(db, 'users', userId), { plan: newPlan }, { merge: true });
-      await setDoc(doc(db, 'users', userId, 'subscription', 'current'), {
-        planId: newPlan,
-        status: newPlan === 'free' ? 'inactive' : 'active',
-      }, { merge: true });
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+      if (appUrl && auth?.currentUser) {
+        // Use the main app's server-side API route with Firebase Admin SDK
+        // (bypasses Firestore security rules entirely)
+        const token = await auth.currentUser.getIdToken();
+        const res = await fetch(`${appUrl}/api/admin/update-subscription`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ userId, planId: newPlan }),
+        });
+        if (!res.ok) {
+          let errMsg = `Request failed (${res.status})`;
+          try {
+            const data = await res.json() as { error?: string };
+            if (data.error) errMsg = data.error;
+          } catch {}
+          throw new Error(errMsg);
+        }
+      } else {
+        // Fallback: direct Firestore client writes
+        if (!db) throw new Error('Firebase not initialized');
+        await setDoc(doc(db, 'users', userId), { plan: newPlan }, { merge: true });
+        await setDoc(doc(db, 'users', userId, 'subscription', 'current'), {
+          planId: newPlan,
+          status: newPlan === 'free' ? 'inactive' : 'active',
+        }, { merge: true });
+      }
       toast({ title: "Plan Updated", description: `Plan changed to ${PLAN_LABELS[newPlan]}.` });
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, plan: newPlan } : u));
     } catch (err) {
