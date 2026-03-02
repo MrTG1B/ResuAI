@@ -10,12 +10,13 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  AlertDialog, AlertDialogCancel, AlertDialogContent,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Trash2, Search, RefreshCw, Users, Crown, Loader2 } from 'lucide-react';
 import { auth, db, collection, getDocs, doc, getDoc, setDoc, collectionGroup } from '@/lib/firebase';
+import { deleteUser } from '@/lib/adminApi';
 import { useToast } from '@/hooks/use-toast';
 import type { User, PlanId } from '@/types/user';
 
@@ -34,6 +35,7 @@ export default function UsersPage() {
   const [search, setSearch] = useState('');
   const [planFilter, setPlanFilter] = useState<PlanId | 'all'>('all');
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     if (!db) return;
@@ -116,6 +118,19 @@ export default function UsersPage() {
       toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to update plan.", variant: "destructive" });
     } finally {
       setChangingPlan(null);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    setDeletingUser(userId);
+    try {
+      await deleteUser(userId);
+      toast({ title: "User Deleted", description: "The user has been permanently deleted." });
+      setUsers(prev => prev.filter(u => u.id !== userId));
+    } catch (err) {
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to delete user.", variant: "destructive" });
+    } finally {
+      setDeletingUser(null);
     }
   };
 
@@ -248,19 +263,25 @@ export default function UsersPage() {
                         <TableCell className="text-right pr-4">
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-                                <Trash2 className="h-3.5 w-3.5" />
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10" disabled={deletingUser === user.id}>
+                                {deletingUser === user.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete User?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Deleting {user.name} requires the Firebase Admin SDK via a server-side API route (not yet wired up). User data deletion cannot be performed from the client side for security reasons.
+                                  This will permanently delete <strong>{user.name}</strong> ({user.email}) and all of their data. This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Close</AlertDialogCancel>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => handleDeleteUser(user.id)}
+                                >
+                                  Delete
+                                </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
