@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { User, PlanId } from '@/types/user';
 
 const PLAN_LABELS: Record<PlanId, string> = { free: 'Free', medium: 'Medium', pro: 'Pro', ultra_pro: 'Ultra Pro' };
-const PLAN_PRICES: Record<PlanId, number> = { free: 0, medium: 9.99, pro: 19.99, ultra_pro: 39.99 };
+const PLAN_PRICES: Record<PlanId, number> = { free: 0, medium: 799, pro: 1599, ultra_pro: 3199 };
 const PLAN_COLORS: Record<PlanId, string> = {
   free: 'bg-slate-400',
   medium: 'bg-blue-500',
@@ -204,7 +204,7 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: 'Total Users', value: analytics.totalUsers, icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/30', border: 'border-blue-200 dark:border-blue-800' },
-          { label: 'Est. MRR', value: `$${analytics.estimatedMRR}`, icon: CreditCard, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-emerald-200 dark:border-emerald-800' },
+          { label: 'Est. MRR', value: `₹${analytics.estimatedMRR}`, icon: CreditCard, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-emerald-200 dark:border-emerald-800' },
           { label: 'Premium Rate', value: `${analytics.premiumRate}%`, icon: TrendingUp, color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-950/30', border: 'border-violet-200 dark:border-violet-800' },
           { label: 'Total Feedback', value: analytics.totalFeedbacks, icon: MessageSquare, color: 'text-pink-500', bg: 'bg-pink-50 dark:bg-pink-950/30', border: 'border-pink-200 dark:border-pink-800' },
         ].map(({ label, value, icon: Icon, color, bg, border }) => (
@@ -323,12 +323,12 @@ export default function AnalyticsPage() {
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {(Object.keys(PLAN_LABELS) as PlanId[]).map(id => {
-              const revenue = (analytics.planCounts[id] * PLAN_PRICES[id]).toFixed(2);
+              const revenue = Math.round(analytics.planCounts[id] * PLAN_PRICES[id]);
               return (
                 <div key={id} className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-2">
                   <div className="text-xs font-semibold text-muted-foreground">{PLAN_LABELS[id]}</div>
-                  <div className={`text-2xl font-extrabold tabular-nums ${PLAN_TEXT[id]}`}>${revenue}</div>
-                  <div className="text-xs text-muted-foreground">{analytics.planCounts[id]} users × ${PLAN_PRICES[id]}</div>
+                  <div className={`text-2xl font-extrabold tabular-nums ${PLAN_TEXT[id]}`}>₹{revenue}</div>
+                  <div className="text-xs text-muted-foreground">{analytics.planCounts[id]} users × ₹{PLAN_PRICES[id]}</div>
                   <div className="h-1 rounded-full bg-muted overflow-hidden">
                     <div
                       className={`h-full rounded-full ${PLAN_COLORS[id]}`}
@@ -348,7 +348,7 @@ export default function AnalyticsPage() {
               <TrendingUp className="h-4 w-4" />
               Total Estimated MRR
             </span>
-            <span className="text-xl font-extrabold text-emerald-700 dark:text-emerald-400">${analytics.estimatedMRR}</span>
+            <span className="text-xl font-extrabold text-emerald-700 dark:text-emerald-400">₹{analytics.estimatedMRR}</span>
           </div>
         </CardContent>
       </Card>

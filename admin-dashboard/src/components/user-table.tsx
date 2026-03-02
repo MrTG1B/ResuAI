@@ -27,7 +27,8 @@ import { User, type PlanId } from "@/types/user";
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Badge } from './ui/badge';
-import { db, doc, setDoc } from '@/lib/firebase';
+import { db, auth, doc, setDoc } from '@/lib/firebase';
+import { deleteUser } from '@/lib/adminApi';
 
 const PLAN_LABELS: Record<PlanId, string> = {
   free: 'Free', medium: 'Medium', pro: 'Pro', ultra_pro: 'Ultra Pro',
@@ -49,7 +50,13 @@ export function UserTable({ users, onRefresh }: UserTableProps) {
     const [loading, setLoading] = useState<string | null>(null);
 
     const handleDeleteUser = async (userId: string) => {
-        toast({ title: "Note", description: "User deletion requires Firebase Admin SDK.", variant: "default" });
+        try {
+            await deleteUser(userId);
+            toast({ title: "User Deleted", description: "The user has been permanently deleted." });
+            onRefresh?.();
+        } catch (err) {
+            toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to delete user.", variant: "destructive" });
+        }
     };
 
     const handlePlanChange = async (userId: string, newPlan: PlanId) => {
