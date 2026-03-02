@@ -15,7 +15,7 @@ import type { User, PlanId } from '@/types/user';
 import type { Feedback } from '@/types/feedback';
 
 const PLAN_LABELS: Record<PlanId, string> = { free: 'Free', medium: 'Medium', pro: 'Pro', ultra_pro: 'Ultra Pro' };
-const PLAN_PRICES: Record<PlanId, number> = { free: 0, medium: 9.99, pro: 19.99, ultra_pro: 39.99 };
+const PLAN_PRICES: Record<PlanId, number> = { free: 0, medium: 799, pro: 1599, ultra_pro: 3199 };
 const PLAN_COLORS: Record<PlanId, { bar: string; badge: string; dot: string }> = {
   free: { bar: 'bg-slate-400', badge: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300', dot: 'bg-slate-400' },
   medium: { bar: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300', dot: 'bg-blue-500' },
@@ -116,11 +116,11 @@ export default function OverviewPage() {
   const planCounts: Record<PlanId, number> = { free: 0, medium: 0, pro: 0, ultra_pro: 0 };
   users.forEach(u => { planCounts[u.plan ?? 'free']++; });
   const total = users.length || 1;
-  const revenue = (
+  const revenue = Math.round(
     planCounts.medium * PLAN_PRICES.medium +
     planCounts.pro * PLAN_PRICES.pro +
     planCounts.ultra_pro * PLAN_PRICES.ultra_pro
-  ).toFixed(2);
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -168,7 +168,7 @@ export default function OverviewPage() {
               <CardTitle className="text-base font-semibold">Plan Distribution</CardTitle>
               <Badge variant="outline" className="text-xs gap-1.5">
                 <CreditCard className="h-3 w-3" />
-                ${revenue}/mo est.
+                ₹{revenue}/mo est.
               </Badge>
             </div>
             <CardDescription className="text-xs">Subscription breakdown across all plans</CardDescription>
