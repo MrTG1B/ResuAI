@@ -24,6 +24,10 @@ const STEPS = [
 ];
 
 // Helper component for each text block so hooks are called statically
+// Steps are distributed evenly: [0, 1/3, 2/3, 1]
+const SEGMENT = 1 / 3;
+const FADE = 0.06; // how much of the segment is used for cross-fade
+
 function StepText({
   step,
   index,
@@ -33,20 +37,29 @@ function StepText({
   index: number;
   scrollYProgress: MotionValue<number>;
 }) {
-  const start = index * 0.33;
-  const end = (index + 1) * 0.33;
-  const mid = start + 0.165;
+  const segStart = index * SEGMENT;
+  const segEnd = (index + 1) * SEGMENT;
+
+  // fade in over first FADE of this segment, hold, fade out over last FADE
+  const fadeInEnd = segStart + FADE;
+  const fadeOutStart = segEnd - FADE;
+
+  // clamp to [0, 1]
+  const p0 = Math.max(0, segStart);
+  const p1 = Math.min(1, fadeInEnd);
+  const p2 = Math.max(0, Math.min(1, fadeOutStart));
+  const p3 = Math.min(1, segEnd);
 
   const opacity = useTransform(
     scrollYProgress,
-    [Math.max(0, start - 0.05), start, mid, end, Math.min(1, end + 0.05)],
-    [0, 1, 1, 1, 0]
+    [p0, p1, p2, p3],
+    [0, 1, 1, index === STEPS.length - 1 ? 1 : 0] // last step stays visible
   );
 
   const y = useTransform(
     scrollYProgress,
-    [Math.max(0, start - 0.05), start, mid, end, Math.min(1, end + 0.05)],
-    [40, 0, 0, 0, -40]
+    [p0, p1, p2, p3],
+    [30, 0, 0, index === STEPS.length - 1 ? 0 : -30]
   );
 
   const pointerEvents = useTransform(opacity, (val) =>
@@ -76,8 +89,8 @@ function StepText({
 // ─── Visual sub-components (hooks extracted from JSX) ────────────────────────
 
 function Visual1({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  const opacity = useTransform(scrollYProgress, [0.0, 0.25, 0.33], [1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0.0, 0.33], [1, 0.9]);
+  const opacity = useTransform(scrollYProgress, [0.0, 0.28, 0.33], [1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0.0, 0.33], [1, 0.92]);
 
   return (
     <motion.div
@@ -98,13 +111,13 @@ function Visual1({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) 
 function Visual2({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const opacity = useTransform(
     scrollYProgress,
-    [0.25, 0.33, 0.58, 0.66],
+    [0.28, 0.33, 0.61, 0.667],
     [0, 1, 1, 0]
   );
   const scale = useTransform(
     scrollYProgress,
-    [0.25, 0.33, 0.66],
-    [0.85, 1, 0.9]
+    [0.28, 0.33, 0.667],
+    [0.88, 1, 0.92]
   );
 
   return (
@@ -145,12 +158,12 @@ function Visual2({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) 
 }
 
 function Visual3({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  const opacity = useTransform(scrollYProgress, [0.58, 0.66, 1.0], [0, 1, 1]);
-  const scale = useTransform(scrollYProgress, [0.58, 0.66, 1.0], [0.9, 1, 1]);
-  const cardY = useTransform(scrollYProgress, [0.66, 1], [30, -10]);
-  const cardRotate = useTransform(scrollYProgress, [0.66, 1], [-2, 0]);
-  const card2Y = useTransform(scrollYProgress, [0.66, 1], [50, -25]);
-  const card2Rotate = useTransform(scrollYProgress, [0.66, 1], [3, 0]);
+  const opacity = useTransform(scrollYProgress, [0.61, 0.667, 1.0], [0, 1, 1]);
+  const scale = useTransform(scrollYProgress, [0.61, 0.667, 1.0], [0.9, 1, 1]);
+  const cardY = useTransform(scrollYProgress, [0.667, 1], [30, -10]);
+  const cardRotate = useTransform(scrollYProgress, [0.667, 1], [-2, 0]);
+  const card2Y = useTransform(scrollYProgress, [0.667, 1], [50, -25]);
+  const card2Rotate = useTransform(scrollYProgress, [0.667, 1], [3, 0]);
 
   return (
     <motion.div
@@ -221,7 +234,7 @@ export function ScrollyTellingProcess() {
   });
 
   return (
-    <section ref={containerRef} className="relative h-[300vh] bg-background">
+    <section ref={containerRef} className="relative h-[400vh] bg-background">
       <div className="sticky top-0 h-screen w-full flex items-center overflow-hidden">
         {/* Background Parallax Element */}
         <BgParallax scrollYProgress={scrollYProgress} />
