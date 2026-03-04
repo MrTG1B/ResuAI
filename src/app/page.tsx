@@ -128,7 +128,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-background overflow-x-clip">
       <Header />
       <main>
 

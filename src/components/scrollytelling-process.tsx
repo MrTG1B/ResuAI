@@ -53,13 +53,13 @@ function StepText({
   const opacity = useTransform(
     scrollYProgress,
     [p0, p1, p2, p3],
-    [0, 1, 1, index === STEPS.length - 1 ? 1 : 0] // last step stays visible
+    [index === 0 ? 1 : 0, 1, 1, index === STEPS.length - 1 ? 1 : 0] // first step starts visible, last step stays visible
   );
 
   const y = useTransform(
     scrollYProgress,
     [p0, p1, p2, p3],
-    [30, 0, 0, index === STEPS.length - 1 ? 0 : -30]
+    [index === 0 ? 0 : 30, 0, 0, index === STEPS.length - 1 ? 0 : -30]
   );
 
   const pointerEvents = useTransform(opacity, (val) =>
