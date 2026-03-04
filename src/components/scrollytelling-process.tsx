@@ -26,7 +26,7 @@ const STEPS = [
 // Helper component for each text block so hooks are called statically
 // Steps are distributed evenly: [0, 1/3, 2/3, 1]
 const SEGMENT = 1 / 3;
-const FADE = 0.06; // how much of the segment is used for cross-fade
+const FADE = 0.12; // how much of the segment is used for cross-fade
 
 function StepText({
   step,
@@ -89,8 +89,8 @@ function StepText({
 // ─── Visual sub-components (hooks extracted from JSX) ────────────────────────
 
 function Visual1({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  const opacity = useTransform(scrollYProgress, [0.0, 0.28, 0.33], [1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0.0, 0.33], [1, 0.92]);
+  const opacity = useTransform(scrollYProgress, [0.0, 0.213, 0.453], [1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0.0, 0.453], [1, 0.92]);
 
   return (
     <motion.div
@@ -111,12 +111,12 @@ function Visual1({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) 
 function Visual2({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const opacity = useTransform(
     scrollYProgress,
-    [0.28, 0.33, 0.61, 0.667],
+    [0.213, 0.453, 0.547, 0.787],
     [0, 1, 1, 0]
   );
   const scale = useTransform(
     scrollYProgress,
-    [0.28, 0.33, 0.667],
+    [0.213, 0.453, 0.787],
     [0.88, 1, 0.92]
   );
 
@@ -158,12 +158,12 @@ function Visual2({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) 
 }
 
 function Visual3({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  const opacity = useTransform(scrollYProgress, [0.61, 0.667, 1.0], [0, 1, 1]);
-  const scale = useTransform(scrollYProgress, [0.61, 0.667, 1.0], [0.9, 1, 1]);
-  const cardY = useTransform(scrollYProgress, [0.667, 1], [30, -10]);
-  const cardRotate = useTransform(scrollYProgress, [0.667, 1], [-2, 0]);
-  const card2Y = useTransform(scrollYProgress, [0.667, 1], [50, -25]);
-  const card2Rotate = useTransform(scrollYProgress, [0.667, 1], [3, 0]);
+  const opacity = useTransform(scrollYProgress, [0.547, 0.787, 1.0], [0, 1, 1]);
+  const scale = useTransform(scrollYProgress, [0.547, 0.787, 1.0], [0.9, 1, 1]);
+  const cardY = useTransform(scrollYProgress, [0.787, 1], [30, -10]);
+  const cardRotate = useTransform(scrollYProgress, [0.787, 1], [-2, 0]);
+  const card2Y = useTransform(scrollYProgress, [0.787, 1], [50, -25]);
+  const card2Rotate = useTransform(scrollYProgress, [0.787, 1], [3, 0]);
 
   return (
     <motion.div
