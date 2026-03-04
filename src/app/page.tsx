@@ -21,6 +21,7 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useScrollReveal } from '@/hooks/use-scroll-reveal';
+import { ScrollyTellingProcess } from '@/components/scrollytelling-process';
 
 /* ── Count-Up Hook ─────────────────────────────────────────────────────── */
 function useCountUp(target: number, duration = 1800, active = false) {
@@ -68,13 +69,13 @@ export default function HomePage() {
   const statsRef = useCallback((node: HTMLDivElement | null) => setStatsEl(node), []);
 
   /* ── Scroll-reveal refs ─────────────────────────────────────────────── */
-  const heroRevealRef  = useScrollReveal();
-  const howRevealRef   = useScrollReveal();
+  const heroRevealRef = useScrollReveal();
+  const howRevealRef = useScrollReveal();
   const toolsRevealRef = useScrollReveal();
-  const whyRevealRef   = useScrollReveal();
+  const whyRevealRef = useScrollReveal();
   const testiRevealRef = useScrollReveal();
-  const faqRevealRef   = useScrollReveal();
-  const ctaRevealRef   = useScrollReveal();
+  const faqRevealRef = useScrollReveal();
+  const ctaRevealRef = useScrollReveal();
 
   /* ── Auth redirect ──────────────────────────────────────────────────── */
   useEffect(() => {
@@ -92,7 +93,7 @@ export default function HomePage() {
   /* ── Mouse parallax ─────────────────────────────────────────────────── */
   const handleMouseMove = useCallback((e: MouseEvent) => {
     setMousePos({
-      x: (e.clientX / window.innerWidth  - 0.5) * 38,
+      x: (e.clientX / window.innerWidth - 0.5) * 38,
       y: (e.clientY / window.innerHeight - 0.5) * 38,
     });
   }, []);
@@ -215,9 +216,9 @@ export default function HomePage() {
               style={{ transitionDelay: '430ms' }}
             >
               {[
-                { icon: Users,    text: '10,000+ Professionals' },
+                { icon: Users, text: '10,000+ Professionals' },
                 { icon: FileText, text: '50,000+ Resumes Created' },
-                { icon: Star,     text: '4.9 / 5 Rating' },
+                { icon: Star, text: '4.9 / 5 Rating' },
               ].map(({ icon: Icon, text }) => (
                 <span
                   key={text}
@@ -303,69 +304,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
-        <section
-          className="parallax-bg py-14 lg:py-20"
-          ref={howRevealRef}
-        >
-          <div className="container mx-auto px-4">
-            <div className="reveal text-center mb-10">
-              <span className="inline-block text-xs uppercase tracking-widest text-primary font-semibold mb-3">
-                Process
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight font-heading bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent">
-                Simple, Powerful, and Fast
-              </h2>
-              <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">
-                Our AI streamlines the entire process — from analysing your experience to designing a beautiful final product.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-
-              {[
-                {
-                  icon: Bot,
-                  step: '01',
-                  title: 'Provide Your Info',
-                  desc: 'Upload your existing resume. Our AI analyses your information to create a structured, polished draft instantly.',
-                  delay: '0ms',
-                },
-                {
-                  icon: PenSquare,
-                  step: '02',
-                  title: 'Customise & Refine',
-                  desc: 'Edit any section with AI suggestions, apply professional templates, and tailor the design to match your style.',
-                  delay: '180ms',
-                },
-                {
-                  icon: Eye,
-                  step: '03',
-                  title: 'Publish & Share',
-                  desc: 'Download a recruiter-ready resume or share your portfolio via a unique public link and land your dream job.',
-                  delay: '360ms',
-                },
-              ].map(({ icon: Icon, step, title, desc, delay }) => (
-                <div
-                  key={step}
-                  className="reveal relative text-center group"
-                  style={{ transitionDelay: delay }}
-                >
-                  <div className="flex justify-center mb-6 relative">
-                    <div className="relative bg-primary/10 p-5 rounded-2xl border border-primary/20 group-hover:border-primary/50 transition-all duration-300 group-hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]">
-                      <Icon className="h-9 w-9 text-primary" />
-                      <span className="absolute -top-3 -right-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                        {step}
-                      </span>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 font-heading">{title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* ── HOW IT WORKS (Scrollytelling) ─────────────────────────────── */}
+        <ScrollyTellingProcess />
 
         {/* ── AI TOOLKIT ────────────────────────────────────────────────── */}
         <section
@@ -460,12 +400,12 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
-                { icon: BrainCircuit, colorHex: 'hsl(var(--primary))', title: 'Gemini AI Engine',       desc: 'Powered by Google Gemini — the most advanced AI to generate, analyse, and refine your career documents.',  delay: '0ms'   },
-                { icon: Rocket,       colorHex: '#45B8AC',              title: 'Ready in 2 Minutes',    desc: 'From raw experience to a polished, ATS-optimised resume or live portfolio in under two minutes.',          delay: '120ms' },
-                { icon: Target,       colorHex: '#F71B3D',              title: 'ATS Optimised',         desc: 'Every document is crafted to pass automated screening systems used by top recruiters worldwide.',          delay: '240ms' },
-                { icon: Medal,        colorHex: 'hsl(var(--primary))', title: 'Pro Templates',          desc: 'Curated, recruiter-approved templates that look stunning across all screen sizes and print layouts.',      delay: '360ms' },
-                { icon: ShieldCheck,  colorHex: '#45B8AC',              title: '100% Data Privacy',     desc: 'Your data lives in Firebase under strict security rules. Only you can access your documents.',             delay: '480ms' },
-                { icon: TrendingUp,   colorHex: '#F71B3D',              title: 'Career Growth Tools',   desc: 'Go beyond resumes — interview prep, aptitude tests, cover letters, and an AI career coach in one place.',  delay: '600ms' },
+                { icon: BrainCircuit, colorHex: 'hsl(var(--primary))', title: 'Gemini AI Engine', desc: 'Powered by Google Gemini — the most advanced AI to generate, analyse, and refine your career documents.', delay: '0ms' },
+                { icon: Rocket, colorHex: '#45B8AC', title: 'Ready in 2 Minutes', desc: 'From raw experience to a polished, ATS-optimised resume or live portfolio in under two minutes.', delay: '120ms' },
+                { icon: Target, colorHex: '#F71B3D', title: 'ATS Optimised', desc: 'Every document is crafted to pass automated screening systems used by top recruiters worldwide.', delay: '240ms' },
+                { icon: Medal, colorHex: 'hsl(var(--primary))', title: 'Pro Templates', desc: 'Curated, recruiter-approved templates that look stunning across all screen sizes and print layouts.', delay: '360ms' },
+                { icon: ShieldCheck, colorHex: '#45B8AC', title: '100% Data Privacy', desc: 'Your data lives in Firebase under strict security rules. Only you can access your documents.', delay: '480ms' },
+                { icon: TrendingUp, colorHex: '#F71B3D', title: 'Career Growth Tools', desc: 'Go beyond resumes — interview prep, aptitude tests, cover letters, and an AI career coach in one place.', delay: '600ms' },
               ].map(({ icon: Icon, colorHex, title, desc, delay }) => (
                 <div key={title} className="reveal group" style={{ transitionDelay: delay }}>
                   <div className="glass-card rounded-xl p-6 h-full transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_8px_30px_hsl(var(--primary)/0.12)]">
@@ -493,10 +433,10 @@ export default function HomePage() {
           <div className="container mx-auto px-4" ref={statsRef}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
               {[
-                { icon: Users,       colorHex: 'hsl(var(--primary))', target: 10000, suffix: '+',   label: 'Professionals Helped' },
-                { icon: FileText,    colorHex: 'hsl(var(--primary))', target: 50000, suffix: '+',   label: 'Resumes Created'      },
-                { icon: Zap,         colorHex: '#45B8AC',              target: 2,     suffix: ' min',label: 'Avg Build Time'       },
-                { icon: ShieldCheck, colorHex: '#F71B3D',              target: 100,   suffix: '%',   label: 'Data Privacy'         },
+                { icon: Users, colorHex: 'hsl(var(--primary))', target: 10000, suffix: '+', label: 'Professionals Helped' },
+                { icon: FileText, colorHex: 'hsl(var(--primary))', target: 50000, suffix: '+', label: 'Resumes Created' },
+                { icon: Zap, colorHex: '#45B8AC', target: 2, suffix: ' min', label: 'Avg Build Time' },
+                { icon: ShieldCheck, colorHex: '#F71B3D', target: 100, suffix: '%', label: 'Data Privacy' },
               ].map(({ icon: Icon, colorHex, target, suffix, label }) => (
                 <div key={label} className="flex flex-col items-center gap-3">
                   <div className="p-3 rounded-xl" style={{ backgroundColor: `${colorHex}1A` }}>
@@ -532,9 +472,9 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { quote: '"I created a portfolio in under 5 minutes that looked better than what I spent weeks building myself. Truly magical!"',                  name: 'Sarah L.',   role: 'UX Designer',        initials: 'SL', color: '#45B8AC',              delay: '0ms'   },
-                { quote: '"The ATS checker gave me the exact feedback I needed to land three interviews. It\'s like having a personal career coach."',            name: 'Michael B.', role: 'Software Engineer',  initials: 'MB', color: 'hsl(var(--primary))', delay: '160ms' },
-                { quote: '"As a recent graduate, this tool was a lifesaver. It helped me craft a resume that got noticed and felt truly professional."',           name: 'Jessica R.', role: 'Marketing Graduate',  initials: 'JR', color: '#F71B3D',              delay: '320ms' },
+                { quote: '"I created a portfolio in under 5 minutes that looked better than what I spent weeks building myself. Truly magical!"', name: 'Sarah L.', role: 'UX Designer', initials: 'SL', color: '#45B8AC', delay: '0ms' },
+                { quote: '"The ATS checker gave me the exact feedback I needed to land three interviews. It\'s like having a personal career coach."', name: 'Michael B.', role: 'Software Engineer', initials: 'MB', color: 'hsl(var(--primary))', delay: '160ms' },
+                { quote: '"As a recent graduate, this tool was a lifesaver. It helped me craft a resume that got noticed and felt truly professional."', name: 'Jessica R.', role: 'Marketing Graduate', initials: 'JR', color: '#F71B3D', delay: '320ms' },
               ].map(({ quote, name, role, initials, color, delay }) => (
                 <div key={name} className="reveal" style={{ transitionDelay: delay }}>
                   <Card className="p-8 glass-card rounded-xl flex flex-col h-full shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl group">
@@ -576,10 +516,10 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
-                { icon: MessageSquare, colorHex: '#45B8AC',              title: 'Mentra AI Coach',    desc: 'A conversational AI career coach that helps you navigate your next move.'             },
-                { icon: Globe,         colorHex: 'hsl(var(--primary))', title: 'Live Portfolio',      desc: 'Publish a beautiful personal website with a shareable public link in one click.'      },
-                { icon: BrainCircuit,  colorHex: '#F71B3D',              title: 'Interview Prep',     desc: 'Practice tough interview questions with AI-powered feedback and guidance.'            },
-                { icon: Target,        colorHex: '#45B8AC',              title: 'Job Match Analyser', desc: 'Paste a job description and instantly see how well your profile matches.'             },
+                { icon: MessageSquare, colorHex: '#45B8AC', title: 'Mentra AI Coach', desc: 'A conversational AI career coach that helps you navigate your next move.' },
+                { icon: Globe, colorHex: 'hsl(var(--primary))', title: 'Live Portfolio', desc: 'Publish a beautiful personal website with a shareable public link in one click.' },
+                { icon: BrainCircuit, colorHex: '#F71B3D', title: 'Interview Prep', desc: 'Practice tough interview questions with AI-powered feedback and guidance.' },
+                { icon: Target, colorHex: '#45B8AC', title: 'Job Match Analyser', desc: 'Paste a job description and instantly see how well your profile matches.' },
               ].map(({ icon: Icon, colorHex, title, desc }) => (
                 <div
                   key={title}
@@ -654,11 +594,11 @@ export default function HomePage() {
             <div className="reveal" style={{ transitionDelay: '100ms' }}>
               <Accordion type="single" collapsible className="space-y-4">
                 {[
-                  { q: 'Is ResuAI free to use?',               a: 'Yes! ResuAI offers a free tier with access to all core AI features — resume editor, ATS checker, portfolio generator, and cover letter writer.' },
+                  { q: 'Is ResuAI free to use?', a: 'Yes! ResuAI offers a free tier with access to all core AI features — resume editor, ATS checker, portfolio generator, and cover letter writer.' },
                   { q: 'How does the ATS resume checker work?', a: 'Our AI analyses your resume against a specific job description, assigns a compatibility score, and provides actionable recommendations to improve your chances of passing automated screening systems.' },
-                  { q: 'Is my resume data secure?',            a: 'Absolutely. Your data is stored in Google Firebase with strict security rules — only you can access your documents. All connections are encrypted via HTTPS/TLS.' },
-                  { q: 'Can I create multiple resumes?',       a: 'Yes. You can create and manage multiple resume versions, tailoring each one for different roles or industries from a single account.' },
-                  { q: 'What AI powers ResuAI?',               a: "ResuAI uses Google's Gemini AI models via the Genkit framework for all intelligent features including content generation, analysis, and career coaching." },
+                  { q: 'Is my resume data secure?', a: 'Absolutely. Your data is stored in Google Firebase with strict security rules — only you can access your documents. All connections are encrypted via HTTPS/TLS.' },
+                  { q: 'Can I create multiple resumes?', a: 'Yes. You can create and manage multiple resume versions, tailoring each one for different roles or industries from a single account.' },
+                  { q: 'What AI powers ResuAI?', a: "ResuAI uses Google's Gemini AI models via the Genkit framework for all intelligent features including content generation, analysis, and career coaching." },
                 ].map((faq, i) => (
                   <AccordionItem
                     key={i}
