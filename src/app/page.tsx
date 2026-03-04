@@ -12,7 +12,7 @@ import { Footer } from '@/components/footer';
 import {
   ArrowRight, Bot, PenSquare, Eye, Star, FileText,
   LayoutTemplate, SearchCheck, NotebookPen, Users, Zap, ShieldCheck,
-  Sparkles, CheckCircle2, BrainCircuit, Rocket, Target, Medal,
+  CheckCircle2, BrainCircuit, Rocket, Target, Medal,
   TrendingUp, MessageSquare, Globe, TreePine, ScrollText,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/accordion';
 import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 import { ScrollyTellingProcess } from '@/components/scrollytelling-process';
+import { HeroGeometric } from '@/components/ui/shape-landing-hero';
 
 /* ── Count-Up Hook ─────────────────────────────────────────────────────── */
 function useCountUp(target: number, duration = 1800, active = false) {
@@ -63,13 +64,11 @@ function AnimatedStat({
 export default function HomePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [statsActive, setStatsActive] = useState(false);
   const [statsEl, setStatsEl] = useState<HTMLDivElement | null>(null);
   const statsRef = useCallback((node: HTMLDivElement | null) => setStatsEl(node), []);
 
   /* ── Scroll-reveal refs ─────────────────────────────────────────────── */
-  const heroRevealRef = useScrollReveal();
   const howRevealRef = useScrollReveal();
   const toolsRevealRef = useScrollReveal();
   const whyRevealRef = useScrollReveal();
@@ -89,18 +88,6 @@ export default function HomePage() {
     });
     return () => unsub();
   }, [router]);
-
-  /* ── Mouse parallax ─────────────────────────────────────────────────── */
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    setMousePos({
-      x: (e.clientX / window.innerWidth - 0.5) * 38,
-      y: (e.clientY / window.innerHeight - 0.5) * 38,
-    });
-  }, []);
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [handleMouseMove]);
 
   /* ── Stats IntersectionObserver ─────────────────────────────────────── */
   useEffect(() => {
@@ -133,105 +120,62 @@ export default function HomePage() {
       <main>
 
         {/* ── HERO ──────────────────────────────────────────────────────── */}
-        <section
-          className="relative flex flex-col justify-center items-center text-center min-h-screen py-20 overflow-hidden dot-grid"
-          ref={heroRevealRef}
+        <HeroGeometric
+          badge="AI-Powered Career Platform"
+          title1="Your Career"
+          title2="Elevated by AI"
+          description="Create standout resumes & portfolios with intelligent, personalised AI tools."
         >
-          {/* Animated background orbs with mouse-parallax */}
-          <div
-            className="absolute top-[8%] left-[22%] w-[55vw] h-[55vw] max-w-[780px] max-h-[780px] rounded-full bg-primary/10 blur-[130px] -z-10 animate-pulse-glow"
-            style={{ transform: `translate(${mousePos.x * 0.4}px, ${mousePos.y * 0.4}px)` }}
-          />
-          <div
-            className="absolute top-[15%] right-[15%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] rounded-full bg-[#45b8ac]/10 blur-[120px] -z-10 animate-pulse-glow"
-            style={{ transform: `translate(${mousePos.x * -0.3}px, ${mousePos.y * -0.3}px)`, animationDelay: '1.2s' }}
-          />
-          <div
-            className="absolute bottom-[10%] left-[10%] w-[30vw] h-[30vw] max-w-[450px] max-h-[450px] rounded-full bg-[#F71B3D]/[0.08] blur-[100px] -z-10 animate-pulse-glow"
-            style={{ transform: `translate(${mousePos.x * 0.25}px, ${mousePos.y * 0.25}px)`, animationDelay: '2.4s' }}
-          />
-
-          <div className="container mx-auto px-4 relative z-10">
-            {/* Badge */}
-            <div className="reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium mb-8 mx-auto">
-              <Sparkles className="h-4 w-4 animate-wobble" />
-              AI-Powered Career Platform
-            </div>
-
-            {/* Headline */}
-            <h1 className="reveal text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 font-heading bg-gradient-to-r from-[#FFA62E] via-[#F71B3D] to-[#45B8AC] bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient leading-[1.05]">
-              Your Career<br />Elevated by AI
-            </h1>
-
-            {/* Subtitle */}
-            <p
-              className="reveal text-lg md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto"
-              style={{ transitionDelay: '120ms' }}
-            >
-              Create standout resumes &amp; portfolios with intelligent, personalised AI tools.
-            </p>
-
-            {/* CTAs */}
-            <div
-              className="reveal flex flex-col sm:flex-row justify-center gap-4 mt-6"
-              style={{ transitionDelay: '280ms' }}
-            >
-              <div className="relative group animated-border-glow">
-                <Button
-                  asChild
-                  size="lg"
-                  className="font-bold relative bg-background hover:bg-background text-foreground transition-all duration-300 transform group-hover:scale-105 group-hover:-translate-y-1 text-xl px-10 py-6"
-                >
-                  <Link href="/signup">
-                    Get Started Free
-                    <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
-                  </Link>
-                </Button>
-              </div>
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+            <div className="relative group animated-border-glow">
               <Button
                 asChild
-                variant="outline"
                 size="lg"
-                className="text-lg px-8 py-6 border-border hover:border-primary/40 transition-all duration-300 hover:-translate-y-1"
+                className="font-bold relative bg-white hover:bg-white/90 text-gray-900 transition-all duration-300 transform group-hover:scale-105 group-hover:-translate-y-1 text-xl px-10 py-6"
               >
-                <Link href="/login">Sign In</Link>
+                <Link href="/signup">
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-5 w-5" strokeWidth={2.5} />
+                </Link>
               </Button>
             </div>
-
-            {/* Eco announcement strip */}
-            <div
-              className="reveal mt-8 inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-emerald-400/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm font-medium mx-auto"
-              style={{ transitionDelay: '340ms' }}
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="text-lg px-8 py-6 border-white/20 text-white/80 hover:border-white/40 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1"
             >
-              <TreePine className="h-4 w-4 shrink-0" />
-              <span>Every Pro plan plants a real tree in your name — and you get a <strong>personalised certificate</strong></span>
-              <Link href="/pricing" className="underline underline-offset-2 hover:text-emerald-600 dark:hover:text-emerald-300 whitespace-nowrap">
-                Learn more →
-              </Link>
-            </div>
-
-            {/* Floating social-proof pills */}
-            <div
-              className="reveal mt-10 flex flex-wrap justify-center gap-3 opacity-80"
-              style={{ transitionDelay: '430ms' }}
-            >
-              {[
-                { icon: Users, text: '10,000+ Professionals' },
-                { icon: FileText, text: '50,000+ Resumes Created' },
-                { icon: Star, text: '4.9 / 5 Rating' },
-              ].map(({ icon: Icon, text }) => (
-                <span
-                  key={text}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-card/70 border border-border text-sm text-muted-foreground backdrop-blur-sm"
-                >
-                  <Icon className="h-3.5 w-3.5 text-primary" />
-                  {text}
-                </span>
-              ))}
-            </div>
+              <Link href="/login">Sign In</Link>
+            </Button>
           </div>
 
-        </section>
+          {/* Eco announcement strip */}
+          <div className="mt-8 inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-emerald-400/40 bg-emerald-500/10 text-emerald-400 text-sm font-medium mx-auto">
+            <TreePine className="h-4 w-4 shrink-0" />
+            <span>Every Pro plan plants a real tree in your name — and you get a <strong>personalised certificate</strong></span>
+            <Link href="/pricing" className="underline underline-offset-2 hover:text-emerald-300 whitespace-nowrap">
+              Learn more →
+            </Link>
+          </div>
+
+          {/* Floating social-proof pills */}
+          <div className="mt-10 flex flex-wrap justify-center gap-3 opacity-80">
+            {[
+              { icon: Users, text: '10,000+ Professionals' },
+              { icon: FileText, text: '50,000+ Resumes Created' },
+              { icon: Star, text: '4.9 / 5 Rating' },
+            ].map(({ icon: Icon, text }) => (
+              <span
+                key={text}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.1] text-sm text-white/50 backdrop-blur-sm"
+              >
+                <Icon className="h-3.5 w-3.5 text-indigo-400" />
+                {text}
+              </span>
+            ))}
+          </div>
+        </HeroGeometric>
 
         {/* ── TICKER / MARQUEE ──────────────────────────────────────────── */}
         <div className="border-y border-border/60 bg-card/30 py-4 overflow-hidden">
