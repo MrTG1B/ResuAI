@@ -119,10 +119,7 @@ export function Pricing({
         )}
       >
         {plans.map((plan, index) => {
-          const isSide =
-            isThreePlan && (index === 0 || index === 2);
-          const isCenter =
-            isThreePlan && index === 1;
+          const isSide = isThreePlan && (index === 0 || index === 2);
 
           return (
             <motion.div
@@ -196,7 +193,7 @@ export function Pricing({
                         easing: "ease-out",
                       }}
                       willChange
-                      className="font-variant-numeric: tabular-nums"
+                      className="tabular-nums"
                     />
                   </span>
                   {plan.period !== "Next 3 months" && (
