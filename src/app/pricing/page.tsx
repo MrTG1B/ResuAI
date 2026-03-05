@@ -2,11 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Check, X, Zap, Star, Crown, Sparkles, AlertCircle, Loader2, ChevronDown, Users, TrendingUp, Award, Rocket, TreePine, ScrollText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Sparkles, AlertCircle, Loader2, ChevronDown, Users, TrendingUp, Award, Rocket, TreePine, ScrollText, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { PLANS_LIST, applyPlanConfigOverrides, getRuntimePlansList, type PlanOverride } from "@/lib/plans";
@@ -14,6 +11,7 @@ import type { Plan, PlanId } from "@/types/subscription";
 import { auth, db, doc, getDoc } from "@/lib/firebase";
 import { getIdToken } from "firebase/auth";
 import { useSubscription } from "@/hooks/use-subscription";
+import { Pricing, type PricingPlan } from "@/components/ui/pricing";
 
 // ---------------------------------------------------------------------------
 // Constants & helpers
@@ -53,42 +51,6 @@ function featureIncluded(value: Plan["features"][keyof Plan["features"]]): boole
   return false;
 }
 
-function annualSavings(plan: Plan): number {
-  if (plan.priceINR === 0) return 0;
-  return Math.round((1 - plan.annualPriceINR / plan.priceINR) * 100);
-}
-
-const PLAN_META: Record<PlanId, { icon: React.ReactNode; gradient: string; border: string; badge: string; badgeClass: string }> = {
-  free: {
-    icon: <Zap className="w-5 h-5" />,
-    gradient: "from-slate-50 to-slate-100 dark:from-slate-900/40 dark:to-slate-800/40",
-    border: "border-slate-200 dark:border-slate-700",
-    badge: "Free",
-    badgeClass: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  },
-  medium: {
-    icon: <Star className="w-5 h-5" />,
-    gradient: "from-blue-50 to-blue-100/60 dark:from-blue-950/40 dark:to-blue-900/30",
-    border: "border-blue-200 dark:border-blue-800",
-    badge: "Medium",
-    badgeClass: "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300",
-  },
-  pro: {
-    icon: <Sparkles className="w-5 h-5" />,
-    gradient: "from-violet-50 to-purple-100/60 dark:from-violet-950/50 dark:to-purple-900/40",
-    border: "border-violet-400 dark:border-violet-500",
-    badge: "Most Popular",
-    badgeClass: "bg-violet-600 text-white dark:bg-violet-500",
-  },
-  ultra_pro: {
-    icon: <Crown className="w-5 h-5" />,
-    gradient: "from-amber-50 to-yellow-100/60 dark:from-amber-950/40 dark:to-yellow-900/30",
-    border: "border-amber-400 dark:border-amber-500",
-    badge: "Ultra Pro",
-    badgeClass: "bg-gradient-to-r from-amber-500 to-yellow-500 text-white",
-  },
-};
-
 const FAQS = [
   {
     q: "Can I switch plans at any time?",
@@ -111,6 +73,55 @@ const FAQS = [
     a: "When you subscribe to any paid plan, we partner with a verified reforestation organisation to plant a real tree in your name. You will receive a personalised tree-planting certificate via email within 7 days of your subscription being confirmed.",
   },
 ];
+
+/** Map a Plan to the PricingPlan shape expected by the Pricing component. */
+function mapPlanToPricingPlan(
+  plan: Plan,
+  isAnnual: boolean,
+  currentPlanId: PlanId | null,
+  loadingPlanId: PlanId | null,
+  onSubscribe: (plan: Plan) => Promise<void>
+): PricingPlan {
+  const isCurrent = currentPlanId === plan.id;
+  const isLoading = loadingPlanId === plan.id;
+  const stripeConfigured =
+    plan.id === "free" || !!(isAnnual ? plan.stripeAnnualPriceId : plan.stripePriceId);
+
+  const features = FEATURE_ORDER
+    .filter((key) => featureIncluded(plan.features[key]))
+    .map((key) => {
+      const raw = plan.features[key];
+      const label = FEATURE_LABELS[key];
+      if (typeof raw === "boolean") return label;
+      return `${label} — ${formatFeatureValue(raw)}`;
+    });
+
+  let buttonText = "Subscribe";
+  if (isCurrent) buttonText = "Current Plan";
+  else if (plan.id === "free") buttonText = "Get Started";
+  else if (!stripeConfigured) buttonText = "Coming Soon";
+  else if (isLoading) buttonText = "Redirecting…";
+
+  const onClick =
+    isCurrent || !stripeConfigured
+      ? undefined
+      : plan.id === "free"
+      ? undefined
+      : () => { void onSubscribe(plan); };
+
+  return {
+    name: plan.name.toUpperCase(),
+    price: String(plan.price),
+    yearlyPrice: String(plan.annualPrice),
+    period: "per month",
+    features,
+    description: plan.description,
+    buttonText,
+    href: plan.id === "free" ? "/dashboard" : "/pricing",
+    isPopular: plan.id === "pro",
+    onClick,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -143,170 +154,6 @@ function FAQItem({ q, a }: { q: string; a: string }) {
           <p className="pt-3">{a}</p>
         </div>
       )}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// PlanCard
-// ---------------------------------------------------------------------------
-
-interface PlanCardProps {
-  plan: Plan;
-  isAnnual: boolean;
-  currentPlanId: PlanId | null;
-  onSubscribe: (plan: Plan) => Promise<void>;
-  loadingPlanId: PlanId | null;
-}
-
-function PlanCard({ plan, isAnnual, currentPlanId, onSubscribe, loadingPlanId }: PlanCardProps) {
-  const meta = PLAN_META[plan.id];
-  const isPopular = plan.id === "pro";
-  const isUltraPro = plan.id === "ultra_pro";
-  const isCurrent = currentPlanId === plan.id;
-  const price = isAnnual ? plan.annualPriceINR : plan.priceINR;
-  const savings = annualSavings(plan);
-  const isLoading = loadingPlanId === plan.id;
-
-  const stripeConfigured = plan.id === "free" || !!(isAnnual ? plan.stripeAnnualPriceId : plan.stripePriceId);
-
-  return (
-    <div
-      className={`
-        relative flex flex-col rounded-2xl border-2 bg-gradient-to-b p-6 transition-all duration-300
-        hover:shadow-xl hover:-translate-y-1
-        ${meta.gradient} ${meta.border}
-        ${isPopular ? "shadow-lg shadow-violet-200/60 dark:shadow-violet-900/40 ring-2 ring-violet-400/50 dark:ring-violet-500/40" : ""}
-        ${isUltraPro ? "shadow-lg shadow-amber-200/60 dark:shadow-amber-900/40" : ""}
-      `}
-    >
-      {/* Popular badge pinned to top */}
-      {isPopular && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-violet-600 text-white shadow-md">
-            <Sparkles className="w-3 h-3" /> Most Popular
-          </span>
-        </div>
-      )}
-
-      {/* Plan header */}
-      <div className="mb-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className={`flex items-center gap-2 px-2.5 py-1 rounded-lg text-sm font-semibold ${meta.badgeClass}`}>
-            {meta.icon}
-            {plan.name}
-          </div>
-          {isUltraPro && (
-            <span className="text-xs font-medium bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">
-              ✦ Premium
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground leading-relaxed">{plan.description}</p>
-        {plan.id !== "free" && (
-          <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800">
-            <TreePine className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Tree planted + certificate</span>
-          </div>
-        )}
-      </div>
-
-      {/* Pricing */}
-      <div className="mb-6">
-        {price === 0 ? (
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-extrabold text-foreground">Free</span>
-            <span className="text-sm text-muted-foreground">forever</span>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-muted-foreground">₹</span>
-              <span className="text-4xl font-extrabold text-foreground">{price.toLocaleString('en-IN')}</span>
-              <span className="text-sm text-muted-foreground">/month</span>
-            </div>
-            {isAnnual && savings > 0 && (
-              <p className="mt-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                ✓ Save {savings}% with annual billing
-              </p>
-            )}
-            {!isAnnual && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                or ₹{plan.annualPriceINR.toLocaleString('en-IN')}/mo billed annually
-              </p>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* CTA button */}
-      <div className="mb-6">
-        {isCurrent ? (
-          <Button variant="outline" className="w-full" disabled>
-            Current Plan
-          </Button>
-        ) : plan.id === "free" ? (
-          <Button variant="outline" className="w-full" asChild>
-            <a href="/dashboard">Get Started</a>
-          </Button>
-        ) : !stripeConfigured ? (
-          <Button className="w-full" disabled variant="outline">
-            Coming Soon
-          </Button>
-        ) : (
-          <Button
-            className={`w-full font-semibold ${
-              isPopular
-                ? "bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200 dark:shadow-violet-900/40"
-                : isUltraPro
-                ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-md shadow-amber-200 dark:shadow-amber-900/40"
-                : ""
-            }`}
-            onClick={() => onSubscribe(plan)}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Redirecting…
-              </>
-            ) : (
-              "Subscribe"
-            )}
-          </Button>
-        )}
-      </div>
-
-      {/* Divider */}
-      <div className="h-px bg-border mb-5" />
-
-      {/* Features list */}
-      <ul className="space-y-2.5 flex-1">
-        {FEATURE_ORDER.map((key) => {
-          const raw = plan.features[key];
-          const included = featureIncluded(raw);
-          const label = FEATURE_LABELS[key];
-          const value = typeof raw !== "boolean" ? formatFeatureValue(raw) : null;
-
-          return (
-            <li key={key} className={`flex items-start gap-2.5 text-sm ${included ? "text-foreground" : "text-muted-foreground/50"}`}>
-              {included ? (
-                <Check className="w-4 h-4 mt-0.5 shrink-0 text-emerald-500 dark:text-emerald-400" />
-              ) : (
-                <X className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground/40" />
-              )}
-              <span>
-                {label}
-                {value && included && typeof plan.features[key] !== "boolean" && (
-                  <span className="ml-1 font-semibold text-foreground/80">
-                    {Array.isArray(raw) ? `(${value})` : `— ${value}`}
-                  </span>
-                )}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
     </div>
   );
 }
@@ -439,42 +286,27 @@ function PricingInner() {
               <p className="text-sm font-medium">{error}</p>
             </div>
           )}
+        </div>
 
-          {/* Billing toggle */}
-          <div className="flex items-center justify-center gap-3 mb-12">
-            <Label htmlFor="billing-toggle" className={`text-sm font-medium ${!isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
-              Monthly
-            </Label>
-            <Switch
-              id="billing-toggle"
-              checked={isAnnual}
-              onCheckedChange={setIsAnnual}
-              className="data-[state=checked]:bg-violet-600"
-            />
-            <Label htmlFor="billing-toggle" className={`text-sm font-medium ${isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
-              Annual
-            </Label>
-            <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
-              Save up to 20%
-            </span>
-          </div>
+        {/* Pricing cards (21st.dev style) */}
+        <div id="pricing-cards">
+          <Pricing
+            plans={plansList.map((plan) =>
+              mapPlanToPricingPlan(
+                plan,
+                isAnnual,
+                subLoading ? null : currentPlanId,
+                loadingPlanId,
+                handleSubscribe
+              )
+            )}
+            onBillingToggle={setIsAnnual}
+          />
+        </div>
 
-          {/* Plan cards grid */}
-          <div id="pricing-cards" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
-            {plansList.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                isAnnual={isAnnual}
-                currentPlanId={subLoading ? null : currentPlanId}
-                onSubscribe={handleSubscribe}
-                loadingPlanId={loadingPlanId}
-              />
-            ))}
-          </div>
-
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Green initiative banner */}
-          <div className="mt-12 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 dark:border-emerald-800 p-6">
+          <div className="mt-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 dark:border-emerald-800 p-6">
             <div className="flex flex-col sm:flex-row items-center gap-5">
               <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/60">
                 <TreePine className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
