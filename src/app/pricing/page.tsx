@@ -111,8 +111,8 @@ function mapPlanToPricingPlan(
 
   return {
     name: plan.name.toUpperCase(),
-    price: String(plan.price),
-    yearlyPrice: String(plan.annualPrice),
+    price: plan.priceINR === 0 ? "0" : String(plan.priceINR),
+    yearlyPrice: plan.annualPriceINR === 0 ? "0" : String(plan.annualPriceINR),
     period: "per month",
     features,
     description: plan.description,

@@ -184,7 +184,7 @@ export function Pricing({
                       }
                       format={{
                         style: "currency",
-                        currency: "USD",
+                        currency: "INR",
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0,
                       }}
